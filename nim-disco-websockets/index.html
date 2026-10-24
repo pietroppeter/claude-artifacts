@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<meta name="description" content="How the Nim + Mummy counter on Disco keeps every open tab in sync with WebSockets, explained change by change.">
+<meta name="description" content="How the Nim + Mummy counter on Disco keeps every open tab in sync with WebSockets, explained with its actual code.">
 <style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
 <title>Live Counter with WebSockets</title>
 <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap">
@@ -31,36 +31,35 @@ figure{margin:16px 0 12px;overflow-x:auto} figure svg{width:100%;min-width:600px
 figcaption{color:var(--mute);font-size:13.5px;margin-top:6px}
 .d-ink{fill:var(--fg)} .d-mute{fill:var(--mute)} .d-edge{stroke:var(--mute)} .d-grid{stroke:var(--line)}
 .d-hot{stroke:var(--accent)} .d-hotfill{fill:var(--accent)} .d-tint{fill:var(--accent-tint);stroke:var(--accent)}
-table{border-collapse:collapse;width:100%;font-size:14px;margin:0 0 12px}
-th,td{text-align:left;padding:6px 8px;border-bottom:1px solid var(--line);vertical-align:top}
-th{font-weight:600;color:var(--mute)}
 footer{margin-top:40px;font-size:12.5px;color:var(--mute)}
 </style>
 </head>
 <body>
 <main>
 <h1>Live counter with WebSockets</h1>
-<p class="lede">How a tiny Nim + Mummy + SQLite counter, deployed with Disco, learned to update every open tab without a refresh. Written after the fact, explaining each change.</p>
+<p class="lede">How a small web counter keeps every open browser tab in sync with WebSockets, walked through with its actual Nim and JavaScript code.</p>
 <ul class="links">
-<li><a href="https://counter.pietroppeter.xyz">Live site: counter.pietroppeter.xyz</a></li>
-<li><a href="https://github.com/pietroppeter/disco-nim-mummy">Source: pietroppeter/disco-nim-mummy</a></li>
+<li><a href="https://counter.pietroppeter.xyz">Live app: counter.pietroppeter.xyz</a></li>
+<li><a href="https://github.com/pietroppeter/disco-nim-mummy/tree/a5a584d02831b80b33d247709483081ccdfc2b8e">Code explained here (commit a5a584d)</a></li>
 </ul>
 
+<h2>The app</h2>
+<p>The app is a click counter: a page with a big number and a +1 button. Everyone who opens it sees the same number, and a click adds one for everybody. It is deliberately tiny, a playground for learning how to deploy a small app on your own server.</p>
+<ul>
+<li><a href="https://nim-lang.org/">Nim</a>, compiled to a single binary.</li>
+<li><a href="https://github.com/guzba/mummy">Mummy</a>, a multi-threaded HTTP server for Nim with WebSockets built in.</li>
+<li>SQLite, holding the count in one row of one table.</li>
+<li><a href="https://disco.cloud">Disco</a>, a self-hosted deploy tool: a push to <code>main</code> builds the Dockerfile on a small VPS and serves the app over HTTPS.</li>
+</ul>
+<p>This page describes the code at <a href="https://github.com/pietroppeter/disco-nim-mummy/tree/a5a584d02831b80b33d247709483081ccdfc2b8e">commit a5a584d</a>. The <a href="https://github.com/pietroppeter/disco-nim-mummy">repository</a> may have moved on since.</p>
+
 <h2>The problem</h2>
-<p>The first version worked, but each device only saw the count from when it loaded the page. Clicking +1 on the laptop did not change the number on the phone until you refreshed it. Every click also reloaded the whole page, which was visible on mobile.</p>
-<p>Three pull requests fixed that:</p>
-<table>
-<thead><tr><th>PR</th><th>Change</th></tr></thead>
-<tbody>
-<tr><td><a href="https://github.com/pietroppeter/disco-nim-mummy/pull/1">#1</a></td><td>Live sync over a WebSocket; clicks no longer reload the page. The browser script moved to its own <code>client.js</code>.</td></tr>
-<tr><td><a href="https://github.com/pietroppeter/disco-nim-mummy/pull/2">#2</a></td><td>Link to the source on the page, link to the live site in the README.</td></tr>
-<tr><td><a href="https://github.com/pietroppeter/disco-nim-mummy/pull/3">#3</a></td><td>Show how many clients are connected: “live (2)”.</td></tr>
-</tbody>
-</table>
+<p>In the first version, the number was baked into the page when it loaded. With the counter open on a laptop and a phone, a click on the laptop did not show up on the phone until you refreshed it. Each click was also a form submission that reloaded the whole page.</p>
+<p>Keeping every tab in agreement without refreshing needs the server to tell browsers that something changed. Browsers normally only hear from a server when they ask, so this needs a different kind of connection: a WebSocket.</p>
 
 <h2>WebSockets in two minutes</h2>
 <p>A WebSocket is a connection the browser keeps open, so the server can send a message whenever it wants. Plain HTTP can't do that: the server only ever answers a request.</p>
-<p><strong>Plain HTTP</strong> (what the counter did before). The browser asks, the server answers, and the exchange is over. <code>GET /</code> returns the page with the count baked in. The server has no way to tell your phone that the laptop just clicked; the phone only finds out when it asks again, which is your refresh.</p>
+<p><strong>Plain HTTP</strong> (how the first version worked). The browser asks, the server answers, and the exchange is over. <code>GET /</code> returns the page with the count baked in. The server has no way to tell your phone that the laptop just clicked; the phone only finds out when it asks again, which is your refresh.</p>
 <p><strong>WebSocket.</strong> The browser opens one long-lived, two-way channel. It starts as an ordinary HTTP request with a special header:</p>
 <pre><code>GET /ws HTTP/1.1
 Upgrade: websocket
@@ -121,8 +120,8 @@ Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==</code></pre>
 <figcaption>On load, each tab opens <code>/ws</code> and gets the current state. A click sends <code>inc</code> up the laptop's socket; the server updates SQLite and pushes the new count to both tabs, including the one that clicked.</figcaption>
 </figure>
 
-<h2>Server changes in counter.nim</h2>
-<p>The server remembers who is connected and sends the current state to all of them whenever something changes.</p>
+<h2>The server: counter.nim</h2>
+<p>The server remembers who is connected and sends the current state to all of them whenever something changes. Here are the parts that matter, in order.</p>
 
 <h3>1. A set of connected clients</h3>
 <pre><code>import std/[os, strutils, locks, sets]
@@ -132,7 +131,7 @@ var
   dbLock: Lock
   clients: HashSet[WebSocket] # guarded by dbLock too, so pushes stay in order</code></pre>
 <p>Each open browser tab is one <code>WebSocket</code> value in this set. A connection is added when it opens and removed when it closes.</p>
-<p><strong>Why the lock matters.</strong> Mummy runs handlers on several worker threads at once, and changing a <code>HashSet</code> from two threads at the same time corrupts it. A <code>Lock</code> lets only one thread inside at a time. The existing <code>dbLock</code> is reused rather than adding a second lock, for the reason in step 2. The <code>{.gcsafe.}:</code> blocks tell the Nim compiler “this touches a global from a thread; the lock makes it safe”.</p>
+<p><strong>Why the lock matters.</strong> Mummy runs handlers on several worker threads at once, and changing a <code>HashSet</code> from two threads at the same time corrupts it. A <code>Lock</code> lets only one thread inside at a time. One lock, <code>dbLock</code>, guards both the database and the set, for the reason in step 2. The <code>{.gcsafe.}:</code> blocks tell the Nim compiler “this touches a global from a thread; the lock makes it safe”.</p>
 
 <h3>2. Pushing the state</h3>
 <pre><code>proc pushState(count: int) =
@@ -148,7 +147,7 @@ proc increment(): int =
     {.gcsafe.}:
       result = db.getValue(sql"UPDATE counter SET value = value + 1 WHERE id = 1 RETURNING value").parseInt
       pushState(result)</code></pre>
-<p>Each message is a small JSON object, for example <code>{"count":7,"clients":2}</code>. After the database update, it goes to every client as a text frame. The button, the old form POST and <code>/api/increment</code> all call <code>increment()</code>, so every path triggers the push.</p>
+<p>Each message is a small JSON object, for example <code>{"count":7,"clients":2}</code>. After the database update, it goes to every client as a text frame. The button, the plain form POST and <code>/api/increment</code> all call <code>increment()</code>, so every path triggers the push.</p>
 <p>Updating and sending under the <em>same</em> lock keeps the order right. Without it, two clicks could commit 6 then 7 but send 7 then 6, and a phone would end up showing 6. <code>client.send</code> only queues the frame, so holding the lock while sending is cheap.</p>
 
 <h3>3. The /ws endpoint</h3>
@@ -236,7 +235,7 @@ function connect() {
 <pre><code>document.getElementById("f").onsubmit = (e) =&gt; {
   if (ws &amp;&amp; ws.readyState === WebSocket.OPEN) { e.preventDefault(); ws.send("inc"); }
 };</code></pre>
-<p>The button still sits inside the old <code>&lt;form method="post" action="/increment"&gt;</code>. When the socket is open, <code>e.preventDefault()</code> cancels the form submission (the old page reload) and <code>ws.send("inc")</code> sends the click instead. The new count comes back through <code>onmessage</code>, the same way it reaches every other tab. Without a socket or without JavaScript, the form submits as before, so the button always works.</p>
+<p>The button sits inside a plain <code>&lt;form method="post" action="/increment"&gt;</code>. When the socket is open, <code>e.preventDefault()</code> cancels the form submission (which would reload the page) and <code>ws.send("inc")</code> sends the click instead. The new count comes back through <code>onmessage</code>, the same way it reaches every other tab. Without a socket or without JavaScript, the form submits as before, so the button always works.</p>
 
 <h3>Waking up on phones</h3>
 <pre><code>document.addEventListener("visibilitychange", () =&gt; {
@@ -246,7 +245,7 @@ connect();</code></pre>
 <p>Mobile browsers often kill sockets of background tabs, and the backoff may have grown to 10 s. When the tab becomes visible again, the script cancels the pending retry and reconnects right away; the server pushes the state on open, so the number is fresh as soon as you look. The last line opens the first connection.</p>
 
 <h2>Running it on Disco</h2>
-<p>No Disco configuration changed: <code>disco.json</code> is untouched, and the Dockerfile only copies <code>client.js</code> into the build stage.</p>
+<p>WebSockets need no special Disco configuration: <code>disco.json</code> is the same as for a plain HTTP app. Four things are worth knowing.</p>
 <ul>
 <li><strong>The proxy passes WebSockets through.</strong> Disco puts Caddy in front of the app for HTTPS. Caddy sees <code>Upgrade: websocket</code> and forwards the connection as is: <code>wss://</code> from the browser to Caddy, plain <code>ws://</code> from Caddy to the app on port 8000.</li>
 <li><strong>Every deploy drops all sockets.</strong> A deploy replaces the container, so open tabs show “reconnecting” for about a second, then catch up.</li>
@@ -262,7 +261,7 @@ connect();</code></pre>
 <li><strong>Break the connection.</strong> Put the phone in airplane mode for a few seconds. The status goes to “reconnecting”, then back to “live (N)” with the latest count.</li>
 </ol>
 
-<footer>Written with Claude, October 2026 · App: <a href="https://counter.pietroppeter.xyz">counter.pietroppeter.xyz</a> · Code: <a href="https://github.com/pietroppeter/disco-nim-mummy">pietroppeter/disco-nim-mummy</a> · <a href="../">More pages</a></footer>
+<footer>Written with Claude, October 2026 · App: <a href="https://counter.pietroppeter.xyz">counter.pietroppeter.xyz</a> · Code: <a href="https://github.com/pietroppeter/disco-nim-mummy">pietroppeter/disco-nim-mummy</a> (explained at <a href="https://github.com/pietroppeter/disco-nim-mummy/tree/a5a584d02831b80b33d247709483081ccdfc2b8e">a5a584d</a>) · <a href="../">More pages</a></footer>
 </main>
 </body>
 </html>
