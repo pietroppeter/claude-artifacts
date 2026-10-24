@@ -1,0 +1,40 @@
+diff --git a/src/naffprop/matrix.nim b/src/naffprop/matrix.nim
+index e8961a5..b88bd6f 100644
+--- a/src/naffprop/matrix.nim
++++ b/src/naffprop/matrix.nim
+@@ -8,21 +8,31 @@
+ ## elsewhere: in a `Matrix`, or in a numpy array, so that the similarities can
+ ## be used where Python stored them, without a copy.
+ 
++when defined(js):
++  # No pointers in JS: the elements live in a JS object that a Matrix and its
++  # views share (a `ref seq` would add an indirection on every access).
++  type Elements*[T] = ref object
++    s: seq[T]
++  template `[]`*[T](e: Elements[T]; k: int): T = e.s[k]
++  template `[]=`*[T](e: Elements[T]; k: int; v: T) = e.s[k] = v
++
+ type
+   Matrix*[T: SomeFloat] = object
+     n*: int
+-    data*: seq[T]
++    data*: (when defined(js): Elements[T] else: seq[T])
+ 
+   MatrixView*[T: SomeFloat] = object
+     n*: int
+-    data*: ptr UncheckedArray[T]
++    data*: (when defined(js): Elements[T] else: ptr UncheckedArray[T])
+ 
+ func zeros*[T](n: int): Matrix[T] =
+-  Matrix[T](n: n, data: newSeq[T](n * n))
++  when defined(js): Matrix[T](n: n, data: Elements[T](s: newSeq[T](n * n)))
++  else: Matrix[T](n: n, data: newSeq[T](n * n))
+ 
+ func view*[T](m: var Matrix[T]): MatrixView[T] =
+   ## A view of `m`, valid while `m` is alive and not resized.
+-  MatrixView[T](n: m.n, data: cast[ptr UncheckedArray[T]](m.data[0].addr))
++  when defined(js): MatrixView[T](n: m.n, data: m.data)
++  else: MatrixView[T](n: m.n, data: cast[ptr UncheckedArray[T]](m.data[0].addr))
+ 
+ template `[]`*[T](m: Matrix[T] | MatrixView[T]; i, j: int): T =
+   m.data[i * m.n + j]
