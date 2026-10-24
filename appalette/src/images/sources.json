@@ -1,0 +1,84 @@
+[
+  {
+    "name": "starry-night",
+    "file": "starry_night_google.jpg",
+    "title": "The Starry Night",
+    "author": "Vincent van Gogh, 1889",
+    "license": "Public domain",
+    "via": "https://github.com/jcjohnson/neural-style/blob/master/examples/inputs/starry_night_google.jpg",
+    "note": "Google Art Project scan of the painting (MoMA, New York).",
+    "keep": "#d8c050"
+  },
+  {
+    "name": "great-wave",
+    "file": "wave.jpg",
+    "title": "The Great Wave off Kanagawa",
+    "author": "Katsushika Hokusai, c. 1831",
+    "license": "Public domain",
+    "via": "https://github.com/lengstrom/fast-style-transfer/blob/master/examples/style/wave.jpg",
+    "keep": "#1f3c6e"
+  },
+  {
+    "name": "scream",
+    "file": "the_scream.jpg",
+    "title": "The Scream",
+    "author": "Edvard Munch, 1893",
+    "license": "Public domain",
+    "via": "https://github.com/jcjohnson/neural-style/blob/master/examples/inputs/the_scream.jpg",
+    "keep": "#d06030"
+  },
+  {
+    "name": "woman-with-a-hat",
+    "file": "woman-with-hat-matisse.jpg",
+    "title": "Woman with a Hat",
+    "author": "Henri Matisse, 1905",
+    "license": "Public domain (US: published before 1930; EU: author died 1954)",
+    "via": "https://github.com/jcjohnson/neural-style/blob/master/examples/inputs/woman-with-hat-matisse.jpg",
+    "keep": "#3a6a8a"
+  },
+  {
+    "name": "udnie",
+    "file": "udnie.jpg",
+    "title": "Udnie",
+    "author": "Francis Picabia, 1913",
+    "license": "Public domain (author died 1953)",
+    "via": "https://github.com/lengstrom/fast-style-transfer/blob/master/examples/style/udnie.jpg",
+    "keep": "#2f9060"
+  },
+  {
+    "name": "shipwreck",
+    "file": "shipwreck.jpg",
+    "title": "The Shipwreck of the Minotaur",
+    "author": "J. M. W. Turner, c. 1810",
+    "license": "Public domain",
+    "via": "https://github.com/jcjohnson/neural-style/blob/master/examples/inputs/shipwreck.jpg",
+    "keep": "#e0b040"
+  },
+  {
+    "name": "astronaut",
+    "skimage": "astronaut",
+    "title": "Eileen Collins",
+    "author": "NASA, 1998",
+    "license": "Public domain",
+    "via": "scikit-image (skimage.data.astronaut)",
+    "keep": "#e06030"
+  },
+  {
+    "name": "coffee",
+    "skimage": "coffee",
+    "title": "Coffee",
+    "author": "Rachel Michetti, courtesy of Pikolo Espresso Bar",
+    "license": "CC0",
+    "via": "scikit-image (skimage.data.coffee)",
+    "keep": "#a02010"
+  },
+  {
+    "name": "chelsea",
+    "skimage": "chelsea",
+    "title": "Chelsea the cat",
+    "author": "Stefan van der Walt",
+    "license": "CC0",
+    "via": "scikit-image (skimage.data.chelsea)",
+    "keep": "#a8a048"
+  }
+]
