@@ -1,0 +1,267 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="How the Nim + Mummy counter on Disco keeps every open tab in sync with WebSockets, explained with its actual code.">
+<style>:root{color-scheme:light;padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<title>Live Counter with WebSockets</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Public+Sans:wght@400;600;700&family=JetBrains+Mono:wght@500&display=swap">
+<style>
+/* Layout: one reading column; prose, code blocks and one inline sequence diagram */
+:root{--bg:#fbfafc;--fg:#1f1a22;--mute:#6f6675;--line:#e7e2ea;--code:#f2eff4;--accent:#a3287f;--accent-tint:#a3287f1f;
+--sans:"Public Sans",system-ui,sans-serif;--mono:"JetBrains Mono",ui-monospace,monospace}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){--bg:#17131a;--fg:#ece6ef;--mute:#a49aab;--line:#2d2631;--code:#221c26;--accent:#e06cc0;--accent-tint:#e06cc026;color-scheme:dark}}
+:root[data-theme="dark"]{--bg:#17131a;--fg:#ece6ef;--mute:#a49aab;--line:#2d2631;--code:#221c26;--accent:#e06cc0;--accent-tint:#e06cc026;color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:15px/1.6 var(--sans)}
+main{max-width:720px;margin:0 auto;padding-block:32px 64px;padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+h1{font-size:1.5rem;line-height:1.25;margin:0 0 6px;letter-spacing:-.01em;text-wrap:balance}
+h2{font-size:1.15rem;margin:40px 0 8px;padding-top:16px;border-top:1px solid var(--line)}
+h3{font-size:1rem;margin:24px 0 4px}
+p,ul,ol{margin:0 0 12px} li{margin-bottom:4px}
+.lede{color:var(--mute);margin-bottom:12px}
+.links{display:flex;flex-wrap:wrap;gap:8px;margin:0 0 8px;padding:0;list-style:none}
+.links a{display:inline-block;border:1px solid var(--line);border-radius:999px;padding:4px 12px;font-size:13.5px;color:var(--fg);text-decoration:none}
+.links a:hover,.links a:focus-visible{border-color:var(--accent);color:var(--accent)}
+a{color:var(--accent)}
+code{font-family:var(--mono);font-size:.86em;overflow-wrap:anywhere;background:var(--code);padding:1px 4px;border-radius:4px}
+pre{background:var(--code);border-radius:8px;padding:12px 14px;overflow-x:auto;font-size:13px;line-height:1.5;margin:0 0 12px}
+pre code{background:none;padding:0;font-size:inherit;overflow-wrap:normal}
+figure{margin:16px 0 12px;overflow-x:auto} figure svg{width:100%;min-width:600px;height:auto;display:block}
+figcaption{color:var(--mute);font-size:13.5px;margin-top:6px}
+.d-ink{fill:var(--fg)} .d-mute{fill:var(--mute)} .d-edge{stroke:var(--mute)} .d-grid{stroke:var(--line)}
+.d-hot{stroke:var(--accent)} .d-hotfill{fill:var(--accent)} .d-tint{fill:var(--accent-tint);stroke:var(--accent)}
+footer{margin-top:40px;font-size:12.5px;color:var(--mute)}
+</style>
+</head>
+<body>
+<main>
+<h1>Live counter with WebSockets</h1>
+<p class="lede">How a small web counter keeps every open browser tab in sync with WebSockets, walked through with its actual Nim and JavaScript code.</p>
+<ul class="links">
+<li><a href="https://counter.pietroppeter.xyz">Live app: counter.pietroppeter.xyz</a></li>
+<li><a href="https://github.com/pietroppeter/disco-nim-mummy/tree/a5a584d02831b80b33d247709483081ccdfc2b8e">Code explained here (commit a5a584d)</a></li>
+</ul>
+
+<h2>The app</h2>
+<p>The app is a click counter: a page with a big number and a +1 button. Everyone who opens it sees the same number, and a click adds one for everybody. It is deliberately tiny, a playground for learning how to deploy a small app on your own server.</p>
+<ul>
+<li><a href="https://nim-lang.org/">Nim</a>, compiled to a single binary.</li>
+<li><a href="https://github.com/guzba/mummy">Mummy</a>, a multi-threaded HTTP server for Nim with WebSockets built in.</li>
+<li>SQLite, holding the count in one row of one table.</li>
+<li><a href="https://disco.cloud">Disco</a>, a self-hosted deploy tool: a push to <code>main</code> builds the Dockerfile on a small VPS and serves the app over HTTPS.</li>
+</ul>
+<p>This page describes the code at <a href="https://github.com/pietroppeter/disco-nim-mummy/tree/a5a584d02831b80b33d247709483081ccdfc2b8e">commit a5a584d</a>. The <a href="https://github.com/pietroppeter/disco-nim-mummy">repository</a> may have moved on since.</p>
+
+<h2>The problem</h2>
+<p>In the first version, the number was baked into the page when it loaded. With the counter open on a laptop and a phone, a click on the laptop did not show up on the phone until you refreshed it. Each click was also a form submission that reloaded the whole page.</p>
+<p>Keeping every tab in agreement without refreshing needs the server to tell browsers that something changed. Browsers normally only hear from a server when they ask, so this needs a different kind of connection: a WebSocket.</p>
+
+<h2>WebSockets in two minutes</h2>
+<p>A WebSocket is a connection the browser keeps open, so the server can send a message whenever it wants. Plain HTTP can't do that: the server only ever answers a request.</p>
+<p><strong>Plain HTTP</strong> (how the first version worked). The browser asks, the server answers, and the exchange is over. <code>GET /</code> returns the page with the count baked in. The server has no way to tell your phone that the laptop just clicked; the phone only finds out when it asks again, which is your refresh.</p>
+<p><strong>WebSocket.</strong> The browser opens one long-lived, two-way channel. It starts as an ordinary HTTP request with a special header:</p>
+<pre><code>GET /ws HTTP/1.1
+Upgrade: websocket
+Connection: Upgrade
+Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==</code></pre>
+<p>The server answers <code>101 Switching Protocols</code>. From then on the same TCP connection stops speaking HTTP and carries small <em>frames</em> in both directions: text, binary, ping, pong or close. Either side can send at any moment. That is exactly what live sync needs: when anyone clicks, the server pushes the new number down every open connection.</p>
+<p><strong>The alternatives not picked:</strong></p>
+<ul>
+<li><strong>Polling.</strong> The page asks <code>/api/count</code> every few seconds. Simple, but updates lag by up to the interval, and every open tab keeps sending requests even when nothing changes.</li>
+<li><strong>Server-Sent Events (SSE).</strong> A one-way stream from the server over a long-lived HTTP response. It would fit too, but Mummy 0.4.8 has no streaming responses. WebSockets are built into Mummy.</li>
+</ul>
+<p>A bonus of a two-way channel: the +1 click travels up the same socket, so the page no longer reloads.</p>
+
+<h2>The big picture</h2>
+<p>Every tab holds a socket to the server, and the server sends each new state down all of them.</p>
+<figure>
+<svg viewBox="0 0 760 376" role="img" aria-label="One click reaches every open tab through the server" font-family="Public Sans, system-ui, sans-serif" font-size="13">
+<defs>
+<marker id="ar" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="d-mute"/></marker>
+<marker id="ar-hot" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse"><path d="M0 0L10 5L0 10z" class="d-hotfill"/></marker>
+</defs>
+<text x="24" y="30" font-size="15" font-weight="600" class="d-ink">One click reaches every open tab through the server</text>
+<g class="d-grid" stroke-width="1.25" stroke-dasharray="4 4">
+<line x1="200" y1="92" x2="200" y2="320"/><line x1="420" y1="92" x2="420" y2="244"/><line x1="420" y1="276" x2="420" y2="340"/><line x1="640" y1="92" x2="640" y2="320"/>
+</g>
+<g fill="none" class="d-edge" stroke-width="1.25">
+<rect x="120" y="52" width="160" height="40" rx="8"/><rect x="340" y="52" width="160" height="40" rx="8"/><rect x="560" y="52" width="160" height="40" rx="8"/>
+</g>
+<text x="200" y="76" text-anchor="middle" font-weight="600" class="d-ink">Laptop tab</text>
+<text x="420" y="76" text-anchor="middle" font-weight="600" class="d-ink">Nim server</text>
+<text x="640" y="76" text-anchor="middle" font-weight="600" class="d-ink">Phone tab</text>
+<line x1="24" y1="112" x2="736" y2="112" class="d-grid"/>
+<text x="24" y="130" font-size="11.5" font-weight="600" class="d-mute">1. Page loads</text>
+<g class="d-edge" stroke-width="1.25">
+<line x1="208" y1="148" x2="412" y2="148" marker-end="url(#ar)"/><line x1="632" y1="148" x2="428" y2="148" marker-end="url(#ar)"/>
+<line x1="412" y1="184" x2="208" y2="184" marker-end="url(#ar)"/><line x1="428" y1="184" x2="632" y2="184" marker-end="url(#ar)"/>
+</g>
+<text x="310" y="140" text-anchor="middle" font-size="11.5" class="d-mute">open /ws</text>
+<text x="530" y="140" text-anchor="middle" font-size="11.5" class="d-mute">open /ws</text>
+<text x="310" y="176" text-anchor="middle" font-size="11.5" class="d-mute">count 6, 2 clients</text>
+<text x="530" y="176" text-anchor="middle" font-size="11.5" class="d-mute">count 6, 2 clients</text>
+<line x1="24" y1="204" x2="736" y2="204" class="d-grid"/>
+<text x="24" y="222" font-size="11.5" font-weight="600" class="d-mute">2. Laptop clicks +1</text>
+<line x1="208" y1="236" x2="312" y2="236" class="d-edge" stroke-width="1.25" marker-end="url(#ar)"/>
+<text x="260" y="228" text-anchor="middle" font-size="11.5" class="d-mute">inc</text>
+<rect x="320" y="244" width="200" height="32" rx="8" fill="none" class="d-edge" stroke-width="1.25"/>
+<text x="420" y="264" text-anchor="middle" class="d-ink">UPDATE counter, now 7</text>
+<g class="d-hot" stroke-width="2">
+<line x1="412" y1="300" x2="208" y2="300" marker-end="url(#ar-hot)"/><line x1="428" y1="300" x2="632" y2="300" marker-end="url(#ar-hot)"/>
+</g>
+<text x="310" y="292" text-anchor="middle" font-size="11.5" class="d-ink">push count 7</text>
+<text x="530" y="292" text-anchor="middle" font-size="11.5" class="d-ink">push count 7</text>
+<rect x="140" y="320" width="120" height="32" rx="8" class="d-tint" stroke-width="1.25"/>
+<text x="200" y="340" text-anchor="middle" class="d-ink">shows 7</text>
+<rect x="580" y="320" width="120" height="32" rx="8" class="d-tint" stroke-width="1.25"/>
+<text x="640" y="340" text-anchor="middle" class="d-ink">shows 7</text>
+</svg>
+<figcaption>On load, each tab opens <code>/ws</code> and gets the current state. A click sends <code>inc</code> up the laptop's socket; the server updates SQLite and pushes the new count to both tabs, including the one that clicked.</figcaption>
+</figure>
+
+<h2>The server: counter.nim</h2>
+<p>The server remembers who is connected and sends the current state to all of them whenever something changes. Here are the parts that matter, in order.</p>
+
+<h3>1. A set of connected clients</h3>
+<pre><code>import std/[os, strutils, locks, sets]
+...
+var
+  db: DbConn
+  dbLock: Lock
+  clients: HashSet[WebSocket] # guarded by dbLock too, so pushes stay in order</code></pre>
+<p>Each open browser tab is one <code>WebSocket</code> value in this set. A connection is added when it opens and removed when it closes.</p>
+<p><strong>Why the lock matters.</strong> Mummy runs handlers on several worker threads at once, and changing a <code>HashSet</code> from two threads at the same time corrupts it. A <code>Lock</code> lets only one thread inside at a time. One lock, <code>dbLock</code>, guards both the database and the set, for the reason in step 2. The <code>{.gcsafe.}:</code> blocks tell the Nim compiler “this touches a global from a thread; the lock makes it safe”.</p>
+
+<h3>2. Pushing the state</h3>
+<pre><code>proc pushState(count: int) =
+  ## Sends the count and the number of connected browsers to all of them.
+  ## Callers must hold dbLock.
+  {.gcsafe.}:
+    let msg = """{"count":""" &amp; $count &amp; ""","clients":""" &amp; $clients.len &amp; "}"
+    for client in clients:
+      client.send(msg)
+
+proc increment(): int =
+  withLock dbLock:
+    {.gcsafe.}:
+      result = db.getValue(sql"UPDATE counter SET value = value + 1 WHERE id = 1 RETURNING value").parseInt
+      pushState(result)</code></pre>
+<p>Each message is a small JSON object, for example <code>{"count":7,"clients":2}</code>. After the database update, it goes to every client as a text frame. The button, the plain form POST and <code>/api/increment</code> all call <code>increment()</code>, so every path triggers the push.</p>
+<p>Updating and sending under the <em>same</em> lock keeps the order right. Without it, two clicks could commit 6 then 7 but send 7 then 6, and a phone would end up showing 6. <code>client.send</code> only queues the frame, so holding the lock while sending is cheap.</p>
+
+<h3>3. The /ws endpoint</h3>
+<pre><code>proc wsUpgradeHandler(request: Request) =
+  discard request.upgradeToWebSocket()
+...
+router.get("/ws", wsUpgradeHandler)</code></pre>
+<p>This is the handshake from the primer. <code>upgradeToWebSocket()</code> checks the <code>Upgrade</code> headers and replies <code>101</code>. From then on Mummy calls the WebSocket handler for that connection instead of HTTP handlers.</p>
+
+<h3>4. The WebSocket handler</h3>
+<pre><code>proc websocketHandler(websocket: WebSocket, event: WebSocketEvent, message: Message) =
+  case event
+  of OpenEvent:
+    withLock dbLock:
+      {.gcsafe.}:
+        clients.incl(websocket)
+        pushState(db.getValue(sql"SELECT value FROM counter WHERE id = 1").parseInt)
+  of MessageEvent:
+    if message.kind == TextMessage and message.data == "inc":
+      discard increment()
+  of ErrorEvent:
+    discard
+  of CloseEvent:
+    withLock dbLock:
+      {.gcsafe.}:
+        clients.excl(websocket)
+        pushState(db.getValue(sql"SELECT value FROM counter WHERE id = 1").parseInt)</code></pre>
+<p>Mummy calls one proc for everything that happens on any socket; <code>event</code> says what happened.</p>
+<ul>
+<li><code>OpenEvent</code>: a tab connected. Add it and push the state to everyone: the new tab catches up on the count, and the others see one more client. Both steps happen under the lock, so no increment can slip in between and be missed.</li>
+<li><code>MessageEvent</code>: the browser sent something. The only message accepted is the text <code>inc</code>, meaning “+1 please”.</li>
+<li><code>ErrorEvent</code>: nothing to do; a close always follows.</li>
+<li><code>CloseEvent</code>: the tab went away. Remove it and push, so the others see one client fewer.</li>
+</ul>
+
+<h3>5. The heartbeat</h3>
+<pre><code>proc heartbeat() {.thread.} =
+  while true:
+    sleep(25_000)
+    withLock dbLock:
+      {.gcsafe.}:
+        for client in clients:
+          client.send("", Ping)</code></pre>
+<p>A background thread sends a WebSocket <em>ping</em> to every client every 25 seconds. Browsers answer with a pong automatically. A silent connection can look dead to proxies, routers and mobile networks, and some cut it after a minute or so; the ping keeps a little traffic flowing.</p>
+
+<h3>6. Wiring it up</h3>
+<pre><code>const clientJs = staticRead("client.js")
+...
+var heartbeatThread: Thread[void]
+createThread(heartbeatThread, heartbeat)
+
+let server = newServer(router, websocketHandler)</code></pre>
+<p>The heartbeat thread starts, and <code>newServer</code> gets the WebSocket handler as its second argument. The browser script lives in its own <code>client.js</code> for editing and syntax highlighting; <code>staticRead</code> embeds it into the binary at compile time, so the app is still a single file to deploy.</p>
+
+<h2>Browser side: client.js</h2>
+<p>About 25 lines keep a socket open, show pushed state, and send clicks up the socket.</p>
+
+<h3>Connecting</h3>
+<pre><code>const n = document.getElementById("n"), s = document.getElementById("s");
+let ws, timer, delay = 500;
+function connect() {
+  ws = new WebSocket((location.protocol === "https:" ? "wss://" : "ws://") + location.host + "/ws");</code></pre>
+<p><code>new WebSocket(url)</code> starts the handshake. <code>ws://</code> and <code>wss://</code> are the WebSocket versions of <code>http://</code> and <code>https://</code>. Browsers refuse an unencrypted socket from an HTTPS page, so the script picks <code>wss://</code> on the live site and <code>ws://</code> on localhost.</p>
+
+<h3>The three callbacks</h3>
+<pre><code>  ws.onopen = () =&gt; { delay = 500; s.textContent = "live"; s.className = "s on"; };
+  ws.onmessage = (e) =&gt; {
+    const m = JSON.parse(e.data); // {"count": 7, "clients": 2}
+    n.textContent = m.count;
+    s.textContent = "live (" + m.clients + ")";
+  };
+  ws.onclose = () =&gt; {
+    s.textContent = "reconnecting"; s.className = "s";
+    timer = setTimeout(connect, delay); delay = Math.min(delay * 2, 10000);
+  };
+}</code></pre>
+<ul>
+<li><code>onopen</code>: connected. Show “live” in green and reset the retry delay.</li>
+<li><code>onmessage</code>: the server pushed a frame. Parse the JSON, show the count and “live (N)”. This handler is the whole “sync”.</li>
+<li><code>onclose</code>: the connection dropped. Show “reconnecting” and retry after <code>delay</code>, which doubles each failure (0.5 s, 1 s, 2 s… capped at 10 s). This <em>exponential backoff</em> stops a hundred tabs from hammering a server that is down for a redeploy.</li>
+</ul>
+<p>There is no <code>onerror</code> handler: a failed connection always fires <code>onclose</code> too, and the retry lives there.</p>
+
+<h3>Sending the click, with a fallback</h3>
+<pre><code>document.getElementById("f").onsubmit = (e) =&gt; {
+  if (ws &amp;&amp; ws.readyState === WebSocket.OPEN) { e.preventDefault(); ws.send("inc"); }
+};</code></pre>
+<p>The button sits inside a plain <code>&lt;form method="post" action="/increment"&gt;</code>. When the socket is open, <code>e.preventDefault()</code> cancels the form submission (which would reload the page) and <code>ws.send("inc")</code> sends the click instead. The new count comes back through <code>onmessage</code>, the same way it reaches every other tab. Without a socket or without JavaScript, the form submits as before, so the button always works.</p>
+
+<h3>Waking up on phones</h3>
+<pre><code>document.addEventListener("visibilitychange", () =&gt; {
+  if (!document.hidden &amp;&amp; ws.readyState === WebSocket.CLOSED) { clearTimeout(timer); delay = 500; connect(); }
+});
+connect();</code></pre>
+<p>Mobile browsers often kill sockets of background tabs, and the backoff may have grown to 10 s. When the tab becomes visible again, the script cancels the pending retry and reconnects right away; the server pushes the state on open, so the number is fresh as soon as you look. The last line opens the first connection.</p>
+
+<h2>Running it on Disco</h2>
+<p>WebSockets need no special Disco configuration: <code>disco.json</code> is the same as for a plain HTTP app. Four things are worth knowing.</p>
+<ul>
+<li><strong>The proxy passes WebSockets through.</strong> Disco puts Caddy in front of the app for HTTPS. Caddy sees <code>Upgrade: websocket</code> and forwards the connection as is: <code>wss://</code> from the browser to Caddy, plain <code>ws://</code> from Caddy to the app on port 8000.</li>
+<li><strong>Every deploy drops all sockets.</strong> A deploy replaces the container, so open tabs show “reconnecting” for about a second, then catch up.</li>
+<li><strong>One container only.</strong> The <code>clients</code> set lives in one process's memory. With two replicas, a click on replica A would only reach tabs connected to A; fixing that needs a shared message bus. Disco runs one replica by default.</li>
+<li><strong>“Clients” means open tabs.</strong> Two tabs on the same laptop count as 2.</li>
+</ul>
+
+<h2>Try it yourself</h2>
+<ol>
+<li><strong>Watch the frames.</strong> Open <a href="https://counter.pietroppeter.xyz">the counter</a>, then DevTools → Network → filter “WS”, reload and click the <code>/ws</code> row. The Messages tab lists every frame: the state on open, each <code>inc</code> you send, each state coming back.</li>
+<li><strong>Push from outside the browser.</strong> <code>curl -X POST https://counter.pietroppeter.xyz/api/increment</code> updates every open tab, because the API calls the same <code>increment()</code>.</li>
+<li><strong>Talk to the socket by hand.</strong> With <a href="https://github.com/vi/websocat">websocat</a>: <code>websocat wss://counter.pietroppeter.xyz/ws</code> prints the state and counts as a client. Type <code>inc</code> and press Enter.</li>
+<li><strong>Break the connection.</strong> Put the phone in airplane mode for a few seconds. The status goes to “reconnecting”, then back to “live (N)” with the latest count.</li>
+</ol>
+
+<footer>Written with Claude, October 2026 · App: <a href="https://counter.pietroppeter.xyz">counter.pietroppeter.xyz</a> · Code: <a href="https://github.com/pietroppeter/disco-nim-mummy">pietroppeter/disco-nim-mummy</a> (explained at <a href="https://github.com/pietroppeter/disco-nim-mummy/tree/a5a584d02831b80b33d247709483081ccdfc2b8e">a5a584d</a>) · <a href="../">More pages</a></footer>
+</main>
+</body>
+</html>
