@@ -194,7 +194,7 @@ The nimibex backlog (#4) and nblog's `drafts/mermaid_diagram.nim` assume Mermaid
 
 - **Eleven days old** and moving fast: 1.6.0 on 2026-10-17, 1.12.0 on 2026-10-26 (six releases in four days). Pin a version and expect changes.
 - **Not pixel-compatible.** Own layout, no HTML labels, JavaScript `click` callbacks ignored, Mermaid themes and `themeVariables` ignored, external plugins (ZenUML) unsupported, math only with a KaTeX/Temml resolver. A diagram copied from a GitHub README will look different.
-- **Bus factor.** One author with Obsidian as the driving use case, and a public disagreement with the Mermaid project about its direction. Mermaid has a company behind it and is rendered natively by GitHub, GitLab and most docs tools, so it stays the lingua franca.
+- **Bus factor.** One author with Obsidian as the driving use case, who is publicly critical of Mermaid's direction (["Mermaid.js has transitioned to [Mermaid Chart] and is losing its original vision"](https://x.com/kepano/status/2111575190081847776)); no reply from the Mermaid maintainers found. Mermaid has a company behind it and is rendered natively by GitHub, GitLab and most docs tools, so it stays the lingua franca.
 - **Reference docs** are still Mermaid's; Pele has a playground and a compatibility page, which is where differences get reported.
 - The jsDelivr bundle the README names (`cdn.jsdelivr.net/npm/pele@1/dist/pele.global.js`) could not be fetched from this sandbox, so the CDN path is unverified.
 
