@@ -44,11 +44,11 @@ What is behind is everything around the code:
 
 Other repos in the org: nimconf24 (NimConf 2024 talk), assets (logos), redirect-pages (stub, "avoid 404 after moving"), groviglio (Tangle experiment), `.github` (profile: "work in progress! we are moving nimib repos here!"). Public members: pietroppeter, HugoGranstrom.
 
-Other nimib repos still under pietroppeter: p5nim (62★), paramidib, feedo (static RSS reader), nascondino ("A static site generator for nimib", 2022–23, private), animibis (hugo-theme port), nimconf22-nimib, nimconf2021, nobe and uv-add-nimlang (the Python/uv direction), blog.
+Other nimib repos still under pietroppeter: p5nim (62★), paramidib, feedo (static RSS reader), animibis (hugo-theme port), nimconf22-nimib, nimconf2021, nobe and uv-add-nimlang (the Python/uv direction), blog.
 
-**Dependents.** GitHub code search finds 66 public repos that depend on nimib, nimibook or nimiSlides (31 third-party, 35 of our own; full list below). nimibook has the most third-party adoption (enu, owlkettle, Norm, SciNim getting-started, qex and 8 more); nimiSlides is used for NimConf 2024 and 2026 talks by others; direct nimib users include libnimib (C API), nimitheme, wordle-it, blogs and experiments. Stars: nimib 204, nimibook 88, nimiSlides 88.
+**Dependents.** GitHub code search finds 63 public repos that depend on nimib, nimibook or nimiSlides (31 third-party, 32 of our own; full list below). nimibook has the most third-party adoption (enu, owlkettle, Norm, SciNim getting-started, qex and 8 more); nimiSlides is used for NimConf 2024 and 2026 talks by others; direct nimib users include libnimib (C API), nimitheme, wordle-it, blogs and experiments. Stars: nimib 204, nimibook 88, nimiSlides 88.
 
-### Dependents (31 third-party, 35 our own)
+### Dependents (31 third-party, 32 our own)
 
 Found on 2026-10-28 by GitHub code search for `import nimib`, `import nimislides`, `nbook.nim`, `[nimibook]` in `nimib.toml` and the three package names in `.nimble` files, plus nimibook's README. Vendored copies and the `penguinite/everything` meta-package are left out. Sorted by stars; the 'uses' column says nimibook or nimiSlides when the repo depends on them (both pull in nimib), otherwise plain nimib.
 
@@ -88,7 +88,7 @@ Found on 2026-10-28 by GitHub code search for `import nimib`, `import nimislides
 | [lbartoletti/lbartoletti.github.io](https://github.com/lbartoletti/lbartoletti.github.io) | nimib | 0 | – | 2025-01-20 |  |
 | [Abathargh/avrio_nimconf24](https://github.com/Abathargh/avrio_nimconf24) | nimiSlides | 0 | – | 2024-10-11 | Slides for the avr_io presentation in nimconf24 |
 
-**Our own repos (35).** pietroppeter, HugoGranstrom and nimib-land, excluding nimib, nimibook and nimiSlides themselves.
+**Our own repos (32).** pietroppeter, HugoGranstrom and nimib-land, excluding nimib, nimibook and nimiSlides themselves.
 
 | Repo | Uses | ★ | Site | Last push | What it is |
 |---|---|---|---|---|---|
@@ -118,11 +118,8 @@ Found on 2026-10-28 by GitHub code search for `import nimib`, `import nimislides
 | [pietroppeter/soscin22](https://github.com/pietroppeter/soscin22) | nimiSlides | 1 | [pietroppeter.github.io/soscin22](https://pietroppeter.github.io/soscin22/) | 2022-01-11 | State Of Scientific Computing In Nim 2022 - repo for my Fosdem presentation |
 | [pietroppeter/pyscript-python-dovunque-perchiunque](https://github.com/pietroppeter/pyscript-python-dovunque-perchiunque) | nimiSlides | 1 | [pietroppeter.github.io/pyscript-python-dovunque-perchiunque](https://pietroppeter.github.io/pyscript-python-dovunque-perchiunque/) | 2024-08-30 | presentazione su pyscript |
 | [pietroppeter/nanuq](https://github.com/pietroppeter/nanuq) | nimib | 0 | – | 2026-10-28 | nim bindings for pola-rs |
-| [pietroppeter/japps](https://github.com/pietroppeter/japps) | nimib | 0 | – | 2023-12-15 | tracking effort for job applications |
 | [pietroppeter/penlp](https://github.com/pietroppeter/penlp) | nimiSlides | 0 | [pietroppeter.github.io/penlp](https://pietroppeter.github.io/penlp/) | 2024-04-04 | Philosophy, Emotions, NLP: an explorable |
-| [pietroppeter/nimyverse](https://github.com/pietroppeter/nimyverse) | nimib | 0 | – | 2020-05-22 |  |
 | [pietroppeter/rc23winter1](https://github.com/pietroppeter/rc23winter1) | nimib | 0 | – | 2024-02-04 | main repo for public activities during recurse center (2023 Winter 1 batch) |
-| [pietroppeter/tgml-journey](https://github.com/pietroppeter/tgml-journey) | nimiSlides | 0 | – | 2024-05-21 | A short presentation on how a Data Scientist got in love with putting ML in prod |
 | [pietroppeter/nimconf2021](https://github.com/pietroppeter/nimconf2021) | nimib | 0 | – | 2021-06-28 | slides for my presentation of nimib at NimConf2021 |
 | [pietroppeter/git-matrioska](https://github.com/pietroppeter/git-matrioska) | nimiSlides | 0 | [pietroppeter.github.io/git-matrioska](https://pietroppeter.github.io/git-matrioska/) | 2023-09-18 | a normcore git worklfow for maintaining production (ML) repos |
 | [pietroppeter/hola-talk](https://github.com/pietroppeter/hola-talk) | nimiSlides | 0 | – | 2025-11-08 | a talk about holacracy |
@@ -179,13 +176,35 @@ GitHub redirects git and web URLs for a transferred repo, but **not GitHub Pages
 
 **Backlog:** issues #2–#10 are porting jobs; most prototypes already exist as nblog drafts written against nimib 0.3. #11 (chat elements) is done but open; #1 is decided but open. Third-party extensions (nimitheme, nimipdf) use the GitHub topic `nimibex-extension`.
 
-**Suggested next steps:** close #1 and #11; add one real test per block (render a tiny doc, assert on HTML); tag v0.1.0 and register in nim-lang/packages; port mermaid (also wanted by nimibook #88) and plotly next as they have the most demand; decide whether nbPython actually leaves core (a breaking change for nimib).
+**Suggested next steps:** close #1 and #11; add one real test per block (render a tiny doc, assert on HTML); tag v0.1.0 and register in nim-lang/packages; port diagrams (Mermaid syntax, Pele or Mermaid as renderer, see below; also wanted by nimibook #88) and plotly next as they have the most demand; decide whether nbPython actually leaves core (a breaking change for nimib).
+
+### Diagrams: Mermaid or Pele?
+The nimibex backlog (#4) and nblog's `drafts/mermaid_diagram.nim` assume Mermaid.js. Since 2026-10-17 there is an alternative: [Pele](https://github.com/obsidianmd/pele) ([pele.run](https://pele.run/)), by kepano (Steph Ango, Obsidian's CEO), MIT, zero dependencies. It reads Mermaid 12.1.0 syntax and renders SVG with its own layout engine; Obsidian's next release switches to it. Facts below are from Pele's own docs and the npm registry; I could not run it in this sandbox.
+
+**For Pele**
+
+- **Same input.** Users keep writing Mermaid text (all built-in diagram types, frontmatter, `%%{init}%%`), so the nimib block API is the same whichever renderer is behind it. Switching is a one-line change.
+- **Small and fast.** ~230 kB gzipped vs ~1.6 MB for mermaid.js, 0 vs 23 dependencies, 100–500× faster per diagram (self-reported). nimib pages load everything from CDN, so size matters on mobile.
+- **Theming by CSS variables** (`--pele-bg`, `--pele-fg`, `--pele-accent`, `--pele-font`). Dark mode is a media query; nimitheme and the nimib default theme can style diagrams without touching the renderer. Mermaid needs `themeVariables` in the init call and a re-render.
+- **Build-time rendering.** `render()` is synchronous plain JavaScript and runs in Node without a DOM, so a nimib block could call it once at build time and inline a static SVG: no JavaScript in the page, works in nimibook, in RSS readers, in the SSG and in PDF export. Mermaid needs a browser (Playwright) for that.
+- **Responsive**: a wide flowchart re-lays out vertically on phones instead of shrinking.
+- **Safer by design**: SVG text labels only, a sanitizer hook, size and edge limits. kepano cites Mermaid's CVE history as his main motivation.
+
+**Against Pele (today)**
+
+- **Eleven days old** and moving fast: 1.6.0 on 2026-10-17, 1.12.0 on 2026-10-26 (six releases in four days). Pin a version and expect changes.
+- **Not pixel-compatible.** Own layout, no HTML labels, JavaScript `click` callbacks ignored, Mermaid themes and `themeVariables` ignored, external plugins (ZenUML) unsupported, math only with a KaTeX/Temml resolver. A diagram copied from a GitHub README will look different.
+- **Bus factor.** One author with Obsidian as the driving use case, and a public disagreement with the Mermaid project about its direction. Mermaid has a company behind it and is rendered natively by GitHub, GitLab and most docs tools, so it stays the lingua franca.
+- **Reference docs** are still Mermaid's; Pele has a playground and a compatibility page, which is where differences get reported.
+- The jsDelivr bundle the README names (`cdn.jsdelivr.net/npm/pele@1/dist/pele.global.js`) could not be fetched from this sandbox, so the CDN path is unverified.
+
+**Suggestion.** Build the nimibex block around Mermaid _syntax_, not around a renderer: `nbDiagram` with a `renderer` option defaulting to Pele (client-side `mount()` from jsDelivr, pinned to a major) and Mermaid as the fallback for the gaps above. Later add a build-time mode that inlines SVG when `node` is on the path, which is the mode nimibook and the SSG want. The nblog draft's `useMermaid`/`nbDiagram` names can become `useDiagrams`/`nbDiagram`. Revisit the default after Pele has a few months of releases.
 
 ---
 
 ## 5. nblog and the SSG
 
-**The plan.** Oct 2022: "I do plan to work on a site generator with nimib with main use case blogs (and this blog will move there)" (nblog #12). The Feb 2023 "This Month with Nim" post and discussion #162 put an SSG in 2023H1: render each doc to JSON, then JSON to HTML, with nimibook refactored onto it later (nimibook #65). A private repo `pietroppeter/nascondino` ("A static site generator for nimib", Nov 2022–Feb 2023) is an earlier attempt I could not read.
+**The plan.** Oct 2022: "I do plan to work on a site generator with nimib with main use case blogs (and this blog will move there)" (nblog #12). The Feb 2023 "This Month with Nim" post and discussion #162 put an SSG in 2023H1: render each doc to JSON, then JSON to HTML, with nimibook refactored onto it later (nimibook #65).
 
 **What was built.** nblog draft PR #16 "implementing Basic theme" (branch `basic-theme`, 18 commits):
 - `posts/` → `docs/` layout, `templates/`
@@ -200,7 +219,7 @@ GitHub redirects git and web URLs for a transferred repo, but **not GitHub Pages
 **Competition and demand.** dlesnoff asked for a blog-oriented nimib tool (forum t/13751, Feb 2026). moigagoo, the most active nimibook user, wants site-wide search and Markdown-first authoring, and in mid-2026 added a Markdown-book mode to `nim doc` instead (t/14008). A nimib SSG's edge is executed, compile-checked content and JS interactivity; plain Markdown sites now have a stdlib option.
 
 **Suggested restart** (small, shippable in steps):
-1. A library module (in nblog `src/` or nimibex, or revive the nascondino name) on top of nimib 0.4: `buildSite(srcDir, outDir)` that runs each post with `nim r … --nbJson`-style output, loads JSON, renders with a site theme.
+1. A library module (in nblog `src/` or nimibex) on top of nimib 0.4: `buildSite(srcDir, outDir)` that runs each post with `nim r … --nbJson`-style output, loads JSON, renders with a site theme.
 2. Index page + post metadata (title, date, tags) stored in the doc JSON.
 3. Port the 25 nblog drafts to 0.4 (or freeze the old HTML and only build new posts), add redirects from `drafts/`, a deploy workflow, RSS.
 4. Then consider nimibook #65 (nimibook on the same core) and site-wide search (which benefits both).
@@ -261,7 +280,7 @@ I'm happy to do any of these; closing issues is visible to watchers, so I'd want
 
 **Then (building)**
 8. SSG restart on 0.4 JSON with nblog as first site (§5).
-9. nimibex: tests, v0.1.0 tag and registration, mermaid and plotly ports.
+9. nimibex: tests, v0.1.0 tag and registration, diagram (Pele/Mermaid) and plotly ports.
 10. nimibook site-wide search.
 11. Skills with evals, re-run on each nimib release.
 
@@ -269,7 +288,8 @@ I'm happy to do any of these; closing issues is visible to watchers, so I'd want
 
 - **Redirect strategy:** user-site redirects (recommended) vs. recreating repos at the old names (breaks GitHub's repo redirects).
 - **Order and timing** of nimibook and nimib transfers, and whether to ask Hugo to move nimiSlides.
-- **SSG home:** nblog `src/`, a nimibex module, or a new repo (nascondino?).
+- **SSG home:** nblog `src/`, a nimibex module, or a new repo.
 - **nbPython:** move to nimibex (breaking) or keep in core.
+- **Diagram renderer:** Pele by default with Mermaid fallback (suggested), or Mermaid only until Pele settles.
 - **Archive** nimib.py, nimibland-for-explorables, groviglio?
 - **Speaking hours:** resume or retire.
