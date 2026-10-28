@@ -64,7 +64,7 @@ main > h2:first-child{margin-top:0}
 <p>What is behind is everything around the code:</p>
 <ul>
 <li><strong>The move to nimib-land is about a third done.</strong> nblog, nimiBoost and nimibex live in the org; <strong>nimib, nimibook and nimiSlides do not</strong>. nimib #137 ("moving to nimib organization", 2023H1 milestone) is still open.</li>
-<li><strong>The public docs are stale.</strong> The nimib docs deploy has failed since 0.4.2, so pietroppeter.github.io/nimib stops at 0.4.1, and its prose still describes the mustache-era API. I opened <a href="https://github.com/pietroppeter/nimib/pull/263">nimib#263</a> to fix the deploy.</li>
+<li><strong>The public docs were stale until today.</strong> The nimib docs deploy had failed since 0.4.2, so pietroppeter.github.io/nimib stopped at 0.4.1. <a href="https://github.com/pietroppeter/nimib/pull/263">nimib#263</a> fixed it, was merged on 2026-10-28 and the first deploy after it is green, so the 0.4.3 docs are live. The prose still describes the mustache-era API.</li>
 <li><strong>Old links are already broken.</strong> <code>pietroppeter.github.io/nblog/...</code> returns 404 since nblog moved (nblog #19). Moving nimib and nimibook the same way would break <code>pietroppeter.github.io/nimib</code> (linked in the footer of every page nimib has ever generated) and <code>/nimibook</code>.</li>
 <li><strong>The SSG was started and stalled, and its blocker is now gone.</strong> nblog draft PR #16 (Feb–Mar 2023) built nim → json → html for blog posts but needed blocks that survive a JSON round trip. nimib 0.4 now has exactly that.</li>
 <li><strong>The issue trackers are frozen in 2023–2024.</strong> nimib has 60 open issues, none touched since mid-2024; several are done by 0.4. The <code>2023H1/2023H2</code> labels and milestone are leftovers.</li>
@@ -72,7 +72,7 @@ main > h2:first-child{margin-top:0}
 </ul>
 <p><strong>Top five actions</strong>, in order:</p>
 <ol>
-<li>Merge #263 so the 0.4.x docs go live, then fix the README/index.nim drift (#141) and rewrite the pre-0.4 API text.</li>
+<li>Docs deploy is fixed (#263 merged, deploy green). Next: fix the README/index.nim drift (#141) and rewrite the pre-0.4 API text.</li>
 <li>Pilot the redirect approach on nblog (fix nblog #19), then use it to move nimibook, then nimib.</li>
 <li>Triage: close the ~12 issues that are done, retire dated labels/milestones, delete stale branches.</li>
 <li>Restart the SSG as a small library on top of the 0.4 JSON backend, with nblog as first user.</li>
@@ -98,8 +98,8 @@ main > h2:first-child{margin-top:0}
 <td>pietroppeter</td>
 <td>0.4.3</td>
 <td>2026-10-27</td>
-<td>tests <span class="ok">ok</span>, netlify previews <span class="ok">ok</span>, <strong>docs <span class="bad">failing</span> since 0.4.2</strong></td>
-<td>pietroppeter.github.io/nimib (stale, last deploy 2026-06-04)</td>
+<td>tests <span class="ok">ok</span>, netlify previews <span class="ok">ok</span>, docs <span class="ok">ok</span> (fixed by #263 on 2026-10-28)</td>
+<td>pietroppeter.github.io/nimib (deployed 2026-10-28)</td>
 <td>60 / 3 (+#263)</td>
 </tr>
 <tr>
@@ -421,7 +421,7 @@ main > h2:first-child{margin-top:0}
 <h2 id="9-prioritized-action-plan">9. Prioritized action plan</h2>
 <p><strong>Now (this week, low risk)</strong></p>
 <ol>
-<li>Merge <a href="https://github.com/pietroppeter/nimib/pull/263">nimib#263</a>; docs for 0.4.3 go live.</li>
+<li><s><a href="https://github.com/pietroppeter/nimib/pull/263">nimib#263</a></s> merged 2026-10-28, docs for 0.4.3 deployed.</li>
 <li>Fix #141 (README drift) and rewrite the 0.4 "how it works / add a block" docs.</li>
 <li>Triage pass from §7.</li>
 <li>Add AGENTS.md to nimib, nimibook, nimibex.</li>
