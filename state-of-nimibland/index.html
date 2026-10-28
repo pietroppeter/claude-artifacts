@@ -1,0 +1,454 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="description" content="Where every nimib project stands, the move to the nimib-land org, nimibex, the nblog site generator, and a prioritized plan (surveyed 2026-10-28).">
+<style>:root{padding-top:env(safe-area-inset-top,0px);padding-bottom:env(safe-area-inset-bottom,0px)}body{margin:0}[hidden]{display:none!important}</style>
+<title>State of NimibLand</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,700&family=Source+Sans+3:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap">
+<style>
+/* layout: single reading column with a sticky section rail on wide screens; whale-blue accent from nimib's 🐳 */
+:root{
+  --bg:#f6f8f9; --surface:#ffffff; --fg:#17232b; --muted:#56656f; --line:#d9e1e6;
+  --accent:#1f6f8b; --accent-soft:#e3f0f5; --ok:#2e7d4f; --bad:#b4442c; --code:#eef2f4;
+  --display:"Fraunces",Georgia,serif; --body:"Source Sans 3",system-ui,sans-serif; --mono:"JetBrains Mono",ui-monospace,monospace;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --bg:#0f171c; --surface:#16222a; --fg:#e3eaee; --muted:#9aaab4; --line:#2a3a44;
+  --accent:#6cc0dc; --accent-soft:#1a3340; --ok:#6fcf97; --bad:#f08a70; --code:#1d2b34; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --bg:#0f171c; --surface:#16222a; --fg:#e3eaee; --muted:#9aaab4; --line:#2a3a44;
+  --accent:#6cc0dc; --accent-soft:#1a3340; --ok:#6fcf97; --bad:#f08a70; --code:#1d2b34; color-scheme:dark}
+body{background:var(--bg);color:var(--fg);font:17px/1.6 var(--body);
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px))}
+.wrap{max-width:1180px;margin:0 auto;display:grid;grid-template-columns:200px minmax(0,1fr);gap:48px;padding-block:40px 80px}
+header{grid-column:1/-1;border-bottom:1px solid var(--line);padding-bottom:24px}
+.eyebrow{font:600 12px/1 var(--mono);letter-spacing:.08em;text-transform:uppercase;color:var(--accent)}
+h1{font:700 clamp(32px,5vw,52px)/1.08 var(--display);margin:12px 0 12px;text-wrap:balance}
+.lede{color:var(--muted);max-width:68ch;margin:0}
+nav{position:sticky;top:calc(env(safe-area-inset-top,0px) + 24px);align-self:start;display:flex;flex-direction:column;gap:6px;font-size:14px}
+nav a{color:var(--muted);text-decoration:none;padding:4px 0 4px 10px;border-left:2px solid var(--line)}
+nav a:hover,nav a:focus-visible{color:var(--accent);border-left-color:var(--accent)}
+main{min-width:0}
+hr{border:0;border-top:1px solid var(--line);margin:40px 0}
+h2{font:600 28px/1.2 var(--display);margin:48px 0 12px;text-wrap:balance;scroll-margin-top:24px}
+h3{font:600 15px/1.3 var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--accent);margin:28px 0 8px}
+p,li{max-width:70ch}
+a{color:var(--accent)}
+code{font:0.85em var(--mono);background:var(--code);padding:1px 5px;border-radius:4px;overflow-wrap:anywhere}
+ul,ol{padding-left:22px} li{margin:4px 0}
+.tw{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:6px;background:var(--surface);max-width:none}
+table{border-collapse:collapse;font-size:14px;line-height:1.45;min-width:640px;width:100%}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{font:600 12px var(--mono);text-transform:uppercase;letter-spacing:.05em;color:var(--muted);background:var(--accent-soft)}
+tr:last-child td{border-bottom:0}
+.ok,.bad{font:600 11px var(--mono);text-transform:uppercase;letter-spacing:.04em;padding:1px 6px;border-radius:3px;border:1px solid currentColor}
+.ok{color:var(--ok)} .bad{color:var(--bad)}
+li.todo{list-style:none;position:relative;margin-left:-22px;padding-left:24px}
+.box{position:absolute;left:0;top:6px;width:14px;height:14px;border:1.5px solid var(--accent);border-radius:3px}
+main > h2:first-child{margin-top:0}
+@media (max-width:860px){.wrap{grid-template-columns:minmax(0,1fr);gap:24px}nav{position:static;flex-direction:row;flex-wrap:wrap;gap:4px 14px}nav a{border-left:0;padding:0}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header>
+  <div class="eyebrow">nimib ecosystem · surveyed 2026-10-28</div>
+  <h1>State of NimibLand</h1>
+  <p class="lede">Where every nimib project stands, what the move to the nimib-land org still needs, where nimibex and the nblog site generator got to, and a prioritized plan. Based on the nine project repos, the nim-lang package registry, live docs sites and the Nim forum.</p>
+</header>
+<nav aria-label="Sections"><a href="#1-summary">1. Summary</a><a href="#2-ecosystem-at-a-glance">2. Ecosystem at a glance</a><a href="#3-the-move-to-nimib-land">3. The move to nimib-land</a><a href="#4-nimibex">4. nimibex</a><a href="#5-nblog-and-the-ssg">5. nblog and the SSG</a><a href="#6-what-managing-nimib-involves-recurring-work">6. What managing nimib involves (recurring work)</a><a href="#7-housekeeping-list-low-risk-each-a-few-minutes">7. Housekeeping list (low risk, each a few minutes)</a><a href="#8-ai-and-nimib-skills-handed-to-the-skills-thread">8. AI and nimib skills (handed to the skills thread)</a><a href="#9-prioritized-action-plan">9. Prioritized action plan</a><a href="#10-decisions-for-you">10. Decisions for you</a></nav>
+<main><h2 id="1-summary">1. Summary</h2>
+<p>nimib is in better shape than its repos suggest. Hugo shipped the long-awaited block refactor as <strong>v0.4.0 (2026-05-29)</strong>, followed by 0.4.1–0.4.3 (the last on 2026-10-27). nimibook and nimiSlides are ported to 0.4, and nimibex finally has a working extension (Chat Bubbles, July–Aug 2026). Tests pass (66/66 on Nim 2.2.6, both code-capture modes).</p>
+<p>What is behind is everything around the code:</p>
+<ul>
+<li><strong>The move to nimib-land is about a third done.</strong> nblog, nimiBoost and nimibex live in the org; <strong>nimib, nimibook and nimiSlides do not</strong>. nimib #137 ("moving to nimib organization", 2023H1 milestone) is still open.</li>
+<li><strong>The public docs were stale until today.</strong> The nimib docs deploy had failed since 0.4.2, so pietroppeter.github.io/nimib stopped at 0.4.1. <a href="https://github.com/pietroppeter/nimib/pull/263">nimib#263</a> fixed it, was merged on 2026-10-28 and the first deploy after it is green, so the 0.4.3 docs are live. The prose still describes the mustache-era API.</li>
+<li><strong>Old links are already broken.</strong> <code>pietroppeter.github.io/nblog/...</code> returns 404 since nblog moved (nblog #19). Moving nimib and nimibook the same way would break <code>pietroppeter.github.io/nimib</code> (linked in the footer of every page nimib has ever generated) and <code>/nimibook</code>.</li>
+<li><strong>The SSG was started and stalled, and its blocker is now gone.</strong> nblog draft PR #16 (Feb–Mar 2023) built nim → json → html for blog posts but needed blocks that survive a JSON round trip. nimib 0.4 now has exactly that.</li>
+<li><strong>The issue trackers are frozen in 2023–2024.</strong> nimib has 60 open issues, none touched since mid-2024; several are done by 0.4. The <code>2023H1/2023H2</code> labels and milestone are leftovers.</li>
+<li><strong>No AI tooling exists yet</strong> (no AGENTS.md / CLAUDE.md, no nimib skill anywhere). Models will default to the pre-0.4 API, which the stale docs reinforce.</li>
+</ul>
+<p><strong>Top five actions</strong>, in order:</p>
+<ol>
+<li>Docs deploy is fixed (#263 merged, deploy green). Next: fix the README/index.nim drift (#141) and rewrite the pre-0.4 API text.</li>
+<li>Pilot the redirect approach on nblog (fix nblog #19), then use it to move nimibook, then nimib.</li>
+<li>Triage: close the ~12 issues that are done, retire dated labels/milestones, delete stale branches.</li>
+<li>Restart the SSG as a small library on top of the 0.4 JSON backend, with nblog as first user.</li>
+<li>Add AGENTS.md files and a tested nimib skill set (the "Build and test Nimib skills" thread is on this).</li>
+</ol>
+<hr />
+<h2 id="2-ecosystem-at-a-glance">2. Ecosystem at a glance</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Project</th>
+<th>Lives at</th>
+<th>Version / nimib</th>
+<th>Last real activity</th>
+<th>CI</th>
+<th>Site</th>
+<th>Open issues / PRs</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>nimib</strong></td>
+<td>pietroppeter</td>
+<td>0.4.3</td>
+<td>2026-10-27</td>
+<td>tests <span class="ok">ok</span>, netlify previews <span class="ok">ok</span>, docs <span class="ok">ok</span> (fixed by #263 on 2026-10-28)</td>
+<td>pietroppeter.github.io/nimib (deployed 2026-10-28)</td>
+<td>60 / 3 (+#263)</td>
+</tr>
+<tr>
+<td><strong>nimibook</strong></td>
+<td>pietroppeter</td>
+<td>0.4.0, nimib ≥ 0.4.1</td>
+<td>2026-06-18</td>
+<td>tests, docs, netlify previews <span class="ok">ok</span></td>
+<td>pietroppeter.github.io/nimibook</td>
+<td>23 / 0</td>
+</tr>
+<tr>
+<td><strong>nimiSlides</strong></td>
+<td>HugoGranstrom</td>
+<td>ported to 0.4</td>
+<td>2026-07</td>
+<td>(not in scope)</td>
+<td>hugogranstrom.com/nimiSlides</td>
+<td>–</td>
+</tr>
+<tr>
+<td><strong>nimibex</strong></td>
+<td>nimib-land</td>
+<td>0.1.0, nimib ≥ 0.4.1</td>
+<td>2026-08-08</td>
+<td>docs build + gh-pages PR previews <span class="ok">ok</span> (no unit tests)</td>
+<td>nimib.land/nimibex</td>
+<td>14 / 0</td>
+</tr>
+<tr>
+<td><strong>nblog</strong></td>
+<td>nimib-land</td>
+<td>none (posts built with nimib 0.3)</td>
+<td>2024-05-01</td>
+<td>none</td>
+<td>nimib.land/nblog (old URLs 404)</td>
+<td>18 / 1 (draft SSG PR #16)</td>
+</tr>
+<tr>
+<td><strong>nimiBoost</strong> (VS Code)</td>
+<td>nimib-land</td>
+<td>0.4.3</td>
+<td>2022-09-18</td>
+<td>none</td>
+<td>Marketplace <code>hugogranstrom.nimiboost</code> (156 installs)</td>
+<td>0 / 0</td>
+</tr>
+<tr>
+<td><strong>nimib-land.github.io</strong></td>
+<td>nimib-land</td>
+<td>–</td>
+<td>2024-03-23</td>
+<td>none</td>
+<td><strong>nimib.land</strong> (Jekyll placeholder)</td>
+<td>0 / 0</td>
+</tr>
+<tr>
+<td><strong>nimib.py</strong></td>
+<td>nimib-land</td>
+<td>uses nimib 0.3 internals, won't build on 0.4</td>
+<td>2024-01-18</td>
+<td>none</td>
+<td>nimib.land/nimib.py</td>
+<td>1 / 0</td>
+</tr>
+<tr>
+<td><strong>nimibland-for-explorables</strong></td>
+<td>nimib-land</td>
+<td>nimiSlides deck, nimib 0.3 era</td>
+<td>2024-01-17</td>
+<td>Pages deploy</td>
+<td>nimib.land/nimibland-for-explorables</td>
+<td>1 / 0</td>
+</tr>
+<tr>
+<td><strong>adventofnim</strong></td>
+<td>pietroppeter</td>
+<td>nimib ≥ 0.2.4</td>
+<td>2022-12-31</td>
+<td>none</td>
+<td>pietroppeter.github.io/adventofnim</td>
+<td>2 / 0</td>
+</tr>
+</tbody>
+</table></div>
+<p>Other repos in the org: nimconf24 (NimConf 2024 talk), assets (logos), redirect-pages (stub, "avoid 404 after moving"), groviglio (Tangle experiment), <code>.github</code> (profile: "work in progress! we are moving nimib repos here!"). Public members: pietroppeter, HugoGranstrom.</p>
+<p>Other nimib repos still under pietroppeter: p5nim (62★), paramidib, feedo (static RSS reader), animibis (hugo-theme port), nimconf22-nimib, nimconf2021, nobe and uv-add-nimlang (the Python/uv direction), blog.</p>
+<p><strong>Dependents.</strong> GitHub code search finds 63 public repos that depend on nimib, nimibook or nimiSlides (31 third-party, 32 of our own; full list below). nimibook has the most third-party adoption (enu, owlkettle, Norm, SciNim getting-started, qex and 8 more); nimiSlides is used for NimConf 2024 and 2026 talks by others; direct nimib users include libnimib (C API), nimitheme, wordle-it, blogs and experiments. Stars: nimib 204, nimibook 88, nimiSlides 88.</p>
+<h3 id="dependents">Dependents (31 third-party, 32 our own)</h3>
+<p>Found on 2026-10-28 by GitHub code search for <code>import nimib</code>, <code>import nimislides</code>, <code>nbook.nim</code>, <code>[nimibook]</code> in <code>nimib.toml</code> and the three package names in <code>.nimble</code> files, plus nimibook's README. Vendored copies and the <code>penguinite/everything</code> meta-package are left out. Sorted by stars; the 'uses' column says nimibook or nimiSlides when the repo depends on them (both pull in nimib), otherwise plain nimib.</p>
+<p><strong>Third-party repos (31).</strong> Libraries that document with nimibook, plus talks, blogs and experiments.</p>
+<div class="tw"><table><thead><tr><th>Repo</th><th>Uses</th><th>★</th><th>Site</th><th>Last push</th><th>What it is</th></tr></thead><tbody>
+<tr><td><a href="https://github.com/getenu/enu">getenu/enu</a></td><td>nimibook</td><td>486</td><td><a href="https://getenu.com/docs/intro.html">getenu.com/docs/intro.html</a></td><td>2026-10-08</td><td>A Logo-like 3D environment, implemented in Nim</td></tr>
+<tr><td><a href="https://github.com/can-lehmann/owlkettle">can-lehmann/owlkettle</a></td><td>nimibook</td><td>459</td><td><a href="https://can-lehmann.github.io/owlkettle/README.html">can-lehmann.github.io/owlkettle/README.html</a></td><td>2026-09-14</td><td>A declarative user interface framework based on GTK 4</td></tr>
+<tr><td><a href="https://github.com/moigagoo/norm">moigagoo/norm</a></td><td>nimibook</td><td>417</td><td><a href="https://norm.nim.town">norm.nim.town</a></td><td>2026-08-05</td><td>A Nim ORM for SQLite and Postgres</td></tr>
+<tr><td><a href="https://github.com/SciNim/getting-started">SciNim/getting-started</a></td><td>nimibook</td><td>64</td><td><a href="https://scinim.github.io/getting-started/">scinim.github.io/getting-started</a></td><td>2024-11-22</td><td>Getting started with Nim for Scientific Computing</td></tr>
+<tr><td><a href="https://github.com/jcosborn/qex">jcosborn/qex</a></td><td>nimibook</td><td>60</td><td><a href="http://jcosborn.github.io/qex/">jcosborn.github.io/qex</a></td><td>2026-10-22</td><td>Quantum EXpressions lattice field theory framework</td></tr>
+<tr><td><a href="https://github.com/PhilippMDoerner/Snorlogue">PhilippMDoerner/Snorlogue</a></td><td>nimibook</td><td>27</td><td><a href="https://philippmdoerner.github.io/Snorlogue/bookCompiled/">philippmdoerner.github.io/Snorlogue/bookCompiled</a></td><td>2023-10-27</td><td>An plugin for the prologue web-framework of the nim-language. Provides an admin </td></tr>
+<tr><td><a href="https://github.com/moigagoo/karkas">moigagoo/karkas</a></td><td>nimibook</td><td>19</td><td><a href="https://karkas.nim.town/">karkas.nim.town</a></td><td>2026-01-09</td><td>Layout helpers and syntactic sugar for Karax</td></tr>
+<tr><td><a href="https://github.com/PhilippMDoerner/mapster">PhilippMDoerner/mapster</a></td><td>nimibook</td><td>17</td><td><a href="https://philippmdoerner.github.io/mapster/index.html">philippmdoerner.github.io/mapster/index.html</a></td><td>2025-12-29</td><td>A simple way to generate mapping functions at compile-time without having to wri</td></tr>
+<tr><td><a href="https://github.com/neroist/nova">neroist/nova</a></td><td>nimibook</td><td>14</td><td><a href="https://neroist.github.io/nova/">neroist.github.io/nova</a></td><td>2026-05-03</td><td>Nova is a CLI for controlling Govee light strips, inspired by Bandev's Lux.</td></tr>
+<tr><td><a href="https://github.com/neroist/nimitheme">neroist/nimitheme</a></td><td>nimib</td><td>11</td><td><a href="https://neroist.github.io/nimitheme/">neroist.github.io/nimitheme</a></td><td>2024-06-28</td><td>Make nimib look beautiful with nimitheme</td></tr>
+<tr><td><a href="https://github.com/chutter/FrogCap-Sequence-Capture">chutter/FrogCap-Sequence-Capture</a></td><td>nimibook</td><td>10</td><td>–</td><td>2024-08-02</td><td>Probe set files and pipeline for the analysis of data acquired from the Hutter e</td></tr>
+<tr><td><a href="https://github.com/BontaVlad/NimDrake">BontaVlad/NimDrake</a></td><td>nimibook</td><td>8</td><td>–</td><td>2026-08-25</td><td>Nim wrapper for the DuckDB high-performance analytical database system</td></tr>
+<tr><td><a href="https://github.com/PhilippMDoerner/ThreadButler">PhilippMDoerner/ThreadButler</a></td><td>nimibook</td><td>7</td><td><a href="https://philippmdoerner.github.io/ThreadButler/bookCompiled/index.html">philippmdoerner.github.io/ThreadButler/bookCompiled/index.html</a></td><td>2024-07-08</td><td>Use threads as if they were servers/microservices to enable multi-threading with</td></tr>
+<tr><td><a href="https://github.com/moigagoo/nimconf2024">moigagoo/nimconf2024</a></td><td>nimiSlides</td><td>6</td><td><a href="https://moigagoo.github.io/nimconf2024/nimconf2024.html">moigagoo.github.io/nimconf2024/nimconf2024.html</a></td><td>2024-10-17</td><td>Slides for my NimConf 2024 talk.</td></tr>
+<tr><td><a href="https://github.com/haxscramper/hack">haxscramper/hack</a></td><td>nimib</td><td>5</td><td>–</td><td>2026-10-16</td><td></td></tr>
+<tr><td><a href="https://github.com/enthus1ast/nimTermbin">enthus1ast/nimTermbin</a></td><td>nimib</td><td>4</td><td>–</td><td>2023-07-11</td><td>A termbin clone in Nim</td></tr>
+<tr><td><a href="https://github.com/ajusa/binarylang-fun">ajusa/binarylang-fun</a></td><td>nimib</td><td>4</td><td><a href="https://ajusa.github.io/binarylang-fun/intro.html">ajusa.github.io/binarylang-fun/intro.html</a></td><td>2021-05-05</td><td>Fun with using binarylang to parse stuff in Nim</td></tr>
+<tr><td><a href="https://github.com/beef331/libnimib">beef331/libnimib</a></td><td>nimib</td><td>3</td><td>–</td><td>2024-06-15</td><td>This builds ontop of nimib allowing any language to use it.</td></tr>
+<tr><td><a href="https://github.com/dlesnoff/nimProgramming-blog">dlesnoff/nimProgramming-blog</a></td><td>nimib</td><td>3</td><td><a href="https://dlesnoff.github.io/nimProgramming-blog/">dlesnoff.github.io/nimProgramming-blog</a></td><td>2026-10-28</td><td>Documentation and code about metaprogramming in Nim</td></tr>
+<tr><td><a href="https://github.com/xTrayambak/nimconf2026">xTrayambak/nimconf2026</a></td><td>nimiSlides</td><td>3</td><td>–</td><td>2026-06-20</td><td>My presentation slides for NimConf 2026</td></tr>
+<tr><td><a href="https://github.com/Kiloneie/kiloneie.github.io">Kiloneie/kiloneie.github.io</a></td><td>nimibook, nimiSlides</td><td>1</td><td><a href="https://kiloneie.github.io/">kiloneie.github.io</a></td><td>2025-09-11</td><td>Github page for all my nimib styled offline tutorials of my Nim Tutorial Videos.</td></tr>
+<tr><td><a href="https://github.com/lordcris/wordle-bg-turbo">lordcris/wordle-bg-turbo</a></td><td>nimib</td><td>1</td><td>–</td><td>2022-02-02</td><td></td></tr>
+<tr><td><a href="https://github.com/ConnectedSystems/ihacres_nim">ConnectedSystems/ihacres_nim</a></td><td>nimib</td><td>1</td><td>–</td><td>2021-10-16</td><td>IHACRES ported to nim-lang</td></tr>
+<tr><td><a href="https://github.com/x3C49/x3C49.github.io">x3C49/x3C49.github.io</a></td><td>nimiSlides</td><td>1</td><td><a href="https://x3c4.club/">x3c4.club</a></td><td>2026-04-18</td><td></td></tr>
+<tr><td><a href="https://github.com/RowDaBoat/henka-nimconf-26">RowDaBoat/henka-nimconf-26</a></td><td>nimiSlides</td><td>1</td><td>–</td><td>2026-06-20</td><td>Henka slides and demos for nimconf-26</td></tr>
+<tr><td><a href="https://github.com/ScriptsPython-ISM/wordello">ScriptsPython-ISM/wordello</a></td><td>nimib</td><td>0</td><td>–</td><td>2025-05-30</td><td>wordle clone for italian class</td></tr>
+<tr><td><a href="https://github.com/epistrephein/wordle-it-endless">epistrephein/wordle-it-endless</a></td><td>nimib</td><td>0</td><td><a href="https://epistrephein.github.io/wordle-it-endless/">epistrephein.github.io/wordle-it-endless</a></td><td>2026-06-28</td><td>Italian version of Wordle, endless.</td></tr>
+<tr><td><a href="https://github.com/njh888/njh8888">njh888/njh8888</a></td><td>nimib</td><td>0</td><td><a href="https://njh888.github.io/njh8888/rpn_manual.html">njh888.github.io/njh8888/rpn_manual.html</a></td><td>2025-10-23</td><td></td></tr>
+<tr><td><a href="https://github.com/beef331/beef331.github.io">beef331/beef331.github.io</a></td><td>nimib</td><td>0</td><td>–</td><td>2026-06-20</td><td></td></tr>
+<tr><td><a href="https://github.com/lbartoletti/lbartoletti.github.io">lbartoletti/lbartoletti.github.io</a></td><td>nimib</td><td>0</td><td>–</td><td>2025-01-20</td><td></td></tr>
+<tr><td><a href="https://github.com/Abathargh/avrio_nimconf24">Abathargh/avrio_nimconf24</a></td><td>nimiSlides</td><td>0</td><td>–</td><td>2024-10-11</td><td>Slides for the avr_io presentation in nimconf24</td></tr>
+</tbody></table></div>
+<p><strong>Our own repos (32).</strong> pietroppeter, HugoGranstrom and nimib-land, excluding nimib, nimibook and nimiSlides themselves.</p>
+<div class="tw"><table><thead><tr><th>Repo</th><th>Uses</th><th>★</th><th>Site</th><th>Last push</th><th>What it is</th></tr></thead><tbody>
+<tr><td><a href="https://github.com/pietroppeter/wordle-it">pietroppeter/wordle-it</a></td><td>nimib</td><td>146</td><td><a href="https://pietroppeter.github.io/wordle-it/">pietroppeter.github.io/wordle-it</a></td><td>2023-08-20</td><td>Italian version of Wordle</td></tr>
+<tr><td><a href="https://github.com/HugoGranstrom/nimiSlides">HugoGranstrom/nimiSlides</a></td><td>nimib</td><td>88</td><td><a href="https://hugogranstrom.com/nimiSlides">hugogranstrom.com/nimiSlides</a></td><td>2026-07-21</td><td>A Reveal.js theme for nimib for making slideshow presentations in Nim</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/p5nim">pietroppeter/p5nim</a></td><td>nimib</td><td>62</td><td><a href="https://pietroppeter.github.io/p5nim/">pietroppeter.github.io/p5nim</a></td><td>2023-06-09</td><td>🌸👑 p5nim: processing for nim through p5js</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/adventofnim">pietroppeter/adventofnim</a></td><td>nimib</td><td>28</td><td><a href="https://pietroppeter.github.io/adventofnim/">pietroppeter.github.io/adventofnim</a></td><td>2024-12-10</td><td>🎄👑 adventofnim - nim solutions for advent of code</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/nim-for-pythonistas">pietroppeter/nim-for-pythonistas</a></td><td>nimiSlides</td><td>24</td><td><a href="https://pietroppeter.github.io/nim-for-pythonistas/">pietroppeter.github.io/nim-for-pythonistas</a></td><td>2025-02-05</td><td>me introducing nim to pythonistas</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/paramidib">pietroppeter/paramidib</a></td><td>nimib</td><td>14</td><td><a href="https://pietroppeter.github.io/paramidib/">pietroppeter.github.io/paramidib</a></td><td>2023-03-15</td><td>🎶🐳 paramidi with nimib</td></tr>
+<tr><td><a href="https://github.com/nimib-land/nblog">nimib-land/nblog</a></td><td>nimib</td><td>12</td><td><a href="https://nimib.land/nblog/">nimib.land/nblog</a></td><td>2024-05-01</td><td>✍️🐳👑 blog about nimib and nim ecosystem</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/naffprop">pietroppeter/naffprop</a></td><td>nimib</td><td>8</td><td>–</td><td>2026-10-08</td><td>Affinity Propagation in Nim for Python</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/nimconf22-nimib">pietroppeter/nimconf22-nimib</a></td><td>nimiSlides</td><td>8</td><td><a href="https://pietroppeter.github.io/nimconf22-nimib/">pietroppeter.github.io/nimconf22-nimib</a></td><td>2022-10-24</td><td>slides for nimib presentation at nimconf 2022</td></tr>
+<tr><td><a href="https://github.com/nimib-land/nimibex">nimib-land/nimibex</a></td><td>nimibook</td><td>6</td><td><a href="https://nimib.land/nimibex/">nimib.land/nimibex</a></td><td>2026-08-08</td><td>🐐 nimibex - extensions, experiments and extras for nimib ecosystem</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/domain-driven-data-science">pietroppeter/domain-driven-data-science</a></td><td>nimiSlides</td><td>4</td><td><a href="https://pietroppeter.github.io/domain-driven-data-science/">pietroppeter.github.io/domain-driven-data-science</a></td><td>2025-06-12</td><td>talk about the importance of domain expertise in data science</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/pymi-timeseries-forecasting-nixtla">pietroppeter/pymi-timeseries-forecasting-nixtla</a></td><td>nimiSlides</td><td>3</td><td>–</td><td>2023-05-22</td><td>repo for presentation at Python Milano (May 2023) on timeseries forecasting with</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/nim-ib-lightning-tcp">pietroppeter/nim-ib-lightning-tcp</a></td><td>nimiSlides</td><td>3</td><td><a href="https://pietroppeter.github.io/nim-ib-lightning-tcp/">pietroppeter.github.io/nim-ib-lightning-tcp</a></td><td>2024-04-18</td><td>Lightning Talk (10') on Nim and Nimib with a Tech/Culture/People point of view (</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/blog">pietroppeter/blog</a></td><td>nimib</td><td>2</td><td><a href="http://blog.pietroppeter.xyz/">blog.pietroppeter.xyz</a></td><td>2026-10-14</td><td>my personal blog</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/feedo">pietroppeter/feedo</a></td><td>nimib</td><td>2</td><td><a href="https://pietroppeter.github.io/feedo/">pietroppeter.github.io/feedo</a></td><td>2024-11-03</td><td>🐶 minimalistic static rss reader built with nim(ib)</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/adventofcode2023">pietroppeter/adventofcode2023</a></td><td>nimib</td><td>2</td><td><a href="https://pietroppeter.github.io/adventofcode2023/">pietroppeter.github.io/adventofcode2023</a></td><td>2024-01-16</td><td>My solutions for advent of code 2023</td></tr>
+<tr><td><a href="https://github.com/nimib-land/nimconf24">nimib-land/nimconf24</a></td><td>nimibook, nimiSlides</td><td>1</td><td><a href="http://nimib.land/nimconf24/">nimib.land/nimconf24</a></td><td>2024-10-26</td><td>NimibLand presentation for NimConf 2024</td></tr>
+<tr><td><a href="https://github.com/HugoGranstrom/AdventOfNim">HugoGranstrom/AdventOfNim</a></td><td>nimib</td><td>1</td><td>–</td><td>2025-12-12</td><td>My Advent of Code solutions written in Nim</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/programma101">pietroppeter/programma101</a></td><td>nimib</td><td>1</td><td><a href="https://pietroppeter.github.io/programma101/p5gui.html">pietroppeter.github.io/programma101/p5gui.html</a></td><td>2023-06-20</td><td>programma 101 emulator in nim</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/time-circles">pietroppeter/time-circles</a></td><td>nimib</td><td>1</td><td><a href="https://pietroppeter.github.io/time-circles/">pietroppeter.github.io/time-circles</a></td><td>2024-11-09</td><td>circles changing through time</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/diventa-avventore-del-codice">pietroppeter/diventa-avventore-del-codice</a></td><td>nimiSlides</td><td>1</td><td><a href="https://pietroppeter.github.io/diventa-avventore-del-codice/">pietroppeter.github.io/diventa-avventore-del-codice</a></td><td>2024-06-17</td><td>Elogio del calendario dell'avvento del codice (Advent of Code)</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/ai-a-blast-from-the-past">pietroppeter/ai-a-blast-from-the-past</a></td><td>nimiSlides</td><td>1</td><td><a href="https://pietroppeter.github.io/ai-a-blast-from-the-past/">pietroppeter.github.io/ai-a-blast-from-the-past</a></td><td>2025-04-25</td><td>⚡🤖 Lightning talk "AI, a blast from the past", a condensed and opinionated histo</td></tr>
+<tr><td><a href="https://github.com/nimib-land/groviglio">nimib-land/groviglio</a></td><td>nimib</td><td>1</td><td>–</td><td>2024-01-22</td><td>An experiment in wrapping Bret Victor's Tangle framework for NimibLand</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/soscin22">pietroppeter/soscin22</a></td><td>nimiSlides</td><td>1</td><td><a href="https://pietroppeter.github.io/soscin22/">pietroppeter.github.io/soscin22</a></td><td>2022-01-11</td><td>State Of Scientific Computing In Nim 2022 - repo for my Fosdem presentation</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/pyscript-python-dovunque-perchiunque">pietroppeter/pyscript-python-dovunque-perchiunque</a></td><td>nimiSlides</td><td>1</td><td><a href="https://pietroppeter.github.io/pyscript-python-dovunque-perchiunque/">pietroppeter.github.io/pyscript-python-dovunque-perchiunque</a></td><td>2024-08-30</td><td>presentazione su pyscript</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/nanuq">pietroppeter/nanuq</a></td><td>nimib</td><td>0</td><td>–</td><td>2026-10-28</td><td>nim bindings for pola-rs</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/penlp">pietroppeter/penlp</a></td><td>nimiSlides</td><td>0</td><td><a href="https://pietroppeter.github.io/penlp/">pietroppeter.github.io/penlp</a></td><td>2024-04-04</td><td>Philosophy, Emotions, NLP: an explorable</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/rc23winter1">pietroppeter/rc23winter1</a></td><td>nimib</td><td>0</td><td>–</td><td>2024-02-04</td><td>main repo for public activities during recurse center (2023 Winter 1 batch)</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/nimconf2021">pietroppeter/nimconf2021</a></td><td>nimib</td><td>0</td><td>–</td><td>2021-06-28</td><td>slides for my presentation of nimib at NimConf2021</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/git-matrioska">pietroppeter/git-matrioska</a></td><td>nimiSlides</td><td>0</td><td><a href="https://pietroppeter.github.io/git-matrioska/">pietroppeter.github.io/git-matrioska</a></td><td>2023-09-18</td><td>a normcore git worklfow for maintaining production (ML) repos</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/hola-talk">pietroppeter/hola-talk</a></td><td>nimiSlides</td><td>0</td><td>–</td><td>2025-11-08</td><td>a talk about holacracy</td></tr>
+<tr><td><a href="https://github.com/pietroppeter/talk-sailing-seas-scientific-nim">pietroppeter/talk-sailing-seas-scientific-nim</a></td><td>nimiSlides</td><td>0</td><td><a href="https://pietroppeter.github.io/talk-sailing-seas-scientific-nim/">pietroppeter.github.io/talk-sailing-seas-scientific-nim</a></td><td>2026-10-28</td><td>Slides for Talk "Sailing Seas of Scientific Nim"</td></tr>
+</tbody></table></div>
+<hr />
+<h2 id="3-the-move-to-nimib-land">3. The move to nimib-land</h2>
+<h3>What's done</h3>
+<ul>
+<li>Org created 2023-01-29 as <code>nimib-org</code>, renamed <code>nimib-land</code> by April 2023 (github.com/nimib-org now 404s, still linked from the Feb 2023 Nim blog post).</li>
+<li>Moved: nblog and nimiBoost (Nov 2023, discussion #221), nimibex (created there). New repos created there since.</li>
+<li>Custom domain <strong>nimib.land</strong> on the org Pages repo, so every org project site is served at <code>nimib.land/&lt;repo&gt;/</code>. After the move, nimib docs become <code>nimib.land/nimib/</code> and nimibook <code>nimib.land/nimibook/</code>.</li>
+</ul>
+<h3>The lesson from nblog</h3>
+<p>GitHub redirects git and web URLs for a transferred repo, but <strong>not GitHub Pages URLs</strong>. The proposed fix in #221 was to recreate <code>pietroppeter/nblog</code> holding redirect pages. That has a catch: <strong>creating any repo at the old name cancels GitHub's repo redirect</strong> (git clones, issue links, jsDelivr <code>gh/</code> URLs, nimble lock files that pin the old URL).</p>
+<p><strong>Recommended approach (to verify on nblog first):</strong> put the redirect pages in a <em>user site</em> repo, <code>pietroppeter/pietroppeter.github.io</code>, under folders <code>nblog/</code>, <code>nimib/</code>, <code>nimibook/</code>. A user site serves any path that no project site claims, so after a transfer <code>pietroppeter.github.io/nimib/...</code> would fall through to these redirect pages while <code>github.com/pietroppeter/nimib</code> keeps redirecting to the org. I found no such repo today. One condition: the user site must not set a custom domain, or project URLs would start redirecting to it. This is cheap and reversible, so nblog #19 is the ideal pilot.</p>
+<h3>Checklist per repo (nimibook first, then nimib)</h3>
+<p><strong>Before the transfer</strong></p>
+<ul>
+<li class="todo"><span class="box" aria-hidden="true"></span>Redirect pages ready in the user site (one HTML per published page, meta-refresh plus canonical link to <code>nimib.land/&lt;repo&gt;/...</code>; a small script can generate them from the gh-pages file list).</li>
+<li class="todo"><span class="box" aria-hidden="true"></span>Update hardcoded URLs (full list with lines in <code>core.md</code> §2 and <code>satellites.md</code> §2):<ul>
+<li>nimib <code>src/nimib/themes.nim:32</code> footer link → <code>nimib.land/nimib/</code>.</li>
+<li>nimib <code>themes.nim:125,126,128</code> jsDelivr <code>gh/pietroppeter/nimib/assets/...</code> → <code>gh/nimib-land/nimib@&lt;version&gt;/assets/...</code> (pin a version; two are unpinned today). Already-published pages keep the old URLs, so they rely on the GitHub redirect; this is another reason not to recreate a repo at the old name.</li>
+<li>nimib <code>gits.nim:55,61</code> self-test asserts the remote URL.</li>
+<li>nimib <code>docsrc/index.nim:13-14</code> repo and docs constants (README links derive from them), <code>hello.nim:9</code>, <code>mostaccio.nim:15</code>, CONTRIBUTING links.</li>
+<li>nimibook <code>nimib.toml:9-10</code> (repo URL and Plausible domain), README links, Netlify preview URL.</li>
+<li>nimibex <code>nimble.lock</code> entries for nimib and nimibook.</li>
+</ul>
+</li>
+<li class="todo"><span class="box" aria-hidden="true"></span>Decide on PR previews: nimib and nimibook use Netlify (needs <code>NETLIFY_AUTH_TOKEN</code>/<code>NETLIFY_SITE_ID</code> re-created after transfer); nimibex has a secret-free gh-pages preview (rossjrw/pr-preview-action) that could replace them.</li>
+</ul>
+<p><strong>The transfer</strong> (irreversible-ish; Pietro's call)</p>
+<ul>
+<li class="todo"><span class="box" aria-hidden="true"></span>Transfer the repo to nimib-land (issues, stars, releases, discussions come along).</li>
+<li class="todo"><span class="box" aria-hidden="true"></span>Enable Pages on the new repo; check <code>nimib.land/&lt;repo&gt;/</code> works.</li>
+<li class="todo"><span class="box" aria-hidden="true"></span>Move or recreate repo secrets.</li>
+</ul>
+<p><strong>After the transfer</strong></p>
+<ul>
+<li class="todo"><span class="box" aria-hidden="true"></span>PR to nim-lang/packages updating <code>url</code>/<code>web</code> for nimib and nimibook. While at it, fix <code>nimiSlides</code> which still points at the old <code>HugoGranstrom/nimib-reveal</code> name.</li>
+<li class="todo"><span class="box" aria-hidden="true"></span>Update Plausible site domains.</li>
+<li class="todo"><span class="box" aria-hidden="true"></span>Update links in dependents you control (nimiSlides docs, nimibex, nblog, adventofnim) and the README "showcase" lists.</li>
+<li class="todo"><span class="box" aria-hidden="true"></span>Update the org profile README and nimib-land.github.io landing page; close nimib #137.</li>
+<li class="todo"><span class="box" aria-hidden="true"></span>Optional: enable org-level Discussions (one of the original goals) and post an announcement on the forum.</li>
+</ul>
+<p><strong>Not moving (suggested):</strong> adventofnim (personal), nimconf talk repos, p5nim and paramidib unless you want them as nimibex members. <strong>Hugo's call:</strong> nimiSlides and the nimiBoost Marketplace publisher (<code>hugogranstrom</code>), which can only publish from his account unless a new org publisher is created (which would be a new extension ID).</p>
+<hr />
+<h2 id="4-nimibex">4. nimibex</h2>
+<p><strong>Intent</strong> (discussion #147, Oct 2022; issue #1): one shared repo for extensions too small or too dependency-heavy for core: Mermaid, Plotly, Vega-Lite, the Juxtapose before/after slider, Karax widgets, jsplot, a quiz block, paramidib, and moving <code>nbPython</code> out of nimib. Design went back and forth (monorepo with sub-packages and an installer, Atlas, copy-paste microlibraries) until <strong>Hugo settled it in Jan 2026: one package, one module per block</strong> (<code>import nimibex/chat_bubbles</code>).</p>
+<p><strong>What exists:</strong> one extension, <code>chat_bubbles</code> (a <code>newNbBlock … of NbContainer</code> block with a character type), a nimibook docs site at nimib.land/nimibex, API docs, and the best CI scaffolding in the ecosystem (docs on gh-pages, PR previews without secrets). No unit tests, no release tag, not in the nimble registry.</p>
+<p><strong>Backlog:</strong> issues #2–#10 are porting jobs; most prototypes already exist as nblog drafts written against nimib 0.3. #11 (chat elements) is done but open; #1 is decided but open. Third-party extensions (nimitheme, nimipdf) use the GitHub topic <code>nimibex-extension</code>.</p>
+<p><strong>Suggested next steps:</strong> close #1 and #11; add one real test per block (render a tiny doc, assert on HTML); tag v0.1.0 and register in nim-lang/packages; port diagrams (Mermaid syntax, Pele or Mermaid as renderer, see below; also wanted by nimibook #88) and plotly next as they have the most demand; decide whether nbPython actually leaves core (a breaking change for nimib).</p>
+<h3 id="diagrams-mermaid-or-pele">Diagrams: Mermaid or Pele?</h3>
+<p>The nimibex backlog (#4) and nblog's <code>drafts/mermaid_diagram.nim</code> assume Mermaid.js. Since 2026-10-17 there is an alternative: <a href="https://github.com/obsidianmd/pele">Pele</a> (<a href="https://pele.run/">pele.run</a>), by kepano (Steph Ango, Obsidian's CEO), MIT, zero dependencies. It reads Mermaid 12.1.0 syntax and renders SVG with its own layout engine; Obsidian's next release switches to it. Facts below are from Pele's own docs and the npm registry; I could not run it in this sandbox.</p>
+<p><strong>For Pele</strong></p>
+<ul>
+<li><strong>Same input.</strong> Users keep writing Mermaid text (all built-in diagram types, frontmatter, <code>%%{init}%%</code>), so the nimib block API is the same whichever renderer is behind it. Switching is a one-line change.</li>
+<li><strong>Small and fast.</strong> ~230 kB gzipped vs ~1.6 MB for mermaid.js, 0 vs 23 dependencies, 100–500× faster per diagram (self-reported). nimib pages load everything from CDN, so size matters on mobile.</li>
+<li><strong>Theming by CSS variables</strong> (<code>--pele-bg</code>, <code>--pele-fg</code>, <code>--pele-accent</code>, <code>--pele-font</code>). Dark mode is a media query; nimitheme and the nimib default theme can style diagrams without touching the renderer. Mermaid needs <code>themeVariables</code> in the init call and a re-render.</li>
+<li><strong>Build-time rendering.</strong> <code>render()</code> is synchronous plain JavaScript and runs in Node without a DOM, so a nimib block could call it once at build time and inline a static SVG: no JavaScript in the page, works in nimibook, in RSS readers, in the SSG and in PDF export. Mermaid needs a browser (Playwright) for that.</li>
+<li><strong>Responsive</strong>: a wide flowchart re-lays out vertically on phones instead of shrinking.</li>
+<li><strong>Safer by design</strong>: SVG text labels only, a sanitizer hook, size and edge limits. kepano cites Mermaid's CVE history as his main motivation.</li>
+</ul>
+<p><strong>Against Pele (today)</strong></p>
+<ul>
+<li><strong>Eleven days old</strong> and moving fast: 1.6.0 on 2026-10-17, 1.12.0 on 2026-10-26 (six releases in four days). Pin a version and expect changes.</li>
+<li><strong>Not pixel-compatible.</strong> Own layout, no HTML labels, JavaScript <code>click</code> callbacks ignored, Mermaid themes and <code>themeVariables</code> ignored, external plugins (ZenUML) unsupported, math only with a KaTeX/Temml resolver. A diagram copied from a GitHub README will look different.</li>
+<li><strong>Bus factor.</strong> One author with Obsidian as the driving use case, who is publicly critical of Mermaid's direction (<a href="https://x.com/kepano/status/2111575190081847776">"Mermaid.js has transitioned to [Mermaid Chart] and is losing its original vision"</a>); no reply from the Mermaid maintainers found. Mermaid has a company behind it and is rendered natively by GitHub, GitLab and most docs tools, so it stays the lingua franca.</li>
+<li><strong>Reference docs</strong> are still Mermaid's; Pele has a playground and a compatibility page, which is where differences get reported.</li>
+<li>The jsDelivr bundle the README names (<code>cdn.jsdelivr.net/npm/pele@1/dist/pele.global.js</code>) could not be fetched from this sandbox, so the CDN path is unverified.</li>
+</ul>
+<p><strong>Suggestion.</strong> Build the nimibex block around Mermaid <em>syntax</em>, not around a renderer: <code>nbDiagram</code> with a <code>renderer</code> option defaulting to Pele (client-side <code>mount()</code> from jsDelivr, pinned to a major) and Mermaid as the fallback for the gaps above. Later add a build-time mode that inlines SVG when <code>node</code> is on the path, which is the mode nimibook and the SSG want. The nblog draft's <code>useMermaid</code>/<code>nbDiagram</code> names can become <code>useDiagrams</code>/<code>nbDiagram</code>. Revisit the default after Pele has a few months of releases.</p>
+<hr />
+<h2 id="5-nblog-and-the-ssg">5. nblog and the SSG</h2>
+<p><strong>The plan.</strong> Oct 2022: "I do plan to work on a site generator with nimib with main use case blogs (and this blog will move there)" (nblog #12). The Feb 2023 "This Month with Nim" post and discussion #162 put an SSG in 2023H1: render each doc to JSON, then JSON to HTML, with nimibook refactored onto it later (nimibook #65).</p>
+<p><strong>What was built.</strong> nblog draft PR #16 "implementing Basic theme" (branch <code>basic-theme</code>, 18 commits):</p>
+<ul>
+<li><code>posts/</code> → <code>docs/</code> layout, <code>templates/</code></li>
+<li><code>src/nblog.nim</code>: <code>useNblog</code> theme, <code>title</code>, <code>subtitle</code>, <code>pubDate</code>, hand-written jsony hooks to dump/load a doc, <code>nbSaveJson</code>, <code>nbJsonToHtml</code></li>
+<li>an <code>nblog init / build [--json]</code> CLI (climate)</li>
+<li>two posts converted (city_in_a_bottle, arraymancer_tutorial)</li>
+</ul>
+<p><strong>What's missing</strong> (nblog #5 checklist and PR #16 todo): index page built from the collected JSON, about page, redirects from <code>drafts/</code>, deploy workflow, tags, RSS (nimib #49), front matter (nimib #30), SEO title/description.</p>
+<p><strong>Why it stalled.</strong> The JSON round trip needed real block objects; nbJs blocks in particular didn't survive it. That needed the NbBlock refactor, which took until nimib 0.4.0 (May 2026). Its changelog names "a static site generator built with Nimib" as a motivation for the new JSON backend. Hugo's 2024 nblog post on jsony OOP serialization was groundwork for this.</p>
+<p><strong>Competition and demand.</strong> dlesnoff asked for a blog-oriented nimib tool (forum t/13751, Feb 2026). moigagoo, the most active nimibook user, wants site-wide search and Markdown-first authoring, and in mid-2026 added a Markdown-book mode to <code>nim doc</code> instead (t/14008). A nimib SSG's edge is executed, compile-checked content and JS interactivity; plain Markdown sites now have a stdlib option.</p>
+<p><strong>Suggested restart</strong> (small, shippable in steps):</p>
+<ol>
+<li>A library module (in nblog <code>src/</code> or nimibex) on top of nimib 0.4: <code>buildSite(srcDir, outDir)</code> that runs each post with <code>nim r … --nbJson</code>-style output, loads JSON, renders with a site theme.</li>
+<li>Index page + post metadata (title, date, tags) stored in the doc JSON.</li>
+<li>Port the 25 nblog drafts to 0.4 (or freeze the old HTML and only build new posts), add redirects from <code>drafts/</code>, a deploy workflow, RSS.</li>
+<li>Then consider nimibook #65 (nimibook on the same core) and site-wide search (which benefits both).</li>
+</ol>
+<p>Dependency in nimib: issue #245 (compile a doc to a string instead of a file) is the API an SSG wants; worth adding to core.</p>
+<hr />
+<h2 id="6-what-managing-nimib-involves-recurring-work">6. What managing nimib involves (recurring work)</h2>
+<div class="tw"><table>
+<thead>
+<tr>
+<th>Area</th>
+<th>Today</th>
+<th>What would help</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><strong>Releases</strong></td>
+<td>Manual: squash-merge, bump <code>nimib.nimble</code> and <code>nimibVersion</code>, changelog, tag, auto release notes, optional discussion post. No announcement for 0.4.3.</td>
+<td>A release checklist file or skill; a CI check that the tag matches the nimble version.</td>
+</tr>
+<tr>
+<td><strong>CI</strong></td>
+<td>3 different preview setups (Netlify ×2, gh-pages); old action versions (checkout@v2, peaceiris@v3); libpcre3 dependency forces ubuntu-24.04.</td>
+<td>Unify on the nimibex preview workflow; bump actions; <code>workflow_dispatch</code> (#228). The libpcre3 dependency comes from nim-markdown's <code>std/re</code>; worth tracking upstream before 24.04 ages out.</td>
+</tr>
+<tr>
+<td><strong>Docs</strong></td>
+<td>README generated from <code>docsrc/index.nim</code> but hand-edited (#141); API/Rendering/CONTRIBUTING text describes pre-0.4.</td>
+<td>Fix #141; rewrite the "how it works" and "add a block" docs for 0.4 (also closes #223).</td>
+</tr>
+<tr>
+<td><strong>Registry</strong></td>
+<td>nimib, nimibook, nimiSlides point at personal repos; nimibex not registered.</td>
+<td>Update after the move.</td>
+</tr>
+<tr>
+<td><strong>Issue hygiene</strong></td>
+<td>60 + 23 + 18 + 14 open, mostly 2021–2023.</td>
+<td>One triage pass (list in §7), then a label for "good first issue" that is actually current.</td>
+</tr>
+<tr>
+<td><strong>Community</strong></td>
+<td>Monthly speaking hours Oct 2022–Apr 2024, none since; forum announcements for 0.3, 0.4.0, 0.4.2.</td>
+<td>Decide whether to resume; announce 0.4.3 + docs.</td>
+</tr>
+<tr>
+<td><strong>Ecosystem compatibility</strong></td>
+<td>nblog, adventofnim, nimib.py, explorables deck are on 0.3 and won't rebuild on 0.4.</td>
+<td>Port nblog with the SSG; leave the rest frozen or archive.</td>
+</tr>
+<tr>
+<td><strong>AI</strong></td>
+<td>Claude already used for #260–#263; no AGENTS.md; no skills.</td>
+<td>AGENTS.md per repo (build/test recipe, conventions); skills tested against real builds (see §8).</td>
+</tr>
+</tbody>
+</table></div>
+<hr />
+<h2 id="7-housekeeping-list-low-risk-each-a-few-minutes">7. Housekeeping list (low risk, each a few minutes)</h2>
+<p><strong>nimib:</strong> close #168, #102, #111 (done by #235), #62 (fixed by vendored pathutils in 0.4.2), probably #28 (nbRawHtml); re-check #117, #134, #166, #33 against 0.4; close or rebase PR #177 (superseded by NbContainer); PRs #220 and #210 need porting to 0.4; close milestone 2023H1 and retire <code>2023H1</code>/<code>2023H2</code> labels; delete ~23 stale branches.
+<strong>nimibook:</strong> close #93 (CI green); file the site-wide search request from t/13944; relabel #65 once the SSG plan is set.
+<strong>nimibex:</strong> close #1, #11.
+<strong>nblog:</strong> close #9 (slider post exists), #20 (answered by serialize_oop post); fix the Plausible domain in <code>head_other.mustache</code>.
+<strong>nimiBoost:</strong> <code>package.json</code> repository still points at <code>HugoGranstrom/nimiBoost</code>.
+<strong>nimib.py, nimibland-for-explorables, groviglio, redirect-pages:</strong> decide archive vs. keep. nimib.py's "uvx nimib" vision seems to have moved to <code>nobe</code> / <code>uv-add-nimlang</code>.</p>
+<p>I'm happy to do any of these; closing issues is visible to watchers, so I'd want your go-ahead.</p>
+<hr />
+<h2 id="8-ai-and-nimib-skills-handed-to-the-skills-thread">8. AI and nimib skills (handed to the skills thread)</h2>
+<ul>
+<li>No nimib skill exists anywhere; models know nimib 0.3 (mustache partials, <code>newNbSlimBlock</code>, <code>nb.blk.context</code>) and the live docs still teach it.</li>
+<li>Prior art worth copying: planetis's verified Nim skills (forum t/14221, github.com/planetis-m/skills). Every claim in a skill is backed by a program the compiler runs, agents are benchmarked on unseen tasks with and without the skill, and everything is re-run on each compiler release. The nim-code plugin (t/14033) got pushback for shipping without evidence. The Nim community will judge nimib skills by tests.</li>
+<li>A working sandbox recipe exists: <code>pip install nimlang</code> (Nim 2.2.6 from PyPI), clone fusion/nim-markdown/parsetoml/jsony and pass <code>--path</code>, <code>apt install libpcre3</code>. The full nimib suite runs in ~3 minutes with no nimble.</li>
+<li>Candidate skills: writing a nimib doc; custom blocks and containers in 0.4; migrating a 0.3 custom block; nimibook setup and CI deploy; nimiSlides decks; maintainer workflows (release, registry, org move).</li>
+</ul>
+<hr />
+<h2 id="9-prioritized-action-plan">9. Prioritized action plan</h2>
+<p><strong>Now (this week, low risk)</strong></p>
+<ol>
+<li><s><a href="https://github.com/pietroppeter/nimib/pull/263">nimib#263</a></s> merged 2026-10-28, docs for 0.4.3 deployed.</li>
+<li>Fix #141 (README drift) and rewrite the 0.4 "how it works / add a block" docs.</li>
+<li>Triage pass from §7.</li>
+<li>Add AGENTS.md to nimib, nimibook, nimibex.</li>
+</ol>
+<p><strong>Next (the move)</strong></p>
+<ol start="5">
+<li>Create the <code>pietroppeter.github.io</code> user site with redirects for nblog; confirm <code>pietroppeter.github.io/nblog/drafts/plant_app.html</code> redirects. Closes nblog #19.</li>
+<li>Move nimibook (fewer inbound links), following §3. Then nimib. Then ask Hugo about nimiSlides.</li>
+<li>Registry PR; landing page at nimib.land listing the ecosystem; close #137.</li>
+</ol>
+<p><strong>Then (building)</strong></p>
+<ol start="8">
+<li>SSG restart on 0.4 JSON with nblog as first site (§5).</li>
+<li>nimibex: tests, v0.1.0 tag and registration, diagram (Pele/Mermaid) and plotly ports.</li>
+<li>nimibook site-wide search.</li>
+<li>Skills with evals, re-run on each nimib release.</li>
+</ol>
+<h2 id="10-decisions-for-you">10. Decisions for you</h2>
+<ul>
+<li><strong>Redirect strategy:</strong> user-site redirects (recommended) vs. recreating repos at the old names (breaks GitHub's repo redirects).</li>
+<li><strong>Order and timing</strong> of nimibook and nimib transfers, and whether to ask Hugo to move nimiSlides.</li>
+<li><strong>SSG home:</strong> nblog <code>src/</code>, a nimibex module, or a new repo.</li>
+<li><strong>nbPython:</strong> move to nimibex (breaking) or keep in core.</li>
+<li><strong>Diagram renderer:</strong> Pele by default with Mermaid fallback (suggested), or Mermaid only until Pele settles.</li>
+<li><strong>Archive</strong> nimib.py, nimibland-for-explorables, groviglio?</li>
+<li><strong>Speaking hours:</strong> resume or retire.</li>
+</ul></main>
+</div>
+</body>
+</html>
