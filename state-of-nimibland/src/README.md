@@ -1,0 +1,1 @@
+Source of the State of NimibLand report. `report.md` is the markdown version of the same content as `../index.html`, written from research in the Nimib Land Claude project on 2026-10-28. The page was hand-converted from it; there is no build script.
