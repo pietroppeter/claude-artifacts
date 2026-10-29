@@ -63,17 +63,17 @@ main > h2:first-child{margin-top:0}
 <p>nimib is in better shape than its repos suggest. Hugo shipped the long-awaited block refactor as <strong>v0.4.0 (2026-05-29)</strong>, followed by 0.4.1–0.4.3 (the last on 2026-10-27). nimibook and nimiSlides are ported to 0.4, and nimibex finally has a working extension (Chat Bubbles, July–Aug 2026). Tests pass (66/66 on Nim 2.2.6, both code-capture modes).</p>
 <p>What is behind is everything around the code:</p>
 <ul>
-<li><strong>The move to nimib-land is about a third done.</strong> nblog, nimiBoost and nimibex live in the org; <strong>nimib, nimibook and nimiSlides do not</strong>. nimib #137 ("moving to nimib organization", 2023H1 milestone) is still open.</li>
+<li><strong>The move to nimib-land is about a third done.</strong> nblog, nimiBoost and nimibex live in the org; <strong>nimib, nimibook and nimiSlides do not</strong>. nimib <a href="https://github.com/pietroppeter/nimib/issues/137">#137</a> ("moving to nimib organization", 2023H1 milestone) is still open.</li>
 <li><strong>The public docs were stale until today.</strong> The nimib docs deploy had failed since 0.4.2, so pietroppeter.github.io/nimib stopped at 0.4.1. <a href="https://github.com/pietroppeter/nimib/pull/263">nimib#263</a> fixed it, was merged on 2026-10-28 and the first deploy after it is green, so the 0.4.3 docs are live. The prose still describes the mustache-era API.</li>
-<li><strong>Old links are already broken.</strong> <code>pietroppeter.github.io/nblog/...</code> returns 404 since nblog moved (nblog #19). Moving nimib and nimibook the same way would break <code>pietroppeter.github.io/nimib</code> (linked in the footer of every page nimib has ever generated) and <code>/nimibook</code>.</li>
-<li><strong>The SSG was started and stalled, and its blocker is now gone.</strong> nblog draft PR #16 (Feb–Mar 2023) built nim → json → html for blog posts but needed blocks that survive a JSON round trip. nimib 0.4 now has exactly that.</li>
+<li><strong>Old links are already broken.</strong> <code>pietroppeter.github.io/nblog/...</code> returns 404 since nblog moved (nblog <a href="https://github.com/nimib-land/nblog/issues/19">#19</a>). Moving nimib and nimibook the same way would break <code>pietroppeter.github.io/nimib</code> (linked in the footer of every page nimib has ever generated) and <code>/nimibook</code>.</li>
+<li><strong>The SSG was started and stalled, and its blocker is now gone.</strong> nblog draft PR <a href="https://github.com/nimib-land/nblog/issues/16">#16</a> (Feb–Mar 2023) built nim → json → html for blog posts but needed blocks that survive a JSON round trip. nimib 0.4 now has exactly that.</li>
 <li><strong>The issue trackers are frozen in 2023–2024.</strong> nimib has 60 open issues, none touched since mid-2024; several are done by 0.4. The <code>2023H1/2023H2</code> labels and milestone are leftovers.</li>
 <li><strong>No AI tooling exists yet</strong> (no AGENTS.md / CLAUDE.md, no nimib skill anywhere). Models will default to the pre-0.4 API, which the stale docs reinforce.</li>
 </ul>
 <p><strong>Top five actions</strong>, in order:</p>
 <ol>
-<li>Docs deploy is fixed (#263 merged, deploy green). Next: fix the README/index.nim drift (#141) and rewrite the pre-0.4 API text.</li>
-<li>Pilot the redirect approach on nblog (fix nblog #19), then use it to move nimibook, then nimib.</li>
+<li>Docs deploy is fixed (<a href="https://github.com/pietroppeter/nimib/issues/263">#263</a> merged, deploy green). Next: fix the README/index.nim drift (<a href="https://github.com/pietroppeter/nimib/issues/141">#141</a>) and rewrite the pre-0.4 API text.</li>
+<li>Pilot the redirect approach on nblog (fix nblog <a href="https://github.com/nimib-land/nblog/issues/19">#19</a>), then use it to move nimibook, then nimib.</li>
 <li>Triage: close the ~12 issues that are done, retire dated labels/milestones, delete stale branches.</li>
 <li>Restart the SSG as a small library on top of the 0.4 JSON backend, with nblog as first user.</li>
 <li>Add AGENTS.md files and a tested nimib skill set (the "Build and test Nimib skills" thread is on this).</li>
@@ -98,9 +98,9 @@ main > h2:first-child{margin-top:0}
 <td>pietroppeter</td>
 <td>0.4.3</td>
 <td>2026-10-27</td>
-<td>tests <span class="ok">ok</span>, netlify previews <span class="ok">ok</span>, docs <span class="ok">ok</span> (fixed by #263 on 2026-10-28)</td>
+<td>tests <span class="ok">ok</span>, netlify previews <span class="ok">ok</span>, docs <span class="ok">ok</span> (fixed by <a href="https://github.com/pietroppeter/nimib/issues/263">#263</a> on 2026-10-28)</td>
 <td>pietroppeter.github.io/nimib (deployed 2026-10-28)</td>
-<td>60 / 3 (+#263)</td>
+<td>60 / 3 (+<a href="https://github.com/pietroppeter/nimib/issues/263">#263</a>)</td>
 </tr>
 <tr>
 <td><strong>nimibook</strong></td>
@@ -136,7 +136,7 @@ main > h2:first-child{margin-top:0}
 <td>2024-05-01</td>
 <td>none</td>
 <td>nimib.land/nblog (old URLs 404)</td>
-<td>18 / 1 (draft SSG PR #16)</td>
+<td>18 / 1 (draft SSG PR <a href="https://github.com/nimib-land/nblog/issues/16">#16</a>)</td>
 </tr>
 <tr>
 <td><strong>nimiBoost</strong> (VS Code)</td>
@@ -264,12 +264,12 @@ main > h2:first-child{margin-top:0}
 <h3>What's done</h3>
 <ul>
 <li>Org created 2023-01-29 as <code>nimib-org</code>, renamed <code>nimib-land</code> by April 2023 (github.com/nimib-org now 404s, still linked from the Feb 2023 Nim blog post).</li>
-<li>Moved: nblog and nimiBoost (Nov 2023, discussion #221), nimibex (created there). New repos created there since.</li>
+<li>Moved: nblog and nimiBoost (Nov 2023, discussion <a href="https://github.com/pietroppeter/nimib/discussions/221">#221</a>), nimibex (created there). New repos created there since.</li>
 <li>Custom domain <strong>nimib.land</strong> on the org Pages repo, so every org project site is served at <code>nimib.land/&lt;repo&gt;/</code>. After the move, nimib docs become <code>nimib.land/nimib/</code> and nimibook <code>nimib.land/nimibook/</code>.</li>
 </ul>
 <h3>The lesson from nblog</h3>
-<p>GitHub redirects git and web URLs for a transferred repo, but <strong>not GitHub Pages URLs</strong>. The proposed fix in #221 was to recreate <code>pietroppeter/nblog</code> holding redirect pages. That has a catch: <strong>creating any repo at the old name cancels GitHub's repo redirect</strong> (git clones, issue links, jsDelivr <code>gh/</code> URLs, nimble lock files that pin the old URL).</p>
-<p><strong>Recommended approach (to verify on nblog first):</strong> put the redirect pages in a <em>user site</em> repo, <code>pietroppeter/pietroppeter.github.io</code>, under folders <code>nblog/</code>, <code>nimib/</code>, <code>nimibook/</code>. A user site serves any path that no project site claims, so after a transfer <code>pietroppeter.github.io/nimib/...</code> would fall through to these redirect pages while <code>github.com/pietroppeter/nimib</code> keeps redirecting to the org. I found no such repo today. One condition: the user site must not set a custom domain, or project URLs would start redirecting to it. This is cheap and reversible, so nblog #19 is the ideal pilot.</p>
+<p>GitHub redirects git and web URLs for a transferred repo, but <strong>not GitHub Pages URLs</strong>. The proposed fix in <a href="https://github.com/pietroppeter/nimib/discussions/221">#221</a> was to recreate <code>pietroppeter/nblog</code> holding redirect pages. That has a catch: <strong>creating any repo at the old name cancels GitHub's repo redirect</strong> (git clones, issue links, jsDelivr <code>gh/</code> URLs, nimble lock files that pin the old URL).</p>
+<p><strong>Recommended approach (to verify on nblog first):</strong> put the redirect pages in a <em>user site</em> repo, <code>pietroppeter/pietroppeter.github.io</code>, under folders <code>nblog/</code>, <code>nimib/</code>, <code>nimibook/</code>. A user site serves any path that no project site claims, so after a transfer <code>pietroppeter.github.io/nimib/...</code> would fall through to these redirect pages while <code>github.com/pietroppeter/nimib</code> keeps redirecting to the org. I found no such repo today. One condition: the user site must not set a custom domain, or project URLs would start redirecting to it. This is cheap and reversible, so nblog <a href="https://github.com/nimib-land/nblog/issues/19">#19</a> is the ideal pilot.</p>
 <h3>Checklist per repo (nimibook first, then nimib)</h3>
 <p><strong>Before the transfer</strong></p>
 <ul>
@@ -296,18 +296,18 @@ main > h2:first-child{margin-top:0}
 <li class="todo"><span class="box" aria-hidden="true"></span>PR to nim-lang/packages updating <code>url</code>/<code>web</code> for nimib and nimibook. While at it, fix <code>nimiSlides</code> which still points at the old <code>HugoGranstrom/nimib-reveal</code> name.</li>
 <li class="todo"><span class="box" aria-hidden="true"></span>Update Plausible site domains.</li>
 <li class="todo"><span class="box" aria-hidden="true"></span>Update links in dependents you control (nimiSlides docs, nimibex, nblog, adventofnim) and the README "showcase" lists.</li>
-<li class="todo"><span class="box" aria-hidden="true"></span>Update the org profile README and nimib-land.github.io landing page; close nimib #137.</li>
+<li class="todo"><span class="box" aria-hidden="true"></span>Update the org profile README and nimib-land.github.io landing page; close nimib <a href="https://github.com/pietroppeter/nimib/issues/137">#137</a>.</li>
 <li class="todo"><span class="box" aria-hidden="true"></span>Optional: enable org-level Discussions (one of the original goals) and post an announcement on the forum.</li>
 </ul>
 <p><strong>Not moving (suggested):</strong> adventofnim (personal), nimconf talk repos, p5nim and paramidib unless you want them as nimibex members. <strong>Hugo's call:</strong> nimiSlides and the nimiBoost Marketplace publisher (<code>hugogranstrom</code>), which can only publish from his account unless a new org publisher is created (which would be a new extension ID).</p>
 <hr />
 <h2 id="4-nimibex">4. nimibex</h2>
-<p><strong>Intent</strong> (discussion #147, Oct 2022; issue #1): one shared repo for extensions too small or too dependency-heavy for core: Mermaid, Plotly, Vega-Lite, the Juxtapose before/after slider, Karax widgets, jsplot, a quiz block, paramidib, and moving <code>nbPython</code> out of nimib. Design went back and forth (monorepo with sub-packages and an installer, Atlas, copy-paste microlibraries) until <strong>Hugo settled it in Jan 2026: one package, one module per block</strong> (<code>import nimibex/chat_bubbles</code>).</p>
+<p><strong>Intent</strong> (discussion <a href="https://github.com/pietroppeter/nimib/discussions/147">#147</a>, Oct 2022; issue <a href="https://github.com/nimib-land/nimibex/issues/1">#1</a>): one shared repo for extensions too small or too dependency-heavy for core: Mermaid, Plotly, Vega-Lite, the Juxtapose before/after slider, Karax widgets, jsplot, a quiz block, paramidib, and moving <code>nbPython</code> out of nimib. Design went back and forth (monorepo with sub-packages and an installer, Atlas, copy-paste microlibraries) until <strong>Hugo settled it in Jan 2026: one package, one module per block</strong> (<code>import nimibex/chat_bubbles</code>).</p>
 <p><strong>What exists:</strong> one extension, <code>chat_bubbles</code> (a <code>newNbBlock … of NbContainer</code> block with a character type), a nimibook docs site at nimib.land/nimibex, API docs, and the best CI scaffolding in the ecosystem (docs on gh-pages, PR previews without secrets). No unit tests, no release tag, not in the nimble registry.</p>
-<p><strong>Backlog:</strong> issues #2–#10 are porting jobs; most prototypes already exist as nblog drafts written against nimib 0.3. #11 (chat elements) is done but open; #1 is decided but open. Third-party extensions (nimitheme, nimipdf) use the GitHub topic <code>nimibex-extension</code>.</p>
-<p><strong>Suggested next steps:</strong> close #1 and #11; add one real test per block (render a tiny doc, assert on HTML); tag v0.1.0 and register in nim-lang/packages; port diagrams (Mermaid syntax, Pele or Mermaid as renderer, see below; also wanted by nimibook #88) and plotly next as they have the most demand; decide whether nbPython actually leaves core (a breaking change for nimib).</p>
+<p><strong>Backlog:</strong> issues <a href="https://github.com/nimib-land/nimibex/issues/2">#2</a>–<a href="https://github.com/nimib-land/nimibex/issues/10">#10</a> are porting jobs; most prototypes already exist as nblog drafts written against nimib 0.3. <a href="https://github.com/nimib-land/nimibex/issues/11">#11</a> (chat elements) is done but open; <a href="https://github.com/nimib-land/nimibex/issues/1">#1</a> is decided but open. Third-party extensions (nimitheme, nimipdf) use the GitHub topic <code>nimibex-extension</code>.</p>
+<p><strong>Suggested next steps:</strong> close <a href="https://github.com/nimib-land/nimibex/issues/1">#1</a> and <a href="https://github.com/nimib-land/nimibex/issues/11">#11</a>; add one real test per block (render a tiny doc, assert on HTML); tag v0.1.0 and register in nim-lang/packages; port diagrams (Mermaid syntax, Pele or Mermaid as renderer, see below; also wanted by nimibook <a href="https://github.com/pietroppeter/nimibook/issues/88">#88</a>) and plotly next as they have the most demand; decide whether nbPython actually leaves core (a breaking change for nimib).</p>
 <h3 id="diagrams-mermaid-or-pele">Diagrams: Mermaid or Pele?</h3>
-<p>The nimibex backlog (#4) and nblog's <code>drafts/mermaid_diagram.nim</code> assume Mermaid.js. Since 2026-10-17 there is an alternative: <a href="https://github.com/obsidianmd/pele">Pele</a> (<a href="https://pele.run/">pele.run</a>), by kepano (Steph Ango, Obsidian's CEO), MIT, zero dependencies. It reads Mermaid 12.1.0 syntax and renders SVG with its own layout engine; Obsidian's next release switches to it. Facts below are from Pele's own docs and the npm registry; I could not run it in this sandbox.</p>
+<p>The nimibex backlog (<a href="https://github.com/nimib-land/nimibex/issues/4">#4</a>) and nblog's <code>drafts/mermaid_diagram.nim</code> assume Mermaid.js. Since 2026-10-17 there is an alternative: <a href="https://github.com/obsidianmd/pele">Pele</a> (<a href="https://pele.run/">pele.run</a>), by kepano (Steph Ango, Obsidian's CEO), MIT, zero dependencies. It reads Mermaid 12.1.0 syntax and renders SVG with its own layout engine; Obsidian's next release switches to it. Facts below are from Pele's own docs and the npm registry; I could not run it in this sandbox.</p>
 <p><strong>For Pele</strong></p>
 <ul>
 <li><strong>Same input.</strong> Users keep writing Mermaid text (all built-in diagram types, frontmatter, <code>%%{init}%%</code>), so the nimib block API is the same whichever renderer is behind it. Switching is a one-line change.</li>
@@ -328,25 +328,25 @@ main > h2:first-child{margin-top:0}
 <p><strong>Suggestion.</strong> Build the nimibex block around Mermaid <em>syntax</em>, not around a renderer: <code>nbDiagram</code> with a <code>renderer</code> option defaulting to Pele (client-side <code>mount()</code> from jsDelivr, pinned to a major) and Mermaid as the fallback for the gaps above. Later add a build-time mode that inlines SVG when <code>node</code> is on the path, which is the mode nimibook and the SSG want. The nblog draft's <code>useMermaid</code>/<code>nbDiagram</code> names can become <code>useDiagrams</code>/<code>nbDiagram</code>. Revisit the default after Pele has a few months of releases.</p>
 <hr />
 <h2 id="5-nblog-and-the-ssg">5. nblog and the SSG</h2>
-<p><strong>The plan.</strong> Oct 2022: "I do plan to work on a site generator with nimib with main use case blogs (and this blog will move there)" (nblog #12). The Feb 2023 "This Month with Nim" post and discussion #162 put an SSG in 2023H1: render each doc to JSON, then JSON to HTML, with nimibook refactored onto it later (nimibook #65).</p>
-<p><strong>What was built.</strong> nblog draft PR #16 "implementing Basic theme" (branch <code>basic-theme</code>, 18 commits):</p>
+<p><strong>The plan.</strong> Oct 2022: "I do plan to work on a site generator with nimib with main use case blogs (and this blog will move there)" (nblog <a href="https://github.com/nimib-land/nblog/issues/12">#12</a>). The Feb 2023 "This Month with Nim" post and discussion <a href="https://github.com/pietroppeter/nimib/discussions/162">#162</a> put an SSG in 2023H1: render each doc to JSON, then JSON to HTML, with nimibook refactored onto it later (nimibook <a href="https://github.com/pietroppeter/nimibook/issues/65">#65</a>).</p>
+<p><strong>What was built.</strong> nblog draft PR <a href="https://github.com/nimib-land/nblog/issues/16">#16</a> "implementing Basic theme" (branch <code>basic-theme</code>, 18 commits):</p>
 <ul>
 <li><code>posts/</code> → <code>docs/</code> layout, <code>templates/</code></li>
 <li><code>src/nblog.nim</code>: <code>useNblog</code> theme, <code>title</code>, <code>subtitle</code>, <code>pubDate</code>, hand-written jsony hooks to dump/load a doc, <code>nbSaveJson</code>, <code>nbJsonToHtml</code></li>
 <li>an <code>nblog init / build [--json]</code> CLI (climate)</li>
 <li>two posts converted (city_in_a_bottle, arraymancer_tutorial)</li>
 </ul>
-<p><strong>What's missing</strong> (nblog #5 checklist and PR #16 todo): index page built from the collected JSON, about page, redirects from <code>drafts/</code>, deploy workflow, tags, RSS (nimib #49), front matter (nimib #30), SEO title/description.</p>
+<p><strong>What's missing</strong> (nblog <a href="https://github.com/nimib-land/nblog/issues/5">#5</a> checklist and PR <a href="https://github.com/nimib-land/nblog/issues/16">#16</a> todo): index page built from the collected JSON, about page, redirects from <code>drafts/</code>, deploy workflow, tags, RSS (nimib <a href="https://github.com/pietroppeter/nimib/issues/49">#49</a>), front matter (nimib <a href="https://github.com/pietroppeter/nimib/issues/30">#30</a>), SEO title/description.</p>
 <p><strong>Why it stalled.</strong> The JSON round trip needed real block objects; nbJs blocks in particular didn't survive it. That needed the NbBlock refactor, which took until nimib 0.4.0 (May 2026). Its changelog names "a static site generator built with Nimib" as a motivation for the new JSON backend. Hugo's 2024 nblog post on jsony OOP serialization was groundwork for this.</p>
-<p><strong>Competition and demand.</strong> dlesnoff asked for a blog-oriented nimib tool (forum t/13751, Feb 2026). moigagoo, the most active nimibook user, wants site-wide search and Markdown-first authoring, and in mid-2026 added a Markdown-book mode to <code>nim doc</code> instead (t/14008). A nimib SSG's edge is executed, compile-checked content and JS interactivity; plain Markdown sites now have a stdlib option.</p>
+<p><strong>Competition and demand.</strong> dlesnoff asked for a blog-oriented nimib tool (forum <a href="https://forum.nim-lang.org/t/13751">t/13751</a>, Feb 2026). moigagoo, the most active nimibook user, wants site-wide search and Markdown-first authoring, and in mid-2026 added a Markdown-book mode to <code>nim doc</code> instead (<a href="https://forum.nim-lang.org/t/14008">t/14008</a>). A nimib SSG's edge is executed, compile-checked content and JS interactivity; plain Markdown sites now have a stdlib option.</p>
 <p><strong>Suggested restart</strong> (small, shippable in steps):</p>
 <ol>
 <li>A library module (in nblog <code>src/</code> or nimibex) on top of nimib 0.4: <code>buildSite(srcDir, outDir)</code> that runs each post with <code>nim r … --nbJson</code>-style output, loads JSON, renders with a site theme.</li>
 <li>Index page + post metadata (title, date, tags) stored in the doc JSON.</li>
 <li>Port the 25 nblog drafts to 0.4 (or freeze the old HTML and only build new posts), add redirects from <code>drafts/</code>, a deploy workflow, RSS.</li>
-<li>Then consider nimibook #65 (nimibook on the same core) and site-wide search (which benefits both).</li>
+<li>Then consider nimibook <a href="https://github.com/pietroppeter/nimibook/issues/65">#65</a> (nimibook on the same core) and site-wide search (which benefits both).</li>
 </ol>
-<p>Dependency in nimib: issue #245 (compile a doc to a string instead of a file) is the API an SSG wants; worth adding to core.</p>
+<p>Dependency in nimib: issue <a href="https://github.com/pietroppeter/nimib/issues/245">#245</a> (compile a doc to a string instead of a file) is the API an SSG wants; worth adding to core.</p>
 <hr />
 <h2 id="6-what-managing-nimib-involves-recurring-work">6. What managing nimib involves (recurring work)</h2>
 <div class="tw"><table>
@@ -366,12 +366,12 @@ main > h2:first-child{margin-top:0}
 <tr>
 <td><strong>CI</strong></td>
 <td>3 different preview setups (Netlify ×2, gh-pages); old action versions (checkout@v2, peaceiris@v3); libpcre3 dependency forces ubuntu-24.04.</td>
-<td>Unify on the nimibex preview workflow; bump actions; <code>workflow_dispatch</code> (#228). The libpcre3 dependency comes from nim-markdown's <code>std/re</code>; worth tracking upstream before 24.04 ages out.</td>
+<td>Unify on the nimibex preview workflow; bump actions; <code>workflow_dispatch</code> (<a href="https://github.com/pietroppeter/nimib/issues/228">#228</a>). The libpcre3 dependency comes from nim-markdown's <code>std/re</code>; worth tracking upstream before 24.04 ages out.</td>
 </tr>
 <tr>
 <td><strong>Docs</strong></td>
-<td>README generated from <code>docsrc/index.nim</code> but hand-edited (#141); API/Rendering/CONTRIBUTING text describes pre-0.4.</td>
-<td>Fix #141; rewrite the "how it works" and "add a block" docs for 0.4 (also closes #223).</td>
+<td>README generated from <code>docsrc/index.nim</code> but hand-edited (<a href="https://github.com/pietroppeter/nimib/issues/141">#141</a>); API/Rendering/CONTRIBUTING text describes pre-0.4.</td>
+<td>Fix <a href="https://github.com/pietroppeter/nimib/issues/141">#141</a>; rewrite the "how it works" and "add a block" docs for 0.4 (also closes <a href="https://github.com/pietroppeter/nimib/issues/223">#223</a>).</td>
 </tr>
 <tr>
 <td><strong>Registry</strong></td>
@@ -395,17 +395,17 @@ main > h2:first-child{margin-top:0}
 </tr>
 <tr>
 <td><strong>AI</strong></td>
-<td>Claude already used for #260–#263; no AGENTS.md; no skills.</td>
+<td>Claude already used for <a href="https://github.com/pietroppeter/nimib/issues/260">#260</a>–<a href="https://github.com/pietroppeter/nimib/issues/263">#263</a>; no AGENTS.md; no skills.</td>
 <td>AGENTS.md per repo (build/test recipe, conventions); skills tested against real builds (see §8).</td>
 </tr>
 </tbody>
 </table></div>
 <hr />
 <h2 id="7-housekeeping-list-low-risk-each-a-few-minutes">7. Housekeeping list (low risk, each a few minutes)</h2>
-<p><strong>nimib:</strong> close #168, #102, #111 (done by #235), #62 (fixed by vendored pathutils in 0.4.2), probably #28 (nbRawHtml); re-check #117, #134, #166, #33 against 0.4; close or rebase PR #177 (superseded by NbContainer); PRs #220 and #210 need porting to 0.4; close milestone 2023H1 and retire <code>2023H1</code>/<code>2023H2</code> labels; delete ~23 stale branches.
-<strong>nimibook:</strong> close #93 (CI green); file the site-wide search request from t/13944; relabel #65 once the SSG plan is set.
-<strong>nimibex:</strong> close #1, #11.
-<strong>nblog:</strong> close #9 (slider post exists), #20 (answered by serialize_oop post); fix the Plausible domain in <code>head_other.mustache</code>.
+<p><strong>nimib:</strong> close <a href="https://github.com/nimib-land/nblog/issues/168">#168</a>, <a href="https://github.com/pietroppeter/nimib/issues/102">#102</a>, <a href="https://github.com/pietroppeter/nimib/issues/111">#111</a> (done by <a href="https://github.com/pietroppeter/nimib/issues/235">#235</a>), <a href="https://github.com/pietroppeter/nimib/issues/62">#62</a> (fixed by vendored pathutils in 0.4.2), probably <a href="https://github.com/pietroppeter/nimib/issues/28">#28</a> (nbRawHtml); re-check <a href="https://github.com/pietroppeter/nimib/issues/117">#117</a>, <a href="https://github.com/pietroppeter/nimib/issues/134">#134</a>, <a href="https://github.com/nimib-land/nblog/issues/166">#166</a>, <a href="https://github.com/pietroppeter/nimib/issues/33">#33</a> against 0.4; close or rebase PR <a href="https://github.com/pietroppeter/nimib/issues/177">#177</a> (superseded by NbContainer); PRs <a href="https://github.com/pietroppeter/nimib/issues/220">#220</a> and <a href="https://github.com/pietroppeter/nimib/issues/210">#210</a> need porting to 0.4; close milestone 2023H1 and retire <code>2023H1</code>/<code>2023H2</code> labels; delete ~23 stale branches.
+<strong>nimibook:</strong> close <a href="https://github.com/pietroppeter/nimibook/issues/93">#93</a> (CI green); file the site-wide search request from <a href="https://forum.nim-lang.org/t/13944">t/13944</a>; relabel <a href="https://github.com/pietroppeter/nimibook/issues/65">#65</a> once the SSG plan is set.
+<strong>nimibex:</strong> close <a href="https://github.com/nimib-land/nimibex/issues/1">#1</a>, <a href="https://github.com/nimib-land/nimibex/issues/11">#11</a>.
+<strong>nblog:</strong> close <a href="https://github.com/nimib-land/nblog/issues/9">#9</a> (slider post exists), <a href="https://github.com/nimib-land/nblog/issues/20">#20</a> (answered by serialize_oop post); fix the Plausible domain in <code>head_other.mustache</code>.
 <strong>nimiBoost:</strong> <code>package.json</code> repository still points at <code>HugoGranstrom/nimiBoost</code>.
 <strong>nimib.py, nimibland-for-explorables, groviglio, redirect-pages:</strong> decide archive vs. keep. nimib.py's "uvx nimib" vision seems to have moved to <code>nobe</code> / <code>uv-add-nimlang</code>.</p>
 <p>I'm happy to do any of these; closing issues is visible to watchers, so I'd want your go-ahead.</p>
@@ -413,7 +413,7 @@ main > h2:first-child{margin-top:0}
 <h2 id="8-ai-and-nimib-skills-handed-to-the-skills-thread">8. AI and nimib skills (handed to the skills thread)</h2>
 <ul>
 <li>No nimib skill exists anywhere; models know nimib 0.3 (mustache partials, <code>newNbSlimBlock</code>, <code>nb.blk.context</code>) and the live docs still teach it.</li>
-<li>Prior art worth copying: planetis's verified Nim skills (forum t/14221, github.com/planetis-m/skills). Every claim in a skill is backed by a program the compiler runs, agents are benchmarked on unseen tasks with and without the skill, and everything is re-run on each compiler release. The nim-code plugin (t/14033) got pushback for shipping without evidence. The Nim community will judge nimib skills by tests.</li>
+<li>Prior art worth copying: planetis's verified Nim skills (forum <a href="https://forum.nim-lang.org/t/14221">t/14221</a>, github.com/planetis-m/skills). Every claim in a skill is backed by a program the compiler runs, agents are benchmarked on unseen tasks with and without the skill, and everything is re-run on each compiler release. The nim-code plugin (<a href="https://forum.nim-lang.org/t/14033">t/14033</a>) got pushback for shipping without evidence. The Nim community will judge nimib skills by tests.</li>
 <li>A working sandbox recipe exists: <code>pip install nimlang</code> (Nim 2.2.6 from PyPI), clone fusion/nim-markdown/parsetoml/jsony and pass <code>--path</code>, <code>apt install libpcre3</code>. The full nimib suite runs in ~3 minutes with no nimble.</li>
 <li>Candidate skills: writing a nimib doc; custom blocks and containers in 0.4; migrating a 0.3 custom block; nimibook setup and CI deploy; nimiSlides decks; maintainer workflows (release, registry, org move).</li>
 </ul>
@@ -422,15 +422,15 @@ main > h2:first-child{margin-top:0}
 <p><strong>Now (this week, low risk)</strong></p>
 <ol>
 <li><s><a href="https://github.com/pietroppeter/nimib/pull/263">nimib#263</a></s> merged 2026-10-28, docs for 0.4.3 deployed.</li>
-<li>Fix #141 (README drift) and rewrite the 0.4 "how it works / add a block" docs.</li>
+<li>Fix <a href="https://github.com/pietroppeter/nimib/issues/141">#141</a> (README drift) and rewrite the 0.4 "how it works / add a block" docs.</li>
 <li>Triage pass from §7.</li>
 <li>Add AGENTS.md to nimib, nimibook, nimibex.</li>
 </ol>
 <p><strong>Next (the move)</strong></p>
 <ol start="5">
-<li>Create the <code>pietroppeter.github.io</code> user site with redirects for nblog; confirm <code>pietroppeter.github.io/nblog/drafts/plant_app.html</code> redirects. Closes nblog #19.</li>
+<li>Create the <code>pietroppeter.github.io</code> user site with redirects for nblog; confirm <code>pietroppeter.github.io/nblog/drafts/plant_app.html</code> redirects. Closes nblog <a href="https://github.com/nimib-land/nblog/issues/19">#19</a>.</li>
 <li>Move nimibook (fewer inbound links), following §3. Then nimib. Then ask Hugo about nimiSlides.</li>
-<li>Registry PR; landing page at nimib.land listing the ecosystem; close #137.</li>
+<li>Registry PR; landing page at nimib.land listing the ecosystem; close <a href="https://github.com/pietroppeter/nimib/issues/137">#137</a>.</li>
 </ol>
 <p><strong>Then (building)</strong></p>
 <ol start="8">
