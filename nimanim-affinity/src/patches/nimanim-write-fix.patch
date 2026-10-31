@@ -1,0 +1,13 @@
+diff --git a/src/nimanim/font.nim b/src/nimanim/font.nim
+index c261e32..2152bd3 100644
+--- a/src/nimanim/font.nim
++++ b/src/nimanim/font.nim
+@@ -213,7 +213,7 @@ proc copyPathFlatToSeqs*(cr: ptr Context): FlattenedPath =
+       dlen*: cint
+       # The union is 16 bytes total; pad the header to match so pointer
+       # arithmetic via `UncheckedArray` advances correctly.
+-      pad0*, pad1*: float64
++      pad0*: float64  # 4+4+8 = 16 bytes, matching the C union
+     CairoPathPoint = object
+       x*, y*: float64
+   let p: ptr Path = cr.copyPathFlat()

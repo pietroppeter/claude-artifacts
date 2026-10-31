@@ -1,0 +1,469 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <title>Affinity Propagation, animated with nimanim</title>
+  <meta content="text/html; charset=utf-8" http-equiv="content-type">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <meta content="nimib 0.4.3" name="generator">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/water.css@2/out/light.min.css">
+  <link rel='stylesheet' href='https://cdn.jsdelivr.net/gh/pietroppeter/nimib/assets/atom-one-light.css'>
+  <style>
+.nb-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nb-small {
+  font-size: 0.8rem;
+}
+button.nb-small {
+  float: right;
+  padding: 2px;
+  padding-right: 5px;
+  padding-left: 5px;
+}
+section#source {
+  display:none
+}
+pre > code {
+  font-size: 1.2em;
+}
+.nb-output {
+  line-height: 1.15;
+}
+figure {
+  margin: 2rem 0;
+}
+figcaption {
+  text-align: center;
+}
+  
+</style>
+  
+    
+<script src="https://cdn.jsdelivr.net/gh/pietroppeter/nimib@main/assets/highlight.min.js"></script>
+<script>hljs.highlightAll();</script>
+</head>
+<body>
+<header>
+<div class="nb-box">
+ <span><a href="..">🏡</a></span>
+ <span><code>Affinity Propagation, animated with nimanim</code></span>
+ <span><a href="https://github.com/pietroppeter/claude-artifacts"><svg aria-hidden="true" width="1.2em" height="1.2em" style="vertical-align: middle;" preserveAspectRatio="xMidYMid meet" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59c.4.07.55-.17.55-.38c0-.19-.01-.82-.01-1.49c-2.01.37-2.53-.49-2.69-.94c-.09-.23-.48-.94-.82-1.13c-.28-.15-.68-.52-.01-.53c.63-.01 1.08.58 1.23.82c.72 1.21 1.87.87 2.33.66c.07-.52.28-.87.51-1.07c-1.78-.2-3.64-.89-3.64-3.95c0-.87.31-1.59.82-2.15c-.08-.2-.36-1.02.08-2.12c0 0 .67-.21 2.2.82c.64-.18 1.32-.27 2-.27c.68 0 1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82c.44 1.1.16 1.92.08 2.12c.51.56.82 1.27.82 2.15c0 3.07-1.87 3.75-3.65 3.95c.29.25.54.73.54 1.48c0 1.07-.01 1.93-.01 2.2c0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z" fill="#000"></path></svg></a></span>
+</div>
+<hr>
+</header>
+<main>
+<h1 id="affinity-propagation,-animated-with-nimanim">Affinity Propagation, animated with nimanim</h1>
+<p><a href="https://github.com/himanshm/nimanim">nimanim</a> is a young, manim-inspired 2D animation
+library for Nim: Cairo draws the frames, ffmpeg encodes them. To give it a dry run,
+I used it to explain <a href="https://en.wikipedia.org/wiki/Affinity_propagation">affinity propagation</a>,
+the clustering algorithm where points pass messages to each other until a few of them
+emerge as <em>exemplars</em>, and the number of clusters is not fixed in advance.</p>
+<p>This page is a <a href="https://github.com/pietroppeter/nimib">nimib</a> document: the code blocks
+below run when the page is built, and their output is shown under them.</p>
+<video controls preload="metadata" poster="poster.jpg" style="width:100%;border-radius:6px"
+  src="affinity_propagation.mp4">
+  Your browser does not play MP4: <a href="affinity_propagation.mp4">download the video</a>.
+</video>
+<p class="nb-small">59 seconds, 1280×720, rendered by nimanim in about 16 seconds.
+Source: <a href="src/scene.nim">src/scene.nim</a>.</p>
+<h2 id="the-algorithm-in-a-few-lines-of-nim">The algorithm in a few lines of Nim</h2>
+<p>Same 14 points as in the video: three groups, upper left, lower left and middle.</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">type</span>
+  <span class="hljs-type">Point</span> = <span class="hljs-keyword">tuple</span>[x, y: <span class="hljs-built_in">float</span>]
+  <span class="hljs-type">Mat</span> = <span class="hljs-built_in">seq</span>[<span class="hljs-built_in">seq</span>[<span class="hljs-built_in">float</span>]]
+
+<span class="hljs-keyword">let</span> pts: <span class="hljs-built_in">seq</span>[<span class="hljs-type">Point</span>] = @[
+  (-<span class="hljs-number">5.6</span>, <span class="hljs-number">1.9</span>), (-<span class="hljs-number">4.9</span>, <span class="hljs-number">2.5</span>), (-<span class="hljs-number">4.6</span>, <span class="hljs-number">1.6</span>), (-<span class="hljs-number">5.3</span>, <span class="hljs-number">1.1</span>), (-<span class="hljs-number">4.1</span>, <span class="hljs-number">2.2</span>),
+  (-<span class="hljs-number">5.0</span>, -<span class="hljs-number">1.6</span>), (-<span class="hljs-number">4.3</span>, -<span class="hljs-number">2.3</span>), (-<span class="hljs-number">5.6</span>, -<span class="hljs-number">2.4</span>), (-<span class="hljs-number">4.4</span>, -<span class="hljs-number">1.3</span>),
+  (-<span class="hljs-number">1.9</span>, <span class="hljs-number">0.1</span>), (-<span class="hljs-number">1.2</span>, <span class="hljs-number">0.7</span>), (-<span class="hljs-number">1.5</span>, -<span class="hljs-number">0.6</span>), (-<span class="hljs-number">0.7</span>, -<span class="hljs-number">0.1</span>), (-<span class="hljs-number">2.2</span>, <span class="hljs-number">0.9</span>)]
+<span class="hljs-keyword">let</span> n = pts.len
+
+<span class="hljs-keyword">proc</span> zeros(n: <span class="hljs-built_in">int</span>): <span class="hljs-type">Mat</span> =
+  <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n: <span class="hljs-literal">result</span>.add newSeq[<span class="hljs-built_in">float</span>](n)</code></pre>
+<p><strong>Similarity</strong> is the negative squared distance. The diagonal <code>s(k,k)</code> is the
+<em>preference</em>: how much each point wants to be an exemplar. A common default is the
+median of the other similarities.</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">import</span> std/algorithm
+
+<span class="hljs-keyword">proc</span> similarity(pref: <span class="hljs-built_in">float</span>): <span class="hljs-type">Mat</span> =
+  <span class="hljs-literal">result</span> = zeros(n)
+  <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+    <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+      <span class="hljs-keyword">let</span> (dx, dy) = (pts[i].x - pts[k].x, pts[i].y - pts[k].y)
+      <span class="hljs-literal">result</span>[i][k] = <span class="hljs-keyword">if</span> i == k: pref <span class="hljs-keyword">else</span>: -(dx*dx + dy*dy)
+
+<span class="hljs-keyword">var</span> offDiag: <span class="hljs-built_in">seq</span>[<span class="hljs-built_in">float</span>]
+<span class="hljs-keyword">let</span> s0 = similarity(<span class="hljs-number">0.0</span>)
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+  <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+    <span class="hljs-keyword">if</span> i != k: offDiag.add s0[i][k]
+offDiag.sort()
+<span class="hljs-keyword">let</span> median = offDiag[offDiag.len <span class="hljs-keyword">div</span> <span class="hljs-number">2</span>]
+<span class="hljs-keyword">echo</span> &amp;<span class="hljs-string">&quot;median similarity: {median:.2f}&quot;</span></code></pre>
+<pre class="nb-output">median similarity: -12.37
+</pre>
+<p>Then two kinds of messages go back and forth, with damping so they settle smoothly:</p>
+<ul>
+<li><strong>responsibility</strong> <code>r(i,k)</code>, sent from <code>i</code> to <code>k</code>: how well <code>k</code> suits <code>i</code> as an
+exemplar, compared with <code>i</code>'s best alternative;</li>
+<li><strong>availability</strong> <code>a(i,k)</code>, sent from <code>k</code> to <code>i</code>: how much support <code>k</code> already has from
+other points for being an exemplar.</li>
+</ul>
+<p>A point is an exemplar when <code>r(k,k) + a(k,k) &gt; 0</code>. Each other point joins the exemplar
+most similar to it.</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">proc</span> affinityPropagation(<span class="hljs-type">S</span>: <span class="hljs-type">Mat</span>, iters = <span class="hljs-number">200</span>, damping = <span class="hljs-number">0.8</span>): <span class="hljs-built_in">seq</span>[<span class="hljs-built_in">int</span>] =
+  <span class="hljs-keyword">var</span> <span class="hljs-type">R</span> = zeros(n)
+  <span class="hljs-keyword">var</span> <span class="hljs-type">A</span> = zeros(n)
+  <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-number">1</span> .. iters:
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+      <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+        <span class="hljs-keyword">var</span> best = -<span class="hljs-literal">Inf</span>
+        <span class="hljs-keyword">for</span> k2 <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+          <span class="hljs-keyword">if</span> k2 != k: best = max(best, <span class="hljs-type">A</span>[i][k2] + <span class="hljs-type">S</span>[i][k2])
+        <span class="hljs-type">R</span>[i][k] = damping * <span class="hljs-type">R</span>[i][k] + (<span class="hljs-number">1</span> - damping) * (<span class="hljs-type">S</span>[i][k] - best)
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+      <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+        <span class="hljs-keyword">var</span> support = <span class="hljs-number">0.0</span>
+        <span class="hljs-keyword">for</span> i2 <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+          <span class="hljs-keyword">if</span> i2 != i <span class="hljs-keyword">and</span> i2 != k: support += max(<span class="hljs-number">0.0</span>, <span class="hljs-type">R</span>[i2][k])
+        <span class="hljs-keyword">let</span> a = <span class="hljs-keyword">if</span> i == k: support <span class="hljs-keyword">else</span>: min(<span class="hljs-number">0.0</span>, <span class="hljs-type">R</span>[k][k] + support)
+        <span class="hljs-type">A</span>[i][k] = damping * <span class="hljs-type">A</span>[i][k] + (<span class="hljs-number">1</span> - damping) * a
+  <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+    <span class="hljs-keyword">if</span> <span class="hljs-type">R</span>[k][k] + <span class="hljs-type">A</span>[k][k] &gt; <span class="hljs-number">0</span>: <span class="hljs-literal">result</span>.add k
+
+<span class="hljs-keyword">proc</span> assign(<span class="hljs-type">S</span>: <span class="hljs-type">Mat</span>, exemplars: <span class="hljs-built_in">seq</span>[<span class="hljs-built_in">int</span>]): <span class="hljs-built_in">seq</span>[<span class="hljs-built_in">int</span>] =
+  <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+    <span class="hljs-keyword">if</span> i <span class="hljs-keyword">in</span> exemplars:
+      <span class="hljs-literal">result</span>.add i
+      <span class="hljs-keyword">continue</span>
+    <span class="hljs-keyword">var</span> (best, choice) = (-<span class="hljs-literal">Inf</span>, -<span class="hljs-number">1</span>)
+    <span class="hljs-keyword">for</span> e <span class="hljs-keyword">in</span> exemplars:
+      <span class="hljs-keyword">if</span> <span class="hljs-type">S</span>[i][e] &gt; best: (best, choice) = (<span class="hljs-type">S</span>[i][e], e)
+    <span class="hljs-literal">result</span>.add choice
+
+<span class="hljs-keyword">let</span> <span class="hljs-type">S</span> = similarity(median)
+<span class="hljs-keyword">let</span> exemplars = affinityPropagation(<span class="hljs-type">S</span>)
+<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;exemplars: &quot;</span>, exemplars
+<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;cluster of each point: &quot;</span>, assign(<span class="hljs-type">S</span>, exemplars)</code></pre>
+<pre class="nb-output">exemplars: @[2, 5, 9]
+cluster of each point: @[2, 2, 2, 2, 2, 5, 5, 5, 5, 9, 9, 9, 9, 9]
+</pre>
+<p>Three exemplars (points 2, 5 and 9), one per group, and nobody told the algorithm there were three.
+The preference is the knob that controls how many clusters come out: raise it and
+more points want to be exemplars, lower it and fewer can afford to be. That is the bonus scene at the end of the video.</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">for</span> factor <span class="hljs-keyword">in</span> [<span class="hljs-number">0.05</span>, <span class="hljs-number">0.1</span>, <span class="hljs-number">0.25</span>, <span class="hljs-number">1.0</span>, <span class="hljs-number">4.0</span>, <span class="hljs-number">8.0</span>]:
+  <span class="hljs-keyword">let</span> ex = affinityPropagation(similarity(factor * median))
+  <span class="hljs-keyword">let</span> word = <span class="hljs-keyword">if</span> ex.len == <span class="hljs-number">1</span>: <span class="hljs-string">&quot;exemplar &quot;</span> <span class="hljs-keyword">else</span>: <span class="hljs-string">&quot;exemplars&quot;</span>
+  <span class="hljs-keyword">echo</span> &amp;<span class="hljs-string">&quot;preference = {factor:&gt;4} × median → {ex.len} {word} {ex}&quot;</span></code></pre>
+<pre class="nb-output">preference = 0.05 × median → 14 exemplars @[0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13]
+preference =  0.1 × median → 6 exemplars @[2, 3, 4, 5, 9, 12]
+preference = 0.25 × median → 3 exemplars @[2, 5, 9]
+preference =    1 × median → 3 exemplars @[2, 5, 9]
+preference =    4 × median → 2 exemplars @[2, 9]
+preference =    8 × median → 1 exemplar  @[13]
+</pre>
+<h2 id="how-the-animation-was-made">How the animation was made</h2>
+<p>nimanim has shapes, text, easing functions and manim-style <code>play</code> / <code>wait</code>, but no
+updaters (<code>ValueTracker</code>, <code>add_updater</code>) and no arrows. Two things made it workable anyway:
+every mobject field is public, and <code>scene.wait(1/fps)</code> renders exactly one frame.
+So a homemade updater is five lines:</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">proc</span> tween(s: <span class="hljs-type">Scene</span>, duration: <span class="hljs-built_in">float</span>, body: <span class="hljs-keyword">proc</span>(t: <span class="hljs-built_in">float</span>),
+           easing: <span class="hljs-type">EasingFunc</span> = smoothstep) =
+  <span class="hljs-keyword">let</span> frames = max(<span class="hljs-number">1</span>, <span class="hljs-built_in">int</span>(duration * fps.<span class="hljs-built_in">float</span> + <span class="hljs-number">0.5</span>))
+  <span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> <span class="hljs-number">1.</span>.frames:
+    body(easing(f / frames))
+    s.wait(<span class="hljs-number">1.0</span> / fps.<span class="hljs-built_in">float</span>)</code></pre>
+<p>The message passing section runs the algorithm for 40 iterations and, for each one,
+tweens from one state to the next: an arrow from every point to its current favourite
+exemplar (<code>argmax a(i,k) + r(i,k)</code>) and a gold ring whose size follows the exemplar
+evidence <code>r(k,k) + a(k,k)</code>. Arrows are a line plus a triangle, rebuilt every frame.</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">for</span> it <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; <span class="hljs-number">40</span>:
+  <span class="hljs-keyword">let</span> a = hist[it]
+  <span class="hljs-keyword">let</span> b = hist[it + <span class="hljs-number">1</span>]
+  iterText.text = &amp;<span class="hljs-string">&quot;iteration {it + 1}&quot;</span>
+  s.tween(<span class="hljs-number">0.3</span>, <span class="hljs-keyword">proc</span>(t: <span class="hljs-built_in">float</span>) =
+    showState(<span class="hljs-type">Snapshot</span>(<span class="hljs-type">R</span>: lerpMat(a.<span class="hljs-type">R</span>, b.<span class="hljs-type">R</span>, t), <span class="hljs-type">A</span>: lerpMat(a.<span class="hljs-type">A</span>, b.<span class="hljs-type">A</span>, t))),
+    linear)</code></pre>
+<p>The full scene is <a href="src/scene.nim">src/scene.nim</a> (about 500 lines, most of them captions).</p>
+<h2 id="nimanim:-notes-from-the-dry-run">nimanim: notes from the dry run</h2>
+<p>Tried at commit <a href="https://github.com/himanshm/nimanim/commit/378a4596c630b24d7f9a68c426261e76744fccd4"><code>378a459</code></a> (v1.3.0).</p>
+<p><strong>What works well</strong></p>
+<ul>
+<li>The core loop is small and fast: the 59 second video renders in about 16 seconds.</li>
+<li>Circles, lines, polygons, text, easing, <code>fadeOut</code>, <code>scaleTo</code>, <code>moveTo</code> on simple shapes.</li>
+<li>Unicode in text (‖x‖², ≠, Σ, primes) is enough for simple formulas.</li>
+<li>Being able to change anything between frames makes up for the missing features.</li>
+</ul>
+<p><strong>Bugs found</strong></p>
+<ol>
+<li><strong><code>write()</code> showed nothing, then the text popped in at the end.</strong> This is the README's
+headline feature (stroke-by-stroke tracing). In <code>font.nim</code> the struct used to walk
+Cairo's path is 24 bytes, while <code>cairo_path_data_t</code> is a 16-byte union, so the walk
+reads garbage. Removing one padding field fixes it:
+<a href="src/patches/nimanim-write-fix.patch">patch</a>. The video was rendered with the fix.
+Text <code>transform()</code> uses the same code, so it was probably affected too.</li>
+<li><strong>Animated <code>shiftBy</code> / <code>moveTo</code> don't move lines or groups.</strong> The animation only moves
+<code>center</code>, but lines are drawn from their endpoints and groups from their children.
+(The instant <code>shift()</code> handles both.)</li>
+<li><strong>Animations on a group don't reach its children</strong> (fade, scale, rotate).</li>
+<li><strong><code>fadeIn</code> and <code>create</code> can't fade in a hidden object</strong>: they animate from 0 to the
+<em>current</em> opacity, so the object must be added at full opacity.</li>
+<li><strong><code>newLatex</code> is hard to use on a dark background</strong>: it needs <code>texlive-latex-extra</code>
+(for <code>standalone.cls</code>), renders black, and its <code>color</code> argument does nothing.</li>
+<li>Smaller things: no <code>duration =</code> on <code>play</code> (it's a positional first argument), and
+<code>FontWeight</code> needs <code>import cairo</code> because nimanim doesn't re-export it.</li>
+</ol>
+<p><strong>Missing compared with manim</strong>: arrows, updaters, <code>lag_ratio</code> / animation groups,
+color-change animations, text alignment.</p>
+<h2 id="rebuild">Rebuild</h2>
+<p>With Nim (1.6 or later), Cairo, FreeType and ffmpeg installed:</p>
+<pre><code class="language-sh">cd nimanim-affinity
+sh src/deps.sh                      # pinned deps into src/deps, patches nimanim
+nim c -r -d:release src/scene.nim   # affinity_propagation.mp4
+nim c -r src/index.nim              # index.html (this page)
+</code></pre>
+</main>
+<footer>
+<div class="nb-box">
+ <span><span class="nb-small">made with <a href="https://pietroppeter.github.io/nimib/">nimib 🐳</a></span></span>
+ <span></span>
+ <span><button class="nb-small" id="show" onclick="toggleSourceDisplay()">Show Source</button></span>
+</div>
+</footer>
+<section id="source">
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">import</span> nimib, std/[os, strformat]
+
+nbInit
+nb.title = <span class="hljs-string">&quot;Affinity Propagation, animated with nimanim&quot;</span>
+<span class="hljs-comment"># write the page next to src/, wherever the build is run from</span>
+nb.doc.filename = currentSourcePath().parentDir.parentDir / <span class="hljs-string">&quot;index.html&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+# Affinity Propagation, animated with nimanim
+
+[nimanim](https://github.com/himanshm/nimanim) is a young, manim-inspired 2D animation
+library for Nim: Cairo draws the frames, ffmpeg encodes them. To give it a dry run,
+I used it to explain [affinity propagation](https://en.wikipedia.org/wiki/Affinity_propagation),
+the clustering algorithm where points pass messages to each other until a few of them
+emerge as *exemplars*, and the number of clusters is not fixed in advance.
+
+This page is a [nimib](https://github.com/pietroppeter/nimib) document: the code blocks
+below run when the page is built, and their output is shown under them.
+&quot;&quot;&quot;</span>
+
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;
+&lt;video controls preload=&quot;metadata&quot; poster=&quot;poster.jpg&quot; style=&quot;width:100%;border-radius:6px&quot;
+  src=&quot;affinity_propagation.mp4&quot;&gt;
+  Your browser does not play MP4: &lt;a href=&quot;affinity_propagation.mp4&quot;&gt;download the video&lt;/a&gt;.
+&lt;/video&gt;
+&lt;p class=&quot;nb-small&quot;&gt;59 seconds, 1280×720, rendered by nimanim in about 16 seconds.
+Source: &lt;a href=&quot;src/scene.nim&quot;&gt;src/scene.nim&lt;/a&gt;.&lt;/p&gt;
+&quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+## The algorithm in a few lines of Nim
+
+Same 14 points as in the video: three groups, upper left, lower left and middle.
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">type</span>
+    <span class="hljs-type">Point</span> = <span class="hljs-keyword">tuple</span>[x, y: <span class="hljs-built_in">float</span>]
+    <span class="hljs-type">Mat</span> = <span class="hljs-built_in">seq</span>[<span class="hljs-built_in">seq</span>[<span class="hljs-built_in">float</span>]]
+
+  <span class="hljs-keyword">let</span> pts: <span class="hljs-built_in">seq</span>[<span class="hljs-type">Point</span>] = @[
+    (-<span class="hljs-number">5.6</span>, <span class="hljs-number">1.9</span>), (-<span class="hljs-number">4.9</span>, <span class="hljs-number">2.5</span>), (-<span class="hljs-number">4.6</span>, <span class="hljs-number">1.6</span>), (-<span class="hljs-number">5.3</span>, <span class="hljs-number">1.1</span>), (-<span class="hljs-number">4.1</span>, <span class="hljs-number">2.2</span>),
+    (-<span class="hljs-number">5.0</span>, -<span class="hljs-number">1.6</span>), (-<span class="hljs-number">4.3</span>, -<span class="hljs-number">2.3</span>), (-<span class="hljs-number">5.6</span>, -<span class="hljs-number">2.4</span>), (-<span class="hljs-number">4.4</span>, -<span class="hljs-number">1.3</span>),
+    (-<span class="hljs-number">1.9</span>, <span class="hljs-number">0.1</span>), (-<span class="hljs-number">1.2</span>, <span class="hljs-number">0.7</span>), (-<span class="hljs-number">1.5</span>, -<span class="hljs-number">0.6</span>), (-<span class="hljs-number">0.7</span>, -<span class="hljs-number">0.1</span>), (-<span class="hljs-number">2.2</span>, <span class="hljs-number">0.9</span>)]
+  <span class="hljs-keyword">let</span> n = pts.len
+
+  <span class="hljs-keyword">proc</span> zeros(n: <span class="hljs-built_in">int</span>): <span class="hljs-type">Mat</span> =
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n: <span class="hljs-literal">result</span>.add newSeq[<span class="hljs-built_in">float</span>](n)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+**Similarity** is the negative squared distance. The diagonal `s(k,k)` is the
+*preference*: how much each point wants to be an exemplar. A common default is the
+median of the other similarities.
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">import</span> std/algorithm
+
+  <span class="hljs-keyword">proc</span> similarity(pref: <span class="hljs-built_in">float</span>): <span class="hljs-type">Mat</span> =
+    <span class="hljs-literal">result</span> = zeros(n)
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+      <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+        <span class="hljs-keyword">let</span> (dx, dy) = (pts[i].x - pts[k].x, pts[i].y - pts[k].y)
+        <span class="hljs-literal">result</span>[i][k] = <span class="hljs-keyword">if</span> i == k: pref <span class="hljs-keyword">else</span>: -(dx*dx + dy*dy)
+
+  <span class="hljs-keyword">var</span> offDiag: <span class="hljs-built_in">seq</span>[<span class="hljs-built_in">float</span>]
+  <span class="hljs-keyword">let</span> s0 = similarity(<span class="hljs-number">0.0</span>)
+  <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+    <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+      <span class="hljs-keyword">if</span> i != k: offDiag.add s0[i][k]
+  offDiag.sort()
+  <span class="hljs-keyword">let</span> median = offDiag[offDiag.len <span class="hljs-keyword">div</span> <span class="hljs-number">2</span>]
+  <span class="hljs-keyword">echo</span> &amp;<span class="hljs-string">&quot;median similarity: {median:.2f}&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+Then two kinds of messages go back and forth, with damping so they settle smoothly:
+
+- **responsibility** `r(i,k)`, sent from `i` to `k`: how well `k` suits `i` as an
+  exemplar, compared with `i`'s best alternative;
+- **availability** `a(i,k)`, sent from `k` to `i`: how much support `k` already has from
+  other points for being an exemplar.
+
+A point is an exemplar when `r(k,k) + a(k,k) &gt; 0`. Each other point joins the exemplar
+most similar to it.
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">proc</span> affinityPropagation(<span class="hljs-type">S</span>: <span class="hljs-type">Mat</span>, iters = <span class="hljs-number">200</span>, damping = <span class="hljs-number">0.8</span>): <span class="hljs-built_in">seq</span>[<span class="hljs-built_in">int</span>] =
+    <span class="hljs-keyword">var</span> <span class="hljs-type">R</span> = zeros(n)
+    <span class="hljs-keyword">var</span> <span class="hljs-type">A</span> = zeros(n)
+    <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-number">1</span> .. iters:
+      <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+        <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+          <span class="hljs-keyword">var</span> best = -<span class="hljs-literal">Inf</span>
+          <span class="hljs-keyword">for</span> k2 <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+            <span class="hljs-keyword">if</span> k2 != k: best = max(best, <span class="hljs-type">A</span>[i][k2] + <span class="hljs-type">S</span>[i][k2])
+          <span class="hljs-type">R</span>[i][k] = damping * <span class="hljs-type">R</span>[i][k] + (<span class="hljs-number">1</span> - damping) * (<span class="hljs-type">S</span>[i][k] - best)
+      <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+        <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+          <span class="hljs-keyword">var</span> support = <span class="hljs-number">0.0</span>
+          <span class="hljs-keyword">for</span> i2 <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+            <span class="hljs-keyword">if</span> i2 != i <span class="hljs-keyword">and</span> i2 != k: support += max(<span class="hljs-number">0.0</span>, <span class="hljs-type">R</span>[i2][k])
+          <span class="hljs-keyword">let</span> a = <span class="hljs-keyword">if</span> i == k: support <span class="hljs-keyword">else</span>: min(<span class="hljs-number">0.0</span>, <span class="hljs-type">R</span>[k][k] + support)
+          <span class="hljs-type">A</span>[i][k] = damping * <span class="hljs-type">A</span>[i][k] + (<span class="hljs-number">1</span> - damping) * a
+    <span class="hljs-keyword">for</span> k <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+      <span class="hljs-keyword">if</span> <span class="hljs-type">R</span>[k][k] + <span class="hljs-type">A</span>[k][k] &gt; <span class="hljs-number">0</span>: <span class="hljs-literal">result</span>.add k
+
+  <span class="hljs-keyword">proc</span> assign(<span class="hljs-type">S</span>: <span class="hljs-type">Mat</span>, exemplars: <span class="hljs-built_in">seq</span>[<span class="hljs-built_in">int</span>]): <span class="hljs-built_in">seq</span>[<span class="hljs-built_in">int</span>] =
+    <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+      <span class="hljs-keyword">if</span> i <span class="hljs-keyword">in</span> exemplars:
+        <span class="hljs-literal">result</span>.add i
+        <span class="hljs-keyword">continue</span>
+      <span class="hljs-keyword">var</span> (best, choice) = (-<span class="hljs-literal">Inf</span>, -<span class="hljs-number">1</span>)
+      <span class="hljs-keyword">for</span> e <span class="hljs-keyword">in</span> exemplars:
+        <span class="hljs-keyword">if</span> <span class="hljs-type">S</span>[i][e] &gt; best: (best, choice) = (<span class="hljs-type">S</span>[i][e], e)
+      <span class="hljs-literal">result</span>.add choice
+
+  <span class="hljs-keyword">let</span> <span class="hljs-type">S</span> = similarity(median)
+  <span class="hljs-keyword">let</span> exemplars = affinityPropagation(<span class="hljs-type">S</span>)
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;exemplars: &quot;</span>, exemplars
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;cluster of each point: &quot;</span>, assign(<span class="hljs-type">S</span>, exemplars)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+Three exemplars (points 2, 5 and 9), one per group, and nobody told the algorithm there were three.
+The preference is the knob that controls how many clusters come out: raise it and
+more points want to be exemplars, lower it and fewer can afford to be. That is the bonus scene at the end of the video.
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">for</span> factor <span class="hljs-keyword">in</span> [<span class="hljs-number">0.05</span>, <span class="hljs-number">0.1</span>, <span class="hljs-number">0.25</span>, <span class="hljs-number">1.0</span>, <span class="hljs-number">4.0</span>, <span class="hljs-number">8.0</span>]:
+    <span class="hljs-keyword">let</span> ex = affinityPropagation(similarity(factor * median))
+    <span class="hljs-keyword">let</span> word = <span class="hljs-keyword">if</span> ex.len == <span class="hljs-number">1</span>: <span class="hljs-string">&quot;exemplar &quot;</span> <span class="hljs-keyword">else</span>: <span class="hljs-string">&quot;exemplars&quot;</span>
+    <span class="hljs-keyword">echo</span> &amp;<span class="hljs-string">&quot;preference = {factor:&gt;4} × median → {ex.len} {word} {ex}&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+## How the animation was made
+
+nimanim has shapes, text, easing functions and manim-style `play` / `wait`, but no
+updaters (`ValueTracker`, `add_updater`) and no arrows. Two things made it workable anyway:
+every mobject field is public, and `scene.wait(1/fps)` renders exactly one frame.
+So a homemade updater is five lines:
+&quot;&quot;&quot;</span>
+
+nbCodeSkip:
+  <span class="hljs-keyword">proc</span> tween(s: <span class="hljs-type">Scene</span>, duration: <span class="hljs-built_in">float</span>, body: <span class="hljs-keyword">proc</span>(t: <span class="hljs-built_in">float</span>),
+             easing: <span class="hljs-type">EasingFunc</span> = smoothstep) =
+    <span class="hljs-keyword">let</span> frames = max(<span class="hljs-number">1</span>, <span class="hljs-built_in">int</span>(duration * fps.<span class="hljs-built_in">float</span> + <span class="hljs-number">0.5</span>))
+    <span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> <span class="hljs-number">1.</span>.frames:
+      body(easing(f / frames))
+      s.wait(<span class="hljs-number">1.0</span> / fps.<span class="hljs-built_in">float</span>)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+The message passing section runs the algorithm for 40 iterations and, for each one,
+tweens from one state to the next: an arrow from every point to its current favourite
+exemplar (`argmax a(i,k) + r(i,k)`) and a gold ring whose size follows the exemplar
+evidence `r(k,k) + a(k,k)`. Arrows are a line plus a triangle, rebuilt every frame.
+&quot;&quot;&quot;</span>
+
+nbCodeSkip:
+  <span class="hljs-keyword">for</span> it <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; <span class="hljs-number">40</span>:
+    <span class="hljs-keyword">let</span> a = hist[it]
+    <span class="hljs-keyword">let</span> b = hist[it + <span class="hljs-number">1</span>]
+    iterText.text = &amp;<span class="hljs-string">&quot;iteration {it + 1}&quot;</span>
+    s.tween(<span class="hljs-number">0.3</span>, <span class="hljs-keyword">proc</span>(t: <span class="hljs-built_in">float</span>) =
+      showState(<span class="hljs-type">Snapshot</span>(<span class="hljs-type">R</span>: lerpMat(a.<span class="hljs-type">R</span>, b.<span class="hljs-type">R</span>, t), <span class="hljs-type">A</span>: lerpMat(a.<span class="hljs-type">A</span>, b.<span class="hljs-type">A</span>, t))),
+      linear)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+The full scene is [src/scene.nim](src/scene.nim) (about 500 lines, most of them captions).
+
+## nimanim: notes from the dry run
+
+Tried at commit [`378a459`](https://github.com/himanshm/nimanim/commit/378a4596c630b24d7f9a68c426261e76744fccd4) (v1.3.0).
+
+**What works well**
+
+- The core loop is small and fast: the 59 second video renders in about 16 seconds.
+- Circles, lines, polygons, text, easing, `fadeOut`, `scaleTo`, `moveTo` on simple shapes.
+- Unicode in text (‖x‖², ≠, Σ, primes) is enough for simple formulas.
+- Being able to change anything between frames makes up for the missing features.
+
+**Bugs found**
+
+1. **`write()` showed nothing, then the text popped in at the end.** This is the README's
+   headline feature (stroke-by-stroke tracing). In `font.nim` the struct used to walk
+   Cairo's path is 24 bytes, while `cairo_path_data_t` is a 16-byte union, so the walk
+   reads garbage. Removing one padding field fixes it:
+   [patch](src/patches/nimanim-write-fix.patch). The video was rendered with the fix.
+   Text `transform()` uses the same code, so it was probably affected too.
+2. **Animated `shiftBy` / `moveTo` don't move lines or groups.** The animation only moves
+   `center`, but lines are drawn from their endpoints and groups from their children.
+   (The instant `shift()` handles both.)
+3. **Animations on a group don't reach its children** (fade, scale, rotate).
+4. **`fadeIn` and `create` can't fade in a hidden object**: they animate from 0 to the
+   *current* opacity, so the object must be added at full opacity.
+5. **`newLatex` is hard to use on a dark background**: it needs `texlive-latex-extra`
+   (for `standalone.cls`), renders black, and its `color` argument does nothing.
+6. Smaller things: no `duration =` on `play` (it's a positional first argument), and
+   `FontWeight` needs `import cairo` because nimanim doesn't re-export it.
+
+**Missing compared with manim**: arrows, updaters, `lag_ratio` / animation groups,
+color-change animations, text alignment.
+
+## Rebuild
+
+With Nim (1.6 or later), Cairo, FreeType and ffmpeg installed:
+
+```sh
+cd nimanim-affinity
+sh src/deps.sh                      # pinned deps into src/deps, patches nimanim
+nim c -r -d:release src/scene.nim   # affinity_propagation.mp4
+nim c -r src/index.nim              # index.html (this page)
+```
+&quot;&quot;&quot;</span>
+
+nbSave
+</code></pre>
+</section>
+  
+<script>
+  function toggleSourceDisplay() {
+    var btn = document.getElementById("show")
+    var source = document.getElementById("source");
+    if (btn.innerHTML=="Show Source") {
+      btn.innerHTML = "Hide Source";
+      source.style.display = "block";
+    } else {
+      btn.innerHTML = "Show Source";
+      source.style.display = "none";
+    }
+  }
+</script>
+  
+</body>
