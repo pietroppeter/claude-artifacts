@@ -3,7 +3,7 @@
 Pages made with Claude, published as static HTML via GitHub Pages:
 https://pietroppeter.github.io/claude-artifacts/
 
-> AI disclosure: this project is mostly vibed. Currently [level 7](https://www.visidata.org/blog/2026/ai/#level-6%3A-bots-coded%2C-human-understands-mostly) on visidata AI scale: Human specced, bots coded.
+> AI disclosure: this project is mostly "vibed". Currently [level 7-8]([https://www.visidata.org/blog/2026/ai/#level-6%3A-bots-coded%2C-human-understands-mostly](https://www.visidata.org/blog/2026/ai/#level-8%3A-bots-planned%2C-human-approved)) on visidata AI scale. Level 7: Human specced, bots coded; Level 8: Bots planned, human approved
 
 | Page | Date | Description |
 |---|---|---|
