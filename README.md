@@ -7,6 +7,7 @@ https://pietroppeter.github.io/claude-artifacts/
 
 | Page | Date | Description |
 |---|---|---|
+| [declarative-dragging-nim](https://pietroppeter.github.io/claude-artifacts/declarative-dragging-nim/) | 2026-11-04 | [Declarative Dragging](https://declarative-dragging.github.io/) (UIST 2026 best paper) ported to Nim in a [nimib](https://github.com/pietroppeter/nimib) page: engine runs natively at build time and in the browser via `nim js` |
 | [nimanim-affinity](https://pietroppeter.github.io/claude-artifacts/nimanim-affinity/) | 2026-10-31 | Affinity propagation explained in a video made with [nimanim](https://github.com/himanshm/nimanim), in a [nimib](https://github.com/pietroppeter/nimib) page with the algorithm and notes from the dry run |
 | [state-of-nimibland](https://pietroppeter.github.io/claude-artifacts/state-of-nimibland/) | 2026-10-28 | State of the [nimib](https://github.com/pietroppeter/nimib) ecosystem: the move to nimib-land, nimibex, nblog SSG, and a prioritized plan ([markdown](state-of-nimibland/src/report.md)) |
 | [nim-disco-websockets](https://pietroppeter.github.io/claude-artifacts/nim-disco-websockets/) | 2026-10-24 | How the [Nim counter on Disco](https://counter.pietroppeter.xyz) ([source](https://github.com/pietroppeter/disco-nim-mummy)) syncs live with WebSockets |
