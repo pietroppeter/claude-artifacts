@@ -1,0 +1,1192 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <title>Cartographer, in Nim</title>
+  <meta content="text/html; charset=utf-8" http-equiv="content-type">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <meta content="nimib 0.4.3" name="generator">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=IBM+Plex+Sans:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --paper:#f6f3ea; --card:#fffdf7; --ink:#1b2027; --muted:#5f6670; --line:#e0dccf;
+  --nim:#ffe953; --sea:#2b6f8f; --land:#c9b98a; --pin:#d1495b; --ok:#3f8f5a; --code:#efeadb;
+  --out-bg:#1b2027; --out-fg:#ecebe4; --hl:#ffe953;
+}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
+  --paper:#14181d; --card:#1b2027; --ink:#e8e6df; --muted:#9aa3ad; --line:#2c333c;
+  --sea:#79b8d6; --land:#8f8160; --pin:#ef7d8b; --ok:#7cc896; --code:#232a33; --out-bg:#0d1014; --out-fg:#e8e6df; --hl:#7a6a12; color-scheme:dark}}
+:root[data-theme="dark"]{
+  --paper:#14181d; --card:#1b2027; --ink:#e8e6df; --muted:#9aa3ad; --line:#2c333c;
+  --sea:#79b8d6; --land:#8f8160; --pin:#ef7d8b; --ok:#7cc896; --code:#232a33; --out-bg:#0d1014; --out-fg:#e8e6df; --hl:#7a6a12; color-scheme:dark}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+:root{padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0)}
+html{background:var(--paper)}
+body{margin:0 auto;max-width:860px;padding:0 16px 60px;color:var(--ink);
+  font:17px/1.6 "IBM Plex Sans",system-ui,sans-serif;background:var(--paper)}
+header,footer .nb-box{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;color:var(--muted);padding:14px 0}
+header{border-bottom:1px solid var(--line)} footer .nb-box{border-top:1px solid var(--line);margin-top:40px}
+header a, footer a{color:var(--muted)}
+h1,h2,h3{font-family:Fraunces,Georgia,serif;line-height:1.12;letter-spacing:-.01em}
+h1{font-size:clamp(36px,8vw,60px);font-weight:900;margin:34px 0 8px}
+h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--hl) 62%);padding:0 .08em}
+h2{font-size:28px;font-weight:700;margin:54px 0 10px;padding-top:18px;border-top:2px solid var(--ink)}
+h2 .num{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.08em}
+h3{font-size:21px;margin:30px 0 6px}
+a{color:var(--sea);text-decoration-thickness:1px;text-underline-offset:3px}
+p code, li code, td code{font:14px "JetBrains Mono",monospace;background:var(--code);padding:1px 5px;border-radius:4px}
+.lede{font-size:20px;font-family:Fraunces,Georgia,serif;font-weight:400}
+blockquote{margin:18px 0;padding:6px 16px;border-left:4px solid var(--sea);background:var(--card)}
+pre{margin:14px 0;overflow-x:auto;border-radius:10px}
+pre code{display:block;padding:14px 16px;font:12.5px/1.55 "JetBrains Mono",monospace;font-variant-ligatures:none;background:var(--card);border:1px solid var(--line);border-radius:10px;color:var(--ink)}
+pre.nb-output, pre samp{display:block;padding:12px 16px;font:12.5px/1.5 "JetBrains Mono",monospace;background:var(--out-bg);color:var(--out-fg);border-radius:10px;white-space:pre-wrap;overflow-wrap:anywhere;font-variant-ligatures:none}
+.hljs-keyword{color:#a626a4;font-weight:600}.hljs-type,.hljs-built_in{color:#b76b01}.hljs-string{color:#3f8f5a}
+.hljs-number,.hljs-literal{color:#986801}.hljs-comment{color:#8a8f96;font-style:italic}.hljs-meta{color:#4078f2}
+details{margin:14px 0;border:1px dashed var(--line);border-radius:10px;padding:4px 12px;background:var(--card)}
+details summary{cursor:pointer;font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted);padding:6px 0}
+.table-wrap{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+table{border-collapse:collapse;width:100%;font-size:14.5px;line-height:1.45}
+th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+th{font:600 12px "JetBrains Mono",monospace;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);background:var(--paper)}
+tr:last-child td{border-bottom:none}
+.verdict{background:var(--card);border:2px solid var(--ink);border-radius:14px;box-shadow:5px 5px 0 var(--ink);padding:6px 20px;margin:22px 0}
+.verdict h3{margin-top:14px}
+.flow{display:block;width:100%;height:auto;margin:16px 0}
+.flow text{font-family:"IBM Plex Sans",sans-serif;fill:var(--ink)}
+.flow .mono{font-family:"JetBrains Mono",monospace;font-size:12px}
+.flow .box{fill:var(--card);stroke:var(--ink);stroke-width:1.5}
+.flow .srv{fill:var(--nim);stroke:#1b2027;stroke-width:2}
+.flow .srv-t{fill:#1b2027}
+.flow .arrow{stroke:var(--ink);stroke-width:1.5;fill:none;marker-end:url(#ah)}
+.flow .no{stroke:var(--pin);stroke-width:2;stroke-dasharray:5 4;fill:none}
+.flow .no-t{fill:var(--pin);font-size:13px}
+.flow .ah{fill:var(--ink)}
+.flow .muted{fill:var(--muted)}
+.tag{font:600 11px "JetBrains Mono",monospace;background:var(--nim);color:#1b2027;border:1.5px solid #1b2027;border-radius:4px;padding:0 5px}
+#source{display:none}
+footer button{font:600 12px "JetBrains Mono",monospace;border:1.5px solid var(--ink);background:var(--card);color:var(--ink);border-radius:999px;padding:4px 12px;cursor:pointer}
+footer hr{display:none}
+</style>
+
+  
+  <style>
+.nb-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nb-small {
+  font-size: 0.8rem;
+}
+button.nb-small {
+  float: right;
+  padding: 2px;
+  padding-right: 5px;
+  padding-left: 5px;
+}
+section#source {
+  display:none
+}
+pre > code {
+  font-size: 1.2em;
+}
+.nb-output {
+  line-height: 1.15;
+}
+figure {
+  margin: 2rem 0;
+}
+figcaption {
+  text-align: center;
+}
+  
+</style>
+  
+    
+</head>
+<body>
+<header><span>a nimib notebook</span><span>written 2026-11-04</span></header>
+<main>
+<h1>Cartographer, <em>in Nim</em></h1>
+<p class="lede">Your team's coding agents each learn things and forget them. Cartographer gives them one shared wiki
+they can all read and grow, but can't break. This page studies it, rebuilds its core in about 400 lines of Nim,
+compares it with the alternatives, and asks whether it fits a project with many repos and many teams.</p>
+<div class="verdict">
+<h3>The short answer</h3>
+<p><b>The idea is a good fit for a multi-repo, multi-team project. Cartographer itself is worth a pilot, not a rollout.</b>
+The pattern it builds on (an LLM-maintained Markdown wiki, stored in the Open Knowledge Format) is cheap to adopt and easy to
+leave, because the knowledge is plain files in git. What Cartographer adds is a server that refuses bad writes and records
+who changed what and why. That matters most when several teams' agents write to the same knowledge. Against it: it's a
+pre-1.0 personal project with one maintainer, and it gives you a server to run.</p>
+<p><b>And yes, "OKF LLMWiki" is the same family.</b> <i>LLM Wiki</i> is Andrej Karpathy's pattern (April 2026), and <i>OKF</i> is
+Google Cloud's Open Knowledge Format (June 2026), which formalizes that pattern as a file format. Cartographer says it combines the two.
+I couldn't find a single product called "OKF LLMWiki". The closest match is a small demo repo, <a href="https://github.com/real-jiakai/okf_llm_wiki">okf_llm_wiki</a>,
+which lays the same knowledge out both ways. <a href="#fit">Jump to the fit analysis</a>.</p>
+</div>
+<h2><span class="num">01 · WHAT IT IS</span>Cartographer in one picture</h2>
+<p><a href="https://github.com/BeppeTemp/cartographer">Cartographer</a> is &quot;a shared, git-backed wiki your team's AI agents maintain but can't break —
+Claude Code, Codex, OpenCode and any MCP client.&quot; It is one Go binary, Apache-2.0, by GitHub user BeppeTemp, and it describes itself as
+&quot;Pre-1.0&quot; and &quot;a personal project maintained on a best-effort basis&quot;. When I read it, the repo had 924 commits and 54 stars.</p>
+<p>Its README names three fixes teams usually try, and says why each falls short:</p>
+<ul>
+<li><strong>RAG</strong> &quot;retrieves, but nothing accumulates.&quot;</li>
+<li><strong>A folder of Markdown the agent edits freely</strong> ends in &quot;broken links, lost history and silent corruption.&quot;</li>
+<li><strong>Skills and instructions</strong> &quot;get hand-copied into <code>.claude/</code>, <code>.codex/</code>, <code>.kiro/</code>… and drift apart.&quot;</li>
+</ul>
+<p>Its answer is one rule: <em>&quot;The agent uses MCP tools; the server owns filesystem writes and validation.&quot;</em>
+Agents never open the files. They call tools such as <code>concept_read</code> and <code>concept_write</code>, and the server checks every write before
+it lands. Each write becomes one git commit, so nothing is lost and every change can be traced.</p>
+<svg class="flow" viewBox="0 0 760 270" role="img" aria-label="Agents call MCP tools on the server; the server validates and commits to a git repository of Markdown pages; agents cannot write the files directly.">
+  <defs><marker id="ah" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" class="ah"/></marker></defs>
+  <rect class="box" x="6" y="20" width="190" height="44" rx="8"/><text x="101" y="47" text-anchor="middle">Claude Code · team A</text>
+  <rect class="box" x="6" y="80" width="190" height="44" rx="8"/><text x="101" y="107" text-anchor="middle">Codex · team B</text>
+  <rect class="box" x="6" y="140" width="190" height="44" rx="8"/><text x="101" y="167" text-anchor="middle">any MCP client</text>
+  <path class="arrow" d="M198 42 L300 92"/><path class="arrow" d="M198 102 L300 102"/><path class="arrow" d="M198 162 L300 112"/>
+  <text class="mono muted" x="222" y="62">MCP tools</text>
+  <rect class="srv" x="302" y="50" width="190" height="110" rx="12"/>
+  <text class="srv-t" x="397" y="80" text-anchor="middle" font-weight="600">server</text>
+  <text class="mono srv-t" x="397" y="102" text-anchor="middle">validate · if_match</text>
+  <text class="mono srv-t" x="397" y="120" text-anchor="middle">one commit per write</text>
+  <text class="mono srv-t" x="397" y="138" text-anchor="middle">index · log · lint</text>
+  <path class="arrow" d="M494 105 L590 105"/>
+  <rect class="box" x="592" y="40" width="160" height="130" rx="8"/>
+  <text x="672" y="64" text-anchor="middle" font-weight="600">git repo</text>
+  <text class="mono" x="606" y="88">data/</text>
+  <text class="mono" x="618" y="106">index.md</text>
+  <text class="mono" x="618" y="124">log.md</text>
+  <text class="mono" x="618" y="142">services/…md</text>
+  <text class="mono" x="618" y="160">teams/…md</text>
+  <path class="no" d="M101 186 C 101 240, 672 240, 672 172"/>
+  <text class="no-t mono" x="386" y="258" text-anchor="middle">✗ agents never write the files directly</text>
+</svg>
+<p>Beyond that core, the docs describe a lot of surrounding machinery. I read the
+<a href="https://github.com/BeppeTemp/cartographer">README</a>, <a href="https://github.com/BeppeTemp/cartographer/blob/main/docs/overview.md">overview</a>,
+<a href="https://github.com/BeppeTemp/cartographer/blob/main/docs/faq.md">FAQ</a>,
+<a href="https://github.com/BeppeTemp/cartographer/blob/main/docs/data-plane.md">data plane</a> and
+<a href="https://github.com/BeppeTemp/cartographer/blob/main/docs/control-plane.md">control plane</a> docs:</p>
+<ul>
+<li><strong>Layout.</strong> An <em>Atlas</em> is one knowledge base (KB) and one git repo. Under <code>data/</code> are <em>Maps</em>, which are thematic folders, and <em>Journals</em>, which hold dated
+pages named <code>YYYY-MM-DD-slug</code>. Each page is a <em>Concept</em>. A folder's <code>_map.md</code> can declare a contract: which <code>concept_types</code>
+are allowed and which <code>required_fields</code> each page needs. A page's id is its path, and that id is its identity.</li>
+<li><strong>Beyond knowledge.</strong> The same repo also holds <code>skills/</code>, <code>agents/</code> (subagents), <code>hooks/</code>, <code>mcp/</code> descriptors, SOPS-encrypted <code>secrets/</code>
+and <code>instructions.md</code>. <code>cartographer sync</code> installs them into each client, so every agent on the team is configured from one place.</li>
+<li><strong>Tools.</strong> About 60 MCP tools covering reading, keyword search (the docs say &quot;keyword search only&quot;), writes (including an atomic
+<code>concept_batch</code>), graph queries (personalized PageRank), governance (<code>validate</code>, <code>lint</code>, <code>kb_review</code>, <code>gate_check</code>), ingest and conflicts.</li>
+<li><strong>Teams.</strong> One HTTP server can serve several KBs, with bearer tokens scoped per KB and per map (<code>kb:&lt;name&gt;:r</code> or <code>rw</code>). Commits carry
+<code>Reason:</code>, <code>Agent:</code> and author trailers. When two machines' changes conflict, the KB is marked <code>degraded</code> and someone must pick <code>ours</code>,
+<code>theirs</code> or <code>edit</code> for each page. The FAQ says: &quot;It is not a silent last-write-wins.&quot;</li>
+<li><strong>Its own limits, as stated.</strong> Search has no model-backed mode, sync is &quot;not atomic across clients&quot;, and: <em>&quot;If your knowledge fits in
+one repository and one person, a plain instruction file is simpler and you should use it.&quot;</em></li>
+</ul>
+<p>I couldn't open the project site <a href="https://beppetemp.github.io/cartographer/">beppetemp.github.io/cartographer</a> from my sandbox
+because the network policy blocked it. Everything above comes from the GitHub repo and its <code>docs/</code> folder. I didn't read the
+changelog, the decision records or the sync and concurrency docs.</p>
+<h2><span class="num">02 · WHERE IT COMES FROM</span>LLM Wiki + OKF, the "OKF LLMWiki" question</h2>
+<p>Cartographer's overview says it combines &quot;Karpathy's LLM Wiki pattern&quot; with &quot;Google's Open Knowledge Format (OKF)&quot;. Both are recent:</p>
+<p><strong>LLM Wiki</strong> (<a href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f">Karpathy's gist</a>, created April 4, 2026) is &quot;an idea file&quot;:
+instead of RAG re-deriving answers from raw documents on every question, an LLM &quot;incrementally builds and maintains a persistent wiki&quot;,
+so &quot;the wiki is a persistent, compounding artifact.&quot; It has three layers: <strong>raw sources</strong>, which are immutable; <strong>the wiki</strong>; and <strong>the schema</strong>, a
+<code>CLAUDE.md</code> or <code>AGENTS.md</code> that tells the agent the rules. It also has three operations: <strong>ingest</strong>, <strong>query</strong> and <strong>lint</strong>. Two files
+are special. <code>index.md</code> is a catalog the agent reads first, and <code>log.md</code> is an &quot;append-only record of what happened and when&quot;.</p>
+<p><strong>OKF</strong> (<a href="https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing">Google Cloud blog, June 12, 2026</a>)
+is &quot;an open specification that formalizes the LLM-wiki pattern&quot;. The <a href="https://github.com/GoogleCloudPlatform/open-knowledge-format">spec</a>,
+now at v0.2, is short: a bundle is &quot;a directory of markdown files with YAML frontmatter&quot;, and <code>type</code> &quot;is the only always-required key&quot;.
+<code>index.md</code> and <code>log.md</code> are reserved. Links are paths relative to the bundle that start with <code>/</code>. Consumers &quot;MUST tolerate broken links&quot;.
+That last point is where Cartographer goes further: it validates a bundle on every write, so it is stricter than OKF requires.</p>
+<p>So <strong>&quot;OKF LLMWiki&quot; names the same family of ideas</strong>: the LLM Wiki is the workflow, and OKF is the file format. That phrasing comes from
+<a href="https://github.com/real-jiakai/okf_llm_wiki">real-jiakai/okf_llm_wiki</a>, a 5-star demo that organizes one knowledge base both ways.
+I found no product by that exact name. If you saw it somewhere specific, send me the link and I'll check whether it's something else.</p>
+<h2><span class="num">03 · THE MINIMAL VERSION</span>carto.nim: the core, in one file</h2>
+<p>To understand the idea, I rebuilt the part that makes Cartographer more than &quot;a folder of Markdown&quot;: <strong>a server that owns the writes</strong>.
+<a href="https://github.com/pietroppeter/claude-artifacts/blob/main/cartographer-nim/src/carto.nim"><code>carto.nim</code></a> is one file with no dependencies
+beyond the Nim standard library and the <code>git</code> command. It keeps these parts:</p>
+<table>
+<thead>
+<tr>
+<th>Cartographer idea</th>
+<th>in <code>carto.nim</code></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>OKF pages: Markdown + frontmatter, <code>type</code> required</td>
+<td><code>parseConcept</code>, <code>render</code>, round-trip check on every write</td>
+</tr>
+<tr>
+<td>Agents use tools; the server owns the files</td>
+<td><code>write</code> is the only way a page changes</td>
+</tr>
+<tr>
+<td>Folder contracts in <code>_map.md</code> (<code>concept_types</code>, <code>required_fields</code>, journals)</td>
+<td><code>mapFor</code>, <code>problems</code>; <code>mapCreate</code> is for people only, with no tool for agents</td>
+</tr>
+<tr>
+<td>Optimistic concurrency, <code>stale_write</code></td>
+<td>the etag is the page's git blob id; <code>if_match</code> must match</td>
+</tr>
+<tr>
+<td>One git commit per write, with <code>Reason:</code> and <code>Agent:</code> trailers</td>
+<td><code>commit</code>, <code>history</code></td>
+</tr>
+<tr>
+<td><code>index.md</code> + <code>log.md</code> (OKF reserved files)</td>
+<td>regenerated on every write; log is newest first</td>
+</tr>
+<tr>
+<td>Keyword search, links graph, lint</td>
+<td><code>search</code>, <code>neighbors</code>, <code>lint</code></td>
+</tr>
+<tr>
+<td>MCP server</td>
+<td><code>carto serve</code>: JSON-RPC 2.0 over stdio, 7 tools</td>
+</tr></tbody></table>
+<p>I also added one thing aimed at a multi-repo project, which <strong>I didn't find in Cartographer's docs</strong>. A page can cite code with
+<code>sources: [repo:path]</code>. The server pins each source to the file's current git blob, and <code>lint</code> reports <code>source_drift</code> once that code
+changes. Documentation that silently goes stale is the main way a knowledge base dies across many repos.</p>
+<p>Here is the write path. Everything else in the file supports it:</p>
+<pre><code class="language-nim">proc write*(kb: Kb, c: Concept, ifMatch = &quot;&quot;, reason = &quot;&quot;, agent = &quot;unknown&quot;): string =
+  ## The only way a page changes. Refuses with a code, or commits and returns the new etag.
+  let cur = kb.etag(c.id)
+  if cur != ifMatch:
+    if ifMatch.len == 0:
+      refuse(&quot;stale_write&quot;, &amp;&quot;`{c.id}` already exists (etag {cur[0 ..&lt; 7]}); read it and pass its etag as if_match&quot;)
+    if cur.len == 0: refuse(&quot;stale_write&quot;, &amp;&quot;`{c.id}` does not exist; create it with an empty if_match&quot;)
+    refuse(&quot;stale_write&quot;, &amp;&quot;`{c.id}` changed since you read it (now {cur[0 ..&lt; 7]}); read it again and merge&quot;)
+  let ps = kb.problems(c)
+  if ps.len &gt; 0: refuse(ps[0].split(':')[0], ps.join(&quot;\n&quot;))
+  var c = c
+  if &quot;sources&quot; in c.meta:
+    c.meta[&quot;sources&quot;] = &quot;[&quot; &amp; c.meta[&quot;sources&quot;].list.mapIt(kb.pin(it)).join(&quot;, &quot;) &amp; &quot;]&quot;
+  let text = c.render
+  let back = parseConcept(c.id, text)   # what we write must read back identically
+  if back.meta != c.meta or back.body != c.body: refuse(&quot;round_trip&quot;, &amp;&quot;`{c.id}` does not survive a re-read&quot;)
+  createDir(kb.pathOf(c.id).parentDir)
+  writeFile(kb.pathOf(c.id), text)
+  let verb = if cur.len == 0: &quot;concept_new&quot; else: &quot;concept_write&quot;
+  kb.logEntry(&amp;&quot;{verb} [{c.id}](/{c.id}) by {agent}: {reason}&quot;)
+  kb.regenIndex
+  kb.commit(&amp;&quot;{verb}: {c.id}&quot;, reason, agent)
+  kb.etag(c.id)
+</code></pre>
+<p>The checks it runs come from <code>problems</code>. These are the same checks <code>lint</code> later runs over the whole KB:</p>
+<pre><code class="language-nim">proc problems*(kb: Kb, c: Concept, pending = initHashSet[string]()): seq[string] =
+  ## Everything wrong with a page, as `code: message` lines. Empty means it may be written.
+  if not validId(c.id):
+    result.add &amp;&quot;invalid_id: `{c.id}` must be 1-3 kebab-case segments and not a reserved name&quot;
+  for k, v in c.meta:
+    if not k.allIt(it in {'a'..'z', '0'..'9', '_'}): result.add &amp;&quot;bad_key: `{k}`&quot;
+    if '\n' in v: result.add &amp;&quot;nested_frontmatter: `{k}` spans lines&quot;
+  let typ = c.meta.getOrDefault(&quot;type&quot;)
+  if typ.len == 0: result.add &quot;missing_type: OKF requires a `type` in the frontmatter&quot;
+  let m = kb.mapFor(c.id)
+  if m.meta.len &gt; 0:
+    let allowed = m.meta.getOrDefault(&quot;concept_types&quot;).list
+    if allowed.len &gt; 0 and typ.len &gt; 0 and typ notin allowed:
+      let names = allowed.join(&quot;, &quot;)
+      result.add &amp;&quot;type_not_allowed: `{m.id}` takes {names}, not {typ}&quot;
+    for f in m.meta.getOrDefault(&quot;required_fields&quot;).list:
+      if c.meta.getOrDefault(f).len == 0: result.add &amp;&quot;missing_field: `{m.id}` requires `{f}`&quot;
+    if m.meta.getOrDefault(&quot;kind&quot;) == &quot;journal&quot;:
+      let n = c.id.split('/')[^1]
+      if n.len &lt; 11 or n[4] != '-' or n[7] != '-' or n[10] != '-':
+        result.add &amp;&quot;journal_name: pages in `{m.id}` are named YYYY-MM-DD-slug&quot;
+  for l in c.body.links:
+    if not kb.exists(l) and l notin pending: result.add &amp;&quot;broken_link: `{l}` does not exist&quot;
+</code></pre>
+<h2><span class="num">04 · A WALKTHROUGH</span>Two teams, two repos, one knowledge base</h2>
+<p>Everything below ran while this page was built. Each output is what the code printed. The setup is a small version of a
+multi-team project: a <code>payments-api</code> repo, a <code>web-checkout</code> repo, and one knowledge base they share.</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">proc</span> sh(dir, cmd: <span class="hljs-built_in">string</span>) =
+  <span class="hljs-keyword">let</span> (outp, code) = execCmdEx(cmd, workingDir = dir)
+  doAssert code == <span class="hljs-number">0</span>, cmd &amp; <span class="hljs-string">&quot;: &quot;</span> &amp; outp
+
+<span class="hljs-comment"># two code repos, as two teams would have them</span>
+<span class="hljs-keyword">for</span> (repo, file, text) <span class="hljs-keyword">in</span> [(<span class="hljs-string">&quot;payments-api&quot;</span>, <span class="hljs-string">&quot;openapi.yaml&quot;</span>, <span class="hljs-string">&quot;paths:</span><span class="hljs-meta">\n</span><span class="hljs-string">  /charges: {post: {}}</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>),
+                           (<span class="hljs-string">&quot;web-checkout&quot;</span>, <span class="hljs-string">&quot;src/pay.ts&quot;</span>, <span class="hljs-string">&quot;export const retries = 3</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>)]:
+  createDir(work / repo / file.parentDir)
+  writeFile(work / repo / file, text)
+  sh(work / repo, <span class="hljs-string">&quot;git init -q -b main &amp;&amp; git add -A &amp;&amp; &quot;</span> &amp;
+                  <span class="hljs-string">&quot;git -c user.name=dev -c user.email=dev@x commit -qm init&quot;</span>)
+
+<span class="hljs-comment"># the knowledge base, and the folder contracts people agree on</span>
+<span class="hljs-keyword">var</span> kb = initKb(work / <span class="hljs-string">&quot;kb-platform&quot;</span>)
+kb.repos = {<span class="hljs-string">&quot;payments-api&quot;</span>: work / <span class="hljs-string">&quot;payments-api&quot;</span>,
+            <span class="hljs-string">&quot;web-checkout&quot;</span>: work / <span class="hljs-string">&quot;web-checkout&quot;</span>}.toTable
+kb.mapCreate(<span class="hljs-string">&quot;services&quot;</span>, {<span class="hljs-string">&quot;kind&quot;</span>: <span class="hljs-string">&quot;map&quot;</span>, <span class="hljs-string">&quot;concept_types&quot;</span>: <span class="hljs-string">&quot;[Service]&quot;</span>,
+                          <span class="hljs-string">&quot;required_fields&quot;</span>: <span class="hljs-string">&quot;[owner, sources]&quot;</span>}.toOrderedTable, <span class="hljs-string">&quot;one page per deployable&quot;</span>)
+kb.mapCreate(<span class="hljs-string">&quot;teams&quot;</span>, {<span class="hljs-string">&quot;kind&quot;</span>: <span class="hljs-string">&quot;map&quot;</span>, <span class="hljs-string">&quot;concept_types&quot;</span>: <span class="hljs-string">&quot;[Runbook, Reference, Note]&quot;</span>,
+                       <span class="hljs-string">&quot;required_fields&quot;</span>: <span class="hljs-string">&quot;[owner]&quot;</span>}.toOrderedTable, <span class="hljs-string">&quot;team-owned know-how&quot;</span>)
+kb.mapCreate(<span class="hljs-string">&quot;decisions&quot;</span>, {<span class="hljs-string">&quot;kind&quot;</span>: <span class="hljs-string">&quot;journal&quot;</span>, <span class="hljs-string">&quot;concept_types&quot;</span>: <span class="hljs-string">&quot;[Decision]&quot;</span>,
+                           <span class="hljs-string">&quot;required_fields&quot;</span>: <span class="hljs-string">&quot;[status]&quot;</span>}.toOrderedTable, <span class="hljs-string">&quot;cross-team decisions&quot;</span>)
+<span class="hljs-keyword">echo</span> kb.guide</code></pre>
+<pre class="nb-output">This knowledge base is written only through these tools. Pages are OKF concepts: Markdown with flat YAML frontmatter; `type` is required. Read a page before writing it and pass its etag as if_match. Link pages with [[id]]. Cite code with sources: [repo:path].
+
+Folders:
+- decisions (journal): types [Decision], required [status]
+- services (map): types [Service], required [owner, sources]
+- teams (map): types [Runbook, Reference, Note], required [owner]
+
+Repos: payments-api, web-checkout
+
+</pre>
+<p><code>kb_guide</code> is the first thing an agent reads. Now an agent, Claude Code on the payments team, writes the first page.
+A small helper builds pages and reports refusals:</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">proc</span> page(id: <span class="hljs-built_in">string</span>, meta: openArray[(<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span>)], body: <span class="hljs-built_in">string</span>): <span class="hljs-keyword">Concept</span> =
+  <span class="hljs-keyword">Concept</span>(id: id, meta: meta.toOrderedTable, body: body)
+
+<span class="hljs-keyword">proc</span> attempt(kb: <span class="hljs-type">Kb</span>, c: <span class="hljs-keyword">Concept</span>, reason: <span class="hljs-built_in">string</span>, ifMatch = <span class="hljs-string">&quot;&quot;</span>, agent = <span class="hljs-string">&quot;claude-code&quot;</span>): <span class="hljs-built_in">string</span> =
+  <span class="hljs-keyword">try</span>:
+    <span class="hljs-literal">result</span> = kb.write(c, ifMatch, reason, agent)
+    <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;✓ &quot;</span>, reason, <span class="hljs-string">&quot;  (etag &quot;</span>, <span class="hljs-literal">result</span>[<span class="hljs-number">0</span> ..&lt; <span class="hljs-number">7</span>], <span class="hljs-string">&quot;)&quot;</span>
+  <span class="hljs-keyword">except</span> <span class="hljs-type">KbError</span> <span class="hljs-keyword">as</span> e:
+    <span class="hljs-keyword">let</span> msg = <span class="hljs-keyword">if</span> e.msg.startsWith(e.code &amp; <span class="hljs-string">&quot;:&quot;</span>): e.msg <span class="hljs-keyword">else</span>: e.code &amp; <span class="hljs-string">&quot;: &quot;</span> &amp; e.msg
+    <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;✗ &quot;</span>, reason, <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">    refused &quot;</span>, msg.replace(<span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>, <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">    refused &quot;</span>)
+
+<span class="hljs-keyword">var</span> svc = page(<span class="hljs-string">&quot;services/payments-api&quot;</span>,
+  {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;Service&quot;</span>, <span class="hljs-string">&quot;title&quot;</span>: <span class="hljs-string">&quot;Payments API&quot;</span>, <span class="hljs-string">&quot;owner&quot;</span>: <span class="hljs-string">&quot;team-payments&quot;</span>,
+   <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Charges, refunds and idempotency for every checkout.&quot;</span>,
+   <span class="hljs-string">&quot;sources&quot;</span>: <span class="hljs-string">&quot;[payments-api:openapi.yaml]&quot;</span>},
+  <span class="hljs-string">&quot;# Payments API</span><span class="hljs-meta">\n</span><span class="hljs-meta">\n</span><span class="hljs-string">Public contract: `POST /charges`. Owned by team-payments.</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>)
+<span class="hljs-keyword">let</span> svcTag = kb.attempt(svc, <span class="hljs-string">&quot;document the payments service&quot;</span>)
+<span class="hljs-keyword">echo</span> readFile(work / <span class="hljs-string">&quot;kb-platform/data/services/payments-api.md&quot;</span>)</code></pre>
+<pre class="nb-output">✓ document the payments service  (etag 4264164)
+---
+type: Service
+title: Payments API
+owner: team-payments
+description: Charges, refunds and idempotency for every checkout.
+sources: [payments-api:openapi.yaml@ce7d768]
+---
+# Payments API
+
+Public contract: `POST /charges`. Owned by team-payments.
+
+</pre>
+<p>The server pinned the source to <code>@&lt;blob&gt;</code>, the exact version of <code>openapi.yaml</code> the page describes.
+Next come the writes a careless agent would make. Each one is refused with a code the agent can act on:</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">discard</span> kb.attempt(page(<span class="hljs-string">&quot;teams/payments/retries&quot;</span>, {<span class="hljs-string">&quot;title&quot;</span>: <span class="hljs-string">&quot;Retries&quot;</span>}, <span class="hljs-string">&quot;Retry 3 times.&quot;</span>),
+                   <span class="hljs-string">&quot;no type&quot;</span>)
+<span class="hljs-keyword">discard</span> kb.attempt(page(<span class="hljs-string">&quot;services/retry-howto&quot;</span>, {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;Runbook&quot;</span>, <span class="hljs-string">&quot;owner&quot;</span>: <span class="hljs-string">&quot;team-payments&quot;</span>}, <span class="hljs-string">&quot;…&quot;</span>),
+                   <span class="hljs-string">&quot;a runbook in the services folder&quot;</span>)
+<span class="hljs-keyword">discard</span> kb.attempt(page(<span class="hljs-string">&quot;teams/checkout/retries&quot;</span>, {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;Runbook&quot;</span>}, <span class="hljs-string">&quot;Retry 3 times.&quot;</span>),
+                   <span class="hljs-string">&quot;a team page with no owner&quot;</span>)
+<span class="hljs-keyword">discard</span> kb.attempt(page(<span class="hljs-string">&quot;teams/checkout/retries&quot;</span>, {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;Runbook&quot;</span>, <span class="hljs-string">&quot;owner&quot;</span>: <span class="hljs-string">&quot;team-checkout&quot;</span>},
+                        <span class="hljs-string">&quot;Follow [[teams/payments/idempotency]] first.&quot;</span>),
+                   <span class="hljs-string">&quot;a link to a page that doesn't exist&quot;</span>)
+<span class="hljs-keyword">discard</span> kb.attempt(page(<span class="hljs-string">&quot;decisions/idempotency-keys&quot;</span>, {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;Decision&quot;</span>, <span class="hljs-string">&quot;status&quot;</span>: <span class="hljs-string">&quot;accepted&quot;</span>}, <span class="hljs-string">&quot;…&quot;</span>),
+                   <span class="hljs-string">&quot;a journal entry without a date&quot;</span>)
+<span class="hljs-keyword">discard</span> kb.attempt(page(<span class="hljs-string">&quot;services/payments-api&quot;</span>, {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;Service&quot;</span>, <span class="hljs-string">&quot;owner&quot;</span>: <span class="hljs-string">&quot;x&quot;</span>, <span class="hljs-string">&quot;sources&quot;</span>: <span class="hljs-string">&quot;[a:b]&quot;</span>}, <span class="hljs-string">&quot;…&quot;</span>),
+                   <span class="hljs-string">&quot;create the payments page again, without reading it&quot;</span>, agent = <span class="hljs-string">&quot;codex&quot;</span>)</code></pre>
+<pre class="nb-output">✗ no type
+    refused missing_type: OKF requires a `type` in the frontmatter
+    refused missing_field: `teams/_map` requires `owner`
+✗ a runbook in the services folder
+    refused type_not_allowed: `services/_map` takes Service, not Runbook
+    refused missing_field: `services/_map` requires `sources`
+✗ a team page with no owner
+    refused missing_field: `teams/_map` requires `owner`
+✗ a link to a page that doesn't exist
+    refused broken_link: `teams/payments/idempotency` does not exist
+✗ a journal entry without a date
+    refused journal_name: pages in `decisions/_map` are named YYYY-MM-DD-slug
+✗ create the payments page again, without reading it
+    refused stale_write: `services/payments-api` already exists (etag 4264164); read it and pass its etag as if_match
+</pre>
+<p>The last one is the important case for teams. You can't create a page that already exists or overwrite one you haven't read.
+Two agents on two teams now work on the same page at the same time:</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-comment"># both agents read the page at the same version</span>
+<span class="hljs-keyword">let</span> seenByCodex = kb.etag(<span class="hljs-string">&quot;services/payments-api&quot;</span>)
+<span class="hljs-keyword">var</span> c1 = kb.read(<span class="hljs-string">&quot;services/payments-api&quot;</span>)
+
+<span class="hljs-comment"># checkout's Claude records a decision, writes a runbook, and links them from the service page</span>
+<span class="hljs-keyword">discard</span> kb.attempt(page(<span class="hljs-string">&quot;decisions/2026-10-30-idempotency-keys&quot;</span>,
+  {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;Decision&quot;</span>, <span class="hljs-string">&quot;title&quot;</span>: <span class="hljs-string">&quot;Idempotency keys on every charge&quot;</span>, <span class="hljs-string">&quot;status&quot;</span>: <span class="hljs-string">&quot;accepted&quot;</span>,
+   <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Clients send Idempotency-Key; the API dedupes for 24h.&quot;</span>},
+  <span class="hljs-string">&quot;Agreed by payments and checkout. Affects [[services/payments-api]].</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>),
+  <span class="hljs-string">&quot;record the idempotency decision&quot;</span>)
+<span class="hljs-keyword">discard</span> kb.attempt(page(<span class="hljs-string">&quot;teams/checkout/retries&quot;</span>,
+  {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;Runbook&quot;</span>, <span class="hljs-string">&quot;title&quot;</span>: <span class="hljs-string">&quot;Retrying a failed payment&quot;</span>, <span class="hljs-string">&quot;owner&quot;</span>: <span class="hljs-string">&quot;team-checkout&quot;</span>,
+   <span class="hljs-string">&quot;sources&quot;</span>: <span class="hljs-string">&quot;[web-checkout:src/pay.ts]&quot;</span>},
+  <span class="hljs-string">&quot;Retry up to 3 times with the same key, see [[decisions/2026-10-30-idempotency-keys]].</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>),
+  <span class="hljs-string">&quot;write the checkout retry runbook&quot;</span>)
+c1.body.add <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">Decisions: [[decisions/2026-10-30-idempotency-keys]]. Client retries: [[teams/checkout/retries]].</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>
+<span class="hljs-keyword">discard</span> kb.attempt(c1, <span class="hljs-string">&quot;link decision and runbook&quot;</span>, svcTag)
+
+<span class="hljs-comment"># codex, still holding the old version, tries to add its own line</span>
+<span class="hljs-keyword">var</span> c2 = page(<span class="hljs-string">&quot;services/payments-api&quot;</span>, toSeq(kb.read(<span class="hljs-string">&quot;services/payments-api&quot;</span>).meta.pairs), svc.body &amp; <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">Rate limit: 100 rps.</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>)
+<span class="hljs-keyword">discard</span> kb.attempt(c2, <span class="hljs-string">&quot;add rate limit&quot;</span>, seenByCodex, agent = <span class="hljs-string">&quot;codex&quot;</span>)
+<span class="hljs-comment"># it re-reads, merges its change into the current page, and tries again</span>
+<span class="hljs-keyword">var</span> merged = kb.read(<span class="hljs-string">&quot;services/payments-api&quot;</span>)
+merged.body.add <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">Rate limit: 100 rps.</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>
+<span class="hljs-keyword">discard</span> kb.attempt(merged, <span class="hljs-string">&quot;add rate limit&quot;</span>, kb.etag(<span class="hljs-string">&quot;services/payments-api&quot;</span>), agent = <span class="hljs-string">&quot;codex&quot;</span>)</code></pre>
+<pre class="nb-output">✓ record the idempotency decision  (etag 4ab796c)
+✓ write the checkout retry runbook  (etag c8574ac)
+✓ link decision and runbook  (etag 1a2c34d)
+✗ add rate limit
+    refused stale_write: `services/payments-api` changed since you read it (now 1a2c34d); read it again and merge
+✓ add rate limit  (etag 89ee821)
+</pre>
+<p>Nothing was silently lost. Every change is a commit that records which agent made it and why:</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> kb.history(<span class="hljs-string">&quot;services/payments-api&quot;</span>): <span class="hljs-keyword">echo</span> line
+<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;&quot;</span>
+<span class="hljs-keyword">echo</span> readFile(work / <span class="hljs-string">&quot;kb-platform/data/log.md&quot;</span>)
+<span class="hljs-keyword">echo</span> readFile(work / <span class="hljs-string">&quot;kb-platform/data/index.md&quot;</span>)</code></pre>
+<pre class="nb-output">ffaf0e8 concept_write: services/payments-api · codex · add rate limit
+42d266d concept_write: services/payments-api · claude-code · link decision and runbook
+d554de4 concept_new: services/payments-api · claude-code · document the payments service
+
+# Log
+
+## 2026-11-04
+
+- concept_write [services/payments-api](/services/payments-api) by codex: add rate limit
+- concept_write [services/payments-api](/services/payments-api) by claude-code: link decision and runbook
+- concept_new [teams/checkout/retries](/teams/checkout/retries) by claude-code: write the checkout retry runbook
+- concept_new [decisions/2026-10-30-idempotency-keys](/decisions/2026-10-30-idempotency-keys) by claude-code: record the idempotency decision
+- concept_new [services/payments-api](/services/payments-api) by claude-code: document the payments service
+- map_create decisions by operator: cross-team decisions
+- map_create teams by operator: team-owned know-how
+- map_create services by operator: one page per deployable
+- kb_create
+
+# Index
+
+Generated by the server on every write. Do not edit.
+
+## decisions
+
+- [Idempotency keys on every charge](/decisions/2026-10-30-idempotency-keys) · `Decision` Clients send Idempotency-Key; the API dedupes for 24h.
+
+## services
+
+- [Payments API](/services/payments-api) · `Service` Charges, refunds and idempotency for every checkout.
+
+## teams
+
+- [Retrying a failed payment](/teams/checkout/retries) · `Runbook`
+
+</pre>
+<p><code>search</code> and <code>neighbors</code> are what an agent uses to find its way around before it writes:</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">for</span> (score, id) <span class="hljs-keyword">in</span> kb.search(<span class="hljs-string">&quot;retry idempotency&quot;</span>): <span class="hljs-keyword">echo</span> score, <span class="hljs-string">&quot;  &quot;</span>, id
+<span class="hljs-keyword">let</span> n = kb.neighbors(<span class="hljs-string">&quot;decisions/2026-10-30-idempotency-keys&quot;</span>)
+<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;links to:    &quot;</span>, n.outgoing.join(<span class="hljs-string">&quot;, &quot;</span>)
+<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;linked from: &quot;</span>, n.incoming.join(<span class="hljs-string">&quot;, &quot;</span>)</code></pre>
+<pre class="nb-output">8  decisions/2026-10-30-idempotency-keys
+5  teams/checkout/retries
+3  services/payments-api
+links to:    services/payments-api
+linked from: services/payments-api, teams/checkout/retries
+</pre>
+<h3>When something goes around the server</h3>
+<p>Someone (or some agent with shell access) edits the files directly. The server can't stop that, but <code>lint</code> notices,
+and because every good state is a commit, recovery is a <code>git checkout</code>:</p>
+<pre><code class="nohighlight nim hljs">createDir(work / <span class="hljs-string">&quot;kb-platform/data/teams/payments&quot;</span>)
+writeFile(work / <span class="hljs-string">&quot;kb-platform/data/teams/payments/scratch.md&quot;</span>, <span class="hljs-string">&quot;quick notes, no frontmatter</span><span class="hljs-meta">\n</span><span class="hljs-string">see [[nowhere]]</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>)
+<span class="hljs-keyword">for</span> l <span class="hljs-keyword">in</span> kb.lint: <span class="hljs-keyword">echo</span> l
+sh(work / <span class="hljs-string">&quot;kb-platform&quot;</span>, <span class="hljs-string">&quot;git clean -fdq data &amp;&amp; git checkout -q -- data&quot;</span>)
+<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;after restore: &quot;</span>, (<span class="hljs-keyword">if</span> kb.lint.len == <span class="hljs-number">0</span>: <span class="hljs-string">&quot;clean&quot;</span> <span class="hljs-keyword">else</span>: kb.lint.join(<span class="hljs-string">&quot;; &quot;</span>))</code></pre>
+<pre class="nb-output">edited_outside: data/teams/payments/scratch.md changed without going through the server
+teams/payments/scratch: missing_type: OKF requires a `type` in the frontmatter
+teams/payments/scratch: missing_field: `teams/_map` requires `owner`
+teams/payments/scratch: broken_link: `nowhere` does not exist
+teams/payments/scratch: orphan: no page links here
+after restore: clean
+</pre>
+<h3>When the code moves on</h3>
+<p>This is the multi-repo problem. The payments team changes its API, and nobody updates the wiki. Because the service page
+pinned the blob of <code>openapi.yaml</code>, <code>lint</code> can tell:</p>
+<pre><code class="nohighlight nim hljs">writeFile(work / <span class="hljs-string">&quot;payments-api/openapi.yaml&quot;</span>, <span class="hljs-string">&quot;paths:</span><span class="hljs-meta">\n</span><span class="hljs-string">  /charges: {post: {}}</span><span class="hljs-meta">\n</span><span class="hljs-string">  /refunds: {post: {}}</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>)
+sh(work / <span class="hljs-string">&quot;payments-api&quot;</span>, <span class="hljs-string">&quot;git -c user.name=dev -c user.email=dev@x commit -qam 'add refunds'&quot;</span>)
+<span class="hljs-keyword">for</span> l <span class="hljs-keyword">in</span> kb.lint: <span class="hljs-keyword">echo</span> l</code></pre>
+<pre class="nb-output">services/payments-api: source_drift: payments-api:openapi.yaml changed since this page was written
+</pre>
+<p>Running that <code>lint</code> in each code repo's CI, or on a schedule, turns &quot;the docs are stale&quot; from a surprise into a work item.
+An agent can pick it up: read the diff, update the page, and pass the new etag.</p>
+<h2><span class="num">05 · OVER MCP</span>What an agent actually sees</h2>
+<p>The same library behind <code>carto serve</code> speaks <a href="https://modelcontextprotocol.io">MCP</a> over stdio: one JSON-RPC message per line.
+This block compiles the binary, starts it, and talks to it the way Claude Code or Codex would.</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">let</span> bin = work / <span class="hljs-string">&quot;carto&quot;</span>
+<span class="hljs-keyword">let</span> src = currentSourcePath().parentDir / <span class="hljs-string">&quot;carto.nim&quot;</span>
+doAssert execCmd(&amp;<span class="hljs-string">&quot;nim c -d:release --hints:off --warnings:off -o:{bin} {src} &gt; /dev/null&quot;</span>) == <span class="hljs-number">0</span>
+<span class="hljs-keyword">let</span> p = startProcess(bin, args = [<span class="hljs-string">&quot;serve&quot;</span>, <span class="hljs-string">&quot;--kb&quot;</span>, work / <span class="hljs-string">&quot;kb-platform&quot;</span>,
+                                  <span class="hljs-string">&quot;--repo&quot;</span>, <span class="hljs-string">&quot;payments-api=&quot;</span> &amp; work / <span class="hljs-string">&quot;payments-api&quot;</span>])
+<span class="hljs-keyword">var</span> id = <span class="hljs-number">0</span>
+<span class="hljs-keyword">proc</span> rpc(meth: <span class="hljs-built_in">string</span>, params: <span class="hljs-type">JsonNode</span>): <span class="hljs-type">JsonNode</span> =
+  inc id
+  <span class="hljs-keyword">let</span> req = %*{<span class="hljs-string">&quot;jsonrpc&quot;</span>: <span class="hljs-string">&quot;2.0&quot;</span>, <span class="hljs-string">&quot;id&quot;</span>: id, <span class="hljs-string">&quot;method&quot;</span>: meth, <span class="hljs-string">&quot;params&quot;</span>: params}
+  p.inputStream.writeLine($req)
+  p.inputStream.flush
+  <span class="hljs-literal">result</span> = parseJson(p.outputStream.readLine)
+<span class="hljs-keyword">proc</span> call(tool: <span class="hljs-built_in">string</span>, args: <span class="hljs-type">JsonNode</span>) =
+  <span class="hljs-keyword">let</span> r = rpc(<span class="hljs-string">&quot;tools/call&quot;</span>, %*{<span class="hljs-string">&quot;name&quot;</span>: tool, <span class="hljs-string">&quot;arguments&quot;</span>: args})[<span class="hljs-string">&quot;result&quot;</span>]
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;→ &quot;</span>, tool, <span class="hljs-string">&quot; &quot;</span>, $args
+  <span class="hljs-keyword">echo</span> (<span class="hljs-keyword">if</span> r{<span class="hljs-string">&quot;isError&quot;</span>}.getBool: <span class="hljs-string">&quot;← ERROR &quot;</span> <span class="hljs-keyword">else</span>: <span class="hljs-string">&quot;← &quot;</span>), r[<span class="hljs-string">&quot;content&quot;</span>][<span class="hljs-number">0</span>][<span class="hljs-string">&quot;text&quot;</span>].getStr.replace(<span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>, <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">  &quot;</span>), <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>
+
+<span class="hljs-keyword">let</span> hello = rpc(<span class="hljs-string">&quot;initialize&quot;</span>, %*{<span class="hljs-string">&quot;protocolVersion&quot;</span>: <span class="hljs-string">&quot;2025-06-18&quot;</span>, <span class="hljs-string">&quot;clientInfo&quot;</span>: {<span class="hljs-string">&quot;name&quot;</span>: <span class="hljs-string">&quot;claude-code&quot;</span>}})
+<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;server: &quot;</span>, hello[<span class="hljs-string">&quot;result&quot;</span>][<span class="hljs-string">&quot;serverInfo&quot;</span>], <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>
+<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;tools:  &quot;</span>, rpc(<span class="hljs-string">&quot;tools/list&quot;</span>, newJObject())[<span class="hljs-string">&quot;result&quot;</span>][<span class="hljs-string">&quot;tools&quot;</span>].mapIt(it[<span class="hljs-string">&quot;name&quot;</span>].getStr).join(<span class="hljs-string">&quot;, &quot;</span>), <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>
+call(<span class="hljs-string">&quot;search&quot;</span>, %*{<span class="hljs-string">&quot;query&quot;</span>: <span class="hljs-string">&quot;refunds&quot;</span>})
+call(<span class="hljs-string">&quot;concept_write&quot;</span>, %*{<span class="hljs-string">&quot;id&quot;</span>: <span class="hljs-string">&quot;teams/payments/refunds&quot;</span>, <span class="hljs-string">&quot;if_match&quot;</span>: <span class="hljs-string">&quot;&quot;</span>, <span class="hljs-string">&quot;reason&quot;</span>: <span class="hljs-string">&quot;doc refunds&quot;</span>,
+                         <span class="hljs-string">&quot;frontmatter&quot;</span>: {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;Reference&quot;</span>}, <span class="hljs-string">&quot;body&quot;</span>: <span class="hljs-string">&quot;See [[services/payments-api]].&quot;</span>})
+call(<span class="hljs-string">&quot;concept_write&quot;</span>, %*{<span class="hljs-string">&quot;id&quot;</span>: <span class="hljs-string">&quot;teams/payments/refunds&quot;</span>, <span class="hljs-string">&quot;if_match&quot;</span>: <span class="hljs-string">&quot;&quot;</span>, <span class="hljs-string">&quot;reason&quot;</span>: <span class="hljs-string">&quot;document refunds&quot;</span>,
+                         <span class="hljs-string">&quot;frontmatter&quot;</span>: {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;Reference&quot;</span>, <span class="hljs-string">&quot;owner&quot;</span>: <span class="hljs-string">&quot;team-payments&quot;</span>, <span class="hljs-string">&quot;title&quot;</span>: <span class="hljs-string">&quot;Refunds&quot;</span>},
+                         <span class="hljs-string">&quot;body&quot;</span>: <span class="hljs-string">&quot;POST /refunds reverses a charge. See [[services/payments-api]].</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>})
+call(<span class="hljs-string">&quot;concept_history&quot;</span>, %*{<span class="hljs-string">&quot;id&quot;</span>: <span class="hljs-string">&quot;teams/payments/refunds&quot;</span>})
+p.inputStream.close
+<span class="hljs-keyword">discard</span> p.waitForExit
+p.close</code></pre>
+<pre class="nb-output">server: {"name":"carto","version":"0.1.0"}
+
+tools:  kb_guide, concept_read, concept_write, search, graph_neighbors, concept_history, lint
+
+→ search {"query":"refunds"}
+← services/payments-api (score 2)
+
+→ concept_write {"id":"teams/payments/refunds","if_match":"","reason":"doc refunds","frontmatter":{"type":"Reference"},"body":"See [[services/payments-api]]."}
+← ERROR refused missing_field: `teams/_map` requires `owner`
+
+→ concept_write {"id":"teams/payments/refunds","if_match":"","reason":"document refunds","frontmatter":{"type":"Reference","owner":"team-payments","title":"Refunds"},"body":"POST /refunds reverses a charge. See [[services/payments-api]].\n"}
+← written, etag 6ef54dca423ab724c3d80b829dee49e56962a20a
+
+→ concept_history {"id":"teams/payments/refunds"}
+← 47e7724 concept_new: teams/payments/refunds · claude-code · document refunds
+
+</pre>
+<p>The agent gets a refusal it can fix (<code>missing_field</code>), fixes it, and the commit records <code>claude-code</code> as the agent.
+The name comes from the client's <code>initialize</code> handshake. Connecting it to a real client takes one line of config, for example
+<code>claude mcp add carto -- /path/to/carto serve --kb /path/to/kb-platform --repo payments-api=/path/to/payments-api</code>.</p>
+<h2><span class="num">06 · WHAT THE MINIMUM LEAVES OUT</span>Where the other 90% of Cartographer goes</h2>
+<p><code>carto.nim</code> shows the core idea, and it leaves out most of what you'd need to run this for real teams. Here's what Cartographer
+documents and this version skips:</p>
+<ul>
+<li><strong>A server for many people.</strong> Cartographer has an HTTP mode with bearer tokens scoped per KB and per map, and serves several KBs
+from one process. <code>carto</code> is one local process per user. With git underneath, each person would run their own and push and pull,
+and then you need Cartographer's answer to conflicting merges (<code>degraded</code> state, <code>git_conflict_resolve</code>).</li>
+<li><strong>Atomic multi-page writes</strong> (<code>concept_batch</code>). In the walkthrough, the decision, runbook and service page took three commits and
+had to be written in dependency order.</li>
+<li><strong>Agent configuration as knowledge.</strong> Syncing <code>skills/</code>, <code>agents/</code>, <code>hooks/</code>, MCP descriptors and SOPS secrets into every client.
+For a team lead this may be the most useful part, because it stops each developer's <code>.claude/</code> from drifting.</li>
+<li><strong>Lifecycle and trust fields</strong> (<code>status</code>, <code>superseded_by</code>, <code>confidence</code>, <code>provenance</code>), <code>supersede</code>, archive, review gates, the
+read-only web UI (&quot;Atlas&quot;), a graph ranked by personalized PageRank, and a signed audit log.</li>
+<li><strong>Ingest.</strong> Registering sources and letting a planner decide where new knowledge goes.</li>
+</ul>
+<p>The code-drift check goes the other way: it's my addition. I didn't find it in Cartographer's docs, though I didn't read
+<code>changes_since</code> or the ingest docs in full.</p>
+<h2><span class="num">07 · ALTERNATIVES</span>What else solves this</h2>
+<p>The tools people reach for to give agents shared knowledge fall into four groups. For each one I checked the README or official
+page on 2026-11-04. Star counts are rough and change quickly. Rows marked <em>unverified</em> are from memory, because my sandbox couldn't reach the site.</p>
+<div class="table-wrap"><table>
+<tr><th>Option</th><th>Store</th><th>Agents write?</th><th>Teams / many repos</th><th>Signal</th></tr>
+<tr><td colspan="5"><b>Agent-maintained Markdown wikis</b> (same family as Cartographer)</td></tr>
+<tr><td><a href="https://github.com/BeppeTemp/cartographer">Cartographer</a></td><td>OKF files in git</td><td>Only through validated MCP tools</td><td>Several KBs per server, scoped tokens, commit trailers, conflict flow</td><td>Apache-2.0, pre-1.0, 1 maintainer, ~54★</td></tr>
+<tr><td>Plain OKF bundle + <code>AGENTS.md</code> rules, e.g. <a href="https://github.com/mchu1966/okf-wiki">okf-wiki</a></td><td>OKF files in git</td><td>Directly, with rules in a prompt file</td><td>Through git and PR review; no enforcement unless CI lints</td><td>Spec Apache-2.0; okf-wiki is a 1-commit template</td></tr>
+<tr><td><a href="https://github.com/atomicstrata/llm-wiki-compiler">llm-wiki-compiler</a></td><td>Local files, embeddings in files</td><td>Yes, MCP, optional review queue</td><td>No permission model</td><td>MIT, ~2.2k★, v1.5.0, "early software", OKF import/export</td></tr>
+<tr><td><a href="https://github.com/lucasastorian/llmwiki">llmwiki</a></td><td>Local files + SQLite, or Postgres/S3 hosted</td><td>Yes, MCP</td><td>Single-user; team capture on the roadmap</td><td>Apache-2.0, ~1.8k★</td></tr>
+<tr><td colspan="5"><b>Agent memory systems</b> (facts in a database, not a doc corpus people read)</td></tr>
+<tr><td><a href="https://github.com/basicmachines-co/basic-memory">basic-memory</a></td><td>Markdown + SQLite index, vectors</td><td>Yes, MCP</td><td>Local is single-user; hosted Teams tier announced</td><td>AGPL-3.0, ~4.5k★, active</td></tr>
+<tr><td><a href="https://github.com/mem0ai/mem0">mem0</a></td><td>Vector store</td><td>Yes, SDK</td><td>Scoped by user/agent id, not a shared wiki</td><td>Apache-2.0, ~68k★</td></tr>
+<tr><td><a href="https://github.com/getzep/graphiti">Graphiti</a> / Zep</td><td>Temporal graph DB (Neo4j…)</td><td>Yes; reference MCP server has no auth</td><td>Build your own service, or use Zep</td><td>Apache-2.0, ~32k★</td></tr>
+<tr><td><a href="https://github.com/letta-ai/letta">Letta</a></td><td>Server-side agent state</td><td>Agents edit their own memory</td><td>Per agent</td><td>Apache-2.0, ~25k★; code moved to letta-code</td></tr>
+<tr><td colspan="5"><b>Docs generated from code</b> (read-only for agents)</td></tr>
+<tr><td><a href="https://github.com/AsyncFuncAI/deepwiki-open">deepwiki-open</a></td><td>Generated wiki + embeddings</td><td>No</td><td>One wiki per repo</td><td>MIT, ~18k★</td></tr>
+<tr><td>DeepWiki (deepwiki.com) <i>unverified</i></td><td>Hosted, generated</td><td>No</td><td>Per repo</td><td>Couldn't reach the site</td></tr>
+<tr><td><a href="https://github.com/upstash/context7">Context7</a></td><td>Hosted index of third-party library docs</td><td>No, read-only</td><td>Not for your own knowledge</td><td>MIT, ~64k★</td></tr>
+<tr><td colspan="5"><b>Classic docs platforms</b></td></tr>
+<tr><td>Backstage TechDocs <i>unverified</i></td><td>MkDocs Markdown next to each repo, built into a portal</td><td>Through normal PRs</td><td>Designed for many repos and teams: software catalog, ownership</td><td>Apache-2.0, CNCF; couldn't reach backstage.io</td></tr>
+<tr><td>Per-repo <code>AGENTS.md</code> / <code>CLAUDE.md</code></td><td>One file per repo</td><td>Directly</td><td>Doesn't share across repos; copies drift</td><td>What Cartographer's FAQ recommends for one repo and one person</td></tr>
+</table></div>
+<p>Two things stand out. First, <strong>only Cartographer in this list is built for many agents from many teams writing to the same knowledge.</strong>
+The other wikis are single-user, and the memory systems store facts for one agent, not documentation people can review.
+Second, the two real alternatives for a team are not tools. One is the <strong>plain OKF bundle</strong> (a git repo of Markdown plus written rules
+and CI), and the other is the <strong>docs platform you may already have</strong>. Cartographer competes with those on enforcement and audit, not on format.</p>
+<h2 id="fit"><span class="num">08 · FIT</span>For a multi-repo, multi-team project</h2>
+<p>I don't know your project's details, so this assumes several teams, each owning a few repos, with developers using coding agents
+(Claude Code, Codex and others), and knowledge that crosses repo boundaries: contracts between services, decisions, runbooks and onboarding.</p>
+<p><strong>Where it helps most</strong></p>
+<ul>
+<li><strong>Cross-repo knowledge with no home.</strong> &quot;Why do we retry this way&quot; lives in Slack, in one person's head, or in one repo's <code>CLAUDE.md</code>.
+A shared KB with one folder per team and a journal of decisions gives it a home that every agent reads at the start of a session.</li>
+<li><strong>Many writers, little trust.</strong> If agents on several teams will write, the guardrails are the point: required <code>type</code> and <code>owner</code>,
+no broken links, no blind overwrites, and an audit trail that names the agent and the reason. This is the gap between Cartographer and a plain folder.</li>
+<li><strong>One agent setup for everyone.</strong> Shipping the team's skills, subagents and instructions from one repo to every client fixes the
+drift between developers' <code>.claude/</code> and <code>.codex/</code> folders. You may find this useful even if you use nothing else.</li>
+<li><strong>Easy to leave.</strong> It's OKF Markdown in git. If Cartographer stalls, the bundle stays readable by people, by other OKF tools, and by any agent with plain file access.</li>
+</ul>
+<p><strong>What to watch</strong></p>
+<ul>
+<li><strong>Bus factor.</strong> It's a pre-1.0 personal project, maintained on a best-effort basis, with breaking changes in minor versions.
+Pin a version and don't put it in the critical path yet.</li>
+<li><strong>A server to run.</strong> You'd need the HTTP mode, tokens, backups, and someone who owns it. The local mode is one person's KB.</li>
+<li><strong>KBs don't link to each other.</strong> The docs say &quot;no cross-links between different KBs&quot;. For one project, use <strong>one KB with a map
+per team</strong>, not one KB per team, or the cross-team links you want most won't be possible.</li>
+<li><strong>Drift from code.</strong> The KB lives outside the code repos. Unless something ties pages to code (like the <code>sources</code> check above,
+or a CI job that asks for KB updates on API changes), it will drift the way wikis always do.</li>
+<li><strong>Search is keyword-only.</strong> That's a deliberate choice, and fine for a curated wiki. It's weak for fuzzy recall over a large corpus.</li>
+</ul>
+<p><strong>What I'd do</strong></p>
+<ol>
+<li><strong>Start with the format, not the server.</strong> Create one <code>kb-&lt;project&gt;</code> repo as an OKF bundle with <code>services/</code>, <code>teams/&lt;team&gt;/</code> and a
+<code>decisions/</code> journal. Add a short <code>AGENTS.md</code> with the rules and link it from every code repo's <code>AGENTS.md</code>/<code>CLAUDE.md</code>. Run a
+lint in CI, either <code>carto</code>'s or a 50-line script. This costs a day and settles whether agents and people actually use the KB.</li>
+<li><strong>Pilot Cartographer with two teams for two to four weeks</strong> once more than a couple of people's agents are writing. Watch for refused
+writes (that's the guardrails working), conflicts, merge pain, and whether <code>cartographer sync</code> of skills saves real time.</li>
+<li><strong>Decide on evidence.</strong> If agents edit freely and quality holds, the plain bundle may be enough. If you see broken links,
+overwrites or nobody knowing where a claim came from, that's what Cartographer is for. Either way, nothing is wasted, because the files are the same.</li>
+</ol>
+<p>Questions that would change this: How many people's agents would write, as opposed to read? Do you already run a docs portal such as
+Backstage or Confluence that this must coexist with? Can your teams run a shared internal service, or must everything be local and git-only?</p>
+<h2><span class="num">09 · SOURCES</span>What I read, and what I couldn't</h2>
+<ul>
+<li><strong>Cartographer:</strong> <a href="https://github.com/BeppeTemp/cartographer">repo and README</a>,
+<a href="https://github.com/BeppeTemp/cartographer/blob/main/docs/overview.md">overview</a>, <a href="https://github.com/BeppeTemp/cartographer/blob/main/docs/faq.md">FAQ</a>,
+<a href="https://github.com/BeppeTemp/cartographer/blob/main/docs/data-plane.md">data plane</a>, <a href="https://github.com/BeppeTemp/cartographer/blob/main/docs/control-plane.md">control plane</a>.
+The ends of the last two were too long to read in full.</li>
+<li><strong>LLM Wiki:</strong> <a href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f">Karpathy's gist</a>, April 4, 2026.</li>
+<li><strong>OKF:</strong> <a href="https://github.com/GoogleCloudPlatform/open-knowledge-format/blob/main/SPEC.md">spec v0.2</a>,
+<a href="https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing">Google Cloud announcement</a> (June 12, 2026, describing v0.1).
+The announcement and some third-party pages point to a v0.1 spec in <code>GoogleCloudPlatform/knowledge-catalog</code>. I didn't read that version.</li>
+<li><strong>&quot;OKF LLMWiki&quot;:</strong> <a href="https://github.com/real-jiakai/okf_llm_wiki">real-jiakai/okf_llm_wiki</a>. I didn't find a product by that name.</li>
+<li><strong>Alternatives:</strong> the READMEs linked in the table.</li>
+<li><strong>Couldn't reach</strong> (sandbox network policy): beppetemp.github.io/cartographer, deepwiki.com, backstage.io, agents.md. Rows that depend on them are marked <em>unverified</em>.</li>
+</ul>
+<p>The page's sources are in <a href="https://github.com/pietroppeter/claude-artifacts/tree/main/cartographer-nim/src"><code>cartographer-nim/src</code></a>.
+<code>carto.nim</code> is the library and MCP server, and <code>index.nim</code> is this <a href="https://github.com/pietroppeter/nimib">nimib</a> notebook. Every
+output above was produced by running it.</p>
+</main>
+<footer>
+<div class="nb-box">
+ <span><span class="nb-small">made with <a href="https://pietroppeter.github.io/nimib/">nimib 🐳</a></span></span>
+ <span></span>
+ <span><button class="nb-small" id="show" onclick="toggleSourceDisplay()">Show Source</button></span>
+</div>
+</footer>
+<section id="source">
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">import</span> std/[json, os, osproc, strutils, strformat, tables, streams, sequtils]
+<span class="hljs-keyword">import</span> nimib
+<span class="hljs-keyword">import</span> style
+<span class="hljs-keyword">import</span> carto
+
+nbInit
+nb.doc.filename = currentSourcePath().parentDir.parentDir / <span class="hljs-string">&quot;index.html&quot;</span>
+nb.doc.context[<span class="hljs-string">&quot;title&quot;</span>] = %<span class="hljs-string">&quot;Cartographer, in Nim&quot;</span>
+nb.doc.context[<span class="hljs-string">&quot;stylesheet&quot;</span>] = %pageStyle
+nb.doc.context[<span class="hljs-string">&quot;highlight&quot;</span>] = %<span class="hljs-string">&quot;&quot;</span>
+nb.doc.context[<span class="hljs-string">&quot;disableHighlightJs&quot;</span>] = %<span class="hljs-literal">true</span>
+<span class="hljs-keyword">func</span> pageHeader(blk: <span class="hljs-type">JsonNode</span>, nb: <span class="hljs-type">Nb</span>): <span class="hljs-built_in">string</span> =
+  <span class="hljs-string">&quot;&quot;&quot;&lt;header&gt;&lt;span&gt;a nimib notebook&lt;/span&gt;&lt;span&gt;written 2026-11-04&lt;/span&gt;&lt;/header&gt;&quot;&quot;&quot;</span>
+nb.backend.partials[<span class="hljs-string">&quot;header&quot;</span>] = pageHeader
+
+<span class="hljs-comment"># Show a proc from carto.nim, so the excerpts can't drift from the code that ran.</span>
+<span class="hljs-keyword">let</span> cartoSrc = readFile(currentSourcePath().parentDir / <span class="hljs-string">&quot;carto.nim&quot;</span>).splitLines
+<span class="hljs-keyword">proc</span> excerpt(names: <span class="hljs-built_in">varargs</span>[<span class="hljs-built_in">string</span>]): <span class="hljs-built_in">string</span> =
+  <span class="hljs-keyword">var</span> parts: <span class="hljs-built_in">seq</span>[<span class="hljs-built_in">string</span>]
+  <span class="hljs-keyword">for</span> name <span class="hljs-keyword">in</span> names:
+    <span class="hljs-keyword">var</span> i = <span class="hljs-number">0</span>
+    <span class="hljs-keyword">while</span> i &lt; cartoSrc.len <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> cartoSrc[i].startsWith(<span class="hljs-string">&quot;proc &quot;</span> &amp; name &amp; <span class="hljs-string">&quot;*&quot;</span>) <span class="hljs-keyword">and</span>
+          <span class="hljs-keyword">not</span> cartoSrc[i].startsWith(<span class="hljs-string">&quot;proc &quot;</span> &amp; name &amp; <span class="hljs-string">&quot;(&quot;</span>):
+      inc i
+    doAssert i &lt; cartoSrc.len, <span class="hljs-string">&quot;no proc &quot;</span> &amp; name
+    <span class="hljs-keyword">var</span> lines = @[cartoSrc[i]]
+    inc i
+    <span class="hljs-keyword">while</span> i &lt; cartoSrc.len <span class="hljs-keyword">and</span> (cartoSrc[i].len == <span class="hljs-number">0</span> <span class="hljs-keyword">or</span> cartoSrc[i].startsWith(<span class="hljs-string">&quot; &quot;</span>)):
+      lines.add cartoSrc[i]
+      inc i
+    <span class="hljs-keyword">while</span> lines[^<span class="hljs-number">1</span>].len == <span class="hljs-number">0</span>: <span class="hljs-keyword">discard</span> lines.pop
+    parts.add lines.join(<span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>)
+  <span class="hljs-string">&quot;```nim</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span> &amp; parts.join(<span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>) &amp; <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">```</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>
+
+<span class="hljs-comment"># Fixed clock: commit ids and the log are the same on every build.</span>
+putEnv(<span class="hljs-string">&quot;CARTO_NOW&quot;</span>, <span class="hljs-string">&quot;2026-11-04T12:00:00Z&quot;</span>)
+putEnv(<span class="hljs-string">&quot;GIT_AUTHOR_DATE&quot;</span>, <span class="hljs-string">&quot;2026-11-04T12:00:00Z&quot;</span>)
+putEnv(<span class="hljs-string">&quot;GIT_COMMITTER_DATE&quot;</span>, <span class="hljs-string">&quot;2026-11-04T12:00:00Z&quot;</span>)
+<span class="hljs-keyword">let</span> work = getTempDir() / <span class="hljs-string">&quot;carto-demo&quot;</span>
+removeDir(work)
+createDir(work)
+
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;
+&lt;h1&gt;Cartographer, &lt;em&gt;in Nim&lt;/em&gt;&lt;/h1&gt;
+&lt;p class=&quot;lede&quot;&gt;Your team's coding agents each learn things and forget them. Cartographer gives them one shared wiki
+they can all read and grow, but can't break. This page studies it, rebuilds its core in about 400 lines of Nim,
+compares it with the alternatives, and asks whether it fits a project with many repos and many teams.&lt;/p&gt;
+&quot;&quot;&quot;</span>
+
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;
+&lt;div class=&quot;verdict&quot;&gt;
+&lt;h3&gt;The short answer&lt;/h3&gt;
+&lt;p&gt;&lt;b&gt;The idea is a good fit for a multi-repo, multi-team project. Cartographer itself is worth a pilot, not a rollout.&lt;/b&gt;
+The pattern it builds on (an LLM-maintained Markdown wiki, stored in the Open Knowledge Format) is cheap to adopt and easy to
+leave, because the knowledge is plain files in git. What Cartographer adds is a server that refuses bad writes and records
+who changed what and why. That matters most when several teams' agents write to the same knowledge. Against it: it's a
+pre-1.0 personal project with one maintainer, and it gives you a server to run.&lt;/p&gt;
+&lt;p&gt;&lt;b&gt;And yes, &quot;OKF LLMWiki&quot; is the same family.&lt;/b&gt; &lt;i&gt;LLM Wiki&lt;/i&gt; is Andrej Karpathy's pattern (April 2026), and &lt;i&gt;OKF&lt;/i&gt; is
+Google Cloud's Open Knowledge Format (June 2026), which formalizes that pattern as a file format. Cartographer says it combines the two.
+I couldn't find a single product called &quot;OKF LLMWiki&quot;. The closest match is a small demo repo, &lt;a href=&quot;https://github.com/real-jiakai/okf_llm_wiki&quot;&gt;okf_llm_wiki&lt;/a&gt;,
+which lays the same knowledge out both ways. &lt;a href=&quot;#fit&quot;&gt;Jump to the fit analysis&lt;/a&gt;.&lt;/p&gt;
+&lt;/div&gt;
+&quot;&quot;&quot;</span>
+
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;01 · WHAT IT IS&lt;/span&gt;Cartographer in one picture&lt;/h2&gt;&quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+[Cartographer](https://github.com/BeppeTemp/cartographer) is &quot;a shared, git-backed wiki your team's AI agents maintain but can't break —
+Claude Code, Codex, OpenCode and any MCP client.&quot; It is one Go binary, Apache-2.0, by GitHub user BeppeTemp, and it describes itself as
+&quot;Pre-1.0&quot; and &quot;a personal project maintained on a best-effort basis&quot;. When I read it, the repo had 924 commits and 54 stars.
+
+Its README names three fixes teams usually try, and says why each falls short:
+
+- **RAG** &quot;retrieves, but nothing accumulates.&quot;
+- **A folder of Markdown the agent edits freely** ends in &quot;broken links, lost history and silent corruption.&quot;
+- **Skills and instructions** &quot;get hand-copied into `.claude/`, `.codex/`, `.kiro/`… and drift apart.&quot;
+
+Its answer is one rule: *&quot;The agent uses MCP tools; the server owns filesystem writes and validation.&quot;*
+Agents never open the files. They call tools such as `concept_read` and `concept_write`, and the server checks every write before
+it lands. Each write becomes one git commit, so nothing is lost and every change can be traced.
+&quot;&quot;&quot;</span>
+
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;
+&lt;svg class=&quot;flow&quot; viewBox=&quot;0 0 760 270&quot; role=&quot;img&quot; aria-label=&quot;Agents call MCP tools on the server; the server validates and commits to a git repository of Markdown pages; agents cannot write the files directly.&quot;&gt;
+  &lt;defs&gt;&lt;marker id=&quot;ah&quot; viewBox=&quot;0 0 10 10&quot; refX=&quot;9&quot; refY=&quot;5&quot; markerWidth=&quot;7&quot; markerHeight=&quot;7&quot; orient=&quot;auto-start-reverse&quot;&gt;&lt;path d=&quot;M0,0 L10,5 L0,10 z&quot; class=&quot;ah&quot;/&gt;&lt;/marker&gt;&lt;/defs&gt;
+  &lt;rect class=&quot;box&quot; x=&quot;6&quot; y=&quot;20&quot; width=&quot;190&quot; height=&quot;44&quot; rx=&quot;8&quot;/&gt;&lt;text x=&quot;101&quot; y=&quot;47&quot; text-anchor=&quot;middle&quot;&gt;Claude Code · team A&lt;/text&gt;
+  &lt;rect class=&quot;box&quot; x=&quot;6&quot; y=&quot;80&quot; width=&quot;190&quot; height=&quot;44&quot; rx=&quot;8&quot;/&gt;&lt;text x=&quot;101&quot; y=&quot;107&quot; text-anchor=&quot;middle&quot;&gt;Codex · team B&lt;/text&gt;
+  &lt;rect class=&quot;box&quot; x=&quot;6&quot; y=&quot;140&quot; width=&quot;190&quot; height=&quot;44&quot; rx=&quot;8&quot;/&gt;&lt;text x=&quot;101&quot; y=&quot;167&quot; text-anchor=&quot;middle&quot;&gt;any MCP client&lt;/text&gt;
+  &lt;path class=&quot;arrow&quot; d=&quot;M198 42 L300 92&quot;/&gt;&lt;path class=&quot;arrow&quot; d=&quot;M198 102 L300 102&quot;/&gt;&lt;path class=&quot;arrow&quot; d=&quot;M198 162 L300 112&quot;/&gt;
+  &lt;text class=&quot;mono muted&quot; x=&quot;222&quot; y=&quot;62&quot;&gt;MCP tools&lt;/text&gt;
+  &lt;rect class=&quot;srv&quot; x=&quot;302&quot; y=&quot;50&quot; width=&quot;190&quot; height=&quot;110&quot; rx=&quot;12&quot;/&gt;
+  &lt;text class=&quot;srv-t&quot; x=&quot;397&quot; y=&quot;80&quot; text-anchor=&quot;middle&quot; font-weight=&quot;600&quot;&gt;server&lt;/text&gt;
+  &lt;text class=&quot;mono srv-t&quot; x=&quot;397&quot; y=&quot;102&quot; text-anchor=&quot;middle&quot;&gt;validate · if_match&lt;/text&gt;
+  &lt;text class=&quot;mono srv-t&quot; x=&quot;397&quot; y=&quot;120&quot; text-anchor=&quot;middle&quot;&gt;one commit per write&lt;/text&gt;
+  &lt;text class=&quot;mono srv-t&quot; x=&quot;397&quot; y=&quot;138&quot; text-anchor=&quot;middle&quot;&gt;index · log · lint&lt;/text&gt;
+  &lt;path class=&quot;arrow&quot; d=&quot;M494 105 L590 105&quot;/&gt;
+  &lt;rect class=&quot;box&quot; x=&quot;592&quot; y=&quot;40&quot; width=&quot;160&quot; height=&quot;130&quot; rx=&quot;8&quot;/&gt;
+  &lt;text x=&quot;672&quot; y=&quot;64&quot; text-anchor=&quot;middle&quot; font-weight=&quot;600&quot;&gt;git repo&lt;/text&gt;
+  &lt;text class=&quot;mono&quot; x=&quot;606&quot; y=&quot;88&quot;&gt;data/&lt;/text&gt;
+  &lt;text class=&quot;mono&quot; x=&quot;618&quot; y=&quot;106&quot;&gt;index.md&lt;/text&gt;
+  &lt;text class=&quot;mono&quot; x=&quot;618&quot; y=&quot;124&quot;&gt;log.md&lt;/text&gt;
+  &lt;text class=&quot;mono&quot; x=&quot;618&quot; y=&quot;142&quot;&gt;services/…md&lt;/text&gt;
+  &lt;text class=&quot;mono&quot; x=&quot;618&quot; y=&quot;160&quot;&gt;teams/…md&lt;/text&gt;
+  &lt;path class=&quot;no&quot; d=&quot;M101 186 C 101 240, 672 240, 672 172&quot;/&gt;
+  &lt;text class=&quot;no-t mono&quot; x=&quot;386&quot; y=&quot;258&quot; text-anchor=&quot;middle&quot;&gt;✗ agents never write the files directly&lt;/text&gt;
+&lt;/svg&gt;
+&quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+Beyond that core, the docs describe a lot of surrounding machinery. I read the
+[README](https://github.com/BeppeTemp/cartographer), [overview](https://github.com/BeppeTemp/cartographer/blob/main/docs/overview.md),
+[FAQ](https://github.com/BeppeTemp/cartographer/blob/main/docs/faq.md),
+[data plane](https://github.com/BeppeTemp/cartographer/blob/main/docs/data-plane.md) and
+[control plane](https://github.com/BeppeTemp/cartographer/blob/main/docs/control-plane.md) docs:
+
+- **Layout.** An *Atlas* is one knowledge base (KB) and one git repo. Under `data/` are *Maps*, which are thematic folders, and *Journals*, which hold dated
+  pages named `YYYY-MM-DD-slug`. Each page is a *Concept*. A folder's `_map.md` can declare a contract: which `concept_types`
+  are allowed and which `required_fields` each page needs. A page's id is its path, and that id is its identity.
+- **Beyond knowledge.** The same repo also holds `skills/`, `agents/` (subagents), `hooks/`, `mcp/` descriptors, SOPS-encrypted `secrets/`
+  and `instructions.md`. `cartographer sync` installs them into each client, so every agent on the team is configured from one place.
+- **Tools.** About 60 MCP tools covering reading, keyword search (the docs say &quot;keyword search only&quot;), writes (including an atomic
+  `concept_batch`), graph queries (personalized PageRank), governance (`validate`, `lint`, `kb_review`, `gate_check`), ingest and conflicts.
+- **Teams.** One HTTP server can serve several KBs, with bearer tokens scoped per KB and per map (`kb:&lt;name&gt;:r` or `rw`). Commits carry
+  `Reason:`, `Agent:` and author trailers. When two machines' changes conflict, the KB is marked `degraded` and someone must pick `ours`,
+  `theirs` or `edit` for each page. The FAQ says: &quot;It is not a silent last-write-wins.&quot;
+- **Its own limits, as stated.** Search has no model-backed mode, sync is &quot;not atomic across clients&quot;, and: *&quot;If your knowledge fits in
+  one repository and one person, a plain instruction file is simpler and you should use it.&quot;*
+
+I couldn't open the project site [beppetemp.github.io/cartographer](https://beppetemp.github.io/cartographer/) from my sandbox
+because the network policy blocked it. Everything above comes from the GitHub repo and its `docs/` folder. I didn't read the
+changelog, the decision records or the sync and concurrency docs.
+&quot;&quot;&quot;</span>
+
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;02 · WHERE IT COMES FROM&lt;/span&gt;LLM Wiki + OKF, the &quot;OKF LLMWiki&quot; question&lt;/h2&gt;&quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+Cartographer's overview says it combines &quot;Karpathy's LLM Wiki pattern&quot; with &quot;Google's Open Knowledge Format (OKF)&quot;. Both are recent:
+
+**LLM Wiki** ([Karpathy's gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f), created April 4, 2026) is &quot;an idea file&quot;:
+instead of RAG re-deriving answers from raw documents on every question, an LLM &quot;incrementally builds and maintains a persistent wiki&quot;,
+so &quot;the wiki is a persistent, compounding artifact.&quot; It has three layers: **raw sources**, which are immutable; **the wiki**; and **the schema**, a
+`CLAUDE.md` or `AGENTS.md` that tells the agent the rules. It also has three operations: **ingest**, **query** and **lint**. Two files
+are special. `index.md` is a catalog the agent reads first, and `log.md` is an &quot;append-only record of what happened and when&quot;.
+
+**OKF** ([Google Cloud blog, June 12, 2026](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing))
+is &quot;an open specification that formalizes the LLM-wiki pattern&quot;. The [spec](https://github.com/GoogleCloudPlatform/open-knowledge-format),
+now at v0.2, is short: a bundle is &quot;a directory of markdown files with YAML frontmatter&quot;, and `type` &quot;is the only always-required key&quot;.
+`index.md` and `log.md` are reserved. Links are paths relative to the bundle that start with `/`. Consumers &quot;MUST tolerate broken links&quot;.
+That last point is where Cartographer goes further: it validates a bundle on every write, so it is stricter than OKF requires.
+
+So **&quot;OKF LLMWiki&quot; names the same family of ideas**: the LLM Wiki is the workflow, and OKF is the file format. That phrasing comes from
+[real-jiakai/okf_llm_wiki](https://github.com/real-jiakai/okf_llm_wiki), a 5-star demo that organizes one knowledge base both ways.
+I found no product by that exact name. If you saw it somewhere specific, send me the link and I'll check whether it's something else.
+&quot;&quot;&quot;</span>
+
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;03 · THE MINIMAL VERSION&lt;/span&gt;carto.nim: the core, in one file&lt;/h2&gt;&quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+To understand the idea, I rebuilt the part that makes Cartographer more than &quot;a folder of Markdown&quot;: **a server that owns the writes**.
+[`carto.nim`](https://github.com/pietroppeter/claude-artifacts/blob/main/cartographer-nim/src/carto.nim) is one file with no dependencies
+beyond the Nim standard library and the `git` command. It keeps these parts:
+
+| Cartographer idea | in `carto.nim` |
+|---|---|
+| OKF pages: Markdown + frontmatter, `type` required | `parseConcept`, `render`, round-trip check on every write |
+| Agents use tools; the server owns the files | `write` is the only way a page changes |
+| Folder contracts in `_map.md` (`concept_types`, `required_fields`, journals) | `mapFor`, `problems`; `mapCreate` is for people only, with no tool for agents |
+| Optimistic concurrency, `stale_write` | the etag is the page's git blob id; `if_match` must match |
+| One git commit per write, with `Reason:` and `Agent:` trailers | `commit`, `history` |
+| `index.md` + `log.md` (OKF reserved files) | regenerated on every write; log is newest first |
+| Keyword search, links graph, lint | `search`, `neighbors`, `lint` |
+| MCP server | `carto serve`: JSON-RPC 2.0 over stdio, 7 tools |
+
+I also added one thing aimed at a multi-repo project, which **I didn't find in Cartographer's docs**. A page can cite code with
+`sources: [repo:path]`. The server pins each source to the file's current git blob, and `lint` reports `source_drift` once that code
+changes. Documentation that silently goes stale is the main way a knowledge base dies across many repos.
+
+Here is the write path. Everything else in the file supports it:
+&quot;&quot;&quot;</span> &amp; excerpt(<span class="hljs-string">&quot;write&quot;</span>)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+The checks it runs come from `problems`. These are the same checks `lint` later runs over the whole KB:
+&quot;&quot;&quot;</span> &amp; excerpt(<span class="hljs-string">&quot;problems&quot;</span>)
+
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;04 · A WALKTHROUGH&lt;/span&gt;Two teams, two repos, one knowledge base&lt;/h2&gt;&quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+Everything below ran while this page was built. Each output is what the code printed. The setup is a small version of a
+multi-team project: a `payments-api` repo, a `web-checkout` repo, and one knowledge base they share.
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">proc</span> sh(dir, cmd: <span class="hljs-built_in">string</span>) =
+    <span class="hljs-keyword">let</span> (outp, code) = execCmdEx(cmd, workingDir = dir)
+    doAssert code == <span class="hljs-number">0</span>, cmd &amp; <span class="hljs-string">&quot;: &quot;</span> &amp; outp
+
+  <span class="hljs-comment"># two code repos, as two teams would have them</span>
+  <span class="hljs-keyword">for</span> (repo, file, text) <span class="hljs-keyword">in</span> [(<span class="hljs-string">&quot;payments-api&quot;</span>, <span class="hljs-string">&quot;openapi.yaml&quot;</span>, <span class="hljs-string">&quot;paths:</span><span class="hljs-meta">\n</span><span class="hljs-string">  /charges: {post: {}}</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>),
+                             (<span class="hljs-string">&quot;web-checkout&quot;</span>, <span class="hljs-string">&quot;src/pay.ts&quot;</span>, <span class="hljs-string">&quot;export const retries = 3</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>)]:
+    createDir(work / repo / file.parentDir)
+    writeFile(work / repo / file, text)
+    sh(work / repo, <span class="hljs-string">&quot;git init -q -b main &amp;&amp; git add -A &amp;&amp; &quot;</span> &amp;
+                    <span class="hljs-string">&quot;git -c user.name=dev -c user.email=dev@x commit -qm init&quot;</span>)
+
+  <span class="hljs-comment"># the knowledge base, and the folder contracts people agree on</span>
+  <span class="hljs-keyword">var</span> kb = initKb(work / <span class="hljs-string">&quot;kb-platform&quot;</span>)
+  kb.repos = {<span class="hljs-string">&quot;payments-api&quot;</span>: work / <span class="hljs-string">&quot;payments-api&quot;</span>,
+              <span class="hljs-string">&quot;web-checkout&quot;</span>: work / <span class="hljs-string">&quot;web-checkout&quot;</span>}.toTable
+  kb.mapCreate(<span class="hljs-string">&quot;services&quot;</span>, {<span class="hljs-string">&quot;kind&quot;</span>: <span class="hljs-string">&quot;map&quot;</span>, <span class="hljs-string">&quot;concept_types&quot;</span>: <span class="hljs-string">&quot;[Service]&quot;</span>,
+                            <span class="hljs-string">&quot;required_fields&quot;</span>: <span class="hljs-string">&quot;[owner, sources]&quot;</span>}.toOrderedTable, <span class="hljs-string">&quot;one page per deployable&quot;</span>)
+  kb.mapCreate(<span class="hljs-string">&quot;teams&quot;</span>, {<span class="hljs-string">&quot;kind&quot;</span>: <span class="hljs-string">&quot;map&quot;</span>, <span class="hljs-string">&quot;concept_types&quot;</span>: <span class="hljs-string">&quot;[Runbook, Reference, Note]&quot;</span>,
+                         <span class="hljs-string">&quot;required_fields&quot;</span>: <span class="hljs-string">&quot;[owner]&quot;</span>}.toOrderedTable, <span class="hljs-string">&quot;team-owned know-how&quot;</span>)
+  kb.mapCreate(<span class="hljs-string">&quot;decisions&quot;</span>, {<span class="hljs-string">&quot;kind&quot;</span>: <span class="hljs-string">&quot;journal&quot;</span>, <span class="hljs-string">&quot;concept_types&quot;</span>: <span class="hljs-string">&quot;[Decision]&quot;</span>,
+                             <span class="hljs-string">&quot;required_fields&quot;</span>: <span class="hljs-string">&quot;[status]&quot;</span>}.toOrderedTable, <span class="hljs-string">&quot;cross-team decisions&quot;</span>)
+  <span class="hljs-keyword">echo</span> kb.guide
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+`kb_guide` is the first thing an agent reads. Now an agent, Claude Code on the payments team, writes the first page.
+A small helper builds pages and reports refusals:
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">proc</span> page(id: <span class="hljs-built_in">string</span>, meta: openArray[(<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span>)], body: <span class="hljs-built_in">string</span>): <span class="hljs-keyword">Concept</span> =
+    <span class="hljs-keyword">Concept</span>(id: id, meta: meta.toOrderedTable, body: body)
+
+  <span class="hljs-keyword">proc</span> attempt(kb: <span class="hljs-type">Kb</span>, c: <span class="hljs-keyword">Concept</span>, reason: <span class="hljs-built_in">string</span>, ifMatch = <span class="hljs-string">&quot;&quot;</span>, agent = <span class="hljs-string">&quot;claude-code&quot;</span>): <span class="hljs-built_in">string</span> =
+    <span class="hljs-keyword">try</span>:
+      <span class="hljs-literal">result</span> = kb.write(c, ifMatch, reason, agent)
+      <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;✓ &quot;</span>, reason, <span class="hljs-string">&quot;  (etag &quot;</span>, <span class="hljs-literal">result</span>[<span class="hljs-number">0</span> ..&lt; <span class="hljs-number">7</span>], <span class="hljs-string">&quot;)&quot;</span>
+    <span class="hljs-keyword">except</span> <span class="hljs-type">KbError</span> <span class="hljs-keyword">as</span> e:
+      <span class="hljs-keyword">let</span> msg = <span class="hljs-keyword">if</span> e.msg.startsWith(e.code &amp; <span class="hljs-string">&quot;:&quot;</span>): e.msg <span class="hljs-keyword">else</span>: e.code &amp; <span class="hljs-string">&quot;: &quot;</span> &amp; e.msg
+      <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;✗ &quot;</span>, reason, <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">    refused &quot;</span>, msg.replace(<span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>, <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">    refused &quot;</span>)
+
+  <span class="hljs-keyword">var</span> svc = page(<span class="hljs-string">&quot;services/payments-api&quot;</span>,
+    {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;Service&quot;</span>, <span class="hljs-string">&quot;title&quot;</span>: <span class="hljs-string">&quot;Payments API&quot;</span>, <span class="hljs-string">&quot;owner&quot;</span>: <span class="hljs-string">&quot;team-payments&quot;</span>,
+     <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Charges, refunds and idempotency for every checkout.&quot;</span>,
+     <span class="hljs-string">&quot;sources&quot;</span>: <span class="hljs-string">&quot;[payments-api:openapi.yaml]&quot;</span>},
+    <span class="hljs-string">&quot;# Payments API</span><span class="hljs-meta">\n</span><span class="hljs-meta">\n</span><span class="hljs-string">Public contract: `POST /charges`. Owned by team-payments.</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>)
+  <span class="hljs-keyword">let</span> svcTag = kb.attempt(svc, <span class="hljs-string">&quot;document the payments service&quot;</span>)
+  <span class="hljs-keyword">echo</span> readFile(work / <span class="hljs-string">&quot;kb-platform/data/services/payments-api.md&quot;</span>)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+The server pinned the source to `@&lt;blob&gt;`, the exact version of `openapi.yaml` the page describes.
+Next come the writes a careless agent would make. Each one is refused with a code the agent can act on:
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">discard</span> kb.attempt(page(<span class="hljs-string">&quot;teams/payments/retries&quot;</span>, {<span class="hljs-string">&quot;title&quot;</span>: <span class="hljs-string">&quot;Retries&quot;</span>}, <span class="hljs-string">&quot;Retry 3 times.&quot;</span>),
+                     <span class="hljs-string">&quot;no type&quot;</span>)
+  <span class="hljs-keyword">discard</span> kb.attempt(page(<span class="hljs-string">&quot;services/retry-howto&quot;</span>, {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;Runbook&quot;</span>, <span class="hljs-string">&quot;owner&quot;</span>: <span class="hljs-string">&quot;team-payments&quot;</span>}, <span class="hljs-string">&quot;…&quot;</span>),
+                     <span class="hljs-string">&quot;a runbook in the services folder&quot;</span>)
+  <span class="hljs-keyword">discard</span> kb.attempt(page(<span class="hljs-string">&quot;teams/checkout/retries&quot;</span>, {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;Runbook&quot;</span>}, <span class="hljs-string">&quot;Retry 3 times.&quot;</span>),
+                     <span class="hljs-string">&quot;a team page with no owner&quot;</span>)
+  <span class="hljs-keyword">discard</span> kb.attempt(page(<span class="hljs-string">&quot;teams/checkout/retries&quot;</span>, {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;Runbook&quot;</span>, <span class="hljs-string">&quot;owner&quot;</span>: <span class="hljs-string">&quot;team-checkout&quot;</span>},
+                          <span class="hljs-string">&quot;Follow [[teams/payments/idempotency]] first.&quot;</span>),
+                     <span class="hljs-string">&quot;a link to a page that doesn't exist&quot;</span>)
+  <span class="hljs-keyword">discard</span> kb.attempt(page(<span class="hljs-string">&quot;decisions/idempotency-keys&quot;</span>, {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;Decision&quot;</span>, <span class="hljs-string">&quot;status&quot;</span>: <span class="hljs-string">&quot;accepted&quot;</span>}, <span class="hljs-string">&quot;…&quot;</span>),
+                     <span class="hljs-string">&quot;a journal entry without a date&quot;</span>)
+  <span class="hljs-keyword">discard</span> kb.attempt(page(<span class="hljs-string">&quot;services/payments-api&quot;</span>, {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;Service&quot;</span>, <span class="hljs-string">&quot;owner&quot;</span>: <span class="hljs-string">&quot;x&quot;</span>, <span class="hljs-string">&quot;sources&quot;</span>: <span class="hljs-string">&quot;[a:b]&quot;</span>}, <span class="hljs-string">&quot;…&quot;</span>),
+                     <span class="hljs-string">&quot;create the payments page again, without reading it&quot;</span>, agent = <span class="hljs-string">&quot;codex&quot;</span>)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+The last one is the important case for teams. You can't create a page that already exists or overwrite one you haven't read.
+Two agents on two teams now work on the same page at the same time:
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-comment"># both agents read the page at the same version</span>
+  <span class="hljs-keyword">let</span> seenByCodex = kb.etag(<span class="hljs-string">&quot;services/payments-api&quot;</span>)
+  <span class="hljs-keyword">var</span> c1 = kb.read(<span class="hljs-string">&quot;services/payments-api&quot;</span>)
+
+  <span class="hljs-comment"># checkout's Claude records a decision, writes a runbook, and links them from the service page</span>
+  <span class="hljs-keyword">discard</span> kb.attempt(page(<span class="hljs-string">&quot;decisions/2026-10-30-idempotency-keys&quot;</span>,
+    {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;Decision&quot;</span>, <span class="hljs-string">&quot;title&quot;</span>: <span class="hljs-string">&quot;Idempotency keys on every charge&quot;</span>, <span class="hljs-string">&quot;status&quot;</span>: <span class="hljs-string">&quot;accepted&quot;</span>,
+     <span class="hljs-string">&quot;description&quot;</span>: <span class="hljs-string">&quot;Clients send Idempotency-Key; the API dedupes for 24h.&quot;</span>},
+    <span class="hljs-string">&quot;Agreed by payments and checkout. Affects [[services/payments-api]].</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>),
+    <span class="hljs-string">&quot;record the idempotency decision&quot;</span>)
+  <span class="hljs-keyword">discard</span> kb.attempt(page(<span class="hljs-string">&quot;teams/checkout/retries&quot;</span>,
+    {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;Runbook&quot;</span>, <span class="hljs-string">&quot;title&quot;</span>: <span class="hljs-string">&quot;Retrying a failed payment&quot;</span>, <span class="hljs-string">&quot;owner&quot;</span>: <span class="hljs-string">&quot;team-checkout&quot;</span>,
+     <span class="hljs-string">&quot;sources&quot;</span>: <span class="hljs-string">&quot;[web-checkout:src/pay.ts]&quot;</span>},
+    <span class="hljs-string">&quot;Retry up to 3 times with the same key, see [[decisions/2026-10-30-idempotency-keys]].</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>),
+    <span class="hljs-string">&quot;write the checkout retry runbook&quot;</span>)
+  c1.body.add <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">Decisions: [[decisions/2026-10-30-idempotency-keys]]. Client retries: [[teams/checkout/retries]].</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>
+  <span class="hljs-keyword">discard</span> kb.attempt(c1, <span class="hljs-string">&quot;link decision and runbook&quot;</span>, svcTag)
+
+  <span class="hljs-comment"># codex, still holding the old version, tries to add its own line</span>
+  <span class="hljs-keyword">var</span> c2 = page(<span class="hljs-string">&quot;services/payments-api&quot;</span>, toSeq(kb.read(<span class="hljs-string">&quot;services/payments-api&quot;</span>).meta.pairs), svc.body &amp; <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">Rate limit: 100 rps.</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>)
+  <span class="hljs-keyword">discard</span> kb.attempt(c2, <span class="hljs-string">&quot;add rate limit&quot;</span>, seenByCodex, agent = <span class="hljs-string">&quot;codex&quot;</span>)
+  <span class="hljs-comment"># it re-reads, merges its change into the current page, and tries again</span>
+  <span class="hljs-keyword">var</span> merged = kb.read(<span class="hljs-string">&quot;services/payments-api&quot;</span>)
+  merged.body.add <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">Rate limit: 100 rps.</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>
+  <span class="hljs-keyword">discard</span> kb.attempt(merged, <span class="hljs-string">&quot;add rate limit&quot;</span>, kb.etag(<span class="hljs-string">&quot;services/payments-api&quot;</span>), agent = <span class="hljs-string">&quot;codex&quot;</span>)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+Nothing was silently lost. Every change is a commit that records which agent made it and why:
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> kb.history(<span class="hljs-string">&quot;services/payments-api&quot;</span>): <span class="hljs-keyword">echo</span> line
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;&quot;</span>
+  <span class="hljs-keyword">echo</span> readFile(work / <span class="hljs-string">&quot;kb-platform/data/log.md&quot;</span>)
+  <span class="hljs-keyword">echo</span> readFile(work / <span class="hljs-string">&quot;kb-platform/data/index.md&quot;</span>)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+`search` and `neighbors` are what an agent uses to find its way around before it writes:
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">for</span> (score, id) <span class="hljs-keyword">in</span> kb.search(<span class="hljs-string">&quot;retry idempotency&quot;</span>): <span class="hljs-keyword">echo</span> score, <span class="hljs-string">&quot;  &quot;</span>, id
+  <span class="hljs-keyword">let</span> n = kb.neighbors(<span class="hljs-string">&quot;decisions/2026-10-30-idempotency-keys&quot;</span>)
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;links to:    &quot;</span>, n.outgoing.join(<span class="hljs-string">&quot;, &quot;</span>)
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;linked from: &quot;</span>, n.incoming.join(<span class="hljs-string">&quot;, &quot;</span>)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+### When something goes around the server
+
+Someone (or some agent with shell access) edits the files directly. The server can't stop that, but `lint` notices,
+and because every good state is a commit, recovery is a `git checkout`:
+&quot;&quot;&quot;</span>
+
+nbCode:
+  createDir(work / <span class="hljs-string">&quot;kb-platform/data/teams/payments&quot;</span>)
+  writeFile(work / <span class="hljs-string">&quot;kb-platform/data/teams/payments/scratch.md&quot;</span>, <span class="hljs-string">&quot;quick notes, no frontmatter</span><span class="hljs-meta">\n</span><span class="hljs-string">see [[nowhere]]</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>)
+  <span class="hljs-keyword">for</span> l <span class="hljs-keyword">in</span> kb.lint: <span class="hljs-keyword">echo</span> l
+  sh(work / <span class="hljs-string">&quot;kb-platform&quot;</span>, <span class="hljs-string">&quot;git clean -fdq data &amp;&amp; git checkout -q -- data&quot;</span>)
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;after restore: &quot;</span>, (<span class="hljs-keyword">if</span> kb.lint.len == <span class="hljs-number">0</span>: <span class="hljs-string">&quot;clean&quot;</span> <span class="hljs-keyword">else</span>: kb.lint.join(<span class="hljs-string">&quot;; &quot;</span>))
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+### When the code moves on
+
+This is the multi-repo problem. The payments team changes its API, and nobody updates the wiki. Because the service page
+pinned the blob of `openapi.yaml`, `lint` can tell:
+&quot;&quot;&quot;</span>
+
+nbCode:
+  writeFile(work / <span class="hljs-string">&quot;payments-api/openapi.yaml&quot;</span>, <span class="hljs-string">&quot;paths:</span><span class="hljs-meta">\n</span><span class="hljs-string">  /charges: {post: {}}</span><span class="hljs-meta">\n</span><span class="hljs-string">  /refunds: {post: {}}</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>)
+  sh(work / <span class="hljs-string">&quot;payments-api&quot;</span>, <span class="hljs-string">&quot;git -c user.name=dev -c user.email=dev@x commit -qam 'add refunds'&quot;</span>)
+  <span class="hljs-keyword">for</span> l <span class="hljs-keyword">in</span> kb.lint: <span class="hljs-keyword">echo</span> l
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+Running that `lint` in each code repo's CI, or on a schedule, turns &quot;the docs are stale&quot; from a surprise into a work item.
+An agent can pick it up: read the diff, update the page, and pass the new etag.
+&quot;&quot;&quot;</span>
+
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;05 · OVER MCP&lt;/span&gt;What an agent actually sees&lt;/h2&gt;&quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+The same library behind `carto serve` speaks [MCP](https://modelcontextprotocol.io) over stdio: one JSON-RPC message per line.
+This block compiles the binary, starts it, and talks to it the way Claude Code or Codex would.
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">let</span> bin = work / <span class="hljs-string">&quot;carto&quot;</span>
+  <span class="hljs-keyword">let</span> src = currentSourcePath().parentDir / <span class="hljs-string">&quot;carto.nim&quot;</span>
+  doAssert execCmd(&amp;<span class="hljs-string">&quot;nim c -d:release --hints:off --warnings:off -o:{bin} {src} &gt; /dev/null&quot;</span>) == <span class="hljs-number">0</span>
+  <span class="hljs-keyword">let</span> p = startProcess(bin, args = [<span class="hljs-string">&quot;serve&quot;</span>, <span class="hljs-string">&quot;--kb&quot;</span>, work / <span class="hljs-string">&quot;kb-platform&quot;</span>,
+                                    <span class="hljs-string">&quot;--repo&quot;</span>, <span class="hljs-string">&quot;payments-api=&quot;</span> &amp; work / <span class="hljs-string">&quot;payments-api&quot;</span>])
+  <span class="hljs-keyword">var</span> id = <span class="hljs-number">0</span>
+  <span class="hljs-keyword">proc</span> rpc(meth: <span class="hljs-built_in">string</span>, params: <span class="hljs-type">JsonNode</span>): <span class="hljs-type">JsonNode</span> =
+    inc id
+    <span class="hljs-keyword">let</span> req = %*{<span class="hljs-string">&quot;jsonrpc&quot;</span>: <span class="hljs-string">&quot;2.0&quot;</span>, <span class="hljs-string">&quot;id&quot;</span>: id, <span class="hljs-string">&quot;method&quot;</span>: meth, <span class="hljs-string">&quot;params&quot;</span>: params}
+    p.inputStream.writeLine($req)
+    p.inputStream.flush
+    <span class="hljs-literal">result</span> = parseJson(p.outputStream.readLine)
+  <span class="hljs-keyword">proc</span> call(tool: <span class="hljs-built_in">string</span>, args: <span class="hljs-type">JsonNode</span>) =
+    <span class="hljs-keyword">let</span> r = rpc(<span class="hljs-string">&quot;tools/call&quot;</span>, %*{<span class="hljs-string">&quot;name&quot;</span>: tool, <span class="hljs-string">&quot;arguments&quot;</span>: args})[<span class="hljs-string">&quot;result&quot;</span>]
+    <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;→ &quot;</span>, tool, <span class="hljs-string">&quot; &quot;</span>, $args
+    <span class="hljs-keyword">echo</span> (<span class="hljs-keyword">if</span> r{<span class="hljs-string">&quot;isError&quot;</span>}.getBool: <span class="hljs-string">&quot;← ERROR &quot;</span> <span class="hljs-keyword">else</span>: <span class="hljs-string">&quot;← &quot;</span>), r[<span class="hljs-string">&quot;content&quot;</span>][<span class="hljs-number">0</span>][<span class="hljs-string">&quot;text&quot;</span>].getStr.replace(<span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>, <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">  &quot;</span>), <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>
+
+  <span class="hljs-keyword">let</span> hello = rpc(<span class="hljs-string">&quot;initialize&quot;</span>, %*{<span class="hljs-string">&quot;protocolVersion&quot;</span>: <span class="hljs-string">&quot;2025-06-18&quot;</span>, <span class="hljs-string">&quot;clientInfo&quot;</span>: {<span class="hljs-string">&quot;name&quot;</span>: <span class="hljs-string">&quot;claude-code&quot;</span>}})
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;server: &quot;</span>, hello[<span class="hljs-string">&quot;result&quot;</span>][<span class="hljs-string">&quot;serverInfo&quot;</span>], <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;tools:  &quot;</span>, rpc(<span class="hljs-string">&quot;tools/list&quot;</span>, newJObject())[<span class="hljs-string">&quot;result&quot;</span>][<span class="hljs-string">&quot;tools&quot;</span>].mapIt(it[<span class="hljs-string">&quot;name&quot;</span>].getStr).join(<span class="hljs-string">&quot;, &quot;</span>), <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>
+  call(<span class="hljs-string">&quot;search&quot;</span>, %*{<span class="hljs-string">&quot;query&quot;</span>: <span class="hljs-string">&quot;refunds&quot;</span>})
+  call(<span class="hljs-string">&quot;concept_write&quot;</span>, %*{<span class="hljs-string">&quot;id&quot;</span>: <span class="hljs-string">&quot;teams/payments/refunds&quot;</span>, <span class="hljs-string">&quot;if_match&quot;</span>: <span class="hljs-string">&quot;&quot;</span>, <span class="hljs-string">&quot;reason&quot;</span>: <span class="hljs-string">&quot;doc refunds&quot;</span>,
+                           <span class="hljs-string">&quot;frontmatter&quot;</span>: {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;Reference&quot;</span>}, <span class="hljs-string">&quot;body&quot;</span>: <span class="hljs-string">&quot;See [[services/payments-api]].&quot;</span>})
+  call(<span class="hljs-string">&quot;concept_write&quot;</span>, %*{<span class="hljs-string">&quot;id&quot;</span>: <span class="hljs-string">&quot;teams/payments/refunds&quot;</span>, <span class="hljs-string">&quot;if_match&quot;</span>: <span class="hljs-string">&quot;&quot;</span>, <span class="hljs-string">&quot;reason&quot;</span>: <span class="hljs-string">&quot;document refunds&quot;</span>,
+                           <span class="hljs-string">&quot;frontmatter&quot;</span>: {<span class="hljs-string">&quot;type&quot;</span>: <span class="hljs-string">&quot;Reference&quot;</span>, <span class="hljs-string">&quot;owner&quot;</span>: <span class="hljs-string">&quot;team-payments&quot;</span>, <span class="hljs-string">&quot;title&quot;</span>: <span class="hljs-string">&quot;Refunds&quot;</span>},
+                           <span class="hljs-string">&quot;body&quot;</span>: <span class="hljs-string">&quot;POST /refunds reverses a charge. See [[services/payments-api]].</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>})
+  call(<span class="hljs-string">&quot;concept_history&quot;</span>, %*{<span class="hljs-string">&quot;id&quot;</span>: <span class="hljs-string">&quot;teams/payments/refunds&quot;</span>})
+  p.inputStream.close
+  <span class="hljs-keyword">discard</span> p.waitForExit
+  p.close
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+The agent gets a refusal it can fix (`missing_field`), fixes it, and the commit records `claude-code` as the agent.
+The name comes from the client's `initialize` handshake. Connecting it to a real client takes one line of config, for example
+`claude mcp add carto -- /path/to/carto serve --kb /path/to/kb-platform --repo payments-api=/path/to/payments-api`.
+&quot;&quot;&quot;</span>
+
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;06 · WHAT THE MINIMUM LEAVES OUT&lt;/span&gt;Where the other 90% of Cartographer goes&lt;/h2&gt;&quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+`carto.nim` shows the core idea, and it leaves out most of what you'd need to run this for real teams. Here's what Cartographer
+documents and this version skips:
+
+- **A server for many people.** Cartographer has an HTTP mode with bearer tokens scoped per KB and per map, and serves several KBs
+  from one process. `carto` is one local process per user. With git underneath, each person would run their own and push and pull,
+  and then you need Cartographer's answer to conflicting merges (`degraded` state, `git_conflict_resolve`).
+- **Atomic multi-page writes** (`concept_batch`). In the walkthrough, the decision, runbook and service page took three commits and
+  had to be written in dependency order.
+- **Agent configuration as knowledge.** Syncing `skills/`, `agents/`, `hooks/`, MCP descriptors and SOPS secrets into every client.
+  For a team lead this may be the most useful part, because it stops each developer's `.claude/` from drifting.
+- **Lifecycle and trust fields** (`status`, `superseded_by`, `confidence`, `provenance`), `supersede`, archive, review gates, the
+  read-only web UI (&quot;Atlas&quot;), a graph ranked by personalized PageRank, and a signed audit log.
+- **Ingest.** Registering sources and letting a planner decide where new knowledge goes.
+
+The code-drift check goes the other way: it's my addition. I didn't find it in Cartographer's docs, though I didn't read
+`changes_since` or the ingest docs in full.
+&quot;&quot;&quot;</span>
+
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;07 · ALTERNATIVES&lt;/span&gt;What else solves this&lt;/h2&gt;&quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+The tools people reach for to give agents shared knowledge fall into four groups. For each one I checked the README or official
+page on 2026-11-04. Star counts are rough and change quickly. Rows marked *unverified* are from memory, because my sandbox couldn't reach the site.
+&quot;&quot;&quot;</span>
+
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;
+&lt;div class=&quot;table-wrap&quot;&gt;&lt;table&gt;
+&lt;tr&gt;&lt;th&gt;Option&lt;/th&gt;&lt;th&gt;Store&lt;/th&gt;&lt;th&gt;Agents write?&lt;/th&gt;&lt;th&gt;Teams / many repos&lt;/th&gt;&lt;th&gt;Signal&lt;/th&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td colspan=&quot;5&quot;&gt;&lt;b&gt;Agent-maintained Markdown wikis&lt;/b&gt; (same family as Cartographer)&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href=&quot;https://github.com/BeppeTemp/cartographer&quot;&gt;Cartographer&lt;/a&gt;&lt;/td&gt;&lt;td&gt;OKF files in git&lt;/td&gt;&lt;td&gt;Only through validated MCP tools&lt;/td&gt;&lt;td&gt;Several KBs per server, scoped tokens, commit trailers, conflict flow&lt;/td&gt;&lt;td&gt;Apache-2.0, pre-1.0, 1 maintainer, ~54★&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Plain OKF bundle + &lt;code&gt;AGENTS.md&lt;/code&gt; rules, e.g. &lt;a href=&quot;https://github.com/mchu1966/okf-wiki&quot;&gt;okf-wiki&lt;/a&gt;&lt;/td&gt;&lt;td&gt;OKF files in git&lt;/td&gt;&lt;td&gt;Directly, with rules in a prompt file&lt;/td&gt;&lt;td&gt;Through git and PR review; no enforcement unless CI lints&lt;/td&gt;&lt;td&gt;Spec Apache-2.0; okf-wiki is a 1-commit template&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href=&quot;https://github.com/atomicstrata/llm-wiki-compiler&quot;&gt;llm-wiki-compiler&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Local files, embeddings in files&lt;/td&gt;&lt;td&gt;Yes, MCP, optional review queue&lt;/td&gt;&lt;td&gt;No permission model&lt;/td&gt;&lt;td&gt;MIT, ~2.2k★, v1.5.0, &quot;early software&quot;, OKF import/export&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href=&quot;https://github.com/lucasastorian/llmwiki&quot;&gt;llmwiki&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Local files + SQLite, or Postgres/S3 hosted&lt;/td&gt;&lt;td&gt;Yes, MCP&lt;/td&gt;&lt;td&gt;Single-user; team capture on the roadmap&lt;/td&gt;&lt;td&gt;Apache-2.0, ~1.8k★&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td colspan=&quot;5&quot;&gt;&lt;b&gt;Agent memory systems&lt;/b&gt; (facts in a database, not a doc corpus people read)&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href=&quot;https://github.com/basicmachines-co/basic-memory&quot;&gt;basic-memory&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Markdown + SQLite index, vectors&lt;/td&gt;&lt;td&gt;Yes, MCP&lt;/td&gt;&lt;td&gt;Local is single-user; hosted Teams tier announced&lt;/td&gt;&lt;td&gt;AGPL-3.0, ~4.5k★, active&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href=&quot;https://github.com/mem0ai/mem0&quot;&gt;mem0&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Vector store&lt;/td&gt;&lt;td&gt;Yes, SDK&lt;/td&gt;&lt;td&gt;Scoped by user/agent id, not a shared wiki&lt;/td&gt;&lt;td&gt;Apache-2.0, ~68k★&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href=&quot;https://github.com/getzep/graphiti&quot;&gt;Graphiti&lt;/a&gt; / Zep&lt;/td&gt;&lt;td&gt;Temporal graph DB (Neo4j…)&lt;/td&gt;&lt;td&gt;Yes; reference MCP server has no auth&lt;/td&gt;&lt;td&gt;Build your own service, or use Zep&lt;/td&gt;&lt;td&gt;Apache-2.0, ~32k★&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href=&quot;https://github.com/letta-ai/letta&quot;&gt;Letta&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Server-side agent state&lt;/td&gt;&lt;td&gt;Agents edit their own memory&lt;/td&gt;&lt;td&gt;Per agent&lt;/td&gt;&lt;td&gt;Apache-2.0, ~25k★; code moved to letta-code&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td colspan=&quot;5&quot;&gt;&lt;b&gt;Docs generated from code&lt;/b&gt; (read-only for agents)&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href=&quot;https://github.com/AsyncFuncAI/deepwiki-open&quot;&gt;deepwiki-open&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Generated wiki + embeddings&lt;/td&gt;&lt;td&gt;No&lt;/td&gt;&lt;td&gt;One wiki per repo&lt;/td&gt;&lt;td&gt;MIT, ~18k★&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;DeepWiki (deepwiki.com) &lt;i&gt;unverified&lt;/i&gt;&lt;/td&gt;&lt;td&gt;Hosted, generated&lt;/td&gt;&lt;td&gt;No&lt;/td&gt;&lt;td&gt;Per repo&lt;/td&gt;&lt;td&gt;Couldn't reach the site&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href=&quot;https://github.com/upstash/context7&quot;&gt;Context7&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Hosted index of third-party library docs&lt;/td&gt;&lt;td&gt;No, read-only&lt;/td&gt;&lt;td&gt;Not for your own knowledge&lt;/td&gt;&lt;td&gt;MIT, ~64k★&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td colspan=&quot;5&quot;&gt;&lt;b&gt;Classic docs platforms&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Backstage TechDocs &lt;i&gt;unverified&lt;/i&gt;&lt;/td&gt;&lt;td&gt;MkDocs Markdown next to each repo, built into a portal&lt;/td&gt;&lt;td&gt;Through normal PRs&lt;/td&gt;&lt;td&gt;Designed for many repos and teams: software catalog, ownership&lt;/td&gt;&lt;td&gt;Apache-2.0, CNCF; couldn't reach backstage.io&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;Per-repo &lt;code&gt;AGENTS.md&lt;/code&gt; / &lt;code&gt;CLAUDE.md&lt;/code&gt;&lt;/td&gt;&lt;td&gt;One file per repo&lt;/td&gt;&lt;td&gt;Directly&lt;/td&gt;&lt;td&gt;Doesn't share across repos; copies drift&lt;/td&gt;&lt;td&gt;What Cartographer's FAQ recommends for one repo and one person&lt;/td&gt;&lt;/tr&gt;
+&lt;/table&gt;&lt;/div&gt;
+&quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+Two things stand out. First, **only Cartographer in this list is built for many agents from many teams writing to the same knowledge.**
+The other wikis are single-user, and the memory systems store facts for one agent, not documentation people can review.
+Second, the two real alternatives for a team are not tools. One is the **plain OKF bundle** (a git repo of Markdown plus written rules
+and CI), and the other is the **docs platform you may already have**. Cartographer competes with those on enforcement and audit, not on format.
+&quot;&quot;&quot;</span>
+
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2 id=&quot;fit&quot;&gt;&lt;span class=&quot;num&quot;&gt;08 · FIT&lt;/span&gt;For a multi-repo, multi-team project&lt;/h2&gt;&quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+I don't know your project's details, so this assumes several teams, each owning a few repos, with developers using coding agents
+(Claude Code, Codex and others), and knowledge that crosses repo boundaries: contracts between services, decisions, runbooks and onboarding.
+
+**Where it helps most**
+
+- **Cross-repo knowledge with no home.** &quot;Why do we retry this way&quot; lives in Slack, in one person's head, or in one repo's `CLAUDE.md`.
+  A shared KB with one folder per team and a journal of decisions gives it a home that every agent reads at the start of a session.
+- **Many writers, little trust.** If agents on several teams will write, the guardrails are the point: required `type` and `owner`,
+  no broken links, no blind overwrites, and an audit trail that names the agent and the reason. This is the gap between Cartographer and a plain folder.
+- **One agent setup for everyone.** Shipping the team's skills, subagents and instructions from one repo to every client fixes the
+  drift between developers' `.claude/` and `.codex/` folders. You may find this useful even if you use nothing else.
+- **Easy to leave.** It's OKF Markdown in git. If Cartographer stalls, the bundle stays readable by people, by other OKF tools, and by any agent with plain file access.
+
+**What to watch**
+
+- **Bus factor.** It's a pre-1.0 personal project, maintained on a best-effort basis, with breaking changes in minor versions.
+  Pin a version and don't put it in the critical path yet.
+- **A server to run.** You'd need the HTTP mode, tokens, backups, and someone who owns it. The local mode is one person's KB.
+- **KBs don't link to each other.** The docs say &quot;no cross-links between different KBs&quot;. For one project, use **one KB with a map
+  per team**, not one KB per team, or the cross-team links you want most won't be possible.
+- **Drift from code.** The KB lives outside the code repos. Unless something ties pages to code (like the `sources` check above,
+  or a CI job that asks for KB updates on API changes), it will drift the way wikis always do.
+- **Search is keyword-only.** That's a deliberate choice, and fine for a curated wiki. It's weak for fuzzy recall over a large corpus.
+
+**What I'd do**
+
+1. **Start with the format, not the server.** Create one `kb-&lt;project&gt;` repo as an OKF bundle with `services/`, `teams/&lt;team&gt;/` and a
+   `decisions/` journal. Add a short `AGENTS.md` with the rules and link it from every code repo's `AGENTS.md`/`CLAUDE.md`. Run a
+   lint in CI, either `carto`'s or a 50-line script. This costs a day and settles whether agents and people actually use the KB.
+2. **Pilot Cartographer with two teams for two to four weeks** once more than a couple of people's agents are writing. Watch for refused
+   writes (that's the guardrails working), conflicts, merge pain, and whether `cartographer sync` of skills saves real time.
+3. **Decide on evidence.** If agents edit freely and quality holds, the plain bundle may be enough. If you see broken links,
+   overwrites or nobody knowing where a claim came from, that's what Cartographer is for. Either way, nothing is wasted, because the files are the same.
+
+Questions that would change this: How many people's agents would write, as opposed to read? Do you already run a docs portal such as
+Backstage or Confluence that this must coexist with? Can your teams run a shared internal service, or must everything be local and git-only?
+&quot;&quot;&quot;</span>
+
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;09 · SOURCES&lt;/span&gt;What I read, and what I couldn't&lt;/h2&gt;&quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+- **Cartographer:** [repo and README](https://github.com/BeppeTemp/cartographer),
+  [overview](https://github.com/BeppeTemp/cartographer/blob/main/docs/overview.md), [FAQ](https://github.com/BeppeTemp/cartographer/blob/main/docs/faq.md),
+  [data plane](https://github.com/BeppeTemp/cartographer/blob/main/docs/data-plane.md), [control plane](https://github.com/BeppeTemp/cartographer/blob/main/docs/control-plane.md).
+  The ends of the last two were too long to read in full.
+- **LLM Wiki:** [Karpathy's gist](https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f), April 4, 2026.
+- **OKF:** [spec v0.2](https://github.com/GoogleCloudPlatform/open-knowledge-format/blob/main/SPEC.md),
+  [Google Cloud announcement](https://cloud.google.com/blog/products/data-analytics/how-the-open-knowledge-format-can-improve-data-sharing) (June 12, 2026, describing v0.1).
+  The announcement and some third-party pages point to a v0.1 spec in `GoogleCloudPlatform/knowledge-catalog`. I didn't read that version.
+- **&quot;OKF LLMWiki&quot;:** [real-jiakai/okf_llm_wiki](https://github.com/real-jiakai/okf_llm_wiki). I didn't find a product by that name.
+- **Alternatives:** the READMEs linked in the table.
+- **Couldn't reach** (sandbox network policy): beppetemp.github.io/cartographer, deepwiki.com, backstage.io, agents.md. Rows that depend on them are marked *unverified*.
+
+The page's sources are in [`cartographer-nim/src`](https://github.com/pietroppeter/claude-artifacts/tree/main/cartographer-nim/src).
+`carto.nim` is the library and MCP server, and `index.nim` is this [nimib](https://github.com/pietroppeter/nimib) notebook. Every
+output above was produced by running it.
+&quot;&quot;&quot;</span>
+
+nbSave
+</code></pre>
+</section>
+  
+<script>
+  function toggleSourceDisplay() {
+    var btn = document.getElementById("show")
+    var source = document.getElementById("source");
+    if (btn.innerHTML=="Show Source") {
+      btn.innerHTML = "Hide Source";
+      source.style.display = "block";
+    } else {
+      btn.innerHTML = "Show Source";
+      source.style.display = "none";
+    }
+  }
+</script>
+  
+</body>
