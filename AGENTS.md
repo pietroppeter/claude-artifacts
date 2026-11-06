@@ -22,8 +22,10 @@ Static pages made with Claude, served by GitHub Pages from `main` (root). No bui
 
 ## Page style
 - Pick a visual style that fits each explainer's subject: palette, typefaces, motifs. Don't reuse the previous page's theme by default.
-- Keep code small: about 12.5–13px for code blocks and outputs, smaller than body text. Set `-webkit-text-size-adjust:100%` on
-  `html` so iOS Safari doesn't inflate text in blocks that scroll sideways. Check a phone-width screenshot before publishing.
+- Keep code small: about 12.5–13px for code blocks and outputs, smaller than body text. nimib's theme sets
+  `pre > code {font-size:1.2em}`, so override it with a selector at least as specific (`body pre > code`). Set
+  `-webkit-text-size-adjust:100%` on `html` so iOS Safari doesn't inflate text in blocks that scroll sideways.
+  Check a phone-width screenshot before publishing.
 
 ## When a source can't be read
 - If a site is blocked by the environment's network policy, tell Pietro what couldn't be read and give him a copy-pastable
