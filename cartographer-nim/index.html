@@ -7,66 +7,81 @@
   <meta content="nimib 0.4.3" name="generator">
   <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,700;9..144,900&family=IBM+Plex+Sans:wght@400;600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,600;0,700;1,600&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
 <style>
 :root{
-  --paper:#f6f3ea; --card:#fffdf7; --ink:#1b2027; --muted:#5f6670; --line:#e0dccf;
-  --nim:#ffe953; --sea:#2b6f8f; --land:#c9b98a; --pin:#d1495b; --ok:#3f8f5a; --code:#efeadb;
-  --out-bg:#1b2027; --out-fg:#ecebe4; --hl:#ffe953;
+  --paper:#f3ecdc; --sheet:#faf5e9; --ink:#2a2118; --muted:#6e6150; --line:#d9cdb4; --rule:#2a2118;
+  --sea:#2f6f8f; --contour:#a0784a; --pin:#b8432f; --land:#6b8f5a; --code:#ece3cf;
+  --out-bg:#1e2a33; --out-fg:#e9e2d0; --hl:#e8c872;
 }
 @media (prefers-color-scheme:dark){:root:not([data-theme="light"]){
-  --paper:#14181d; --card:#1b2027; --ink:#e8e6df; --muted:#9aa3ad; --line:#2c333c;
-  --sea:#79b8d6; --land:#8f8160; --pin:#ef7d8b; --ok:#7cc896; --code:#232a33; --out-bg:#0d1014; --out-fg:#e8e6df; --hl:#7a6a12; color-scheme:dark}}
+  --paper:#0f1a22; --sheet:#14222c; --ink:#e9e2d0; --muted:#a3a08f; --line:#2b3b47; --rule:#c9b98e;
+  --sea:#7fb6d1; --contour:#c9a46e; --pin:#e2826f; --land:#9cbf86; --code:#1c2c38;
+  --out-bg:#0a1218; --out-fg:#e9e2d0; --hl:#6e5a2a; color-scheme:dark}}
 :root[data-theme="dark"]{
-  --paper:#14181d; --card:#1b2027; --ink:#e8e6df; --muted:#9aa3ad; --line:#2c333c;
-  --sea:#79b8d6; --land:#8f8160; --pin:#ef7d8b; --ok:#7cc896; --code:#232a33; --out-bg:#0d1014; --out-fg:#e8e6df; --hl:#7a6a12; color-scheme:dark}
+  --paper:#0f1a22; --sheet:#14222c; --ink:#e9e2d0; --muted:#a3a08f; --line:#2b3b47; --rule:#c9b98e;
+  --sea:#7fb6d1; --contour:#c9a46e; --pin:#e2826f; --land:#9cbf86; --code:#1c2c38;
+  --out-bg:#0a1218; --out-fg:#e9e2d0; --hl:#6e5a2a; color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
+html{background:var(--paper);-webkit-text-size-adjust:100%;text-size-adjust:100%}
 :root{padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0)}
-html{background:var(--paper)}
-body{margin:0 auto;max-width:860px;padding:0 16px 60px;color:var(--ink);
-  font:17px/1.6 "IBM Plex Sans",system-ui,sans-serif;background:var(--paper)}
-header,footer .nb-box{display:flex;justify-content:space-between;align-items:center;gap:10px;font-size:13px;color:var(--muted);padding:14px 0}
-header{border-bottom:1px solid var(--line)} footer .nb-box{border-top:1px solid var(--line);margin-top:40px}
+body{margin:0 auto;max-width:860px;padding:0 16px 60px;color:var(--ink);background:var(--paper);
+  font:17px/1.62 "Source Serif 4",Georgia,serif}
+header,footer .nb-box{display:flex;justify-content:space-between;align-items:center;gap:10px;
+  font:12px "JetBrains Mono",monospace;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);padding:14px 0}
+header{border-bottom:3px double var(--rule)} footer .nb-box{border-top:3px double var(--rule);margin-top:40px}
 header a, footer a{color:var(--muted)}
-h1,h2,h3{font-family:Fraunces,Georgia,serif;line-height:1.12;letter-spacing:-.01em}
-h1{font-size:clamp(36px,8vw,60px);font-weight:900;margin:34px 0 8px}
-h1 em{font-style:normal;background:linear-gradient(transparent 62%,var(--hl) 62%);padding:0 .08em}
-h2{font-size:28px;font-weight:700;margin:54px 0 10px;padding-top:18px;border-top:2px solid var(--ink)}
-h2 .num{font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted);display:block;margin-bottom:6px;letter-spacing:.08em}
-h3{font-size:21px;margin:30px 0 6px}
+h1,h2,h3{font-family:"Cormorant Garamond",Georgia,serif;line-height:1.08;letter-spacing:.005em}
+.hero{position:relative;margin:0 -16px;padding:30px 16px 8px;
+  background:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='600' height='260' viewBox='0 0 600 260'><g fill='none' stroke='%23a0784a' stroke-opacity='.22' stroke-width='1'><path d='M-20 200 C 80 150, 160 230, 260 180 S 420 120, 620 170'/><path d='M-20 170 C 90 120, 170 200, 270 150 S 430 90, 620 140'/><path d='M-20 140 C 100 90, 180 170, 280 120 S 440 60, 620 110'/><path d='M-20 110 C 110 60, 190 140, 290 90 S 450 30, 620 80'/><path d='M140 60 C 180 20, 260 30, 280 60 S 220 110, 170 95 S 120 80, 140 60 Z'/><path d='M170 62 C 195 40, 245 45, 255 62 S 215 90, 185 82 S 160 72, 170 62 Z'/><path d='M430 220 C 470 190, 540 200, 550 225 S 500 260, 460 250 S 410 240, 430 220 Z'/></g></svg>") center/cover no-repeat}
+.hero-top{display:flex;gap:18px;align-items:center;justify-content:space-between}
+.compass{flex:none;width:clamp(70px,16vw,120px);height:auto;color:var(--ink)}
+.compass .n{fill:var(--pin)} .compass .s{fill:var(--ink)} .compass circle{fill:none;stroke:var(--ink)}
+.compass text{font:600 13px "Cormorant Garamond",serif;fill:var(--ink)}
+h1{font-size:clamp(40px,9vw,68px);font-weight:700;margin:0 0 6px}
+h1 em{font-style:italic;font-weight:600;color:var(--sea)}
+.kicker{font:12px "JetBrains Mono",monospace;letter-spacing:.14em;text-transform:uppercase;color:var(--contour);margin:0 0 6px}
+h2{font-size:32px;font-weight:700;margin:56px 0 10px;padding-top:16px;border-top:3px double var(--rule)}
+h2 .num{font:500 12px "JetBrains Mono",monospace;color:var(--contour);display:block;margin-bottom:6px;letter-spacing:.14em;text-transform:uppercase}
+h3{font-size:24px;margin:30px 0 6px}
 a{color:var(--sea);text-decoration-thickness:1px;text-underline-offset:3px}
-p code, li code, td code{font:14px "JetBrains Mono",monospace;background:var(--code);padding:1px 5px;border-radius:4px}
-.lede{font-size:20px;font-family:Fraunces,Georgia,serif;font-weight:400}
-blockquote{margin:18px 0;padding:6px 16px;border-left:4px solid var(--sea);background:var(--card)}
-pre{margin:14px 0;overflow-x:auto;border-radius:10px}
-pre code{display:block;padding:14px 16px;font:12.5px/1.55 "JetBrains Mono",monospace;font-variant-ligatures:none;background:var(--card);border:1px solid var(--line);border-radius:10px;color:var(--ink)}
-pre.nb-output, pre samp{display:block;padding:12px 16px;font:12.5px/1.5 "JetBrains Mono",monospace;background:var(--out-bg);color:var(--out-fg);border-radius:10px;white-space:pre-wrap;overflow-wrap:anywhere;font-variant-ligatures:none}
-.hljs-keyword{color:#a626a4;font-weight:600}.hljs-type,.hljs-built_in{color:#b76b01}.hljs-string{color:#3f8f5a}
-.hljs-number,.hljs-literal{color:#986801}.hljs-comment{color:#8a8f96;font-style:italic}.hljs-meta{color:#4078f2}
-details{margin:14px 0;border:1px dashed var(--line);border-radius:10px;padding:4px 12px;background:var(--card)}
-details summary{cursor:pointer;font-family:"JetBrains Mono",monospace;font-size:13px;color:var(--muted);padding:6px 0}
-.table-wrap{overflow-x:auto;margin:16px 0;border:1px solid var(--line);border-radius:10px;background:var(--card)}
+p code, li code, td code{font:13px "JetBrains Mono",monospace;background:var(--code);padding:1px 5px;border-radius:3px}
+.lede{font-size:20px;line-height:1.5;font-style:italic}
+blockquote{margin:18px 0;padding:6px 16px;border-left:3px solid var(--contour);background:var(--sheet)}
+pre{margin:14px 0;overflow-x:auto;border-radius:4px}
+body pre > code{display:block;padding:14px 16px;font:12.5px/1.55 "JetBrains Mono",monospace;font-variant-ligatures:none;
+  background:var(--sheet);border:1px solid var(--line);border-radius:4px;color:var(--ink)}
+pre.nb-output, pre samp{display:block;padding:12px 16px;font:12px/1.5 "JetBrains Mono",monospace;font-variant-ligatures:none;
+  background:var(--out-bg);color:var(--out-fg);border-radius:4px;white-space:pre-wrap;overflow-wrap:anywhere}
+@media (max-width:520px){body pre > code{font-size:11.5px} pre.nb-output, pre samp{font-size:11px} p code, li code, td code{font-size:12px}}
+.hljs-keyword{color:#8a3b6b;font-weight:600}.hljs-type,.hljs-built_in{color:#8a5a12}.hljs-string{color:#4f7a3e}
+.hljs-number,.hljs-literal{color:#9a5a1e}.hljs-comment{color:#8f8571;font-style:italic}.hljs-meta{color:#2f6f8f}
+@media (prefers-color-scheme:dark){:root:not([data-theme="light"]) .hljs-keyword{color:#e09ac4} :root:not([data-theme="light"]) .hljs-type{color:#e0b36a}
+  :root:not([data-theme="light"]) .hljs-string{color:#a9d08e} :root:not([data-theme="light"]) .hljs-number{color:#e0a56a}}
+details{margin:14px 0;border:1px dashed var(--line);border-radius:4px;padding:4px 12px;background:var(--sheet)}
+details summary{cursor:pointer;font-family:"JetBrains Mono",monospace;font-size:12px;color:var(--muted);padding:6px 0}
+.table-wrap{overflow-x:auto;margin:16px 0;border:1.5px solid var(--rule);outline:1px solid var(--rule);outline-offset:3px;background:var(--sheet)}
 table{border-collapse:collapse;width:100%;font-size:14.5px;line-height:1.45}
 th,td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
-th{font:600 12px "JetBrains Mono",monospace;letter-spacing:.04em;text-transform:uppercase;color:var(--muted);background:var(--paper)}
+th{font:600 11px "JetBrains Mono",monospace;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);background:var(--paper)}
 tr:last-child td{border-bottom:none}
-.verdict{background:var(--card);border:2px solid var(--ink);border-radius:14px;box-shadow:5px 5px 0 var(--ink);padding:6px 20px;margin:22px 0}
-.verdict h3{margin-top:14px}
+td[colspan]{font-family:"Cormorant Garamond",serif;font-size:18px;background:var(--paper)}
+.verdict{background:var(--sheet);border:1.5px solid var(--rule);outline:1px solid var(--rule);outline-offset:4px;padding:6px 20px;margin:26px 4px}
+.verdict h3{margin-top:14px;font-size:22px;letter-spacing:.12em;text-transform:uppercase;font-size:16px;font-family:"JetBrains Mono",monospace;color:var(--contour)}
 .flow{display:block;width:100%;height:auto;margin:16px 0}
-.flow text{font-family:"IBM Plex Sans",sans-serif;fill:var(--ink)}
+.flow text{font-family:"Source Serif 4",serif;fill:var(--ink)}
 .flow .mono{font-family:"JetBrains Mono",monospace;font-size:12px}
-.flow .box{fill:var(--card);stroke:var(--ink);stroke-width:1.5}
-.flow .srv{fill:var(--nim);stroke:#1b2027;stroke-width:2}
-.flow .srv-t{fill:#1b2027}
-.flow .arrow{stroke:var(--ink);stroke-width:1.5;fill:none;marker-end:url(#ah)}
-.flow .no{stroke:var(--pin);stroke-width:2;stroke-dasharray:5 4;fill:none}
-.flow .no-t{fill:var(--pin);font-size:13px}
+.flow .box{fill:var(--sheet);stroke:var(--ink);stroke-width:1.2}
+.flow .srv{fill:var(--hl);stroke:var(--ink);stroke-width:1.8}
+.flow .srv-t{fill:var(--ink)}
+.flow .arrow{stroke:var(--ink);stroke-width:1.3;fill:none;marker-end:url(#ah)}
 .flow .ah{fill:var(--ink)}
+.flow .no{stroke:var(--pin);stroke-width:1.8;stroke-dasharray:5 4;fill:none}
+.flow .no-t{fill:var(--pin);font-size:13px}
 .flow .muted{fill:var(--muted)}
-.tag{font:600 11px "JetBrains Mono",monospace;background:var(--nim);color:#1b2027;border:1.5px solid #1b2027;border-radius:4px;padding:0 5px}
 #source{display:none}
-footer button{font:600 12px "JetBrains Mono",monospace;border:1.5px solid var(--ink);background:var(--card);color:var(--ink);border-radius:999px;padding:4px 12px;cursor:pointer}
+footer button{font:600 12px "JetBrains Mono",monospace;border:1.5px solid var(--ink);background:var(--sheet);color:var(--ink);border-radius:2px;padding:4px 12px;cursor:pointer}
 footer hr{display:none}
 </style>
 
@@ -107,12 +122,25 @@ figcaption {
     
 </head>
 <body>
-<header><span>a nimib notebook</span><span>written 2026-11-04</span></header>
+<header><span>a nimib notebook</span><span>surveyed 2026-11-04 · updated 2026-11-06</span></header>
 <main>
+<div class="hero">
+<div class="hero-top">
+<div>
+<p class="kicker">A survey of agent-kept wikis · Sheet 00</p>
 <h1>Cartographer, <em>in Nim</em></h1>
+</div>
+<svg class="compass" viewBox="-60 -60 120 120" aria-hidden="true">
+  <circle r="44" stroke-width="1.2"/><circle r="38" stroke-width=".6"/>
+  <path class="n" d="M0 -52 L7 0 L-7 0 Z"/><path class="s" d="M0 52 L7 0 L-7 0 Z"/>
+  <path class="s" d="M-40 0 L0 -5 L0 5 Z" opacity=".55"/><path class="s" d="M40 0 L0 -5 L0 5 Z" opacity=".55"/>
+  <text y="-54" text-anchor="middle">N</text>
+</svg>
+</div>
 <p class="lede">Your team's coding agents each learn things and forget them. Cartographer gives them one shared wiki
 they can all read and grow, but can't break. This page studies it, rebuilds its core in about 400 lines of Nim,
 compares it with the alternatives, and asks whether it fits a project with many repos and many teams.</p>
+</div>
 <div class="verdict">
 <h3>The short answer</h3>
 <p><b>The idea is a good fit for a multi-repo, multi-team project. Cartographer itself is worth a pilot, not a rollout.</b>
@@ -125,7 +153,7 @@ Google Cloud's Open Knowledge Format (June 2026), which formalizes that pattern 
 I couldn't find a single product called "OKF LLMWiki". The closest match is a small demo repo, <a href="https://github.com/real-jiakai/okf_llm_wiki">okf_llm_wiki</a>,
 which lays the same knowledge out both ways. <a href="#fit">Jump to the fit analysis</a>.</p>
 </div>
-<h2><span class="num">01 · WHAT IT IS</span>Cartographer in one picture</h2>
+<h2><span class="num">Sheet 01 · WHAT IT IS</span>Cartographer in one picture</h2>
 <p><a href="https://github.com/BeppeTemp/cartographer">Cartographer</a> is &quot;a shared, git-backed wiki your team's AI agents maintain but can't break —
 Claude Code, Codex, OpenCode and any MCP client.&quot; It is one Go binary, Apache-2.0, by GitHub user BeppeTemp, and it describes itself as
 &quot;Pre-1.0&quot; and &quot;a personal project maintained on a best-effort basis&quot;. When I read it, the repo had 924 commits and 54 stars.</p>
@@ -180,10 +208,21 @@ and <code>instructions.md</code>. <code>cartographer sync</code> installs them i
 <li><strong>Its own limits, as stated.</strong> Search has no model-backed mode, sync is &quot;not atomic across clients&quot;, and: <em>&quot;If your knowledge fits in
 one repository and one person, a plain instruction file is simpler and you should use it.&quot;</em></li>
 </ul>
-<p>I couldn't open the project site <a href="https://beppetemp.github.io/cartographer/">beppetemp.github.io/cartographer</a> from my sandbox
-because the network policy blocked it. Everything above comes from the GitHub repo and its <code>docs/</code> folder. I didn't read the
-changelog, the decision records or the sync and concurrency docs.</p>
-<h2><span class="num">02 · WHERE IT COMES FROM</span>LLM Wiki + OKF, the "OKF LLMWiki" question</h2>
+<p>The <a href="https://beppetemp.github.io/cartographer/">project site</a> publishes the same <code>docs/</code> folder. Three of its pages say a lot
+about how Cartographer is meant to be used:</p>
+<ul>
+<li><strong>The agent does the thinking.</strong> The <a href="https://beppetemp.github.io/cartographer/loop/">operating loop</a> says the server provides
+&quot;deterministic building blocks; the agent decides how to combine them&quot;, and that &quot;there is no built-in LLM judge, review queue
+or automatic PR workflow.&quot; On ingest, <a href="https://beppetemp.github.io/cartographer/use-cases/">&quot;the agent reads the source; the server never does.&quot;</a></li>
+<li><strong>Knowledge has a lifecycle.</strong> Pages can carry <code>review_after</code>. <code>changes_since</code> lists recent changes, and <code>supersede</code> replaces one page
+with another. A source ledger (<code>source_register</code>) refuses to ingest the same source twice. A claim that a new source disputes becomes a
+<code>Contradiction</code> page instead of being overwritten. For large corpora, a big model writes an ingest plan and small models execute it one unit at a time.</li>
+<li><strong>Separate KBs are for access, not for teams.</strong> Several KBs can sit under one server, but <a href="https://beppetemp.github.io/cartographer/use-cases/#separate-domains-into-multiple-kbs">&quot;authorization is per KB, not per concept.
+Use separate KBs when data needs different access boundaries.&quot;</a>
+The drift it detects is in agent setup: <code>cartographer status</code> reports when a client's skills, agents or hooks no longer match the KB,
+and <a href="https://beppetemp.github.io/cartographer/sync/"><code>sync</code></a> realigns them.</li>
+</ul>
+<h2><span class="num">Sheet 02 · WHERE IT COMES FROM</span>LLM Wiki + OKF, the "OKF LLMWiki" question</h2>
 <p>Cartographer's overview says it combines &quot;Karpathy's LLM Wiki pattern&quot; with &quot;Google's Open Knowledge Format (OKF)&quot;. Both are recent:</p>
 <p><strong>LLM Wiki</strong> (<a href="https://gist.github.com/karpathy/442a6bf555914893e9891c11519de94f">Karpathy's gist</a>, created April 4, 2026) is &quot;an idea file&quot;:
 instead of RAG re-deriving answers from raw documents on every question, an LLM &quot;incrementally builds and maintains a persistent wiki&quot;,
@@ -198,7 +237,7 @@ That last point is where Cartographer goes further: it validates a bundle on eve
 <p>So <strong>&quot;OKF LLMWiki&quot; names the same family of ideas</strong>: the LLM Wiki is the workflow, and OKF is the file format. That phrasing comes from
 <a href="https://github.com/real-jiakai/okf_llm_wiki">real-jiakai/okf_llm_wiki</a>, a 5-star demo that organizes one knowledge base both ways.
 I found no product by that exact name. If you saw it somewhere specific, send me the link and I'll check whether it's something else.</p>
-<h2><span class="num">03 · THE MINIMAL VERSION</span>carto.nim: the core, in one file</h2>
+<h2><span class="num">Sheet 03 · THE MINIMAL VERSION</span>carto.nim: the core, in one file</h2>
 <p>To understand the idea, I rebuilt the part that makes Cartographer more than &quot;a folder of Markdown&quot;: <strong>a server that owns the writes</strong>.
 <a href="https://github.com/pietroppeter/claude-artifacts/blob/main/cartographer-nim/src/carto.nim"><code>carto.nim</code></a> is one file with no dependencies
 beyond the Nim standard library and the <code>git</code> command. It keeps these parts:</p>
@@ -295,7 +334,7 @@ changes. Documentation that silently goes stale is the main way a knowledge base
   for l in c.body.links:
     if not kb.exists(l) and l notin pending: result.add &amp;&quot;broken_link: `{l}` does not exist&quot;
 </code></pre>
-<h2><span class="num">04 · A WALKTHROUGH</span>Two teams, two repos, one knowledge base</h2>
+<h2><span class="num">Sheet 04 · A WALKTHROUGH</span>Two teams, two repos, one knowledge base</h2>
 <p>Everything below ran while this page was built. Each output is what the code printed. The setup is a small version of a
 multi-team project: a <code>payments-api</code> repo, a <code>web-checkout</code> repo, and one knowledge base they share.</p>
 <pre><code class="nohighlight nim hljs"><span class="hljs-keyword">proc</span> sh(dir, cmd: <span class="hljs-built_in">string</span>) =
@@ -504,7 +543,7 @@ sh(work / <span class="hljs-string">&quot;payments-api&quot;</span>, <span class
 </pre>
 <p>Running that <code>lint</code> in each code repo's CI, or on a schedule, turns &quot;the docs are stale&quot; from a surprise into a work item.
 An agent can pick it up: read the diff, update the page, and pass the new etag.</p>
-<h2><span class="num">05 · OVER MCP</span>What an agent actually sees</h2>
+<h2><span class="num">Sheet 05 · OVER MCP</span>What an agent actually sees</h2>
 <p>The same library behind <code>carto serve</code> speaks <a href="https://modelcontextprotocol.io">MCP</a> over stdio: one JSON-RPC message per line.
 This block compiles the binary, starts it, and talks to it the way Claude Code or Codex would.</p>
 <pre><code class="nohighlight nim hljs"><span class="hljs-keyword">let</span> bin = work / <span class="hljs-string">&quot;carto&quot;</span>
@@ -557,7 +596,7 @@ tools:  kb_guide, concept_read, concept_write, search, graph_neighbors, concept_
 <p>The agent gets a refusal it can fix (<code>missing_field</code>), fixes it, and the commit records <code>claude-code</code> as the agent.
 The name comes from the client's <code>initialize</code> handshake. Connecting it to a real client takes one line of config, for example
 <code>claude mcp add carto -- /path/to/carto serve --kb /path/to/kb-platform --repo payments-api=/path/to/payments-api</code>.</p>
-<h2><span class="num">06 · WHAT THE MINIMUM LEAVES OUT</span>Where the other 90% of Cartographer goes</h2>
+<h2><span class="num">Sheet 06 · WHAT THE MINIMUM LEAVES OUT</span>Where the other 90% of Cartographer goes</h2>
 <p><code>carto.nim</code> shows the core idea, and it leaves out most of what you'd need to run this for real teams. Here's what Cartographer
 documents and this version skips:</p>
 <ul>
@@ -572,11 +611,12 @@ For a team lead this may be the most useful part, because it stops each develope
 read-only web UI (&quot;Atlas&quot;), a graph ranked by personalized PageRank, and a signed audit log.</li>
 <li><strong>Ingest.</strong> Registering sources and letting a planner decide where new knowledge goes.</li>
 </ul>
-<p>The code-drift check goes the other way: it's my addition. I didn't find it in Cartographer's docs, though I didn't read
-<code>changes_since</code> or the ingest docs in full.</p>
-<h2><span class="num">07 · ALTERNATIVES</span>What else solves this</h2>
+<p>The code-drift check goes the other way: it's my addition. Cartographer has <code>review_after</code>, <code>changes_since</code> and a source ledger,
+and it detects drift in agents' configuration. But its server never reads sources, so nothing in it notices when the code a page
+describes has changed. Some agent has to think to look.</p>
+<h2><span class="num">Sheet 07 · ALTERNATIVES</span>What else solves this</h2>
 <p>The tools people reach for to give agents shared knowledge fall into four groups. For each one I checked the README or official
-page on 2026-11-04. Star counts are rough and change quickly. Rows marked <em>unverified</em> are from memory, because my sandbox couldn't reach the site.</p>
+page on 2026-11-04 or 2026-11-06. Star counts are rough and change quickly. The row marked <em>unverified</em> is from memory, because the site blocked automated reads.</p>
 <div class="table-wrap"><table>
 <tr><th>Option</th><th>Store</th><th>Agents write?</th><th>Teams / many repos</th><th>Signal</th></tr>
 <tr><td colspan="5"><b>Agent-maintained Markdown wikis</b> (same family as Cartographer)</td></tr>
@@ -591,17 +631,17 @@ page on 2026-11-04. Star counts are rough and change quickly. Rows marked <em>un
 <tr><td><a href="https://github.com/letta-ai/letta">Letta</a></td><td>Server-side agent state</td><td>Agents edit their own memory</td><td>Per agent</td><td>Apache-2.0, ~25k★; code moved to letta-code</td></tr>
 <tr><td colspan="5"><b>Docs generated from code</b> (read-only for agents)</td></tr>
 <tr><td><a href="https://github.com/AsyncFuncAI/deepwiki-open">deepwiki-open</a></td><td>Generated wiki + embeddings</td><td>No</td><td>One wiki per repo</td><td>MIT, ~18k★</td></tr>
-<tr><td>DeepWiki (deepwiki.com) <i>unverified</i></td><td>Hosted, generated</td><td>No</td><td>Per repo</td><td>Couldn't reach the site</td></tr>
+<tr><td>DeepWiki (deepwiki.com) <i>unverified</i></td><td>Hosted, generated</td><td>No</td><td>Per repo</td><td>The site answered with a bot check</td></tr>
 <tr><td><a href="https://github.com/upstash/context7">Context7</a></td><td>Hosted index of third-party library docs</td><td>No, read-only</td><td>Not for your own knowledge</td><td>MIT, ~64k★</td></tr>
 <tr><td colspan="5"><b>Classic docs platforms</b></td></tr>
-<tr><td>Backstage TechDocs <i>unverified</i></td><td>MkDocs Markdown next to each repo, built into a portal</td><td>Through normal PRs</td><td>Designed for many repos and teams: software catalog, ownership</td><td>Apache-2.0, CNCF; couldn't reach backstage.io</td></tr>
-<tr><td>Per-repo <code>AGENTS.md</code> / <code>CLAUDE.md</code></td><td>One file per repo</td><td>Directly</td><td>Doesn't share across repos; copies drift</td><td>What Cartographer's FAQ recommends for one repo and one person</td></tr>
+<tr><td><a href="https://backstage.io/docs/features/techdocs/">Backstage TechDocs</a></td><td>Markdown that lives "together with their code", built into the Backstage portal</td><td>Through normal PRs</td><td>Docs hang off each service's catalog page; 10 source hosts supported</td><td>Spotify's own: "5000+ documentation sites"</td></tr>
+<tr><td><a href="https://agents.md">AGENTS.md</a> (and <code>CLAUDE.md</code>)</td><td>One file per repo, or nested per package; "the closest one takes precedence"</td><td>Directly</td><td>Doesn't share across repos; copies drift</td><td>Linux Foundation's Agentic AI Foundation; "over 60k open-source projects"</td></tr>
 </table></div>
 <p>Two things stand out. First, <strong>only Cartographer in this list is built for many agents from many teams writing to the same knowledge.</strong>
 The other wikis are single-user, and the memory systems store facts for one agent, not documentation people can review.
 Second, the two real alternatives for a team are not tools. One is the <strong>plain OKF bundle</strong> (a git repo of Markdown plus written rules
 and CI), and the other is the <strong>docs platform you may already have</strong>. Cartographer competes with those on enforcement and audit, not on format.</p>
-<h2 id="fit"><span class="num">08 · FIT</span>For a multi-repo, multi-team project</h2>
+<h2 id="fit"><span class="num">Sheet 08 · FIT</span>For a multi-repo, multi-team project</h2>
 <p>I don't know your project's details, so this assumes several teams, each owning a few repos, with developers using coding agents
 (Claude Code, Codex and others), and knowledge that crosses repo boundaries: contracts between services, decisions, runbooks and onboarding.</p>
 <p><strong>Where it helps most</strong></p>
@@ -619,8 +659,9 @@ drift between developers' <code>.claude/</code> and <code>.codex/</code> folders
 <li><strong>Bus factor.</strong> It's a pre-1.0 personal project, maintained on a best-effort basis, with breaking changes in minor versions.
 Pin a version and don't put it in the critical path yet.</li>
 <li><strong>A server to run.</strong> You'd need the HTTP mode, tokens, backups, and someone who owns it. The local mode is one person's KB.</li>
-<li><strong>KBs don't link to each other.</strong> The docs say &quot;no cross-links between different KBs&quot;. For one project, use <strong>one KB with a map
-per team</strong>, not one KB per team, or the cross-team links you want most won't be possible.</li>
+<li><strong>KBs don't link to each other.</strong> The docs say &quot;no cross-links between different KBs&quot;, and access is granted per KB. For one project,
+use <strong>one KB with a map per team</strong>, and split off a second KB only for knowledge that needs a different access boundary, such as security
+or customer data. Otherwise the cross-team links you want most won't be possible.</li>
 <li><strong>Drift from code.</strong> The KB lives outside the code repos. Unless something ties pages to code (like the <code>sources</code> check above,
 or a CI job that asks for KB updates on API changes), it will drift the way wikis always do.</li>
 <li><strong>Search is keyword-only.</strong> That's a deliberate choice, and fine for a curated wiki. It's weak for fuzzy recall over a large corpus.</li>
@@ -637,7 +678,7 @@ overwrites or nobody knowing where a claim came from, that's what Cartographer i
 </ol>
 <p>Questions that would change this: How many people's agents would write, as opposed to read? Do you already run a docs portal such as
 Backstage or Confluence that this must coexist with? Can your teams run a shared internal service, or must everything be local and git-only?</p>
-<h2><span class="num">09 · SOURCES</span>What I read, and what I couldn't</h2>
+<h2><span class="num">Sheet 09 · SOURCES</span>What I read, and what I couldn't</h2>
 <ul>
 <li><strong>Cartographer:</strong> <a href="https://github.com/BeppeTemp/cartographer">repo and README</a>,
 <a href="https://github.com/BeppeTemp/cartographer/blob/main/docs/overview.md">overview</a>, <a href="https://github.com/BeppeTemp/cartographer/blob/main/docs/faq.md">FAQ</a>,
@@ -649,7 +690,10 @@ The ends of the last two were too long to read in full.</li>
 The announcement and some third-party pages point to a v0.1 spec in <code>GoogleCloudPlatform/knowledge-catalog</code>. I didn't read that version.</li>
 <li><strong>&quot;OKF LLMWiki&quot;:</strong> <a href="https://github.com/real-jiakai/okf_llm_wiki">real-jiakai/okf_llm_wiki</a>. I didn't find a product by that name.</li>
 <li><strong>Alternatives:</strong> the READMEs linked in the table.</li>
-<li><strong>Couldn't reach</strong> (sandbox network policy): beppetemp.github.io/cartographer, deepwiki.com, backstage.io, agents.md. Rows that depend on them are marked <em>unverified</em>.</li>
+<li><strong>Cartographer site</strong> (read 2026-11-06): <a href="https://beppetemp.github.io/cartographer/">index</a>, <a href="https://beppetemp.github.io/cartographer/loop/">operating loop</a>,
+<a href="https://beppetemp.github.io/cartographer/use-cases/">use cases</a>, <a href="https://beppetemp.github.io/cartographer/sync/">sync</a>.</li>
+<li><strong>Docs platforms and agent files:</strong> <a href="https://backstage.io/docs/features/techdocs/">Backstage TechDocs</a>, <a href="https://agents.md">agents.md</a>.</li>
+<li><strong>Couldn't read:</strong> deepwiki.com, which answered with a bot check. Its row is marked <em>unverified</em>.</li>
 </ul>
 <p>The page's sources are in <a href="https://github.com/pietroppeter/claude-artifacts/tree/main/cartographer-nim/src"><code>cartographer-nim/src</code></a>.
 <code>carto.nim</code> is the library and MCP server, and <code>index.nim</code> is this <a href="https://github.com/pietroppeter/nimib">nimib</a> notebook. Every
@@ -675,7 +719,7 @@ nb.doc.context[<span class="hljs-string">&quot;stylesheet&quot;</span>] = %pageS
 nb.doc.context[<span class="hljs-string">&quot;highlight&quot;</span>] = %<span class="hljs-string">&quot;&quot;</span>
 nb.doc.context[<span class="hljs-string">&quot;disableHighlightJs&quot;</span>] = %<span class="hljs-literal">true</span>
 <span class="hljs-keyword">func</span> pageHeader(blk: <span class="hljs-type">JsonNode</span>, nb: <span class="hljs-type">Nb</span>): <span class="hljs-built_in">string</span> =
-  <span class="hljs-string">&quot;&quot;&quot;&lt;header&gt;&lt;span&gt;a nimib notebook&lt;/span&gt;&lt;span&gt;written 2026-11-04&lt;/span&gt;&lt;/header&gt;&quot;&quot;&quot;</span>
+  <span class="hljs-string">&quot;&quot;&quot;&lt;header&gt;&lt;span&gt;a nimib notebook&lt;/span&gt;&lt;span&gt;surveyed 2026-11-04 · updated 2026-11-06&lt;/span&gt;&lt;/header&gt;&quot;&quot;&quot;</span>
 nb.backend.partials[<span class="hljs-string">&quot;header&quot;</span>] = pageHeader
 
 <span class="hljs-comment"># Show a proc from carto.nim, so the excerpts can't drift from the code that ran.</span>
@@ -706,10 +750,23 @@ removeDir(work)
 createDir(work)
 
 nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;
+&lt;div class=&quot;hero&quot;&gt;
+&lt;div class=&quot;hero-top&quot;&gt;
+&lt;div&gt;
+&lt;p class=&quot;kicker&quot;&gt;A survey of agent-kept wikis · Sheet 00&lt;/p&gt;
 &lt;h1&gt;Cartographer, &lt;em&gt;in Nim&lt;/em&gt;&lt;/h1&gt;
+&lt;/div&gt;
+&lt;svg class=&quot;compass&quot; viewBox=&quot;-60 -60 120 120&quot; aria-hidden=&quot;true&quot;&gt;
+  &lt;circle r=&quot;44&quot; stroke-width=&quot;1.2&quot;/&gt;&lt;circle r=&quot;38&quot; stroke-width=&quot;.6&quot;/&gt;
+  &lt;path class=&quot;n&quot; d=&quot;M0 -52 L7 0 L-7 0 Z&quot;/&gt;&lt;path class=&quot;s&quot; d=&quot;M0 52 L7 0 L-7 0 Z&quot;/&gt;
+  &lt;path class=&quot;s&quot; d=&quot;M-40 0 L0 -5 L0 5 Z&quot; opacity=&quot;.55&quot;/&gt;&lt;path class=&quot;s&quot; d=&quot;M40 0 L0 -5 L0 5 Z&quot; opacity=&quot;.55&quot;/&gt;
+  &lt;text y=&quot;-54&quot; text-anchor=&quot;middle&quot;&gt;N&lt;/text&gt;
+&lt;/svg&gt;
+&lt;/div&gt;
 &lt;p class=&quot;lede&quot;&gt;Your team's coding agents each learn things and forget them. Cartographer gives them one shared wiki
 they can all read and grow, but can't break. This page studies it, rebuilds its core in about 400 lines of Nim,
 compares it with the alternatives, and asks whether it fits a project with many repos and many teams.&lt;/p&gt;
+&lt;/div&gt;
 &quot;&quot;&quot;</span>
 
 nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;
@@ -727,7 +784,7 @@ which lays the same knowledge out both ways. &lt;a href=&quot;#fit&quot;&gt;Jump
 &lt;/div&gt;
 &quot;&quot;&quot;</span>
 
-nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;01 · WHAT IT IS&lt;/span&gt;Cartographer in one picture&lt;/h2&gt;&quot;&quot;&quot;</span>
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;Sheet 01 · WHAT IT IS&lt;/span&gt;Cartographer in one picture&lt;/h2&gt;&quot;&quot;&quot;</span>
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 [Cartographer](https://github.com/BeppeTemp/cartographer) is &quot;a shared, git-backed wiki your team's AI agents maintain but can't break —
@@ -791,12 +848,22 @@ Beyond that core, the docs describe a lot of surrounding machinery. I read the
 - **Its own limits, as stated.** Search has no model-backed mode, sync is &quot;not atomic across clients&quot;, and: *&quot;If your knowledge fits in
   one repository and one person, a plain instruction file is simpler and you should use it.&quot;*
 
-I couldn't open the project site [beppetemp.github.io/cartographer](https://beppetemp.github.io/cartographer/) from my sandbox
-because the network policy blocked it. Everything above comes from the GitHub repo and its `docs/` folder. I didn't read the
-changelog, the decision records or the sync and concurrency docs.
+The [project site](https://beppetemp.github.io/cartographer/) publishes the same `docs/` folder. Three of its pages say a lot
+about how Cartographer is meant to be used:
+
+- **The agent does the thinking.** The [operating loop](https://beppetemp.github.io/cartographer/loop/) says the server provides
+  &quot;deterministic building blocks; the agent decides how to combine them&quot;, and that &quot;there is no built-in LLM judge, review queue
+  or automatic PR workflow.&quot; On ingest, [&quot;the agent reads the source; the server never does.&quot;](https://beppetemp.github.io/cartographer/use-cases/)
+- **Knowledge has a lifecycle.** Pages can carry `review_after`. `changes_since` lists recent changes, and `supersede` replaces one page
+  with another. A source ledger (`source_register`) refuses to ingest the same source twice. A claim that a new source disputes becomes a
+  `Contradiction` page instead of being overwritten. For large corpora, a big model writes an ingest plan and small models execute it one unit at a time.
+- **Separate KBs are for access, not for teams.** Several KBs can sit under one server, but [&quot;authorization is per KB, not per concept.
+  Use separate KBs when data needs different access boundaries.&quot;](https://beppetemp.github.io/cartographer/use-cases/#separate-domains-into-multiple-kbs)
+  The drift it detects is in agent setup: `cartographer status` reports when a client's skills, agents or hooks no longer match the KB,
+  and [`sync`](https://beppetemp.github.io/cartographer/sync/) realigns them.
 &quot;&quot;&quot;</span>
 
-nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;02 · WHERE IT COMES FROM&lt;/span&gt;LLM Wiki + OKF, the &quot;OKF LLMWiki&quot; question&lt;/h2&gt;&quot;&quot;&quot;</span>
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;Sheet 02 · WHERE IT COMES FROM&lt;/span&gt;LLM Wiki + OKF, the &quot;OKF LLMWiki&quot; question&lt;/h2&gt;&quot;&quot;&quot;</span>
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 Cartographer's overview says it combines &quot;Karpathy's LLM Wiki pattern&quot; with &quot;Google's Open Knowledge Format (OKF)&quot;. Both are recent:
@@ -818,7 +885,7 @@ So **&quot;OKF LLMWiki&quot; names the same family of ideas**: the LLM Wiki is t
 I found no product by that exact name. If you saw it somewhere specific, send me the link and I'll check whether it's something else.
 &quot;&quot;&quot;</span>
 
-nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;03 · THE MINIMAL VERSION&lt;/span&gt;carto.nim: the core, in one file&lt;/h2&gt;&quot;&quot;&quot;</span>
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;Sheet 03 · THE MINIMAL VERSION&lt;/span&gt;carto.nim: the core, in one file&lt;/h2&gt;&quot;&quot;&quot;</span>
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 To understand the idea, I rebuilt the part that makes Cartographer more than &quot;a folder of Markdown&quot;: **a server that owns the writes**.
@@ -847,7 +914,7 @@ nbText: <span class="hljs-string">&quot;&quot;&quot;
 The checks it runs come from `problems`. These are the same checks `lint` later runs over the whole KB:
 &quot;&quot;&quot;</span> &amp; excerpt(<span class="hljs-string">&quot;problems&quot;</span>)
 
-nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;04 · A WALKTHROUGH&lt;/span&gt;Two teams, two repos, one knowledge base&lt;/h2&gt;&quot;&quot;&quot;</span>
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;Sheet 04 · A WALKTHROUGH&lt;/span&gt;Two teams, two repos, one knowledge base&lt;/h2&gt;&quot;&quot;&quot;</span>
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 Everything below ran while this page was built. Each output is what the code printed. The setup is a small version of a
@@ -1007,7 +1074,7 @@ Running that `lint` in each code repo's CI, or on a schedule, turns &quot;the do
 An agent can pick it up: read the diff, update the page, and pass the new etag.
 &quot;&quot;&quot;</span>
 
-nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;05 · OVER MCP&lt;/span&gt;What an agent actually sees&lt;/h2&gt;&quot;&quot;&quot;</span>
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;Sheet 05 · OVER MCP&lt;/span&gt;What an agent actually sees&lt;/h2&gt;&quot;&quot;&quot;</span>
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 The same library behind `carto serve` speaks [MCP](https://modelcontextprotocol.io) over stdio: one JSON-RPC message per line.
@@ -1052,7 +1119,7 @@ The name comes from the client's `initialize` handshake. Connecting it to a real
 `claude mcp add carto -- /path/to/carto serve --kb /path/to/kb-platform --repo payments-api=/path/to/payments-api`.
 &quot;&quot;&quot;</span>
 
-nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;06 · WHAT THE MINIMUM LEAVES OUT&lt;/span&gt;Where the other 90% of Cartographer goes&lt;/h2&gt;&quot;&quot;&quot;</span>
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;Sheet 06 · WHAT THE MINIMUM LEAVES OUT&lt;/span&gt;Where the other 90% of Cartographer goes&lt;/h2&gt;&quot;&quot;&quot;</span>
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 `carto.nim` shows the core idea, and it leaves out most of what you'd need to run this for real teams. Here's what Cartographer
@@ -1069,15 +1136,16 @@ documents and this version skips:
   read-only web UI (&quot;Atlas&quot;), a graph ranked by personalized PageRank, and a signed audit log.
 - **Ingest.** Registering sources and letting a planner decide where new knowledge goes.
 
-The code-drift check goes the other way: it's my addition. I didn't find it in Cartographer's docs, though I didn't read
-`changes_since` or the ingest docs in full.
+The code-drift check goes the other way: it's my addition. Cartographer has `review_after`, `changes_since` and a source ledger,
+and it detects drift in agents' configuration. But its server never reads sources, so nothing in it notices when the code a page
+describes has changed. Some agent has to think to look.
 &quot;&quot;&quot;</span>
 
-nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;07 · ALTERNATIVES&lt;/span&gt;What else solves this&lt;/h2&gt;&quot;&quot;&quot;</span>
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;Sheet 07 · ALTERNATIVES&lt;/span&gt;What else solves this&lt;/h2&gt;&quot;&quot;&quot;</span>
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 The tools people reach for to give agents shared knowledge fall into four groups. For each one I checked the README or official
-page on 2026-11-04. Star counts are rough and change quickly. Rows marked *unverified* are from memory, because my sandbox couldn't reach the site.
+page on 2026-11-04 or 2026-11-06. Star counts are rough and change quickly. The row marked *unverified* is from memory, because the site blocked automated reads.
 &quot;&quot;&quot;</span>
 
 nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;
@@ -1095,11 +1163,11 @@ nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;
 &lt;tr&gt;&lt;td&gt;&lt;a href=&quot;https://github.com/letta-ai/letta&quot;&gt;Letta&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Server-side agent state&lt;/td&gt;&lt;td&gt;Agents edit their own memory&lt;/td&gt;&lt;td&gt;Per agent&lt;/td&gt;&lt;td&gt;Apache-2.0, ~25k★; code moved to letta-code&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;&lt;td colspan=&quot;5&quot;&gt;&lt;b&gt;Docs generated from code&lt;/b&gt; (read-only for agents)&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;&lt;td&gt;&lt;a href=&quot;https://github.com/AsyncFuncAI/deepwiki-open&quot;&gt;deepwiki-open&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Generated wiki + embeddings&lt;/td&gt;&lt;td&gt;No&lt;/td&gt;&lt;td&gt;One wiki per repo&lt;/td&gt;&lt;td&gt;MIT, ~18k★&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td&gt;DeepWiki (deepwiki.com) &lt;i&gt;unverified&lt;/i&gt;&lt;/td&gt;&lt;td&gt;Hosted, generated&lt;/td&gt;&lt;td&gt;No&lt;/td&gt;&lt;td&gt;Per repo&lt;/td&gt;&lt;td&gt;Couldn't reach the site&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;DeepWiki (deepwiki.com) &lt;i&gt;unverified&lt;/i&gt;&lt;/td&gt;&lt;td&gt;Hosted, generated&lt;/td&gt;&lt;td&gt;No&lt;/td&gt;&lt;td&gt;Per repo&lt;/td&gt;&lt;td&gt;The site answered with a bot check&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;&lt;td&gt;&lt;a href=&quot;https://github.com/upstash/context7&quot;&gt;Context7&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Hosted index of third-party library docs&lt;/td&gt;&lt;td&gt;No, read-only&lt;/td&gt;&lt;td&gt;Not for your own knowledge&lt;/td&gt;&lt;td&gt;MIT, ~64k★&lt;/td&gt;&lt;/tr&gt;
 &lt;tr&gt;&lt;td colspan=&quot;5&quot;&gt;&lt;b&gt;Classic docs platforms&lt;/b&gt;&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td&gt;Backstage TechDocs &lt;i&gt;unverified&lt;/i&gt;&lt;/td&gt;&lt;td&gt;MkDocs Markdown next to each repo, built into a portal&lt;/td&gt;&lt;td&gt;Through normal PRs&lt;/td&gt;&lt;td&gt;Designed for many repos and teams: software catalog, ownership&lt;/td&gt;&lt;td&gt;Apache-2.0, CNCF; couldn't reach backstage.io&lt;/td&gt;&lt;/tr&gt;
-&lt;tr&gt;&lt;td&gt;Per-repo &lt;code&gt;AGENTS.md&lt;/code&gt; / &lt;code&gt;CLAUDE.md&lt;/code&gt;&lt;/td&gt;&lt;td&gt;One file per repo&lt;/td&gt;&lt;td&gt;Directly&lt;/td&gt;&lt;td&gt;Doesn't share across repos; copies drift&lt;/td&gt;&lt;td&gt;What Cartographer's FAQ recommends for one repo and one person&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href=&quot;https://backstage.io/docs/features/techdocs/&quot;&gt;Backstage TechDocs&lt;/a&gt;&lt;/td&gt;&lt;td&gt;Markdown that lives &quot;together with their code&quot;, built into the Backstage portal&lt;/td&gt;&lt;td&gt;Through normal PRs&lt;/td&gt;&lt;td&gt;Docs hang off each service's catalog page; 10 source hosts supported&lt;/td&gt;&lt;td&gt;Spotify's own: &quot;5000+ documentation sites&quot;&lt;/td&gt;&lt;/tr&gt;
+&lt;tr&gt;&lt;td&gt;&lt;a href=&quot;https://agents.md&quot;&gt;AGENTS.md&lt;/a&gt; (and &lt;code&gt;CLAUDE.md&lt;/code&gt;)&lt;/td&gt;&lt;td&gt;One file per repo, or nested per package; &quot;the closest one takes precedence&quot;&lt;/td&gt;&lt;td&gt;Directly&lt;/td&gt;&lt;td&gt;Doesn't share across repos; copies drift&lt;/td&gt;&lt;td&gt;Linux Foundation's Agentic AI Foundation; &quot;over 60k open-source projects&quot;&lt;/td&gt;&lt;/tr&gt;
 &lt;/table&gt;&lt;/div&gt;
 &quot;&quot;&quot;</span>
 
@@ -1110,7 +1178,7 @@ Second, the two real alternatives for a team are not tools. One is the **plain O
 and CI), and the other is the **docs platform you may already have**. Cartographer competes with those on enforcement and audit, not on format.
 &quot;&quot;&quot;</span>
 
-nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2 id=&quot;fit&quot;&gt;&lt;span class=&quot;num&quot;&gt;08 · FIT&lt;/span&gt;For a multi-repo, multi-team project&lt;/h2&gt;&quot;&quot;&quot;</span>
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2 id=&quot;fit&quot;&gt;&lt;span class=&quot;num&quot;&gt;Sheet 08 · FIT&lt;/span&gt;For a multi-repo, multi-team project&lt;/h2&gt;&quot;&quot;&quot;</span>
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 I don't know your project's details, so this assumes several teams, each owning a few repos, with developers using coding agents
@@ -1131,8 +1199,9 @@ I don't know your project's details, so this assumes several teams, each owning 
 - **Bus factor.** It's a pre-1.0 personal project, maintained on a best-effort basis, with breaking changes in minor versions.
   Pin a version and don't put it in the critical path yet.
 - **A server to run.** You'd need the HTTP mode, tokens, backups, and someone who owns it. The local mode is one person's KB.
-- **KBs don't link to each other.** The docs say &quot;no cross-links between different KBs&quot;. For one project, use **one KB with a map
-  per team**, not one KB per team, or the cross-team links you want most won't be possible.
+- **KBs don't link to each other.** The docs say &quot;no cross-links between different KBs&quot;, and access is granted per KB. For one project,
+  use **one KB with a map per team**, and split off a second KB only for knowledge that needs a different access boundary, such as security
+  or customer data. Otherwise the cross-team links you want most won't be possible.
 - **Drift from code.** The KB lives outside the code repos. Unless something ties pages to code (like the `sources` check above,
   or a CI job that asks for KB updates on API changes), it will drift the way wikis always do.
 - **Search is keyword-only.** That's a deliberate choice, and fine for a curated wiki. It's weak for fuzzy recall over a large corpus.
@@ -1151,7 +1220,7 @@ Questions that would change this: How many people's agents would write, as oppos
 Backstage or Confluence that this must coexist with? Can your teams run a shared internal service, or must everything be local and git-only?
 &quot;&quot;&quot;</span>
 
-nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;09 · SOURCES&lt;/span&gt;What I read, and what I couldn't&lt;/h2&gt;&quot;&quot;&quot;</span>
+nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;Sheet 09 · SOURCES&lt;/span&gt;What I read, and what I couldn't&lt;/h2&gt;&quot;&quot;&quot;</span>
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 - **Cartographer:** [repo and README](https://github.com/BeppeTemp/cartographer),
@@ -1164,7 +1233,10 @@ nbText: <span class="hljs-string">&quot;&quot;&quot;
   The announcement and some third-party pages point to a v0.1 spec in `GoogleCloudPlatform/knowledge-catalog`. I didn't read that version.
 - **&quot;OKF LLMWiki&quot;:** [real-jiakai/okf_llm_wiki](https://github.com/real-jiakai/okf_llm_wiki). I didn't find a product by that name.
 - **Alternatives:** the READMEs linked in the table.
-- **Couldn't reach** (sandbox network policy): beppetemp.github.io/cartographer, deepwiki.com, backstage.io, agents.md. Rows that depend on them are marked *unverified*.
+- **Cartographer site** (read 2026-11-06): [index](https://beppetemp.github.io/cartographer/), [operating loop](https://beppetemp.github.io/cartographer/loop/),
+  [use cases](https://beppetemp.github.io/cartographer/use-cases/), [sync](https://beppetemp.github.io/cartographer/sync/).
+- **Docs platforms and agent files:** [Backstage TechDocs](https://backstage.io/docs/features/techdocs/), [agents.md](https://agents.md).
+- **Couldn't read:** deepwiki.com, which answered with a bot check. Its row is marked *unverified*.
 
 The page's sources are in [`cartographer-nim/src`](https://github.com/pietroppeter/claude-artifacts/tree/main/cartographer-nim/src).
 `carto.nim` is the library and MCP server, and `index.nim` is this [nimib](https://github.com/pietroppeter/nimib) notebook. Every

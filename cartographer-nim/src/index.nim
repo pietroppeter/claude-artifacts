@@ -10,7 +10,7 @@ nb.doc.context["stylesheet"] = %pageStyle
 nb.doc.context["highlight"] = %""
 nb.doc.context["disableHighlightJs"] = %true
 func pageHeader(blk: JsonNode, nb: Nb): string =
-  """<header><span>a nimib notebook</span><span>written 2026-11-04</span></header>"""
+  """<header><span>a nimib notebook</span><span>surveyed 2026-11-04 · updated 2026-11-06</span></header>"""
 nb.backend.partials["header"] = pageHeader
 
 # Show a proc from carto.nim, so the excerpts can't drift from the code that ran.
@@ -41,10 +41,23 @@ removeDir(work)
 createDir(work)
 
 nbRawHtml: """
+<div class="hero">
+<div class="hero-top">
+<div>
+<p class="kicker">A survey of agent-kept wikis · Sheet 00</p>
 <h1>Cartographer, <em>in Nim</em></h1>
+</div>
+<svg class="compass" viewBox="-60 -60 120 120" aria-hidden="true">
+  <circle r="44" stroke-width="1.2"/><circle r="38" stroke-width=".6"/>
+  <path class="n" d="M0 -52 L7 0 L-7 0 Z"/><path class="s" d="M0 52 L7 0 L-7 0 Z"/>
+  <path class="s" d="M-40 0 L0 -5 L0 5 Z" opacity=".55"/><path class="s" d="M40 0 L0 -5 L0 5 Z" opacity=".55"/>
+  <text y="-54" text-anchor="middle">N</text>
+</svg>
+</div>
 <p class="lede">Your team's coding agents each learn things and forget them. Cartographer gives them one shared wiki
 they can all read and grow, but can't break. This page studies it, rebuilds its core in about 400 lines of Nim,
 compares it with the alternatives, and asks whether it fits a project with many repos and many teams.</p>
+</div>
 """
 
 nbRawHtml: """
@@ -62,7 +75,7 @@ which lays the same knowledge out both ways. <a href="#fit">Jump to the fit anal
 </div>
 """
 
-nbRawHtml: """<h2><span class="num">01 · WHAT IT IS</span>Cartographer in one picture</h2>"""
+nbRawHtml: """<h2><span class="num">Sheet 01 · WHAT IT IS</span>Cartographer in one picture</h2>"""
 
 nbText: """
 [Cartographer](https://github.com/BeppeTemp/cartographer) is "a shared, git-backed wiki your team's AI agents maintain but can't break —
@@ -126,12 +139,22 @@ Beyond that core, the docs describe a lot of surrounding machinery. I read the
 - **Its own limits, as stated.** Search has no model-backed mode, sync is "not atomic across clients", and: *"If your knowledge fits in
   one repository and one person, a plain instruction file is simpler and you should use it."*
 
-I couldn't open the project site [beppetemp.github.io/cartographer](https://beppetemp.github.io/cartographer/) from my sandbox
-because the network policy blocked it. Everything above comes from the GitHub repo and its `docs/` folder. I didn't read the
-changelog, the decision records or the sync and concurrency docs.
+The [project site](https://beppetemp.github.io/cartographer/) publishes the same `docs/` folder. Three of its pages say a lot
+about how Cartographer is meant to be used:
+
+- **The agent does the thinking.** The [operating loop](https://beppetemp.github.io/cartographer/loop/) says the server provides
+  "deterministic building blocks; the agent decides how to combine them", and that "there is no built-in LLM judge, review queue
+  or automatic PR workflow." On ingest, ["the agent reads the source; the server never does."](https://beppetemp.github.io/cartographer/use-cases/)
+- **Knowledge has a lifecycle.** Pages can carry `review_after`. `changes_since` lists recent changes, and `supersede` replaces one page
+  with another. A source ledger (`source_register`) refuses to ingest the same source twice. A claim that a new source disputes becomes a
+  `Contradiction` page instead of being overwritten. For large corpora, a big model writes an ingest plan and small models execute it one unit at a time.
+- **Separate KBs are for access, not for teams.** Several KBs can sit under one server, but ["authorization is per KB, not per concept.
+  Use separate KBs when data needs different access boundaries."](https://beppetemp.github.io/cartographer/use-cases/#separate-domains-into-multiple-kbs)
+  The drift it detects is in agent setup: `cartographer status` reports when a client's skills, agents or hooks no longer match the KB,
+  and [`sync`](https://beppetemp.github.io/cartographer/sync/) realigns them.
 """
 
-nbRawHtml: """<h2><span class="num">02 · WHERE IT COMES FROM</span>LLM Wiki + OKF, the "OKF LLMWiki" question</h2>"""
+nbRawHtml: """<h2><span class="num">Sheet 02 · WHERE IT COMES FROM</span>LLM Wiki + OKF, the "OKF LLMWiki" question</h2>"""
 
 nbText: """
 Cartographer's overview says it combines "Karpathy's LLM Wiki pattern" with "Google's Open Knowledge Format (OKF)". Both are recent:
@@ -153,7 +176,7 @@ So **"OKF LLMWiki" names the same family of ideas**: the LLM Wiki is the workflo
 I found no product by that exact name. If you saw it somewhere specific, send me the link and I'll check whether it's something else.
 """
 
-nbRawHtml: """<h2><span class="num">03 · THE MINIMAL VERSION</span>carto.nim: the core, in one file</h2>"""
+nbRawHtml: """<h2><span class="num">Sheet 03 · THE MINIMAL VERSION</span>carto.nim: the core, in one file</h2>"""
 
 nbText: """
 To understand the idea, I rebuilt the part that makes Cartographer more than "a folder of Markdown": **a server that owns the writes**.
@@ -182,7 +205,7 @@ nbText: """
 The checks it runs come from `problems`. These are the same checks `lint` later runs over the whole KB:
 """ & excerpt("problems")
 
-nbRawHtml: """<h2><span class="num">04 · A WALKTHROUGH</span>Two teams, two repos, one knowledge base</h2>"""
+nbRawHtml: """<h2><span class="num">Sheet 04 · A WALKTHROUGH</span>Two teams, two repos, one knowledge base</h2>"""
 
 nbText: """
 Everything below ran while this page was built. Each output is what the code printed. The setup is a small version of a
@@ -342,7 +365,7 @@ Running that `lint` in each code repo's CI, or on a schedule, turns "the docs ar
 An agent can pick it up: read the diff, update the page, and pass the new etag.
 """
 
-nbRawHtml: """<h2><span class="num">05 · OVER MCP</span>What an agent actually sees</h2>"""
+nbRawHtml: """<h2><span class="num">Sheet 05 · OVER MCP</span>What an agent actually sees</h2>"""
 
 nbText: """
 The same library behind `carto serve` speaks [MCP](https://modelcontextprotocol.io) over stdio: one JSON-RPC message per line.
@@ -387,7 +410,7 @@ The name comes from the client's `initialize` handshake. Connecting it to a real
 `claude mcp add carto -- /path/to/carto serve --kb /path/to/kb-platform --repo payments-api=/path/to/payments-api`.
 """
 
-nbRawHtml: """<h2><span class="num">06 · WHAT THE MINIMUM LEAVES OUT</span>Where the other 90% of Cartographer goes</h2>"""
+nbRawHtml: """<h2><span class="num">Sheet 06 · WHAT THE MINIMUM LEAVES OUT</span>Where the other 90% of Cartographer goes</h2>"""
 
 nbText: """
 `carto.nim` shows the core idea, and it leaves out most of what you'd need to run this for real teams. Here's what Cartographer
@@ -404,15 +427,16 @@ documents and this version skips:
   read-only web UI ("Atlas"), a graph ranked by personalized PageRank, and a signed audit log.
 - **Ingest.** Registering sources and letting a planner decide where new knowledge goes.
 
-The code-drift check goes the other way: it's my addition. I didn't find it in Cartographer's docs, though I didn't read
-`changes_since` or the ingest docs in full.
+The code-drift check goes the other way: it's my addition. Cartographer has `review_after`, `changes_since` and a source ledger,
+and it detects drift in agents' configuration. But its server never reads sources, so nothing in it notices when the code a page
+describes has changed. Some agent has to think to look.
 """
 
-nbRawHtml: """<h2><span class="num">07 · ALTERNATIVES</span>What else solves this</h2>"""
+nbRawHtml: """<h2><span class="num">Sheet 07 · ALTERNATIVES</span>What else solves this</h2>"""
 
 nbText: """
 The tools people reach for to give agents shared knowledge fall into four groups. For each one I checked the README or official
-page on 2026-11-04. Star counts are rough and change quickly. Rows marked *unverified* are from memory, because my sandbox couldn't reach the site.
+page on 2026-11-04 or 2026-11-06. Star counts are rough and change quickly. The row marked *unverified* is from memory, because the site blocked automated reads.
 """
 
 nbRawHtml: """
@@ -430,11 +454,11 @@ nbRawHtml: """
 <tr><td><a href="https://github.com/letta-ai/letta">Letta</a></td><td>Server-side agent state</td><td>Agents edit their own memory</td><td>Per agent</td><td>Apache-2.0, ~25k★; code moved to letta-code</td></tr>
 <tr><td colspan="5"><b>Docs generated from code</b> (read-only for agents)</td></tr>
 <tr><td><a href="https://github.com/AsyncFuncAI/deepwiki-open">deepwiki-open</a></td><td>Generated wiki + embeddings</td><td>No</td><td>One wiki per repo</td><td>MIT, ~18k★</td></tr>
-<tr><td>DeepWiki (deepwiki.com) <i>unverified</i></td><td>Hosted, generated</td><td>No</td><td>Per repo</td><td>Couldn't reach the site</td></tr>
+<tr><td>DeepWiki (deepwiki.com) <i>unverified</i></td><td>Hosted, generated</td><td>No</td><td>Per repo</td><td>The site answered with a bot check</td></tr>
 <tr><td><a href="https://github.com/upstash/context7">Context7</a></td><td>Hosted index of third-party library docs</td><td>No, read-only</td><td>Not for your own knowledge</td><td>MIT, ~64k★</td></tr>
 <tr><td colspan="5"><b>Classic docs platforms</b></td></tr>
-<tr><td>Backstage TechDocs <i>unverified</i></td><td>MkDocs Markdown next to each repo, built into a portal</td><td>Through normal PRs</td><td>Designed for many repos and teams: software catalog, ownership</td><td>Apache-2.0, CNCF; couldn't reach backstage.io</td></tr>
-<tr><td>Per-repo <code>AGENTS.md</code> / <code>CLAUDE.md</code></td><td>One file per repo</td><td>Directly</td><td>Doesn't share across repos; copies drift</td><td>What Cartographer's FAQ recommends for one repo and one person</td></tr>
+<tr><td><a href="https://backstage.io/docs/features/techdocs/">Backstage TechDocs</a></td><td>Markdown that lives "together with their code", built into the Backstage portal</td><td>Through normal PRs</td><td>Docs hang off each service's catalog page; 10 source hosts supported</td><td>Spotify's own: "5000+ documentation sites"</td></tr>
+<tr><td><a href="https://agents.md">AGENTS.md</a> (and <code>CLAUDE.md</code>)</td><td>One file per repo, or nested per package; "the closest one takes precedence"</td><td>Directly</td><td>Doesn't share across repos; copies drift</td><td>Linux Foundation's Agentic AI Foundation; "over 60k open-source projects"</td></tr>
 </table></div>
 """
 
@@ -445,7 +469,7 @@ Second, the two real alternatives for a team are not tools. One is the **plain O
 and CI), and the other is the **docs platform you may already have**. Cartographer competes with those on enforcement and audit, not on format.
 """
 
-nbRawHtml: """<h2 id="fit"><span class="num">08 · FIT</span>For a multi-repo, multi-team project</h2>"""
+nbRawHtml: """<h2 id="fit"><span class="num">Sheet 08 · FIT</span>For a multi-repo, multi-team project</h2>"""
 
 nbText: """
 I don't know your project's details, so this assumes several teams, each owning a few repos, with developers using coding agents
@@ -466,8 +490,9 @@ I don't know your project's details, so this assumes several teams, each owning 
 - **Bus factor.** It's a pre-1.0 personal project, maintained on a best-effort basis, with breaking changes in minor versions.
   Pin a version and don't put it in the critical path yet.
 - **A server to run.** You'd need the HTTP mode, tokens, backups, and someone who owns it. The local mode is one person's KB.
-- **KBs don't link to each other.** The docs say "no cross-links between different KBs". For one project, use **one KB with a map
-  per team**, not one KB per team, or the cross-team links you want most won't be possible.
+- **KBs don't link to each other.** The docs say "no cross-links between different KBs", and access is granted per KB. For one project,
+  use **one KB with a map per team**, and split off a second KB only for knowledge that needs a different access boundary, such as security
+  or customer data. Otherwise the cross-team links you want most won't be possible.
 - **Drift from code.** The KB lives outside the code repos. Unless something ties pages to code (like the `sources` check above,
   or a CI job that asks for KB updates on API changes), it will drift the way wikis always do.
 - **Search is keyword-only.** That's a deliberate choice, and fine for a curated wiki. It's weak for fuzzy recall over a large corpus.
@@ -486,7 +511,7 @@ Questions that would change this: How many people's agents would write, as oppos
 Backstage or Confluence that this must coexist with? Can your teams run a shared internal service, or must everything be local and git-only?
 """
 
-nbRawHtml: """<h2><span class="num">09 · SOURCES</span>What I read, and what I couldn't</h2>"""
+nbRawHtml: """<h2><span class="num">Sheet 09 · SOURCES</span>What I read, and what I couldn't</h2>"""
 
 nbText: """
 - **Cartographer:** [repo and README](https://github.com/BeppeTemp/cartographer),
@@ -499,7 +524,10 @@ nbText: """
   The announcement and some third-party pages point to a v0.1 spec in `GoogleCloudPlatform/knowledge-catalog`. I didn't read that version.
 - **"OKF LLMWiki":** [real-jiakai/okf_llm_wiki](https://github.com/real-jiakai/okf_llm_wiki). I didn't find a product by that name.
 - **Alternatives:** the READMEs linked in the table.
-- **Couldn't reach** (sandbox network policy): beppetemp.github.io/cartographer, deepwiki.com, backstage.io, agents.md. Rows that depend on them are marked *unverified*.
+- **Cartographer site** (read 2026-11-06): [index](https://beppetemp.github.io/cartographer/), [operating loop](https://beppetemp.github.io/cartographer/loop/),
+  [use cases](https://beppetemp.github.io/cartographer/use-cases/), [sync](https://beppetemp.github.io/cartographer/sync/).
+- **Docs platforms and agent files:** [Backstage TechDocs](https://backstage.io/docs/features/techdocs/), [agents.md](https://agents.md).
+- **Couldn't read:** deepwiki.com, which answered with a bot check. Its row is marked *unverified*.
 
 The page's sources are in [`cartographer-nim/src`](https://github.com/pietroppeter/claude-artifacts/tree/main/cartographer-nim/src).
 `carto.nim` is the library and MCP server, and `index.nim` is this [nimib](https://github.com/pietroppeter/nimib) notebook. Every
