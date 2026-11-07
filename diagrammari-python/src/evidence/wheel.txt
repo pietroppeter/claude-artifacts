@@ -1,0 +1,14 @@
+Archive:  /home/user/diagrammari/experiments/python/dist/diagrammari-0.0.1-py3-none-linux_x86_64.whl
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+     4135  2020-02-02 00:00   mari/__init__.py
+     2769  2020-02-02 00:00   mari/browser.py
+   733670  2020-02-02 00:00   mari/pele.global.js
+    17020  2020-02-02 00:00   mari/widget.js
+      800  2020-02-02 00:00   mari/widget.py
+  2379008  2020-02-02 00:00   mari/_lib/libmari.so
+     4584  2020-02-02 00:00   diagrammari-0.0.1.dist-info/METADATA
+       97  2020-02-02 00:00   diagrammari-0.0.1.dist-info/WHEEL
+      663  2020-02-02 00:00   diagrammari-0.0.1.dist-info/RECORD
+---------                     -------
+  3142746                     9 files

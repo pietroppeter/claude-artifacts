@@ -1,0 +1,6 @@
+$ PATH=/usr/bin:/bin uv run python demo.py
+node on PATH: None
+Pele 1.13.0 drew 3101 bytes of SVG in 3898 ms (first call starts Node)
+ids: {'nodes': ['idea', 'draft', 'review', 'ship'], 'edges': ['L_review_draft_0', 'L_draft_review_0', 'L_review_ship_0', 'L_idea_draft_0']}
+with the layer: 2.3 ms
+DiagramError: syntax at 2:9
