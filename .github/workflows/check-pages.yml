@@ -1,0 +1,21 @@
+name: check pages
+on:
+  pull_request:
+  push:
+    branches: [main]
+jobs:
+  backlink-and-index:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: every page links back to the index
+        run: python3 tools/backlink.py --check
+      - name: every page is listed in index.html and README.md
+        run: |
+          fail=0
+          for d in */index.html; do
+            slug=${d%/index.html}
+            grep -q "href=\"$slug/\"" index.html || { echo "index.html is missing $slug"; fail=1; }
+            grep -q "claude-artifacts/$slug/" README.md || { echo "README.md is missing $slug"; fail=1; }
+          done
+          exit $fail
