@@ -285,55 +285,53 @@ beyond the Nim standard library and the <code>git</code> command. It keeps these
 <code>sources: [repo:path]</code>. The server pins each source to the file's current git blob, and <code>lint</code> reports <code>source_drift</code> once that code
 changes. Documentation that silently goes stale is the main way a knowledge base dies across many repos.</p>
 <p>Here is the write path. Everything else in the file supports it:</p>
-<pre><code class="language-nim">proc write*(kb: Kb, c: Concept, ifMatch = &quot;&quot;, reason = &quot;&quot;, agent = &quot;unknown&quot;): string =
-  ## The only way a page changes. Refuses with a code, or commits and returns the new etag.
-  let cur = kb.etag(c.id)
-  if cur != ifMatch:
-    if ifMatch.len == 0:
-      refuse(&quot;stale_write&quot;, &amp;&quot;`{c.id}` already exists (etag {cur[0 ..&lt; 7]}); read it and pass its etag as if_match&quot;)
-    if cur.len == 0: refuse(&quot;stale_write&quot;, &amp;&quot;`{c.id}` does not exist; create it with an empty if_match&quot;)
-    refuse(&quot;stale_write&quot;, &amp;&quot;`{c.id}` changed since you read it (now {cur[0 ..&lt; 7]}); read it again and merge&quot;)
-  let ps = kb.problems(c)
-  if ps.len &gt; 0: refuse(ps[0].split(':')[0], ps.join(&quot;\n&quot;))
-  var c = c
-  if &quot;sources&quot; in c.meta:
-    c.meta[&quot;sources&quot;] = &quot;[&quot; &amp; c.meta[&quot;sources&quot;].list.mapIt(kb.pin(it)).join(&quot;, &quot;) &amp; &quot;]&quot;
-  let text = c.render
-  let back = parseConcept(c.id, text)   # what we write must read back identically
-  if back.meta != c.meta or back.body != c.body: refuse(&quot;round_trip&quot;, &amp;&quot;`{c.id}` does not survive a re-read&quot;)
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">proc</span> write*(kb: <span class="hljs-type">Kb</span>, c: <span class="hljs-keyword">Concept</span>, ifMatch = <span class="hljs-string">&quot;&quot;</span>, reason = <span class="hljs-string">&quot;&quot;</span>, agent = <span class="hljs-string">&quot;unknown&quot;</span>): <span class="hljs-built_in">string</span> =
+  <span class="hljs-comment">## The only way a page changes. Refuses with a code, or commits and returns the new etag.</span>
+  <span class="hljs-keyword">let</span> cur = kb.etag(c.id)
+  <span class="hljs-keyword">if</span> cur != ifMatch:
+    <span class="hljs-keyword">if</span> ifMatch.len == <span class="hljs-number">0</span>:
+      refuse(<span class="hljs-string">&quot;stale_write&quot;</span>, &amp;<span class="hljs-string">&quot;`{c.id}` already exists (etag {cur[0 ..&lt; 7]}); read it and pass its etag as if_match&quot;</span>)
+    <span class="hljs-keyword">if</span> cur.len == <span class="hljs-number">0</span>: refuse(<span class="hljs-string">&quot;stale_write&quot;</span>, &amp;<span class="hljs-string">&quot;`{c.id}` does not exist; create it with an empty if_match&quot;</span>)
+    refuse(<span class="hljs-string">&quot;stale_write&quot;</span>, &amp;<span class="hljs-string">&quot;`{c.id}` changed since you read it (now {cur[0 ..&lt; 7]}); read it again and merge&quot;</span>)
+  <span class="hljs-keyword">let</span> ps = kb.problems(c)
+  <span class="hljs-keyword">if</span> ps.len &gt; <span class="hljs-number">0</span>: refuse(ps[<span class="hljs-number">0</span>].split(<span class="hljs-string">':'</span>)[<span class="hljs-number">0</span>], ps.join(<span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>))
+  <span class="hljs-keyword">var</span> c = c
+  <span class="hljs-keyword">if</span> <span class="hljs-string">&quot;sources&quot;</span> <span class="hljs-keyword">in</span> c.meta:
+    c.meta[<span class="hljs-string">&quot;sources&quot;</span>] = <span class="hljs-string">&quot;[&quot;</span> &amp; c.meta[<span class="hljs-string">&quot;sources&quot;</span>].list.mapIt(kb.pin(it)).join(<span class="hljs-string">&quot;, &quot;</span>) &amp; <span class="hljs-string">&quot;]&quot;</span>
+  <span class="hljs-keyword">let</span> text = c.render
+  <span class="hljs-keyword">let</span> back = parseConcept(c.id, text)   <span class="hljs-comment"># what we write must read back identically</span>
+  <span class="hljs-keyword">if</span> back.meta != c.meta <span class="hljs-keyword">or</span> back.body != c.body: refuse(<span class="hljs-string">&quot;round_trip&quot;</span>, &amp;<span class="hljs-string">&quot;`{c.id}` does not survive a re-read&quot;</span>)
   createDir(kb.pathOf(c.id).parentDir)
   writeFile(kb.pathOf(c.id), text)
-  let verb = if cur.len == 0: &quot;concept_new&quot; else: &quot;concept_write&quot;
-  kb.logEntry(&amp;&quot;{verb} [{c.id}](/{c.id}) by {agent}: {reason}&quot;)
+  <span class="hljs-keyword">let</span> verb = <span class="hljs-keyword">if</span> cur.len == <span class="hljs-number">0</span>: <span class="hljs-string">&quot;concept_new&quot;</span> <span class="hljs-keyword">else</span>: <span class="hljs-string">&quot;concept_write&quot;</span>
+  kb.logEntry(&amp;<span class="hljs-string">&quot;{verb} [{c.id}](/{c.id}) by {agent}: {reason}&quot;</span>)
   kb.regenIndex
-  kb.commit(&amp;&quot;{verb}: {c.id}&quot;, reason, agent)
-  kb.etag(c.id)
-</code></pre>
+  kb.commit(&amp;<span class="hljs-string">&quot;{verb}: {c.id}&quot;</span>, reason, agent)
+  kb.etag(c.id)</code></pre>
 <p>The checks it runs come from <code>problems</code>. These are the same checks <code>lint</code> later runs over the whole KB:</p>
-<pre><code class="language-nim">proc problems*(kb: Kb, c: Concept, pending = initHashSet[string]()): seq[string] =
-  ## Everything wrong with a page, as `code: message` lines. Empty means it may be written.
-  if not validId(c.id):
-    result.add &amp;&quot;invalid_id: `{c.id}` must be 1-3 kebab-case segments and not a reserved name&quot;
-  for k, v in c.meta:
-    if not k.allIt(it in {'a'..'z', '0'..'9', '_'}): result.add &amp;&quot;bad_key: `{k}`&quot;
-    if '\n' in v: result.add &amp;&quot;nested_frontmatter: `{k}` spans lines&quot;
-  let typ = c.meta.getOrDefault(&quot;type&quot;)
-  if typ.len == 0: result.add &quot;missing_type: OKF requires a `type` in the frontmatter&quot;
-  let m = kb.mapFor(c.id)
-  if m.meta.len &gt; 0:
-    let allowed = m.meta.getOrDefault(&quot;concept_types&quot;).list
-    if allowed.len &gt; 0 and typ.len &gt; 0 and typ notin allowed:
-      let names = allowed.join(&quot;, &quot;)
-      result.add &amp;&quot;type_not_allowed: `{m.id}` takes {names}, not {typ}&quot;
-    for f in m.meta.getOrDefault(&quot;required_fields&quot;).list:
-      if c.meta.getOrDefault(f).len == 0: result.add &amp;&quot;missing_field: `{m.id}` requires `{f}`&quot;
-    if m.meta.getOrDefault(&quot;kind&quot;) == &quot;journal&quot;:
-      let n = c.id.split('/')[^1]
-      if n.len &lt; 11 or n[4] != '-' or n[7] != '-' or n[10] != '-':
-        result.add &amp;&quot;journal_name: pages in `{m.id}` are named YYYY-MM-DD-slug&quot;
-  for l in c.body.links:
-    if not kb.exists(l) and l notin pending: result.add &amp;&quot;broken_link: `{l}` does not exist&quot;
-</code></pre>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">proc</span> problems*(kb: <span class="hljs-type">Kb</span>, c: <span class="hljs-keyword">Concept</span>, pending = initHashSet[<span class="hljs-built_in">string</span>]()): <span class="hljs-built_in">seq</span>[<span class="hljs-built_in">string</span>] =
+  <span class="hljs-comment">## Everything wrong with a page, as `code: message` lines. Empty means it may be written.</span>
+  <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> validId(c.id):
+    <span class="hljs-literal">result</span>.add &amp;<span class="hljs-string">&quot;invalid_id: `{c.id}` must be 1-3 kebab-case segments and not a reserved name&quot;</span>
+  <span class="hljs-keyword">for</span> k, v <span class="hljs-keyword">in</span> c.meta:
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> k.allIt(it <span class="hljs-keyword">in</span> {<span class="hljs-string">'a'</span>..<span class="hljs-string">'z'</span>, <span class="hljs-string">'0'</span>..<span class="hljs-string">'9'</span>, <span class="hljs-string">'_'</span>}): <span class="hljs-literal">result</span>.add &amp;<span class="hljs-string">&quot;bad_key: `{k}`&quot;</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-string">'\n'</span> <span class="hljs-keyword">in</span> v: <span class="hljs-literal">result</span>.add &amp;<span class="hljs-string">&quot;nested_frontmatter: `{k}` spans lines&quot;</span>
+  <span class="hljs-keyword">let</span> typ = c.meta.getOrDefault(<span class="hljs-string">&quot;type&quot;</span>)
+  <span class="hljs-keyword">if</span> typ.len == <span class="hljs-number">0</span>: <span class="hljs-literal">result</span>.add <span class="hljs-string">&quot;missing_type: OKF requires a `type` in the frontmatter&quot;</span>
+  <span class="hljs-keyword">let</span> m = kb.mapFor(c.id)
+  <span class="hljs-keyword">if</span> m.meta.len &gt; <span class="hljs-number">0</span>:
+    <span class="hljs-keyword">let</span> allowed = m.meta.getOrDefault(<span class="hljs-string">&quot;concept_types&quot;</span>).list
+    <span class="hljs-keyword">if</span> allowed.len &gt; <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> typ.len &gt; <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> typ <span class="hljs-keyword">notin</span> allowed:
+      <span class="hljs-keyword">let</span> names = allowed.join(<span class="hljs-string">&quot;, &quot;</span>)
+      <span class="hljs-literal">result</span>.add &amp;<span class="hljs-string">&quot;type_not_allowed: `{m.id}` takes {names}, not {typ}&quot;</span>
+    <span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> m.meta.getOrDefault(<span class="hljs-string">&quot;required_fields&quot;</span>).list:
+      <span class="hljs-keyword">if</span> c.meta.getOrDefault(f).len == <span class="hljs-number">0</span>: <span class="hljs-literal">result</span>.add &amp;<span class="hljs-string">&quot;missing_field: `{m.id}` requires `{f}`&quot;</span>
+    <span class="hljs-keyword">if</span> m.meta.getOrDefault(<span class="hljs-string">&quot;kind&quot;</span>) == <span class="hljs-string">&quot;journal&quot;</span>:
+      <span class="hljs-keyword">let</span> n = c.id.split(<span class="hljs-string">'/'</span>)[^<span class="hljs-number">1</span>]
+      <span class="hljs-keyword">if</span> n.len &lt; <span class="hljs-number">11</span> <span class="hljs-keyword">or</span> n[<span class="hljs-number">4</span>] != <span class="hljs-string">'-'</span> <span class="hljs-keyword">or</span> n[<span class="hljs-number">7</span>] != <span class="hljs-string">'-'</span> <span class="hljs-keyword">or</span> n[<span class="hljs-number">10</span>] != <span class="hljs-string">'-'</span>:
+        <span class="hljs-literal">result</span>.add &amp;<span class="hljs-string">&quot;journal_name: pages in `{m.id}` are named YYYY-MM-DD-slug&quot;</span>
+  <span class="hljs-keyword">for</span> l <span class="hljs-keyword">in</span> c.body.links:
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> kb.exists(l) <span class="hljs-keyword">and</span> l <span class="hljs-keyword">notin</span> pending: <span class="hljs-literal">result</span>.add &amp;<span class="hljs-string">&quot;broken_link: `{l}` does not exist&quot;</span></code></pre>
 <h2><span class="num">Sheet 04 · A WALKTHROUGH</span>Two teams, two repos, one knowledge base</h2>
 <p>Everything below ran while this page was built. Each output is what the code printed. The setup is a small version of a
 multi-team project: a <code>payments-api</code> repo, a <code>web-checkout</code> repo, and one knowledge base they share.</p>
@@ -739,7 +737,9 @@ nb.backend.partials[<span class="hljs-string">&quot;header&quot;</span>] = pageH
       inc i
     <span class="hljs-keyword">while</span> lines[^<span class="hljs-number">1</span>].len == <span class="hljs-number">0</span>: <span class="hljs-keyword">discard</span> lines.pop
     parts.add lines.join(<span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>)
-  <span class="hljs-string">&quot;```nim</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span> &amp; parts.join(<span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>) &amp; <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">```</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>
+  <span class="hljs-comment"># Highlighted the same way as nbCode blocks (nimib's highlightNim), not as a markdown fence,</span>
+  <span class="hljs-comment"># which nimib leaves unhighlighted when highlight.js is off.</span>
+  <span class="hljs-string">&quot;&lt;pre&gt;&lt;code class=</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">nohighlight nim hljs</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&gt;&quot;</span> &amp; highlightNim(parts.join(<span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-meta">\n</span><span class="hljs-string">&quot;</span>)) &amp; <span class="hljs-string">&quot;&lt;/code&gt;&lt;/pre&gt;&quot;</span>
 
 <span class="hljs-comment"># Fixed clock: commit ids and the log are the same on every build.</span>
 putEnv(<span class="hljs-string">&quot;CARTO_NOW&quot;</span>, <span class="hljs-string">&quot;2026-11-04T12:00:00Z&quot;</span>)
@@ -908,11 +908,13 @@ I also added one thing aimed at a multi-repo project, which **I didn't find in C
 changes. Documentation that silently goes stale is the main way a knowledge base dies across many repos.
 
 Here is the write path. Everything else in the file supports it:
-&quot;&quot;&quot;</span> &amp; excerpt(<span class="hljs-string">&quot;write&quot;</span>)
+&quot;&quot;&quot;</span>
+nbRawHtml: excerpt(<span class="hljs-string">&quot;write&quot;</span>)
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 The checks it runs come from `problems`. These are the same checks `lint` later runs over the whole KB:
-&quot;&quot;&quot;</span> &amp; excerpt(<span class="hljs-string">&quot;problems&quot;</span>)
+&quot;&quot;&quot;</span>
+nbRawHtml: excerpt(<span class="hljs-string">&quot;problems&quot;</span>)
 
 nbRawHtml: <span class="hljs-string">&quot;&quot;&quot;&lt;h2&gt;&lt;span class=&quot;num&quot;&gt;Sheet 04 · A WALKTHROUGH&lt;/span&gt;Two teams, two repos, one knowledge base&lt;/h2&gt;&quot;&quot;&quot;</span>
 
@@ -1261,4 +1263,17 @@ nbSave
   }
 </script>
   
+<!-- claude-artifacts:backlink -->
+<style>
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#ca-backlink{all:initial;position:fixed;z-index:2147483647;left:max(10px,env(safe-area-inset-left,0px));bottom:max(10px,env(safe-area-inset-bottom,0px));
+font:500 12px/1 system-ui,-apple-system,"Segoe UI",sans-serif;color:#1f1a22;background:rgba(251,250,252,.96);
+border:1px solid rgba(0,0,0,.14);border-radius:999px;padding:6px 10px;text-decoration:none;box-shadow:0 1px 3px rgba(0,0,0,.12);
+-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);cursor:pointer}
+#ca-backlink:hover,#ca-backlink:focus-visible{text-decoration:underline}
+@media (prefers-color-scheme:dark){#ca-backlink{color:#ece6ef;background:rgba(23,19,26,.94);border-color:rgba(255,255,255,.18)}}
+@media print{#ca-backlink{display:none}}
+</style>
+<a id="ca-backlink" href="https://pietroppeter.github.io/claude-artifacts/" title="All Claude artifacts">&larr; Claude artifacts</a>
+<!-- /claude-artifacts:backlink -->
 </body>

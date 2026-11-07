@@ -4,6 +4,9 @@ nbInit
 nb.title = "Affinity Propagation, animated with nimanim"
 # write the page next to src/, wherever the build is run from
 nb.doc.filename = currentSourcePath().parentDir.parentDir / "index.html"
+# Output blocks are <pre class="nb-output"> with no <code> inside, so water.css doesn't make them
+# scroll; without this, long lines push the whole page sideways on a phone.
+nbRawHtml: "<style>pre.nb-output{overflow-x:auto}</style>"
 
 nbText: """
 # Affinity Propagation, animated with nimanim

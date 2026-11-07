@@ -464,10 +464,10 @@ but it is the honest fastest answer to the literal question.</p>
 <p>Create <em>File → New → Project → iOS → App</em>, Interface <strong>SwiftUI</strong>, Language <strong>Swift</strong>, Team <strong>(Personal Team)</strong>.
 Then add these four things. The Nim file is the one proven above.</p>
 <p><strong>1. <code>nim/core.nim</code></strong>: your Nim. Every proc Swift should see gets <code>{.exportc, cdecl.}</code>.</p>
-<pre><code class="language-nim">proc fib*(n: cint): cint {.exportc, cdecl.} =
-  if n &lt; 2: n else: fib(n - 1) + fib(n - 2)
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">proc</span> fib*(n: <span class="hljs-built_in">cint</span>): <span class="hljs-built_in">cint</span> {.exportc, cdecl.} =
+  <span class="hljs-keyword">if</span> n &lt; <span class="hljs-number">2</span>: n <span class="hljs-keyword">else</span>: fib(n - <span class="hljs-number">1</span>) + fib(n - <span class="hljs-number">2</span>)
 
-proc nimVersion*(): cstring {.exportc, cdecl.} = NimVersion</code></pre>
+<span class="hljs-keyword">proc</span> nimVersion*(): <span class="hljs-built_in">cstring</span> {.exportc, cdecl.} = <span class="hljs-type">NimVersion</span></code></pre>
 <p><strong>2. <code>NimApp/nimcore.h</code></strong>: the C signatures Swift will import. Set <em>Build Settings → Objective-C Bridging Header</em> to this path.
 <code>cint</code> becomes Swift <code>Int32</code>, <code>cstring</code> becomes <code>UnsafePointer&lt;CChar&gt;</code>.</p>
 <pre><code class="language-c">#pragma once
@@ -705,7 +705,11 @@ nb.backend.partials[<span class="hljs-string">&quot;header&quot;</span>] = menuB
   nbRawHtml(<span class="hljs-string">&quot;&lt;/div&gt;&lt;/section&gt;&quot;</span>)
 
 <span class="hljs-keyword">template</span> code(lang, src: <span class="hljs-built_in">string</span>) =
-  nbRawHtml(<span class="hljs-string">&quot;&lt;pre&gt;&lt;code class=</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">language-&quot;</span> &amp; lang &amp; <span class="hljs-string">&quot;</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&gt;&quot;</span> &amp; src.multiReplace((<span class="hljs-string">&quot;&amp;&quot;</span>, <span class="hljs-string">&quot;&amp;amp;&quot;</span>), (<span class="hljs-string">&quot;&lt;&quot;</span>, <span class="hljs-string">&quot;&amp;lt;&quot;</span>), (<span class="hljs-string">&quot;&gt;&quot;</span>, <span class="hljs-string">&quot;&amp;gt;&quot;</span>)) &amp; <span class="hljs-string">&quot;&lt;/code&gt;&lt;/pre&gt;&quot;</span>)
+  <span class="hljs-comment"># highlight.js from cdnjs has no Nim grammar, so Nim is highlighted at build time like nbCode blocks.</span>
+  <span class="hljs-keyword">if</span> lang == <span class="hljs-string">&quot;nim&quot;</span>:
+    nbRawHtml(<span class="hljs-string">&quot;&lt;pre&gt;&lt;code class=</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">nohighlight nim hljs</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&gt;&quot;</span> &amp; highlightNim(src) &amp; <span class="hljs-string">&quot;&lt;/code&gt;&lt;/pre&gt;&quot;</span>)
+  <span class="hljs-keyword">else</span>:
+    nbRawHtml(<span class="hljs-string">&quot;&lt;pre&gt;&lt;code class=</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">language-&quot;</span> &amp; lang &amp; <span class="hljs-string">&quot;</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&gt;&quot;</span> &amp; src.multiReplace((<span class="hljs-string">&quot;&amp;&quot;</span>, <span class="hljs-string">&quot;&amp;amp;&quot;</span>), (<span class="hljs-string">&quot;&lt;&quot;</span>, <span class="hljs-string">&quot;&amp;lt;&quot;</span>), (<span class="hljs-string">&quot;&gt;&quot;</span>, <span class="hljs-string">&quot;&amp;gt;&quot;</span>)) &amp; <span class="hljs-string">&quot;&lt;/code&gt;&lt;/pre&gt;&quot;</span>)
 
 <span class="hljs-comment"># ----------------------------------------------------------------- intro ---</span>
 nbRawHtml <span class="hljs-string">&quot;&quot;&quot;&lt;section class=&quot;hero&quot;&gt;
@@ -952,4 +956,17 @@ nbSave
   }
 </script>
   
+<!-- claude-artifacts:backlink -->
+<style>
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#ca-backlink{all:initial;position:fixed;z-index:2147483647;left:max(10px,env(safe-area-inset-left,0px));bottom:max(10px,env(safe-area-inset-bottom,0px));
+font:500 12px/1 system-ui,-apple-system,"Segoe UI",sans-serif;color:#1f1a22;background:rgba(251,250,252,.96);
+border:1px solid rgba(0,0,0,.14);border-radius:999px;padding:6px 10px;text-decoration:none;box-shadow:0 1px 3px rgba(0,0,0,.12);
+-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);cursor:pointer}
+#ca-backlink:hover,#ca-backlink:focus-visible{text-decoration:underline}
+@media (prefers-color-scheme:dark){#ca-backlink{color:#ece6ef;background:rgba(23,19,26,.94);border-color:rgba(255,255,255,.18)}}
+@media print{#ca-backlink{display:none}}
+</style>
+<a id="ca-backlink" href="https://pietroppeter.github.io/claude-artifacts/" title="All Claude artifacts">&larr; Claude artifacts</a>
+<!-- /claude-artifacts:backlink -->
 </body>

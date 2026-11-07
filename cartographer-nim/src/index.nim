@@ -30,7 +30,9 @@ proc excerpt(names: varargs[string]): string =
       inc i
     while lines[^1].len == 0: discard lines.pop
     parts.add lines.join("\n")
-  "```nim\n" & parts.join("\n\n") & "\n```\n"
+  # Highlighted the same way as nbCode blocks (nimib's highlightNim), not as a markdown fence,
+  # which nimib leaves unhighlighted when highlight.js is off.
+  "<pre><code class=\"nohighlight nim hljs\">" & highlightNim(parts.join("\n\n")) & "</code></pre>"
 
 # Fixed clock: commit ids and the log are the same on every build.
 putEnv("CARTO_NOW", "2026-11-04T12:00:00Z")
@@ -199,11 +201,13 @@ I also added one thing aimed at a multi-repo project, which **I didn't find in C
 changes. Documentation that silently goes stale is the main way a knowledge base dies across many repos.
 
 Here is the write path. Everything else in the file supports it:
-""" & excerpt("write")
+"""
+nbRawHtml: excerpt("write")
 
 nbText: """
 The checks it runs come from `problems`. These are the same checks `lint` later runs over the whole KB:
-""" & excerpt("problems")
+"""
+nbRawHtml: excerpt("problems")
 
 nbRawHtml: """<h2><span class="num">Sheet 04 · A WALKTHROUGH</span>Two teams, two repos, one knowledge base</h2>"""
 
