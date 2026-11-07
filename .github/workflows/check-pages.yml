@@ -15,7 +15,7 @@ jobs:
           fail=0
           for d in */index.html; do
             slug=${d%/index.html}
-            grep -q "href=\"$slug/\"" index.html || { echo "index.html is missing $slug"; fail=1; }
+            grep -q "href=\"$slug/index.html\"" index.html || { echo "index.html is missing $slug"; fail=1; }
             grep -q "claude-artifacts/$slug/" README.md || { echo "README.md is missing $slug"; fail=1; }
           done
           exit $fail
