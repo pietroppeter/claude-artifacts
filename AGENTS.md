@@ -14,7 +14,7 @@ Static pages made with Claude, served by GitHub Pages from `main` (root). No bui
   index before `</body>` (between `claude-artifacts:backlink` marker comments; re-running replaces it, never duplicates it).
   Page generators (`src/build.py`, nimib `index.nim`) overwrite `index.html`, so run it again after every rebuild.
   Don't hand-edit or restyle the link inside a page: change `tools/backlink.py` and re-run it on all pages.
-- Keep the root `index.html` in its basic style: one `<li>` per page (link, `<time>`, short description `<p>`), no per-page theming.
+- Keep the root `index.html` in its basic style: a card grid with one `<li>` per page (link, `<time>`, short description `<p>`; the card clamps it to four lines), no per-page theming.
 - CI (`.github/workflows/check-pages.yml`) fails if any page lacks the current back-link or is missing from `index.html` or
   `README.md`. Run `python3 tools/backlink.py --check` before pushing.
 - Pages here are public: check with Pietro before adding anything with personal or private data.
