@@ -24,6 +24,12 @@ h3{font-size:18px;margin:22px 0 6px}
 .stamp{position:absolute;top:18px;right:18px;transform:rotate(-7deg);border:3px solid var(--red);color:var(--red);font:16px "Special Elite",monospace;padding:4px 10px;border-radius:4px;opacity:.85;text-transform:uppercase;letter-spacing:.05em;background:rgba(255,255,255,.15)}
 .stamp.blue{border-color:var(--blue);color:var(--blue)}
 .stamp.grey{border-color:var(--mute);color:var(--mute)}
+.stamp.green{border-color:#2f6b3a;color:#2f6b3a}
+.stamp.big{font-size:22px;padding:6px 14px;border-width:4px}
+.suspect{border:1px dashed var(--line);background:#fffaf0;padding:10px 14px;margin:12px 0}
+.suspect h3{margin:0 0 4px}
+.suspect .alibi{font-size:15px}
+.verdict{border:3px double var(--ink);padding:12px 16px;margin:16px 0;background:#fffdf6}
 pre{background:#fffaf0;border:1px solid var(--line);border-left:4px solid var(--ink);padding:10px 12px;overflow-x:auto;margin:10px 0 16px}
 body pre > code,pre{font:12.5px/1.5 "IBM Plex Mono",ui-monospace,monospace}
 code{font:0.88em "IBM Plex Mono",ui-monospace,monospace;background:rgba(255,255,255,.5);padding:0 3px}
@@ -78,6 +84,7 @@ ol.toc{columns:2;font-size:15px;padding-left:20px}
     <li><a href="#node">Why Node was needed, and how QuickJS replaced it</a></li>
     <li><a href="#choices">The choices, and why</a></li>
     <li><a href="#next">What is proposed next</a></li>
+    <li><a href="#case-repo">Case 2: one repo or two?</a></li>
   </ol>
   <p class="links"><a href="https://github.com/pietroppeter/diagrammari/pull/3">diagrammari PR #3</a>
   <a href="https://github.com/pietroppeter/diagrammari/tree/claude/project-thread-ekbf6s/experiments/python">experiments/python</a></p>
@@ -362,6 +369,7 @@ same SVG as Node: [True, True, True, True]</code></pre>
 
 <section class="sheet" id="next">
   <div class="tab">PROPOSED</div>
+  <div class="stamp green big">approved · P.P. · 7 Nov 2026</div>
   <h2>What is proposed next</h2>
   <p>Three OpenSpec changes in <a href="https://github.com/pietroppeter/diagrammari/pull/3">diagrammari PR #3</a>, in build order:</p>
   <ol>
@@ -371,7 +379,61 @@ same SVG as Node: [True, True, True, True]</code></pre>
   </ol>
   <p>New BACKLOG items include QuickJS for the Nim library and nimib pages too, one layer engine written in Nim and compiled to JS for the editor, the editor in nimib pages,
   layer files next to the text, a <code>%%mari</code> cell magic, PNG export, Pyodide and conda-forge.</p>
-  <p>One open question for Pietro: should the Python package live in the diagrammari repo, as proposed, or in a repo of its own?</p>
+  <p>Pietro approved all three on 7 Nov 2026. That left one open question, which is <a href="#case-repo">case 2</a> below.</p>
+</section>
+
+<section class="sheet" id="case-repo">
+  <div class="tab">CASE 2</div>
+  <div class="stamp">verdict · first degree</div>
+  <h2>One repo or two?</h2>
+  <p><b>The question.</b> Should the Python package live in the diagrammari repo, in a <code>python/</code> folder, or in a repo of its own
+  (say <code>diagrammari-py</code>)? A separate repo looks cleaner. To decide, ask what could kill this project in a year. Each layout lets a different
+  culprit in, so we find the likeliest one first.</p>
+  <p><b>The victim.</b> A Python user. They run <code>uv add diagrammari</code>, and their diagram comes out different from the same text in a nimib page.
+  Or the editor moves a box and the export doesn't, or a Pele fix shipped in Nim three months ago never reached PyPI.</p>
+
+  <div class="suspect">
+    <h3>Suspect 1: Drift</h3>
+    <p class="alibi">Two copies of anything that must match: the Pele bundle and its version, QuickJS and its commit, the C ABI, the layer's JSON,
+    the spec. Drift only needs two repos and a busy week. In a separate repo, every change to the ABI or the layer is two PRs in a set order, and
+    every Pele upgrade is done twice. <b>No alibi in the two-repo layout.</b> In one repo, a single PR changes the Nim code, the ABI, the widget and
+    the spec together, and the same CI checks the Nim tests and the wheel.</p>
+  </div>
+  <div class="suspect">
+    <h3>Suspect 2: Clutter</h3>
+    <p class="alibi">A Nim repo grows a <code>pyproject.toml</code>, a hatch hook, a wheels workflow and a <code>python/</code> folder, so Nim contributors
+    see Python and Python contributors see Nim. That's real, but small. Nimble installs only <code>srcDir</code> (<code>src/</code>), so Nim users never get the Python
+    files, and the Python tree is one folder plus one workflow. <b>Guilty of untidiness, not of murder.</b></p>
+  </div>
+  <div class="suspect">
+    <h3>Suspect 3: Tangled releases</h3>
+    <p class="alibi">Nim and Python may want different release speeds. One repo can still tag them apart (<code>v0.2.0</code> for nimble, <code>py-v0.2.0</code>
+    for PyPI, each starting its own workflow), and PyPI trusted publishing is set per repo and workflow, so that works. A separate repo makes
+    this easier, but drift (suspect 1) follows the moment the two release speeds differ. <b>Alibi holds.</b></p>
+  </div>
+  <div class="suspect">
+    <h3>Suspect 4: The build that can't see the Nim code</h3>
+    <p class="alibi">The proof of concept builds from <code>experiments/python/</code> and reaches up to <code>../../src</code> for the Nim code and Pele. A wheel
+    built in CI is fine, but an sdist from a subfolder can't include files from the folder above it. So in one repo, <code>pyproject.toml</code> goes at the
+    root, next to <code>mari.nimble</code>, with the Python code in <code>python/mari/</code>. In a separate repo you need a git submodule or a pinned clone of
+    diagrammari just to build. <b>Caught in both layouts. One repo with the pyproject at the root disarms it.</b></p>
+  </div>
+  <div class="suspect">
+    <h3>Suspect 5: Identity</h3>
+    <p class="alibi">Is diagrammari a Nim library with Python bindings, or a product with two front doors? The PyPI page and the docs would say "diagrammari"
+    either way. One repo means one README, one set of issues, one specs page and one devlog: one story. <b>Not a threat in one repo.</b></p>
+  </div>
+
+  <div class="verdict">
+    <p><b>Verdict: same repo.</b> The culprit is drift, and only the two-repo layout lets it in. The Python package is a second front door to the same
+    library: the same Pele, the same QuickJS, the same layer, the same spec. Things that must match belong in one place, checked by one CI.</p>
+    <p><b>The layout:</b> <code>pyproject.toml</code> at the root (distribution <code>diagrammari</code>, import <code>mari</code>), Python code in
+    <code>python/mari/</code>, the C ABI in <code>src/mari/capi.nim</code> next to the library, and wheels built by <code>.github/workflows/wheels.yml</code> on
+    <code>py-v*</code> tags. The Python spec lives in <code>openspec/specs/python/</code> with the others.</p>
+    <p><b>Court:</b> Claude sat as the jury, in the first degree. Pietro is the <i>corte d'appello</i>, the second degree, and his ruling is final.</p>
+    <p><b>When to reopen the case:</b> if the Python side grows its own large surface, such as Python builders, Pyodide or a JupyterLab extension with a
+    build, or gets its own maintainers. Splitting out later is a <code>git subtree split</code>; merging two drifted repos back together is much harder.</p>
+  </div>
 </section>
 
 </main>
