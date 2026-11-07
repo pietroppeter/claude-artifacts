@@ -1,0 +1,4 @@
+$ python threads.py ctypes
+ctypes 8 threads: 400 of 400 right, 280 ms
+$ python threads.py nimpy
+nimpy 8 threads: 400 of 400 right, 202 ms

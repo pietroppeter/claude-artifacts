@@ -1,0 +1,5 @@
+python 3.9.25   same svg: True   nimpy draw 0.834 ms
+python 3.11.18  same svg: True   nimpy draw 0.801 ms
+python 3.13.18  same svg: True   nimpy draw 0.818 ms
+python 3.14.6   same svg: True   nimpy draw 0.801 ms
+(one ctypes library and one nimpy module, the same two files for every version)
