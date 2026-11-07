@@ -1,0 +1,5 @@
+$ nim c -d:release qtest.nim && ./qtest cmp_src.json out.json
+load Pele in QuickJS: 92 ms
+per diagram: 709 µs
+$ python3 compare.py   # against Node, same sources, same options
+same SVG as Node: [True, True, True, True]

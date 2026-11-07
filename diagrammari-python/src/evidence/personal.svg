@@ -1,0 +1,48 @@
+<svg height="244.01" style="--pele-bg:#f1ead9;--pele-fg:#1c1b19;--pele-surface:#e2a52a;--pele-border:#1c1b19;--pele-line:#1c1b19;--pele-accent:#c8402b;--pele-radius:0px;max-width:100%;height:auto;--_bg:var(--pele-bg,#fff);--_fg:var(--pele-fg,#1f1f1f);--_m:var(--pele-muted,#6e6e6e);--_l:var(--pele-line,#1f1f1f);--_s:var(--pele-surface,#f3f3f3);--_a:var(--pele-surface-alt,#e6e6e6);--_b:var(--pele-border,#8a8a8a);--_c:var(--pele-accent,#5b7bd5);color:var(--_fg);--_r:var(--pele-radius,4px);--_fm:var(--pele-font-mono,monospace);font:16px sans-serif;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;font-family:var(--pele-font,Jost, Futura, sans-serif)" xmlns="http://www.w3.org/2000/svg" class="pele pele-flowchart" role="graphics-document document" width="551.72" aria-roledescription="flowchart" viewBox="-4 -35.83 551.72 244.01" fill="var(--_fg)">
+  <g stroke-linecap="round" stroke="var(--_l)" class="pele-edges" fill="none">
+    <g class="pele-edge" data-id="L_idea_draft_0">
+      <path d="M75.14,48.17C111.14,48.17 87.14,48.17 116.14,48.17" />
+      <path stroke="none" d="M123.14,48.17L115.14,51.53L115.14,44.81Z" class="pele-marker" fill="var(--_l)" />
+    </g>
+    <g class="pele-edge" data-id="L_draft_review_0">
+      <path d="M193.81,48.17C231.59,48.17 231.59,48.17 262.38,48.17" />
+      <path stroke="none" d="M269.38,48.17L261.38,51.53L261.38,44.81Z" class="pele-marker" fill="var(--_l)" />
+    </g>
+    <g class="pele-edge" data-id="L_review_ship_0">
+      <path d="M397.92,48.17C438.81,48.17 438.81,168.17 472.7,168.17" />
+      <path stroke="none" d="M479.7,168.17L471.7,171.53L471.7,164.81Z" class="pele-marker" fill="var(--_l)" />
+    </g>
+    <g class="pele-edge" data-id="L_review_draft_0">
+      <path stroke-dasharray="3 4" d="M269.38,48.17C239.38,-31.83 223.81,-31.83 196.26,41.62" />
+      <path stroke="none" d="M193.81,48.17L193.47,39.5L199.76,41.86Z" class="pele-marker" fill="var(--_l)" />
+    </g>
+  </g>
+  <g class="pele-edge-labels" font-size="14">
+    <g transform="translate(3.5,60)" class="pele-edge-label" data-id="L_review_ship_0">
+      <rect x="420.42" height="21" y="37.67" rx="3" width="29.78" fill="var(--_bg)" />
+      <text x="435.31" text-anchor="middle" y="53.07">yes</text>
+    </g>
+    <g transform="translate(-3.5,-72.5)" class="pele-edge-label" data-id="L_review_draft_0">
+      <rect x="223.31" height="21" y="50.17" rx="3" width="23.57" fill="var(--_bg)" />
+      <text x="235.09" text-anchor="middle" y="65.57">no</text>
+    </g>
+  </g>
+  <g class="pele-nodes">
+    <g transform="translate(41.57,48.17)" class="pele-node pele-shape-rect" data-id="idea">
+      <rect x="-33.57" height="48" y="-24" stroke="var(--_b)" style="rx:var(--_r)" width="67.14" fill="var(--_s)" />
+      <text x="0" text-anchor="middle" y="5.6" class="pele-label">Idea</text>
+    </g>
+    <g transform="translate(158.47,48.17)" class="pele-node pele-shape-rounded" data-id="draft">
+      <rect x="-35.34" height="48" y="-24" stroke="var(--_b)" rx="12" width="70.67" fill="var(--_s)" />
+      <text x="0" text-anchor="middle" y="5.6" class="pele-label">Draft</text>
+    </g>
+    <g transform="translate(333.65,48.17)" class="pele-node pele-shape-diam" data-id="review">
+      <polygon stroke="var(--_b)" points="0,-40.17 64.27,0 0,40.17 -64.27,0" fill="var(--_s)" />
+      <text x="0" text-anchor="middle" y="5.6" class="pele-label">Review?</text>
+    </g>
+    <g transform="translate(507.71,168.17)" class="pele-node pele-shape-circle" data-id="ship">
+      <circle stroke="var(--_b)" r="28.01" fill="#c8402b" />
+      <text x="0" text-anchor="middle" y="5.6" class="pele-label">Ship</text>
+    </g>
+  </g>
+</svg>

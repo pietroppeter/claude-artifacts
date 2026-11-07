@@ -1,0 +1,8 @@
+$ uv init --bare
+Initialized project `fresh2`
+$ uv add ./diagrammari-0.0.1-py3-none-linux_x86_64.whl
+Using CPython 3.13.18 interpreter at: /usr/local/bin/python3
+Creating virtual environment at: .venv
+Resolved 2 packages in 19ms
+Installed 1 package in 1ms
+ + diagrammari==0.0.1 (from file://./diagrammari-0.0.1-py3-none-linux_x86_64.whl)

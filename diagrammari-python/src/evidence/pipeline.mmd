@@ -1,0 +1,7 @@
+flowchart LR
+  text([Mermaid text]) --> lib["libmari (Nim)"]
+  lib -->|Pele in QuickJS| svg[SVG]
+  svg --> ed{{editor in the browser}}
+  ed -->|layer JSON| py[Python]
+  py --> lib
+  lib -->|layer applied| out([your SVG])

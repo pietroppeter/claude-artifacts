@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>diagrammari in Python, Jupyter and marimo: the evidence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+:root{--paper:#f4ecd8;--folder:#e3cf9f;--ink:#26221c;--mute:#6d6250;--red:#b3261e;--blue:#1f4e79;--line:#cdbb8d;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--folder);color:var(--ink);font:17px/1.55 "IBM Plex Sans",system-ui,sans-serif}
+[hidden]{display:none!important}
+main{max-width:860px;margin:0 auto;padding:28px 18px 80px}
+.sheet{background:var(--paper);border:1px solid var(--line);box-shadow:0 2px 0 #c9b47f,0 10px 30px rgba(60,40,0,.12);padding:28px 30px;margin:0 0 26px;position:relative}
+h1,h2,h3{font-family:"Special Elite","Courier New",monospace;font-weight:400;line-height:1.2}
+h1{font-size:34px;margin:6px 0 10px}
+h2{font-size:24px;margin:0 0 12px}
+h3{font-size:18px;margin:22px 0 6px}
+.kicker{font:600 12px "IBM Plex Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.lede{font-size:19px}
+.tab{position:absolute;top:-14px;left:22px;background:var(--paper);border:1px solid var(--line);border-bottom:none;padding:2px 12px;font:600 12px "IBM Plex Mono",monospace;letter-spacing:.08em;color:var(--mute)}
+.stamp{position:absolute;top:18px;right:18px;transform:rotate(-7deg);border:3px solid var(--red);color:var(--red);font:16px "Special Elite",monospace;padding:4px 10px;border-radius:4px;opacity:.85;text-transform:uppercase;letter-spacing:.05em;background:rgba(255,255,255,.15)}
+.stamp.blue{border-color:var(--blue);color:var(--blue)}
+.stamp.grey{border-color:var(--mute);color:var(--mute)}
+.stamp.green{border-color:#2f6b3a;color:#2f6b3a}
+.stamp.big{font-size:22px;padding:6px 14px;border-width:4px}
+.suspect{border:1px dashed var(--line);background:#fffaf0;padding:10px 14px;margin:12px 0}
+.suspect h3{margin:0 0 4px}
+.suspect .alibi{font-size:15px}
+.verdict{border:3px double var(--ink);padding:12px 16px;margin:16px 0;background:#fffdf6}
+pre{background:#fffaf0;border:1px solid var(--line);border-left:4px solid var(--ink);padding:10px 12px;overflow-x:auto;margin:10px 0 16px}
+body pre > code,pre{font:12.5px/1.5 "IBM Plex Mono",ui-monospace,monospace}
+code{font:0.88em "IBM Plex Mono",ui-monospace,monospace;background:rgba(255,255,255,.5);padding:0 3px}
+pre code{background:none;padding:0}
+.cmd{color:var(--blue);font-weight:600}
+figure{margin:14px 0 18px}
+figure img{width:100%;height:auto;border:1px solid var(--line);display:block;background:#fff}
+figcaption{font-size:14px;color:var(--mute);margin-top:6px}
+.svgbox{background:#fff;border:1px solid var(--line);padding:12px;overflow-x:auto}
+.svgbox svg{max-width:100%;height:auto}
+.wide{display:block}.narrow{display:none}
+table{border-collapse:collapse;width:100%;font-size:15px;margin:10px 0 16px}
+th,td{border-bottom:1px solid var(--line);text-align:left;padding:6px 8px;vertical-align:top}
+th{font:600 12px "IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}
+.pick{background:rgba(179,38,30,.08)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}.two>*{min-width:0}
+.two .svgbox{padding:8px}
+.note{font-size:14px;color:var(--mute)}
+a{color:var(--blue)}
+ol.toc{columns:2;font-size:15px;padding-left:20px}
+#layer{min-height:60px;white-space:pre}
+.links a{margin-right:14px}
+@media (max-width:640px){
+  body{font-size:16px}main{padding:22px 10px 60px}.sheet{padding:22px 16px}
+  h1{font-size:27px}h2{font-size:21px}.stamp{position:static;display:inline-block;margin:0 0 10px;font-size:13px}
+  .wide{display:none}.narrow{display:block}table{display:block;overflow-x:auto;font-size:13.5px}th,td{padding:5px 5px}.two{grid-template-columns:minmax(0,1fr)}ol.toc{columns:1}
+}
+</style>
+</head>
+<body>
+<main>
+
+<section class="sheet">
+  <div class="kicker">diagrammari · case file · 7 Nov 2026</div>
+  <h1>diagrammari in Python, Jupyter and marimo</h1>
+  <p class="lede">Pietro asked for diagrammari from Python with <code>uv add</code>, an editor in Jupyter and marimo
+  where you drag boxes around, the changes back as JSON, and a personalized SVG exported from the
+  Mermaid text plus those changes. A proof of concept now does all of that. This page is the evidence:
+  every output below was copied from a real run, and every screenshot is from a real browser driven by Playwright.</p>
+  <div class="svgbox wide">{{pipeline}}</div>
+  <div class="svgbox narrow">{{pipeline_narrow}}</div>
+  <p class="note">The loop, drawn by Pele from Mermaid text. Write standard Mermaid, the Nim library draws it, the editor
+  gives back a layer of hand edits, and the library applies the layer to give your SVG.</p>
+  <ol class="toc">
+    <li><a href="#wheel">A Nim library in a Python wheel</a></li>
+    <li><a href="#uvadd">uv add, and no Node anywhere</a></li>
+    <li><a href="#layer-export">The layer, exported headless</a></li>
+    <li><a href="#marimo">The editor in marimo</a></li>
+    <li><a href="#jupyter">The editor in JupyterLab</a></li>
+    <li><a href="#tab">The editor in a browser tab</a></li>
+    <li><a href="#try">Try the editor here</a></li>
+    <li><a href="#node">Why Node was needed, and how QuickJS replaced it</a></li>
+    <li><a href="#choices">The choices, and why</a></li>
+    <li><a href="#next">What is proposed next</a></li>
+    <li><a href="#case-repo">Case 2: one repo or two?</a></li>
+    <li><a href="#appeal">Case 2 on appeal, in an AI world</a></li>
+  </ol>
+  <p class="links"><a href="https://github.com/pietroppeter/diagrammari/pull/3">diagrammari PR #3</a>
+  <a href="https://github.com/pietroppeter/diagrammari/tree/claude/project-thread-ekbf6s/experiments/python">experiments/python</a></p>
+</section>
+
+<section class="sheet" id="wheel">
+  <div class="tab">EXHIBIT A</div>
+  <div class="stamp">seen running</div>
+  <h2>A Nim library in a Python wheel</h2>
+  <p>The Nim side is compiled with <code>nim c --app:lib</code> into <code>libmari.so</code>. It exports a few plain C functions:
+  <code>mari_draw</code> takes a JSON request (Mermaid text, layer, options) and returns a JSON answer (the SVG, or Pele's error),
+  <code>mari_free</code> releases the answer, and <code>mari_pele_version</code> and <code>mari_engine</code> report the Pele version and the engine. Python loads the library with <code>ctypes</code> from the standard library.
+  There is no nimpy and no compiled Python extension, so one wheel works with every Python 3 on a platform.</p>
+  <pre><code>proc mari_draw(request: cstring): cstring {.exportc, dynlib, cdecl.}
+proc mari_free(p: cstring) {.exportc, dynlib, cdecl.}</code></pre>
+  <p>A small hatchling build hook runs Nim during <code>uv build</code> and tags the wheel <code>py3-none-&lt;platform&gt;</code>:</p>
+  <pre><code><span class="cmd">$ uv build --wheel</span>
+{{build}}
+
+<span class="cmd">$ unzip -l dist/diagrammari-0.0.1-py3-none-linux_x86_64.whl</span>
+{{wheel}}</code></pre>
+  <p class="note">The library is 2.4 MB: QuickJS (about 1.2 MB, see exhibit H), Pele's bundle (730 kB, embedded with <code>staticRead</code>) and
+  the Nim code. The widget gets its own copy of Pele (<code>pele.global.js</code>) because the browser draws too. The compressed wheel is 1.3 MB.</p>
+</section>
+
+<section class="sheet" id="uvadd">
+  <div class="tab">EXHIBIT B</div>
+  <div class="stamp">seen running</div>
+  <h2>uv add, and no Node anywhere</h2>
+  <p>This is a new project. <code>uv add</code> installs one package and nothing else. Pele runs inside the library, in QuickJS, and to prove it the
+  script runs with <code>node</code> taken off the <code>PATH</code>.</p>
+  <pre><code>{{add_qjs}}</code></pre>
+  <details><summary>demo.py</summary><pre><code>{{demo_py}}</code></pre></details>
+  <pre><code>{{run_qjs}}</code></pre>
+  <p class="note">The first call loads Pele into QuickJS, which takes about 90 ms. Later diagrams take under a millisecond, and the layer is applied in
+  Nim in about 2 ms. The <code>personal.svg</code> written here is identical, byte for byte, to the one from the Node run below.</p>
+  <h3>Before QuickJS: Node from PyPI</h3>
+  <p>The first version ran Pele in Node. The <code>[node]</code> extra brings Node as a PyPI wheel (<code>nodejs-wheel-binaries</code>), and
+  <code>MARI_ENGINE=node</code> still selects it:</p>
+  <pre><code>{{add}}</code></pre>
+  <pre><code>{{run}}</code></pre>
+  <p class="note">That first call had to start Node from a cold disk and took 3.9 s. A second run took 71 ms.</p>
+</section>
+
+<section class="sheet" id="layer-export">
+  <div class="tab">EXHIBIT C</div>
+  <div class="stamp">seen running</div>
+  <h2>The layer, exported headless</h2>
+  <p>Below are the two files that run wrote: <code>plain.svg</code> is what Pele draws, and <code>personal.svg</code> is the same Mermaid text with this layer applied:</p>
+  <pre><code>{"theme": "isotype", "arrows": "curve",
+ "nodes": {"ship": {"dy": 120, "fill": "#c8402b"}},
+ "edges": {"L_review_draft_0": {"route": "bezier", "c1": [-30, -80], "c2": [30, -80]}}}</code></pre>
+  <div class="two">
+    <figure><div class="svgbox">{{plain}}</div><figcaption>plain.svg: Pele's layout</figcaption></figure>
+    <figure><div class="svgbox" style="background:#f1ead9">{{personal}}</div><figcaption>personal.svg: Ship moved down and filled red, the arrows into it re-routed as curves, "no" as a hand-shaped Bézier arch, isotype colours</figcaption></figure>
+  </div>
+  <p>The layer is keyed by Mermaid's node ids and by Pele's edge ids (<code>L_review_draft_0</code>), and it stores offsets, not
+  positions. If you add a line to the text, Pele lays out the diagram again and the layer still applies. The Nim code (<code>layer.nim</code>)
+  works on the SVG text with <code>std/xmltree</code> and uses the same geometry as the browser editor.</p>
+</section>
+
+<section class="sheet" id="marimo">
+  <div class="tab">EXHIBIT D</div>
+  <div class="stamp blue">seen in marimo 0.25.2</div>
+  <h2>The editor in marimo</h2>
+  <p>The editor is an <a href="https://anywidget.dev">anywidget</a>: one ES module (Pele's bundle followed by about 250 lines of editor) and three synced traits,
+  <code>source</code>, <code>layer</code> and <code>svg</code>. marimo runs any anywidget through <code>mo.ui.anywidget</code>, and a cell that reads
+  <code>editor.value</code> runs again on every edit. Here Playwright dragged Ship down, clicked the dotted arrow, picked <em>bezier</em>
+  and switched the theme. The second cell showed the layer and the SVG exported by Nim from it, as you went.</p>
+  <pre><code>editor = mo.ui.anywidget(mari.Diagram(src).edit())
+# next cell, reruns on each edit:
+layer = editor.value["layer"]
+mari.Diagram(src, layer).save("from_marimo.svg")</code></pre>
+  <figure><img src="img/marimo.png" alt="marimo: the editor with a moved Ship node, the layer JSON, and the SVG exported by Nim" loading="lazy">
+  <figcaption>Top: the editor (browser, Pele). Middle: the layer in Python. Bottom: the export (Nim, Pele in Node). The fonts differ because
+  Jost is not installed in the sandbox.</figcaption></figure>
+</section>
+
+<section class="sheet" id="jupyter">
+  <div class="tab">EXHIBIT E</div>
+  <div class="stamp blue">seen in JupyterLab 4.6.6</div>
+  <h2>The editor in JupyterLab</h2>
+  <p>This is the same widget, unchanged. In a notebook it shows on its own (<code>w = d.edit(); w</code>), and <code>d.layer</code> follows it. Here Playwright dragged
+  nblog to the right, picked <em>elbow</em> arrows, and ran the next cell:</p>
+  <pre><code>{'theme': 'pele',
+ 'arrows': 'elbow',
+ 'nodes': {'nblog': {'dx': 196, 'dy': -20}},
+ 'edges': {}}</code></pre>
+  <figure><img src="img/jupyterlab.png" alt="JupyterLab: the editor with nblog moved and elbow arrows, and d.layer printed below" loading="lazy">
+  <figcaption>nblog is selected (red outline), the arrows are elbows, and the layer is printed below.</figcaption></figure>
+</section>
+
+<section class="sheet" id="tab">
+  <div class="tab">EXHIBIT F</div>
+  <div class="stamp">seen running</div>
+  <h2>The editor in a browser tab</h2>
+  <p>To work without a notebook, from a script or the REPL, <code>d.edit_in_browser()</code> serves the same module on <code>127.0.0.1</code> with a
+  stand-in for the anywidget model, opens a tab, and blocks until you press Done:</p>
+  <pre><code>diagrammari editor: http://127.0.0.1:8765/
+layer back in Python: {'theme': 'pele', 'arrows': 'pele', 'nodes': {'b': {'dx': 68, 'dy': 124}}, 'edges': {}}</code></pre>
+  <p class="note">This uses only <code>http.server</code> and <code>webbrowser</code> from the standard library, so it adds no dependency.</p>
+</section>
+
+<section class="sheet" id="try">
+  <div class="tab">EXHIBIT G</div>
+  <div class="stamp grey">running in this page</div>
+  <h2>Try the editor here</h2>
+  <p>This is the widget module itself, as it ships in the wheel, with the same stand-in model as the browser tab. Drag a box. Click an arrow and pick a route;
+  with <em>bezier</em>, drag its two handles. The layer that Python would receive shows below.</p>
+  <div id="app"></div>
+  <pre id="layer"></pre>
+  <p class="note">The exported SVG needs the Nim library, so it is not in this page. In a notebook, the next cell would draw it.</p>
+</section>
+
+<section class="sheet" id="node">
+  <div class="tab">EXHIBIT H</div>
+  <div class="stamp">seen running</div>
+  <h2>Why Node was needed, and how QuickJS replaced it</h2>
+  <p>Pele is a JavaScript program, and Nim cannot run JavaScript by itself, so something has to execute it.
+  diagrammari (PR #1) starts one Node process and talks to it in JSON lines. That works wherever Node is installed, but for Python it means
+  a 61 MB download (204 MB installed) when Node isn't already there.</p>
+  <p><a href="https://github.com/quickjs-ng/quickjs">QuickJS</a> is a small JavaScript engine written in C (quickjs-ng 0.18, MIT). It runs Pele unchanged. I first checked that with the
+  <code>quickjs</code> package from PyPI:</p>
+  <pre><code>{{qjs}}</code></pre>
+  <p>Then, with Pietro's go, I compiled it into the Nim library. Four C files are built by Nim's <code>{.compile.}</code> pragma, with no CMake, and a
+  40-line C shim gives Nim four functions: make a context, evaluate Pele, call a function with a string, and free. The sources are vendored and pinned
+  to a commit. The test below draws the same four diagrams from Nim and compares them with Node's:</p>
+  <pre><code>{.compile(qjsDir / "quickjs.c", qjsFlags).}
+{.compile(qjsDir / "libregexp.c", qjsFlags).}
+{.compile(qjsDir / "libunicode.c", qjsFlags).}
+{.compile(qjsDir / "dtoa.c", qjsFlags).}
+{.compile(here / "mari_qjs.c", qjsFlags).}</code></pre>
+  <pre><code>{{qjs_nim}}</code></pre>
+  <p class="note">The four sources were a flowchart, a sequence diagram, a pie and a class diagram. The test binary is 2.1 MB and needs only libc and libm.
+  The same engine can draw nimib pages at build time too, which is a BACKLOG item for the Nim library.</p>
+</section>
+
+<section class="sheet" id="choices">
+  <div class="tab">FINDINGS</div>
+  <h2>The choices, and why</h2>
+  <h3>Nim to Python</h3>
+  <table>
+    <tr><th>way</th><th>state (Nov 2026)</th><th>verdict</th></tr>
+    <tr class="pick"><td>C ABI + <code>ctypes</code></td><td>standard library on both sides</td><td><b>chosen</b>: no dependency, one wheel per platform, and the API is JSON in, JSON out</td></tr>
+    <tr><td>nimpy</td><td>active, supports Python 3.14</td><td>the pick if the Python API grows into many small calls (builders)</td></tr>
+    <tr><td>nimporter</td><td>last release 2021</td><td>not maintained</td></tr>
+  </table>
+  <h3>Something to run Pele</h3>
+  <table>
+    <tr><th>engine</th><th>size</th><th>per diagram</th><th>note</th></tr>
+    <tr><td>Node (<code>nodejs-wheel-binaries</code>)</td><td>61 MB wheel, 204 MB installed</td><td>~1 ms after start</td><td>kept as an option, <code>MARI_ENGINE=node</code></td></tr>
+    <tr><td>V8 (<code>mini-racer</code>)</td><td>about 80 MB</td><td>13 ms</td><td>works, but heavy</td></tr>
+    <tr class="pick"><td>QuickJS, compiled into libmari</td><td>about 1.2 MB in the library</td><td>0.7 to 0.9 ms</td><td><b>chosen</b>: the same SVG as Node, nothing to install</td></tr>
+  </table>
+  <h3>Notebook widgets</h3>
+  <table>
+    <tr><th>option</th><th>verdict</th></tr>
+    <tr class="pick"><td>anywidget</td><td><b>chosen</b>: one ES module with no build step, for JupyterLab, Notebook 7, VS Code, Colab and marimo</td></tr>
+    <tr><td>ipywidgets alone</td><td>needs a JupyterLab extension with a build, and doesn't reach marimo</td></tr>
+    <tr><td>a marimo-only plugin</td><td>leaves Jupyter out; <code>mo.ui.anywidget</code> already gives marimo's reactivity</td></tr>
+  </table>
+  <h3>Found on the way</h3>
+  <ul>
+    <li>marimo puts each anywidget in a shadow root, so a <code>&lt;style&gt;</code> added to <code>document.head</code> doesn't reach it. The style now goes inside the widget.</li>
+    <li><code>std/re</code> loads libpcre at run time. That's fine for a Nim program, but in a wheel it broke the import, so <code>layer.nim</code> reads numbers by hand.</li>
+    <li>The editor measures text with the browser's fonts, while Pele in Node uses Arial's widths. A theme font that isn't installed looks different in the export (see exhibit D).</li>
+  </ul>
+</section>
+
+<section class="sheet" id="next">
+  <div class="tab">PROPOSED</div>
+  <div class="stamp green big">approved · P.P. · 7 Nov 2026</div>
+  <h2>What is proposed next</h2>
+  <p>Three OpenSpec changes in <a href="https://github.com/pietroppeter/diagrammari/pull/3">diagrammari PR #3</a>, in build order:</p>
+  <ol>
+    <li><b>add-personal-layer</b>: <code>Layer</code> as a Nim value, <code>toSvg(d, layer)</code>, <code>ids</code> and <code>orphans</code>, plus <code>nbDiagram(…, layer)</code> for nimib.</li>
+    <li><b>add-python-package</b>: <code>uv add diagrammari</code>, <code>import mari</code>, wheels built by cibuildwheel and published to PyPI with trusted publishing.</li>
+    <li><b>add-notebook-editor</b>: the widget for Jupyter and marimo, plus <code>edit_in_browser()</code>.</li>
+  </ol>
+  <p>New BACKLOG items include QuickJS for the Nim library and nimib pages too, one layer engine written in Nim and compiled to JS for the editor, the editor in nimib pages,
+  layer files next to the text, a <code>%%mari</code> cell magic, PNG export, Pyodide and conda-forge.</p>
+  <p>Pietro approved all three on 7 Nov 2026. That left one open question, which is <a href="#case-repo">case 2</a> below.</p>
+</section>
+
+<section class="sheet" id="case-repo">
+  <div class="tab">CASE 2</div>
+  <div class="stamp">verdict · first degree</div>
+  <h2>One repo or two?</h2>
+  <p><b>The question.</b> Should the Python package live in the diagrammari repo, in a <code>python/</code> folder, or in a repo of its own
+  (say <code>diagrammari-py</code>)? A separate repo looks cleaner. To decide, ask what could kill this project in a year. Each layout lets a different
+  culprit in, so we find the likeliest one first.</p>
+  <p><b>The victim.</b> A Python user. They run <code>uv add diagrammari</code>, and their diagram comes out different from the same text in a nimib page.
+  Or the editor moves a box and the export doesn't, or a Pele fix shipped in Nim three months ago never reached PyPI.</p>
+
+  <div class="suspect">
+    <h3>Suspect 1: Drift</h3>
+    <p class="alibi">Two copies of anything that must match: the Pele bundle and its version, QuickJS and its commit, the C ABI, the layer's JSON,
+    the spec. Drift only needs two repos and a busy week. In a separate repo, every change to the ABI or the layer is two PRs in a set order, and
+    every Pele upgrade is done twice. <b>No alibi in the two-repo layout.</b> In one repo, a single PR changes the Nim code, the ABI, the widget and
+    the spec together, and the same CI checks the Nim tests and the wheel.</p>
+  </div>
+  <div class="suspect">
+    <h3>Suspect 2: Clutter</h3>
+    <p class="alibi">A Nim repo grows a <code>pyproject.toml</code>, a hatch hook, a wheels workflow and a <code>python/</code> folder, so Nim contributors
+    see Python and Python contributors see Nim. That's real, but small. Nimble installs only <code>srcDir</code> (<code>src/</code>), so Nim users never get the Python
+    files, and the Python tree is one folder plus one workflow. <b>Guilty of untidiness, not of murder.</b></p>
+  </div>
+  <div class="suspect">
+    <h3>Suspect 3: Tangled releases</h3>
+    <p class="alibi">Nim and Python may want different release speeds. One repo can still tag them apart (<code>v0.2.0</code> for nimble, <code>py-v0.2.0</code>
+    for PyPI, each starting its own workflow), and PyPI trusted publishing is set per repo and workflow, so that works. A separate repo makes
+    this easier, but drift (suspect 1) follows the moment the two release speeds differ. <b>Alibi holds.</b></p>
+  </div>
+  <div class="suspect">
+    <h3>Suspect 4: The build that can't see the Nim code</h3>
+    <p class="alibi">The proof of concept builds from <code>experiments/python/</code> and reaches up to <code>../../src</code> for the Nim code and Pele. A wheel
+    built in CI is fine, but an sdist from a subfolder can't include files from the folder above it. So in one repo, <code>pyproject.toml</code> goes at the
+    root, next to <code>mari.nimble</code>, with the Python code in <code>python/mari/</code>. In a separate repo you need a git submodule or a pinned clone of
+    diagrammari just to build. <b>Caught in both layouts. One repo with the pyproject at the root disarms it.</b></p>
+  </div>
+  <div class="suspect">
+    <h3>Suspect 5: Identity</h3>
+    <p class="alibi">Is diagrammari a Nim library with Python bindings, or a product with two front doors? The PyPI page and the docs would say "diagrammari"
+    either way. One repo means one README, one set of issues, one specs page and one devlog: one story. <b>Not a threat in one repo.</b></p>
+  </div>
+
+  <div class="verdict">
+    <p><b>Verdict: same repo.</b> The culprit is drift, and only the two-repo layout lets it in. The Python package is a second front door to the same
+    library: the same Pele, the same QuickJS, the same layer, the same spec. Things that must match belong in one place, checked by one CI.</p>
+    <p><b>The layout:</b> <code>pyproject.toml</code> at the root (distribution <code>diagrammari</code>, import <code>mari</code>), Python code in
+    <code>python/mari/</code>, the C ABI in <code>src/mari/capi.nim</code> next to the library, and wheels built by <code>.github/workflows/wheels.yml</code> on
+    <code>py-v*</code> tags. The Python spec lives in <code>openspec/specs/python/</code> with the others.</p>
+    <p><b>Court:</b> Claude sat as the jury, in the first degree. Pietro is the <i>corte d'appello</i>, the second degree; he appealed. See <a href="#appeal">the appeal</a>.</p>
+    <p><b>When to reopen the case:</b> if the Python side grows its own large surface, such as Python builders, Pyodide or a JupyterLab extension with a
+    build, or gets its own maintainers. Splitting out later is a <code>git subtree split</code>; merging two drifted repos back together is much harder.</p>
+  </div>
+</section>
+
+<section class="sheet" id="appeal">
+  <div class="tab">CASE 2 · APPEAL</div>
+  <div class="stamp green">reformed on appeal</div>
+  <h2>Corte d'appello: the same case, with agents doing the work</h2>
+  <p><b>The appeal.</b> Pietro objects that the first degree judged the case by pre-AI rules. Drift kills when people forget the second repo. In this project,
+  agents keep twelve repos moving at once, so the case is reopened with that as the premise.</p>
+
+  <div class="suspect">
+    <h3>Drift, cross-examined</h3>
+    <p class="alibi">Drift needed two things: a change that has to land in two places, and nobody remembering to do the second one. Agents remove the second
+    condition, but only when something asks them. The coordination cost (two PRs, a Pele bump done twice) is now minutes of agent time instead of an
+    evening of yours. What agents don't remove is silent drift, a mismatch nobody asks about. So drift has to be made <i>loud</i>: the second repo
+    <b>pins</b> diagrammari to a tag, its CI runs the shared spec examples against that pin, and a routine opens the bump PR when diagrammari tags a
+    release. Then drift is a version lag you can see, not a mismatch you discover. <b>Downgraded from murder to a misdemeanour, if the pin and the
+    routine exist.</b></p>
+  </div>
+  <div class="suspect">
+    <h3>New witness: the agents themselves</h3>
+    <p class="alibi">This morning three threads worked on diagrammari at once: the build PR, the series PR and this one. They had to coordinate over
+    <code>BACKLOG.md</code> to avoid a conflict. With one repo per front door, a Python thread and a Nim thread don't share a branch, a backlog or a CI run.
+    Each repo also gets an <code>AGENTS.md</code> for one toolchain: atlas, nimble and nimib pages there; uv, cibuildwheel, Jupyter and marimo here. A focused
+    checkout is less context per task, so fewer mistakes. <b>Testifies for two repos.</b></p>
+  </div>
+  <div class="suspect">
+    <h3>New witness: CI time</h3>
+    <p class="alibi">A wheel matrix (Linux, macOS, Windows) with Nim and QuickJS compiled in takes about 15 minutes per run. In one repo, every Nim docs fix
+    either waits for it or needs path filters. In two repos, each runs its own CI, and agents iterate faster on each side. <b>Testifies for two repos.</b></p>
+  </div>
+  <div class="suspect">
+    <h3>Suspect 4 again: the build that can't see the Nim code</h3>
+    <p class="alibi">A pinned dependency solves it: the Python build fetches diagrammari at the pinned tag (git dependency or atlas lock), and the sdist
+    vendors that snapshot. That's the same idea as pinning Pele and QuickJS, which diagrammari already does. <b>Disarmed by the pin.</b></p>
+  </div>
+
+  <div class="verdict">
+    <p><b>Ruling on appeal: two repos, with a contract.</b> In an AI world the cost that made one repo win, keeping two places in step, is cheap, and the
+    costs of one repo (agents colliding, mixed toolchains, slow shared CI) matter more. The ruling holds only under three conditions, or drift is back:</p>
+    <ol>
+      <li><b>diagrammari owns everything that must match:</b> the Nim library, the C ABI (<code>src/mari/capi.nim</code>), Pele, QuickJS, the layer engine,
+      the editor's JavaScript (also for nimib pages, a BACKLOG item), and the specs with their examples.</li>
+      <li><b>diagrammari-py owns only the Python side:</b> <code>pyproject.toml</code>, the Python API and widget wrapper, the wheels workflow and the notebook docs.
+      It pins diagrammari to a tag, and its CI runs the shared examples against the pin.</li>
+      <li><b>A routine closes the loop:</b> when diagrammari tags a release, an agent opens the bump PR in diagrammari-py, and nothing ships to PyPI until it's green.</li>
+    </ol>
+    <p><b>Open detail:</b> which org gets the repo, <code>pietroppeter/diagrammari-py</code> or <code>nimib-land/</code>. It should follow wherever diagrammari ends up.</p>
+    <p class="note">The first degree isn't wrong about drift; the appeal changes who pays to prevent it. In the proposals, <code>add-python-package</code> is
+    updated to this layout: the C ABI stays in diagrammari, and the package moves to its own repo.</p>
+  </div>
+</section>
+
+</main>
+<script src="vendor/pele-1.13.0.global.js"></script>
+<script type="module">
+import w from "./widget.js";
+const state = {
+  source: `flowchart TD
+  mermaid([Mermaid text]) --> lib["libmari (Nim)"]
+  lib --> py[Python]
+  lib --> nimib[nimib]
+  py --> jupyter[Jupyter]
+  py --> marimo[marimo]
+  nimib -.-> nblog[nblog]`,
+  layer: {theme: "pele", arrows: "pele", nodes: {}, edges: {}}, svg: ""};
+const model = {get: k => state[k], set: (k, v) => { state[k] = v; }, on: () => {},
+  save_changes() { document.getElementById("layer").textContent = JSON.stringify(state.layer, null, 2); }};
+if (window.pele) { w.render({model, el: document.getElementById("app")}); model.save_changes(); }
+else document.getElementById("app").textContent = "Pele did not load, so the editor cannot draw.";
+</script>
+</body>
+</html>
