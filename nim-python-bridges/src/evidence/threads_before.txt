@@ -1,0 +1,4 @@
+$ python threads.py ctypes        # 8 threads, 400 diagrams, before the fix
+mari.DiagramError: js: Maximum call stack size exceeded
+$ python threads.py nimpy
+nimpy.ValueError: Unexpected error encountered: js: Maximum call stack size exceeded

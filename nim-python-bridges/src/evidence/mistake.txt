@@ -1,0 +1,5 @@
+$ python -c "import mari; mari._lib.mari_free(12345)"     # ctypes: a wrong pointer
+SIGSEGV: Illegal storage access. (Attempt to read from nil?)
+Segmentation fault                                       # exit 139, Python is gone
+$ python -c "import marinp; marinp.svg(42)"               # nimpy: a wrong type
+TypeError: Can't convert python obj of type 'int' to string

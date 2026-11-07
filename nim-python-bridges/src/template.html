@@ -1,0 +1,308 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Two plugs for a Nim library</title>
+<style>
+/* Layout idea: a component datasheet. A part-number header, a features column, numbered
+   sections, characteristic tables with units, caution boxes. Two parts on test: plug A
+   (C ABI + ctypes) and plug B (nimpy). */
+:root {
+  --paper: #fbfbf8;
+  --ink: #16191d;
+  --rule: #c9ccd1;
+  --muted: #5a6068;
+  --blue: #1f4e8c;      /* datasheet blue: part numbers, headings, plug A */
+  --green: #2f6b3a;     /* plug B */
+  --amber: #a85a00;     /* caution */
+  --code-bg: #eef0f2;
+  --tint: #e8eef7;
+  --display: "Arial Narrow", "Roboto Condensed", "Helvetica Neue Condensed", "Liberation Sans Narrow", Arial, sans-serif;
+  --body: Arial, "Helvetica Neue", Helvetica, "Liberation Sans", sans-serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, "Liberation Mono", monospace;
+  --pele-bg: var(--paper); --pele-fg: var(--ink); --pele-line: var(--ink);
+  --pele-surface: var(--tint); --pele-border: var(--blue); --pele-muted: var(--muted);
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  color-scheme: light;
+}
+@media (prefers-color-scheme: dark) {
+  :root:not([data-theme="light"]) {
+    --paper: #14171b; --ink: #e6e8eb; --rule: #3a4048; --muted: #9aa1aa;
+    --blue: #7fa8e6; --green: #7fc28c; --amber: #f0a650; --code-bg: #1d2127; --tint: #1f2a3a;
+    color-scheme: dark;
+  }
+}
+:root[data-theme="dark"] {
+  --paper: #14171b; --ink: #e6e8eb; --rule: #3a4048; --muted: #9aa1aa;
+  --blue: #7fa8e6; --green: #7fc28c; --amber: #f0a650; --code-bg: #1d2127; --tint: #1f2a3a;
+  color-scheme: dark;
+}
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--paper); color: var(--ink); font: 16px/1.55 var(--body); }
+[hidden] { display: none !important; }
+.sheet { max-width: 1040px; margin: 0 auto; padding: 0 20px 64px; }
+a { color: var(--blue); }
+a:focus-visible { outline: 2px solid var(--blue); outline-offset: 2px; }
+
+/* header strip */
+.strip { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 24px;
+  border-bottom: 3px solid var(--ink); padding: 18px 0 8px; font: 700 13px/1.3 var(--display);
+  letter-spacing: .06em; text-transform: uppercase; }
+.strip .pn { color: var(--blue); }
+header.top { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 32px; padding: 26px 0 18px;
+  border-bottom: 1px solid var(--rule); }
+h1 { font: 700 44px/1.02 var(--display); margin: 0 0 12px; text-wrap: balance; letter-spacing: -.01em; }
+.lede { font-size: 18px; margin: 0; max-width: 34em; }
+.features h2 { margin-top: 0; }
+.features ul { margin: 0; padding-left: 18px; }
+.features li { margin: 0 0 7px; }
+
+h2 { font: 700 15px/1.2 var(--display); letter-spacing: .08em; text-transform: uppercase; color: var(--blue);
+  margin: 40px 0 12px; display: flex; gap: 12px; align-items: baseline; text-wrap: balance; }
+h2 .n { color: var(--ink); font-variant-numeric: tabular-nums; }
+h3 { font: 700 17px/1.25 var(--display); margin: 22px 0 8px; }
+section > p, section > ul, .prose { max-width: 65ch; }
+section { border-bottom: 1px solid var(--rule); padding-bottom: 20px; }
+
+.plug { display: inline-block; font: 700 12px/1 var(--display); letter-spacing: .06em; text-transform: uppercase;
+  padding: 3px 6px 2px; border: 1.5px solid currentColor; border-radius: 2px; vertical-align: 1px; }
+.plug.a { color: var(--blue); } .plug.b { color: var(--green); }
+
+.verdict { border: 2px solid var(--ink); padding: 14px 18px; margin: 22px 0 0; max-width: 70ch; background: var(--tint); }
+.verdict b.k { font: 700 13px/1 var(--display); letter-spacing: .08em; text-transform: uppercase; display: block; margin-bottom: 6px; }
+.verdict p { margin: 0 0 8px; } .verdict p:last-child { margin: 0; }
+
+.figure { margin: 8px 0 0; container-type: inline-size; }
+.figure .wide svg, .figure .narrow svg { display: block; width: 100%; height: auto; }
+.figure .narrow { display: none; max-width: 420px; }
+@container (max-width: 640px) { .figure .wide { display: none; } .figure .narrow { display: block; } }
+.cap { font-size: 13px; color: var(--muted); margin: 6px 0 0; max-width: 70ch; }
+
+.two { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 20px; }
+.two > div > h3:first-child { margin-top: 6px; }
+
+pre { margin: 8px 0 0; background: var(--code-bg); border-left: 3px solid var(--rule); padding: 10px 12px;
+  overflow-x: auto; }
+body pre > code, pre { font: 12.5px/1.5 var(--mono); }
+pre.out { background: transparent; border: 1px dashed var(--rule); }
+code { font-family: var(--mono); font-size: .88em; }
+.a-side pre { border-left-color: var(--blue); } .b-side pre { border-left-color: var(--green); }
+
+.tablewrap { overflow-x: auto; margin: 10px 0 0; }
+table { border-collapse: collapse; width: 100%; min-width: 620px; font-size: 14px; font-variant-numeric: tabular-nums; }
+th, td { text-align: left; padding: 7px 10px; border-bottom: 1px solid var(--rule); vertical-align: top; }
+thead th { font: 700 12px/1.2 var(--display); letter-spacing: .06em; text-transform: uppercase;
+  border-bottom: 2px solid var(--ink); }
+td.num { text-align: right; white-space: nowrap; }
+tr.diff td { background: var(--tint); }
+td .good { color: var(--green); font-weight: 700; } td .bad { color: var(--amber); font-weight: 700; }
+
+.caution { border: 2px solid var(--amber); padding: 12px 16px; margin: 16px 0 0; max-width: 70ch; }
+.caution b.k { color: var(--amber); font: 700 13px/1 var(--display); letter-spacing: .08em; text-transform: uppercase;
+  display: block; margin-bottom: 6px; }
+.caution p { margin: 0 0 8px; } .caution p:last-child { margin: 0; }
+
+ol.plan { padding-left: 22px; max-width: 70ch; } ol.plan li { margin: 0 0 8px; }
+.foot { font-size: 13px; color: var(--muted); padding-top: 18px; }
+.foot p { margin: 0 0 6px; max-width: 80ch; }
+
+@media (max-width: 760px) {
+  header.top, .two { grid-template-columns: minmax(0, 1fr); gap: 18px; }
+  h1 { font-size: 34px; }
+}
+</style>
+</head>
+<body>
+<div class="sheet">
+
+<div class="strip"><span class="pn">DGM-PY · rev. A</span><span>Nim library to Python: interface study</span><span>7 Nov 2026</span></div>
+
+<header class="top">
+  <div>
+    <h1>Two plugs for one Nim library</h1>
+    <p class="lede">diagrammari's Nim library draws Mermaid with Pele, inside QuickJS. To call it from Python
+    there are two plugs: <span class="plug a">A</span> a C ABI loaded with <code>ctypes</code>, and
+    <span class="plug b">B</span> a <a href="https://github.com/yglukhov/nimpy">nimpy</a> module. I built both
+    from the same Nim code, with <a href="https://pypi.org/project/nimlang/">nimlang</a> as the compiler, and
+    measured them side by side.</p>
+  </div>
+  <div class="features">
+    <h2>Features</h2>
+    <ul>
+      <li>Both plugs give byte-identical SVG at the same speed, about 0.8 ms a diagram. The call itself costs 0.1 µs or less.</li>
+      <li>Both are one file per platform for every Python from 3.9 to 3.14, with nothing to install at run time.</li>
+      <li>They differ on who checks the arguments, how errors and Python objects cross, the GIL, and who else can load the library.</li>
+      <li>nimlang built all five platform wheels on one Linux machine, 1.2 MB each.</li>
+      <li>The comparison found a thread bug both plugs shared. It is fixed.</li>
+    </ul>
+  </div>
+</header>
+
+<div class="verdict">
+  <b class="k">Recommendation</b>
+  <p>Build diagrammari-py with nimlang, and keep plug A for 0.1. The API is one call with a JSON string, the
+  wrapper is about 20 lines and tested, and the same library can be loaded by any language with a C FFI.</p>
+  <p>Switch to plug B, or add a nimpy module beside it, when the Python API grows many small calls with Python
+  objects (builders, callbacks). The design gave two reasons for plug A, no dependency and one wheel per platform.
+  nimpy has both too, because it is compiled in. So the choice is closer than the design says.</p>
+</div>
+
+<section>
+  <h2><span class="n">1</span> Block diagram</h2>
+  <div class="figure">
+    <div class="wide">{{stack}}</div>
+    <div class="narrow">{{stack_narrow}}</div>
+  </div>
+  <p class="cap">Drawn by the library on test: Python called mari, which ran Pele in QuickJS. There are two
+  borders. Python to Nim is where the plugs differ. Nim to QuickJS is the C shim, the same for both.</p>
+</section>
+
+<section>
+  <h2><span class="n">2</span> Two shims, two jobs</h2>
+  <p>The "simple C shim" is the border between Nim and QuickJS, not the one between Python and Nim. QuickJS
+  passes values as <code>JSValue</code>, and the shape of that type depends on the platform and the build
+  flags: a pointer, a NaN-boxed 64-bit integer, or a 16-byte struct. Many of its helpers are macros. A
+  52-line C file keeps <code>JSValue</code> on the C side and gives Nim four plain functions with
+  pointers and strings. Nim's <code>{.compile.}</code> pragma builds QuickJS's four C files and the shim
+  into the library, so no C build system is needed.</p>
+  <pre><code>{{shim_c}}</code></pre>
+  <pre><code>{{shim_nim}}</code></pre>
+  <p>The Python side is the second border, and there the choice is real.</p>
+  <div class="two">
+    <div class="a-side">
+      <h3><span class="plug a">A</span> C ABI + ctypes</h3>
+      <p class="prose">Nim exports C functions. Python loads the library with <code>ctypes</code> and passes
+      one JSON string. The library allocates the answer, so the library frees it.</p>
+      <pre><code>{{cabi_nim}}</code></pre>
+      <pre><code>{{cabi_py}}</code></pre>
+    </div>
+    <div class="b-side">
+      <h3><span class="plug b">B</span> nimpy</h3>
+      <p class="prose">nimpy writes the Python module for you. Nim strings become Python strings, a Nim
+      exception becomes a Python exception, and memory is Nim's. It finds libpython when it is loaded, so
+      one build serves every Python 3.</p>
+      <pre><code>{{nimpy_nim}}</code></pre>
+      <pre><code>{{nimpy_py}}</code></pre>
+    </div>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">3</span> Electrical characteristics</h2>
+  <p>The same Nim code behind both plugs, built by nimlang (Nim 2.2.6, zig cc), on Linux x86-64 with
+  Python 3.13 unless noted. The shaded rows are where the plugs differ.</p>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Parameter</th><th>Conditions</th><th><span class="plug a">A</span> ctypes</th><th><span class="plug b">B</span> nimpy</th></tr></thead>
+    <tbody>
+      <tr><td>SVG</td><td>flowchart, sequence, pie, class</td><td>byte-identical</td><td>byte-identical</td></tr>
+      <tr><td>Draw a diagram</td><td>4-node flowchart, 300 runs</td><td class="num">0.84–0.96 ms</td><td class="num">0.81 ms</td></tr>
+      <tr><td>First draw</td><td>loads Pele into QuickJS</td><td class="num">60–75 ms</td><td class="num">same</td></tr>
+      <tr><td>Empty call</td><td>returns a short string, 200,000 runs</td><td class="num">0.10 µs</td><td class="num">0.05 µs</td></tr>
+      <tr><td>Library size</td><td>stripped</td><td class="num">2.08 MB</td><td class="num">2.11 MB</td></tr>
+      <tr><td>Python versions</td><td>3.9.25, 3.10.20, 3.11.18, 3.13.18, 3.14.6</td><td>one file for all</td><td>one file for all</td></tr>
+      <tr><td>Needs at run time</td><td></td><td>nothing</td><td>nothing (nimpy is compiled in)</td></tr>
+      <tr class="diff"><td>Wrong argument</td><td>a caller mistake</td><td><span class="bad">segfault</span>, Python exits</td><td><span class="good">TypeError</span></td></tr>
+      <tr class="diff"><td>Pele error</td><td><code>a --> [</code></td><td><code>DiagramError</code> with code, line, column (from the JSON)</td><td><code>ValueError</code> with a message; fields need work</td></tr>
+      <tr class="diff"><td>GIL during a draw</td><td>another Python thread spinning</td><td>released: it keeps running</td><td>held: it waits for each call</td></tr>
+      <tr class="diff"><td>Who can load it</td><td></td><td>any language with a C FFI</td><td>Python only</td></tr>
+      <tr class="diff"><td>Glue code</td><td></td><td>exports, alloc and free in Nim; about 20 lines of ctypes</td><td><code>{.exportpy.}</code> on each proc</td></tr>
+    </tbody>
+  </table></div>
+  <h3>Raw output</h3>
+  <pre class="out"><code>{{bench}}</code></pre>
+  <pre class="out"><code>{{versions}}</code></pre>
+  <pre class="out"><code>{{gil}}</code></pre>
+  <p class="cap">The 1 MB string line is nimpy copying a string both ways: 0.23 ms. A diagram's SVG is 5 to 50 kB,
+  so the copy and the JSON cost less than the drawing on either plug.</p>
+
+  <div class="caution">
+    <b class="k">Caution: what a mistake looks like</b>
+    <p>With plug A, a mistake in the ctypes wrapper crashes Python. The user can't catch it, and a notebook
+    kernel dies. With plug B the same mistake is a Python exception. Users never touch ctypes, so the risk sits in
+    our 20 lines, and the tests cover it.</p>
+    <pre class="out"><code>{{mistake}}</code></pre>
+  </div>
+</section>
+
+<section>
+  <h2><span class="n">4</span> A bug both plugs had: drawing from threads</h2>
+  <p>Drawing 400 diagrams from a pool of 8 Python threads failed on both plugs. The error came from QuickJS,
+  not from Python.</p>
+  <pre class="out"><code>{{threads_before}}</code></pre>
+  <p>QuickJS checks for stack overflow by comparing the current stack with the one where the runtime was made.
+  A call from another thread has a different stack, so every call there looked like an overflow. There was a
+  second problem behind it: plug A lets go of the GIL during the call, so two threads could have entered
+  the same runtime at once. The fix has two parts. The shim tells QuickJS the caller's stack before each
+  call. A Nim lock lets one call into the runtime at a time. The JavaScript stack limit went from 8 MB to
+  1 MB, because Python threads can have smaller stacks than the main thread. A 500-edge flowchart and 30 nested
+  subgraphs still draw (in 107 ms and 3 ms).</p>
+  <pre><code>{{threadfix_c}}</code></pre>
+  <pre><code>{{threadfix_nim}}</code></pre>
+  <pre class="out"><code>{{threads_after}}</code></pre>
+  <p class="cap">The threads do not draw in parallel on either plug: there is one QuickJS runtime and one lock.
+  Plug A lets other Python threads run during a draw; plug B does not.</p>
+</section>
+
+<section>
+  <h2><span class="n">5</span> Building with nimlang</h2>
+  <p>nimlang ships the Nim compiler in a wheel and compiles C with <code>zig cc</code> from the
+  <code>ziglang</code> wheel. As a build requirement, it lets <code>uv build</code> work with no Nim and no C
+  compiler installed. Its hatch hook is made for nimpy modules, but it builds plug A's library unchanged.
+  The file just has to be a Nim module that includes <code>capi.nim</code>, and the loader finds
+  <code>native.so</code>, <code>.pyd</code> or <code>.dylib</code>.</p>
+  <div class="two">
+    <div><pre><code>{{pyproject}}</code></pre><pre><code>{{native}}</code></pre></div>
+    <div><pre><code>{{build_sh}}</code></pre></div>
+  </div>
+  <div class="tablewrap"><table>
+    <thead><tr><th>Wheel</th><th>Size</th><th>Build time</th><th>Checked</th></tr></thead>
+    <tbody>{{wheel_rows}}</tbody>
+  </table></div>
+  <pre class="out"><code>{{wheel_run}}</code></pre>
+  <p>One Nim gotcha came up, and it was not nimlang's. Cross-compiling for Windows, <code>/</code> and
+  <code>parentDir</code> follow the target's separator. That turned the compile-time path to QuickJS's C files
+  into <code>\home\…</code>. Joining paths with <code>"/"</code> by hand fixed it.</p>
+  <pre><code>{{pathfix}}</code></pre>
+
+  <h3>Notes for nimlang</h3>
+  <ul>
+    <li>A <code>libraries = [...]</code> option beside <code>extensions</code> would say "a C ABI library for ctypes".
+    Today it works as an extension, but the Windows file is named <code>.pyd</code> and the module name follows
+    nimpy's rules: no leading underscore.</li>
+    <li>The Windows cross-build takes about 4 times as long as the others: 63 s against 15 to 17 s.</li>
+    <li>macOS and Windows wheels build on Linux, but they still need a run on their own OS. That is what the
+    lib-demo's CI does, and diagrammari-py should copy it.</li>
+  </ul>
+</section>
+
+<section>
+  <h2><span class="n">6</span> What changes in the plan</h2>
+  <ol class="plan">
+    <li>The build hook and cibuildwheel go. <code>nimlang</code> becomes a build requirement, and one Linux job
+    builds the five wheels with <code>NIMLANG_TARGET</code>. A matrix on Linux, macOS and Windows installs each
+    wheel and runs the shared spec examples. Nothing goes to PyPI until that matrix is green.</li>
+    <li>The sdist builds wherever nimlang has a wheel, with no Nim installed. That leaves out musl and
+    Windows arm64. nimlang knows their tags, but neither was tried here.</li>
+    <li>nimlang pins Nim (2.2.6 today, diagrammari needs 2.0 or later). A Nim bump in diagrammari-py becomes a
+    nimlang bump, in the same PR as the diagrammari pin.</li>
+    <li>The thread fix and the Windows path fix go into diagrammari, with the C ABI move to
+    <code>src/mari/</code>, before the first tag that diagrammari-py pins.</li>
+    <li>Plug A stays for 0.1. The design's section on nimpy is rewritten with these measurements, and nimpy
+    comes back as the route for Python builders.</li>
+  </ol>
+</section>
+
+<div class="foot">
+  <p>Versions: nimlang 0.0.3 (Nim 2.2.6, atlas), ziglang 0.17.1, nimpy 0.2.1 (114e1b9), quickjs-ng 0.18, Pele 1.13.0,
+  Python 3.13.18 on Linux x86-64; also 3.9.25, 3.10.20, 3.11.18, 3.14.6 through uv.</p>
+  <p>The scripts that made every number are in <code>src/scripts/</code> beside this page. Their outputs are in
+  <code>src/evidence/</code>, and <code>src/build.py</code> makes this page from them. The proof of concept is
+  <a href="https://github.com/pietroppeter/diagrammari/tree/main/experiments/python">diagrammari/experiments/python</a>,
+  and the case for two repositories is
+  <a href="https://pietroppeter.github.io/diagrammari/devlog/python-jupyter-marimo/">this devlog post</a>.</p>
+</div>
+
+</div>
+</body>
+</html>

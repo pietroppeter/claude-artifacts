@@ -1,0 +1,28 @@
+[project]
+name = "diagrammari"
+version = "0.0.1"
+description = "Mermaid diagrams drawn by Pele, with a personal layer you edit by hand (proof of concept)"
+readme = "README.md"
+license = "MIT"
+requires-python = ">=3.9"
+dependencies = []
+
+[project.optional-dependencies]
+# Node, only for MARI_ENGINE=node (Pele runs in QuickJS, compiled in, by default).
+node = ["nodejs-wheel-binaries>=22"]
+# The editor widget for Jupyter and marimo.
+widget = ["anywidget>=0.9"]
+
+[build-system]
+requires = ["hatchling>=1.24", "nimlang>=0.0.3"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/mari"]
+exclude = ["*.nim"]
+
+[tool.hatch.build.hooks.nimlang]
+extensions = ["src/mari/native.nim"]   # a C ABI library, not a nimpy module: ctypes loads it
+
+[tool.hatch.build.targets.sdist]
+include = ["src/mari", "nim", "README.md"]
