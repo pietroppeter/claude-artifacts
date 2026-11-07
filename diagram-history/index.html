@@ -1,0 +1,251 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Boxes, Lines and Arrows: a short history of diagrams</title>
+<meta name="description" content="A Tufte-style explainer on the history of diagrams, from Babylonian maps to Mermaid and Pele, with references and the stories behind the names.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Crimson+Pro:ital,wght@0,400;0,600;1,400&family=Inconsolata:wght@400;600&display=swap">
+<style>
+:root{--bg:#fffff8;--ink:#111;--mute:#6b6b63;--rule:#d9d6c8;--red:#a4161a;--serif:"Crimson Pro","Palatino Linotype",Palatino,"Book Antiqua",Georgia,serif;--mono:Inconsolata,Consolas,ui-monospace,monospace;
+  padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0)}
+html{-webkit-text-size-adjust:100%;font-size:15px}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--serif);counter-reset:sn}
+[hidden]{display:none!important}
+article{width:87.5%;max-width:1400px;margin:0 auto;padding:4rem 0 5rem 12.5%;box-sizing:border-box}
+h1{font-weight:400;font-size:3.1rem;line-height:1.05;margin:0 0 .4rem;letter-spacing:-.01em}
+.subtitle{font-style:italic;font-size:1.6rem;margin:0 0 3rem;color:#333;line-height:1.2}
+h2{font-weight:400;font-style:italic;font-size:2.1rem;margin:3.6rem 0 1.2rem;line-height:1.1}
+h2 .yr{font-style:normal;font-variant-numeric:oldstyle-nums;color:var(--mute);font-size:1.3rem;margin-left:.4rem}
+p,ul,ol,.wide-note{font-size:1.4rem;line-height:1.55;width:55%;margin:0 0 1.3rem}
+ul.events{list-style:none;padding:0}
+ul.events li{margin:0 0 1.1rem;padding-left:5rem;text-indent:-5rem}
+ul.events b small{font-size:.7em;letter-spacing:.04em}ul.events b{display:inline-block;width:4.8rem;white-space:nowrap;text-indent:0;font-weight:400;font-variant-numeric:oldstyle-nums tabular-nums;color:var(--red)}
+.newthought{font-variant:small-caps;letter-spacing:.04em;font-size:1.15em}
+a{color:inherit;text-decoration-color:#aaa;text-underline-offset:2px}
+a:hover{text-decoration-color:var(--red)}
+.sidenote,.marginnote{float:right;clear:right;margin-right:-60%;width:50%;margin-top:.3rem;margin-bottom:.8rem;font-size:1.05rem;line-height:1.35;color:#333;text-indent:0;position:relative}
+.sidenote-number{counter-increment:sn}
+.sidenote-number::after{content:counter(sn);font-size:.65em;vertical-align:super;line-height:0;color:var(--red);padding-left:1px}
+
+.epigraph{width:55%;margin:0 0 3rem}
+.epigraph blockquote{margin:0;font-style:italic;font-size:1.4rem;line-height:1.45}
+.epigraph footer{font-size:1.1rem;margin-top:.4rem;text-align:right;color:var(--mute)}
+figure{margin:0 0 2.4rem;width:55%}
+figure.fullwidth{width:100%;max-width:none}
+figcaption{font-size:1.05rem;line-height:1.35;color:#333;margin-top:.4rem}
+figure.fullwidth figcaption{width:55%}
+.rug-wrap{overflow-x:auto}.rug{width:100%;min-width:660px;height:auto;display:block}
+.rug text{font-family:var(--serif);fill:var(--ink)}
+.multiples{display:grid;grid-template-columns:repeat(6,1fr);gap:1.6rem 1.4rem;width:92%;margin:0 0 .6rem}
+.multiples div{font-size:.95rem;line-height:1.2;color:#333}
+.multiples svg{width:100%;height:auto;display:block;margin-bottom:.35rem;overflow:visible}
+.multiples i{font-style:italic}
+.multiples span{color:var(--mute);font-variant-numeric:oldstyle-nums}
+.ink{fill:none;stroke:var(--ink);stroke-width:1.3;stroke-linecap:round;stroke-linejoin:round}
+.inkr{fill:none;stroke:var(--red);stroke-width:1.6;stroke-linecap:round;stroke-linejoin:round}
+.dot{fill:var(--ink)}
+.dotr{fill:var(--red)}
+.code-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:1.2rem 1.4rem;width:92%;margin:0 0 1rem}
+.code-grid h3{font-weight:400;font-style:italic;font-size:1.15rem;margin:0 0 .25rem}
+.code-grid h3 span{font-style:normal;color:var(--mute);font-variant-numeric:oldstyle-nums;font-size:.95rem}
+body pre>code,body pre{font-family:var(--mono);font-size:12.5px;line-height:1.45}
+pre{margin:0;padding:.55rem .7rem;background:#f4f2e6;border-left:2px solid var(--rule);overflow-x:auto;white-space:pre}
+table{border-collapse:collapse;width:55%;font-size:1.15rem;line-height:1.35;margin:0 0 1.6rem}
+th{font-weight:400;font-style:italic;text-align:left;border-bottom:1px solid var(--ink);padding:.3rem .8rem .3rem 0}
+td{vertical-align:top;border-bottom:1px solid var(--rule);padding:.45rem .8rem .45rem 0}
+td:first-child{white-space:nowrap}
+ol.refs{font-size:1.1rem;line-height:1.4;padding-left:1.4rem}
+ol.refs li{margin-bottom:.45rem;overflow-wrap:anywhere}
+.colophon{font-size:1.05rem;color:var(--mute);margin-top:3rem}
+@media (max-width:760px){
+  html{font-size:14px}
+  article{width:100%;padding:2.2rem 1.1rem 4rem}
+  h1{font-size:2.3rem}.subtitle{font-size:1.3rem;margin-bottom:2rem}h2{font-size:1.7rem;margin-top:2.6rem}
+  p,ul,ol,.epigraph,figure,table,figure.fullwidth figcaption,.wide-note{width:100%}
+  p,ul,ol{font-size:1.25rem}
+  .sidenote,.marginnote{float:none;display:block;width:auto;margin:.5rem 0 .7rem 1rem;padding-left:.7rem;border-left:1px solid var(--rule);font-size:1rem}
+  ul.events li{padding-left:4.6rem;text-indent:-4.6rem}ul.events b{width:4.4rem}
+  .multiples{grid-template-columns:repeat(3,1fr);width:100%;gap:1.2rem 1rem}
+  .code-grid{grid-template-columns:1fr 1fr;width:100%}
+  table{font-size:1.05rem}td:first-child{white-space:normal}
+}
+@media (min-width:761px) and (max-width:1100px){.multiples{grid-template-columns:repeat(4,1fr)}.code-grid{grid-template-columns:repeat(2,1fr)}}
+</style>
+</head>
+<body>
+<article>
+<h1>Boxes, Lines and Arrows</h1>
+<p class="subtitle">A short history of diagrams, from clay tablets to Mermaid and Pele, and the stories behind their names</p>
+
+<div class="epigraph">
+<blockquote>The world is complex, dynamic, multidimensional; the paper is static, flat. How are we to represent the rich visual world of experience and measurement on mere flatland?</blockquote>
+<footer>Edward Tufte, <i>Envisioning Information</i>, 1990</footer>
+</div>
+
+<p><span class="newthought">A diagram is a picture</span> of something you cannot see: a relation, a process, an argument, a structure. A painting of Königsberg shows bridges; Euler’s diagram of Königsberg shows only which land touches which, and that was enough to found a branch of mathematics. This page follows that idea across 2,600 years, in four eras, ending with the newest turn: diagrams written as plain text and drawn by a machine, which is where Mermaid, Pele and a Nim library to come all live.</p>
+
+<figure class="fullwidth">
+<div class="rug-wrap"><svg class="rug" id="rug" viewBox="0 0 900 132" role="img" aria-label="Rug plot of the dated events on this page, on a stretched time axis with four eras"></svg></div>
+<figcaption>Every dated event on this page, one tick each. The axis is stretched three times: the first 1,900 years take as much room as the last 125, since that is where diagram types multiplied. Red ticks are text-to-diagram tools.</figcaption>
+</figure>
+
+<h2>Twelve shapes of thought</h2>
+<p>Most diagrams you will draw this year use a form someone invented on a specific day. Here are twelve of them as small multiples, drawn in the same ink at the same size, so the differences are only in the idea.</p>
+<div class="multiples" aria-label="Twelve diagram forms in chronological order">
+  <div><svg viewBox="0 0 120 84" aria-hidden="true"><path class="ink" d="M60 6V80M60 18H34M60 18H86M60 36H34M60 36H86M60 54H34M60 54H86"/><path class="inkr" d="M60 72H86"/><circle class="dot" cx="60" cy="6" r="2.4"/></svg><i>Tree</i><br>Porphyry’s categories <span>c. 270, drawn c. 500+</span></div>
+  <div><svg viewBox="0 0 120 84" aria-hidden="true"><circle class="ink" cx="60" cy="42" r="36"/><circle class="ink" cx="60" cy="42" r="24"/><circle class="ink" cx="60" cy="42" r="12"/><path class="inkr" d="M60 42L60 6"/><g class="dot"><circle cx="60" cy="18" r="1.8"/><circle cx="81" cy="30" r="1.8"/><circle cx="81" cy="54" r="1.8"/><circle cx="60" cy="66" r="1.8"/><circle cx="39" cy="54" r="1.8"/><circle cx="39" cy="30" r="1.8"/></g></svg><i>Wheel</i><br>Llull’s combinatorial volvelles <span>c. 1305</span></div>
+  <div><svg viewBox="0 0 120 84" aria-hidden="true"><path class="ink" d="M10 76H110"/><path class="ink" d="M22 76V70M34 76V63M46 76V56M58 76V49M70 76V42M82 76V35M94 76V28M106 76V21"/><path class="inkr" d="M10 76L108 19"/></svg><i>Graph of a quality</i><br>Oresme’s latitude of forms <span>c. 1350</span></div>
+  <div><svg viewBox="0 0 120 84" aria-hidden="true"><path class="ink" d="M60 12C40 22 30 34 28 42M60 12C50 26 42 36 28 42M60 12L92 42M28 42C40 50 50 60 60 72M28 42C34 56 46 66 60 72M92 42L60 72M60 12L60 72"/><g class="dotr"><circle cx="60" cy="12" r="4"/><circle cx="28" cy="42" r="4"/><circle cx="92" cy="42" r="4"/><circle cx="60" cy="72" r="4"/></g></svg><i>Graph</i><br>Euler’s seven bridges <span>1736</span></div>
+  <div><svg viewBox="0 0 120 84" aria-hidden="true"><path class="ink" d="M8 76H112M8 76V8"/><path d="M10 64C30 60 44 52 60 44S92 26 110 20L110 30C90 38 74 48 60 52S30 66 10 68Z" fill="#e6e1cc"/><path class="ink" d="M10 64C30 60 44 52 60 44S92 26 110 20"/><path class="inkr" d="M10 68C30 66 46 56 60 52S90 38 110 30"/></svg><i>Time series</i><br>Playfair’s trade balance <span>1786</span></div>
+  <div><svg viewBox="0 0 120 84" aria-hidden="true"><g transform="translate(60 44)"><path class="ink" d="M0 0L0 -22A22 22 0 0 1 15.6 -15.6Z"/><path class="ink" d="M0 0L28 -28A39.6 39.6 0 0 1 36 0Z" fill="#f1d9d9" stroke="#a4161a"/><path class="ink" d="M0 0L30 0A30 30 0 0 1 21.2 21.2Z"/><path class="ink" d="M0 0L13 13A18.4 18.4 0 0 1 0 18.4Z"/><path class="ink" d="M0 0L0 26A26 26 0 0 1 -18.4 18.4Z"/><path class="ink" d="M0 0L-10.6 10.6A15 15 0 0 1 -15 0Z"/><path class="ink" d="M0 0L-24 0A24 24 0 0 1 -17 -17Z"/><path class="ink" d="M0 0L-11 -11A15.6 15.6 0 0 1 0 -15.6Z"/></g></svg><i>Polar area</i><br>Nightingale’s rose <span>1858</span></div>
+  <div><svg viewBox="0 0 120 84" aria-hidden="true"><path d="M6 30L40 26L70 30L96 22L112 24L112 28L96 27L70 34L40 34L6 44Z" fill="#e6c9c3" stroke="#a4161a" stroke-width="1"/><path class="ink" d="M112 28L104 46L80 52L50 60L20 66L8 70" stroke-width="1.6"/><path class="ink" d="M8 78H112" stroke-width=".8"/><path class="ink" d="M20 78V74M50 78V72M80 78V70M104 78V68" stroke-width=".8"/></svg><i>Flow map</i><br>Minard’s march on Moscow <span>1869</span></div>
+  <div><svg viewBox="0 0 120 84" aria-hidden="true"><circle class="ink" cx="46" cy="34" r="22"/><circle class="ink" cx="74" cy="34" r="22"/><circle class="inkr" cx="60" cy="56" r="22"/></svg><i>Logic diagram</i><br>Venn’s three sets <span>1880</span></div>
+  <div><svg viewBox="0 0 120 84" aria-hidden="true"><rect class="ink" x="40" y="4" width="40" height="14" rx="7"/><path class="ink" d="M60 18V26"/><path class="inkr" d="M60 26L76 38L60 50L44 38Z"/><path class="ink" d="M60 50V58M76 38H100V66M44 38H20V66"/><rect class="ink" x="40" y="58" width="40" height="16"/><path class="ink" d="M97 62L100 66L103 62M17 62L20 66L23 62M57 55L60 58L63 55"/></svg><i>Flowchart</i><br>Gilbreths; von Neumann <span>1921, 1947</span></div>
+  <div><svg viewBox="0 0 120 84" aria-hidden="true"><path class="ink" d="M6 22H50L70 42H114" stroke-width="2.4"/><path class="inkr" d="M60 6V78" stroke-width="2.4"/><path class="ink" d="M14 70L40 44H60L80 24" stroke="#777" stroke-width="2.4"/><path class="ink" d="M24 22V18M38 22V18M86 42V38M100 42V38M60 18H64M60 62H64" stroke-width="1.2"/><circle cx="60" cy="32" r="4.2" fill="#fffff8" stroke="#111" stroke-width="1.4"/><circle cx="60" cy="44" r="4.2" fill="#fffff8" stroke="#111" stroke-width="1.4"/></svg><i>Topological map</i><br>Beck’s Underground <span>1933</span></div>
+  <div><svg viewBox="0 0 120 84" aria-hidden="true"><path class="ink" d="M14 6L38 42L14 78M106 6L82 42L106 78"/><path class="ink" d="M24 21l3 2M28 66l-1-3M96 21l-3 2M93 63l-1 3"/><path class="inkr" d="M38 42c3-7 6-7 8 0s5 7 8 0 6-7 8 0 5 7 8 0 6-7 8 0 3 7 4 0"/></svg><i>Feynman diagram</i><br>electron scattering <span>1949</span></div>
+  <div><svg viewBox="0 0 120 84" aria-hidden="true"><rect class="ink" x="8" y="4" width="34" height="12"/><rect class="ink" x="78" y="4" width="34" height="12"/><path class="ink" d="M25 16V80M95 16V80" stroke-dasharray="3 3"/><path class="inkr" d="M25 30H92M88 27L92 30L88 33"/><path class="ink" d="M95 46H28M32 43L28 46L32 49" stroke-dasharray="4 2"/><path class="inkr" d="M25 62H92M88 59L92 62L88 65"/></svg><i>Sequence diagram</i><br>MSC, UML, then Mermaid <span>1992–2014</span></div>
+</div>
+<p class="wide-note" style="font-size:1.05rem;color:var(--mute)">Schematic redrawings for comparison, not facsimiles. Sources for each are in the references.</p>
+
+<h2>I. Pictures of thought <span class="yr">before 1700</span></h2>
+<ul class="events">
+<li><b>600 <small>BCE</small></b> The Babylonian <i>Map of the World</i> puts Babylon inside a ring of ocean, with triangular regions beyond. It is a diagram of a worldview rather than a survey.<span class="sidenote">British Museum, object BM 92687. Clay tablet from Sippar.</span></li>
+<li><b>300 <small>BCE</small></b> Euclid’s <i>Elements</i>. The lettered figure is part of the proof: the text says “let AB be…” and the reader finds A and B on the drawing. Those labels are the ancestors of the node ids in every diagram language.<span class="sidenote">Netz, <i>The Shaping of Deduction in Greek Mathematics</i> (1999), argues the lettered diagram is what made Greek deduction work.</span></li>
+<li><b>c. 270</b> Porphyry’s <i>Isagoge</i> splits substance into body and spirit, body into living and not, down to the individual. Medieval copyists drew it as a branching figure, the <i>arbor porphyriana</i>, the first famous tree diagram.<span class="sidenote">Lima, <i>The Book of Trees</i> (2014), traces the tree form from Porphyry to phylogenies.</span></li>
+<li><b>c. 1000</b> An anonymous scribe plots the paths of the planets against time on a grid, in a copy of Macrobius. It is the oldest known time-series chart, and Tufte reproduces it at the start of his first book.<span class="sidenote">Funkhouser, “A note on a tenth century graph”, <i>Osiris</i> 1 (1936). Tufte, <i>Visual Display</i>, p. 28.</span></li>
+<li><b>c. 1305</b> Ramon Llull’s <i>Ars</i> uses concentric paper wheels, each marked with concepts, turned to generate every combination. The diagram becomes a machine for thinking.<span class="sidenote">Gardner, <i>Logic Machines and Diagrams</i> (1958), ch. 1.</span></li>
+<li><b>c. 1350</b> Nicole Oresme draws the intensity of a quality (heat, speed) as vertical lines over a base line, and sees that uniformly increasing speed makes a triangle. It is a graph three centuries before Descartes.</li>
+<li><b>1626</b> Christoph Scheiner’s <i>Rosa Ursina</i> shows the sun’s spots day after day as a row of identical discs: small multiples, the form Tufte later praised by name.</li>
+<li><b>1637</b> Descartes’ <i>La Géométrie</i> joins algebra and geometry with coordinates. <b style="width:auto;color:inherit;display:inline">1686</b>: Halley maps the trade winds with strokes on a world map.</li>
+</ul>
+
+<h2>II. Statistics and logic find their forms <span class="yr">1700–1900</span></h2>
+<ul class="events">
+<li><b>1736</b> Euler shows the seven bridges of Königsberg cannot be crossed once each. He throws away the map and keeps only land masses and connections: the first graph.<span class="sidenote">Euler, “Solutio problematis ad geometriam situs pertinentis” (written 1736, published 1741).</span></li>
+<li><b>1765</b> Joseph Priestley’s <i>Chart of Biography</i> draws 2,000 lives as horizontal bars on a time axis, the ancestor of the timeline and of the Gantt chart.</li>
+<li><b>1768</b> In letters to a German princess, Euler explains syllogisms with nested and overlapping circles.</li>
+<li><b>1786</b> William Playfair’s <i>Commercial and Political Atlas</i> introduces the line chart and the bar chart; his <i>Statistical Breviary</i> (1801) adds the pie chart. Nearly all of business graphics comes from one Scottish engineer.<span class="sidenote">Playfair, <i>The Commercial and Political Atlas</i> (1786). Reprint ed. Wainer &amp; Spence (2005).</span></li>
+<li><b>1854</b> John Snow marks cholera deaths around the Broad Street pump in Soho. <b style="width:auto;color:inherit;display:inline">1858</b>: Florence Nightingale’s polar-area “rose” shows that more soldiers died of disease than of wounds.</li>
+<li><b>1859</b> The only figure in Darwin’s <i>Origin of Species</i> is a tree diagram of branching descent.</li>
+<li><b>1869</b> Charles Joseph Minard’s map of Napoleon’s Russian campaign. A band whose width is the size of the army thins from 422,000 to 10,000, with the temperature of the retreat plotted below it. Tufte called it perhaps the best statistical graphic ever drawn.<span class="sidenote">Tufte, <i>Visual Display</i> (1983), pp. 40–41.</span></li>
+<li><b>1879</b> Frege’s <i>Begriffsschrift</i> writes logic as two-dimensional branching strokes. <b style="width:auto;color:inherit;display:inline">1880</b>: John Venn’s overlapping circles show every possible combination of classes. <b style="width:auto;color:inherit;display:inline">c. 1896</b>: Peirce’s existential graphs do logic by drawing.<span class="sidenote">Venn, “On the diagrammatic and mechanical representation of propositions and reasonings”, <i>Philosophical Magazine</i> (1880).</span></li>
+</ul>
+
+<h2>III. Diagrams of process and systems <span class="yr">1900–1980</span></h2>
+<ul class="events">
+<li><b>1896</b> Karol Adamiecki’s <i>harmonogram</i> schedules steel works; <b style="width:auto;color:inherit;display:inline">c. 1912</b> Henry Gantt popularises the bar schedule that still bears his name.</li>
+<li><b>1921</b> Frank and Lillian Gilbreth present “Process Charts” to the American Society of Mechanical Engineers: standard symbols for each step of work, the first flowcharts.<span class="sidenote">Gilbreth &amp; Gilbreth, “Process Charts: First Steps in Finding the One Best Way to Do Work”, ASME (1921).</span></li>
+<li><b>1925</b> Otto Neurath and Gerd Arntz in Vienna begin Isotype: counts drawn as rows of identical pictograms.</li>
+<li><b>1933</b> Harry Beck’s London Underground diagram ignores geography. Lines run only horizontal, vertical or at 45°, and stations are spaced evenly. Riders loved it, and every transit map since has copied it.<span class="sidenote">Garland, <i>Mr Beck’s Underground Map</i> (1994).</span></li>
+<li><b>1947</b> Goldstine and von Neumann draw “flow diagrams” to plan programs for the first stored-program computers. The flowchart moves from factories to software.<span class="sidenote">Goldstine &amp; von Neumann, <i>Planning and Coding of Problems for an Electronic Computing Instrument</i> (1947).</span></li>
+<li><b>1949</b> Richard Feynman’s diagrams turn integrals in quantum field theory into lines and squiggles that physicists can sketch and compute from.<span class="sidenote">Kaiser, <i>Drawing Theories Apart</i> (2005).</span></li>
+<li><b>1962</b> Carl Adam Petri’s nets model concurrency. <b style="width:auto;color:inherit;display:inline">1967</b>: Jacques Bertin’s <i>Sémiologie graphique</i> gives the first grammar of visual variables: position, size, value, texture, colour, orientation, shape.</li>
+<li><b>1976</b> Peter Chen’s entity-relationship model: boxes, diamonds and crow’s feet for databases.<span class="sidenote">Chen, “The Entity-Relationship Model: Toward a Unified View of Data”, <i>ACM TODS</i> 1(1) (1976).</span></li>
+</ul>
+
+<h2>IV. Diagrams written as text <span class="yr">1980–today</span></h2>
+<p>The newest change is not a new shape but a new way to make shapes. You describe the structure in words and an algorithm decides where everything goes. Two ideas made that possible: a layout algorithm good enough to trust, and a syntax small enough to type in a chat message or a README.</p>
+<ul class="events">
+<li><b>1981</b> Sugiyama, Tagawa and Toda publish the layered method for drawing hierarchies: assign layers, reduce crossings, place nodes. Nearly every flowchart renderer since, Mermaid’s and Pele’s included, descends from it.<span class="sidenote">Sugiyama, Tagawa &amp; Toda, “Methods for Visual Understanding of Hierarchical System Structures”, <i>IEEE Trans. SMC</i> 11(2) (1981).</span></li>
+<li><b>1982</b> Brian Kernighan’s PIC, a troff preprocessor: <code>box; arrow; box</code> becomes a picture in a typeset Unix manual.<span class="sidenote">Kernighan, “PIC — A Language for Typesetting Graphics”, <i>Software: Practice and Experience</i> 12 (1982).</span></li>
+<li><b>1983</b> Tufte self-publishes <i>The Visual Display of Quantitative Information</i>: data-ink, chartjunk, small multiples. <b style="width:auto;color:inherit;display:inline">1987</b>: David Harel’s statecharts.</li>
+<li><b>c. 1990</b> <code>dot</code> and Graphviz at AT&amp;T Bell Labs. <code>digraph { a -&gt; b }</code> becomes the lingua franca of machine-drawn graphs.<span class="sidenote">Gansner, Koutsofios, North &amp; Vo, “A Technique for Drawing Directed Graphs”, <i>IEEE TSE</i> 19(3) (1993).</span></li>
+<li><b>1997</b> UML is standardised by the OMG, merging the notations of Booch, Rumbaugh and Jacobson. <b style="width:auto;color:inherit;display:inline">c. 2005</b>: Till Tantau’s TikZ for LaTeX.</li>
+<li><b>2009</b> PlantUML draws UML from plain text, using Graphviz for layout.</li>
+<li><b>2014</b> Knut Sveidqvist starts Mermaid after losing a Visio file he needed to update. It is JavaScript, so it renders in the browser, and its syntax looks like Markdown.<span class="sidenote">Mermaid (software), Wikipedia; Pulse 2.0 interview with Sveidqvist (2024).</span></li>
+<li><b>2020</b> D. Richard Hipp revives PIC as Pikchr, for the Fossil and SQLite docs.</li>
+<li><b>2022</b> GitHub renders Mermaid blocks in Markdown, and Mermaid becomes the default way to put a diagram in a README. The same year Terrastruct open-sources D2.<span class="sidenote">GitHub blog, “Include diagrams in your Markdown files with Mermaid”, 14 Feb 2022.</span></li>
+<li><b>2026</b> Obsidian releases Pele, which renders Mermaid syntax to SVG with no runtime dependencies, synchronously, with colours and fonts as CSS variables. Mermaid stays the language; Pele is a second, faster renderer for it.<span class="sidenote">github.com/obsidianmd/pele, MIT licence. Supports every diagram type in Mermaid 12.1.0.</span></li>
+</ul>
+
+<p>The same two-box graph, in the languages of this lineage, shows how much the syntax has shrunk:</p>
+<div class="code-grid">
+<div><h3>PIC <span>1982</span></h3><pre><code>box "A"; arrow; box "B"</code></pre></div>
+<div><h3>dot <span>c. 1990</span></h3><pre><code>digraph { A -&gt; B }</code></pre></div>
+<div><h3>TikZ <span>c. 2005</span></h3><pre><code>\node (a) {A};
+\node[right=of a] (b) {B};
+\draw[-&gt;] (a) -- (b);</code></pre></div>
+<div><h3>PlantUML <span>2009</span></h3><pre><code>@startuml
+A -&gt; B
+@enduml</code></pre></div>
+<div><h3>Mermaid <span>2014</span></h3><pre><code>flowchart LR
+  A --&gt; B</code></pre></div>
+<div><h3>Pikchr <span>2020</span></h3><pre><code>box "A"; arrow; box "B"</code></pre></div>
+<div><h3>D2 <span>2022</span></h3><pre><code>A -&gt; B</code></pre></div>
+<div><h3>Pele <span>2026</span></h3><pre><code>flowchart LR
+  A --&gt; B</code></pre></div>
+</div>
+<p class="wide-note" style="font-size:1.05rem;color:var(--mute)">Pele reads the Mermaid language unchanged; the new part is the renderer.</p>
+
+<h2>What’s in a name</h2>
+<p>Diagram tools get named in three ways. Some say what they do (<i>dot</i>, <i>PIC</i>, <i>D2</i>). Some make a joke (<i>TikZ</i>, <i>Pikchr</i>). And some are named for a story, which is where both Mermaid and Pele belong.</p>
+<table>
+<thead><tr><th>Name</th><th>Where it comes from</th></tr></thead>
+<tbody>
+<tr><td>Mermaid</td><td>When Knut Sveidqvist got home with the idea, his children were watching <i>The Little Mermaid</i> on TV. “The name just stuck in my head.”</td></tr>
+<tr><td>Pele</td><td>Pele, the Hawaiian goddess of volcanoes and fire, according to the project site as reported by third-party write-ups. The repository’s tagline keeps the joke: “Renders Mermaid diagrams faster than you’d run from a volcano! 🌋” No source mentions Pelé the footballer, whose name has an accent.</td></tr>
+<tr><td>dot</td><td>The language of Graphviz (graph visualization); a graph is dots joined by lines.</td></tr>
+<tr><td>PIC</td><td>Short for picture, next to its troff siblings <i>eqn</i> and <i>tbl</i>.</td></tr>
+<tr><td>TikZ</td><td>A recursive German acronym: <i>TikZ ist kein Zeichenprogramm</i>, “TikZ is not a drawing program”.</td></tr>
+<tr><td>Pikchr</td><td>Pronounced “picture”: PIC’s heir, spelled to be searchable.</td></tr>
+<tr><td>D2</td><td>Short for Declarative Diagramming.</td></tr>
+</tbody>
+</table>
+<p>So the chain behind a Nim wrapper is a fairy tale (a mermaid) handed to a volcano goddess (Pele). Whatever comes next can pick up either thread, or start its own.</p>
+
+<h2>References</h2>
+<ol class="refs">
+<li>Edward R. Tufte, <i>The Visual Display of Quantitative Information</i> (1983); <i>Envisioning Information</i> (1990); <i>Visual Explanations</i> (1997); <i>Beautiful Evidence</i> (2006). Graphics Press. <a href="https://www.edwardtufte.com/">edwardtufte.com</a></li>
+<li>Michael Friendly &amp; Daniel J. Denis, <i>Milestones in the History of Thematic Cartography, Statistical Graphics, and Data Visualization</i>. <a href="https://www.datavis.ca/milestones/">datavis.ca/milestones</a></li>
+<li>Manuel Lima, <i>The Book of Trees: Visualizing Branches of Knowledge</i> (2014); <i>The Book of Circles</i> (2017).</li>
+<li>Reviel Netz, <i>The Shaping of Deduction in Greek Mathematics</i> (1999).</li>
+<li>Martin Gardner, <i>Logic Machines and Diagrams</i> (1958).</li>
+<li>H. Gray Funkhouser, “A Note on a Tenth Century Graph”, <i>Osiris</i> 1 (1936): 260–262.</li>
+<li>Leonhard Euler, “Solutio problematis ad geometriam situs pertinentis”, <i>Commentarii Academiae Scientiarum Petropolitanae</i> 8 (1741).</li>
+<li>William Playfair, <i>The Commercial and Political Atlas and Statistical Breviary</i>, ed. Howard Wainer &amp; Ian Spence (Cambridge, 2005).</li>
+<li>John Venn, “On the Diagrammatic and Mechanical Representation of Propositions and Reasonings”, <i>Philosophical Magazine</i> 10 (1880).</li>
+<li>Frank B. &amp; Lillian M. Gilbreth, “Process Charts”, ASME (1921).</li>
+<li>Ken Garland, <i>Mr Beck’s Underground Map</i> (1994).</li>
+<li>Herman Goldstine &amp; John von Neumann, <i>Planning and Coding of Problems for an Electronic Computing Instrument</i> (1947).</li>
+<li>David Kaiser, <i>Drawing Theories Apart: The Dispersion of Feynman Diagrams in Postwar Physics</i> (2005).</li>
+<li>Jacques Bertin, <i>Sémiologie graphique</i> (1967); English: <i>Semiology of Graphics</i> (1983).</li>
+<li>Peter P. Chen, “The Entity-Relationship Model”, <i>ACM TODS</i> 1(1) (1976).</li>
+<li>K. Sugiyama, S. Tagawa &amp; M. Toda, “Methods for Visual Understanding of Hierarchical System Structures”, <i>IEEE Trans. SMC</i> 11(2) (1981).</li>
+<li>Brian W. Kernighan, “PIC — A Language for Typesetting Graphics”, <i>Software: Practice and Experience</i> 12 (1982).</li>
+<li>E. R. Gansner, E. Koutsofios, S. C. North &amp; K.-P. Vo, “A Technique for Drawing Directed Graphs”, <i>IEEE TSE</i> 19(3) (1993). <a href="https://graphviz.org/">graphviz.org</a></li>
+<li>David Harel, “Statecharts: A Visual Formalism for Complex Systems”, <i>Science of Computer Programming</i> 8 (1987).</li>
+<li>Mermaid: <a href="https://mermaid.js.org/">mermaid.js.org</a>; “<a href="https://pulse2.com/mermaid-chart-knut-sveidqvist-profile/">Mermaid Chart: How This Company Creates Complex Diagrams…</a>”, Pulse 2.0 (2024); <a href="https://en.wikipedia.org/wiki/Mermaid_(software)">Mermaid (software)</a>, Wikipedia.</li>
+<li>GitHub blog, “<a href="https://github.blog/2022-02-14-include-diagrams-markdown-files-mermaid/">Include diagrams in your Markdown files with Mermaid</a>” (2022).</li>
+<li>Pele: <a href="https://github.com/obsidianmd/pele">github.com/obsidianmd/pele</a>; <a href="https://pele.run">pele.run</a>; on the name, <a href="https://braindetox.kr/en/posts/pele_mermaid_themed_svg_renderer.html">braindetox.kr</a> (2026).</li>
+<li>PlantUML <a href="https://plantuml.com/">plantuml.com</a>; Pikchr <a href="https://pikchr.org/">pikchr.org</a>; D2 <a href="https://d2lang.com/">d2lang.com</a>; TikZ &amp; PGF manual (Till Tantau).</li>
+</ol>
+
+<p class="colophon">Made with Claude for Pietro Peterlongo, November 2026, as a starting point for naming a Nim library built on Pele. Set in Crimson Pro after the manner of Tufte’s books; the small multiples are schematic redrawings. Dates are the conventional ones from the references; corrections welcome on <a href="https://github.com/pietroppeter/claude-artifacts">GitHub</a>.</p>
+</article>
+
+<script>
+// Rug plot of every dated event on the page, on a piecewise time axis.
+(function(){
+  var ev=[[-600],[-300],[270],[1000],[1305],[1350],[1626],[1637],[1686],[1736],[1765],[1768],[1786],[1801],[1854],[1858],[1859],[1869],[1879],[1880],[1896],
+    [1912],[1921],[1925],[1933],[1947],[1949],[1962],[1967],[1976],[1981],[1982,1],[1983],[1987],[1990,1],[1997],[2005,1],[2009,1],[2014,1],[2020,1],[2022,1],[2022],[2026,1]];
+  var seg=[[-650,1300,20,240],[1300,1900,240,560],[1900,2030,560,880]];
+  function x(y){for(var i=0;i<seg.length;i++){var s=seg[i];if(y<=s[1]||i==seg.length-1)return s[2]+(y-s[0])/(s[1]-s[0])*(s[3]-s[2]);}}
+  var NS="http://www.w3.org/2000/svg",svg=document.getElementById("rug");
+  function el(t,a,txt){var e=document.createElementNS(NS,t);for(var k in a)e.setAttribute(k,a[k]);if(txt)e.textContent=txt;svg.appendChild(e);return e;}
+  el("line",{x1:20,x2:880,y1:70,y2:70,stroke:"#111","stroke-width":.8});
+  [[-600,"600 BCE"],[0,"0"],[1000,"1000"],[1500,"1500"],[1700,"1700"],[1900,"1900"],[1950,"1950"],[2000,"2000"]].forEach(function(t){
+    el("line",{x1:x(t[0]),x2:x(t[0]),y1:70,y2:75,stroke:"#111","stroke-width":.8});
+    el("text",{x:x(t[0]),y:90,"font-size":13,"text-anchor":"middle"},t[1]);});
+  var counts={};
+  ev.forEach(function(e){var k=Math.round(x(e[0]));var n=counts[k]=(counts[k]||0)+1;
+    el("line",{x1:x(e[0]),x2:x(e[0]),y1:66-(n-1)*9,y2:58-(n-1)*9,stroke:e[1]?"#a4161a":"#111","stroke-width":1.6});});
+  [[-650,1300,"I. Pictures of thought"],[1300,1900,"II. Statistics & logic"],[1900,1980,"III. Process"],[1980,2030,"IV. Text"]].forEach(function(b,i){
+    var a=x(b[0]),z=x(b[1]);
+    el("line",{x1:a+2,x2:z-2,y1:106,y2:106,stroke:"#b9b5a3","stroke-width":.8});
+    el("text",{x:(a+z)/2,y:124,"font-size":13,"font-style":"italic","text-anchor":"middle"},b[2]);});
+  el("text",{x:20,y:20,"font-size":13,"font-style":"italic",fill:"#6b6b63"},"one tick per event; stacked when they share a year");
+})();
+</script>
+</body>
+</html>
