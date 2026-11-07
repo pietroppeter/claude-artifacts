@@ -7,6 +7,7 @@ https://pietroppeter.github.io/claude-artifacts/
 
 | Page | Date | Description |
 |---|---|---|
+| [everyday-diagrams](https://pietroppeter.github.io/claude-artifacts/everyday-diagrams/) | 2026-11-07 | Crafted graphics vs standard diagrams: Mermaid and Pele against draw.io, D3 and others, and Otto Neurath's Isotype, in Isotype style |
 | [diagram-history](https://pietroppeter.github.io/claude-artifacts/diagram-history/) | 2026-11-07 | Tufte-style history of diagrams, from clay tablets to [Mermaid](https://mermaid.js.org) and [Pele](https://github.com/obsidianmd/pele), with references and the stories behind the names |
 | [cartographer-nim](https://pietroppeter.github.io/claude-artifacts/cartographer-nim/) | 2026-11-04 | Evaluating [Cartographer](https://github.com/BeppeTemp/cartographer) (agent-maintained git wiki over MCP) for a multi-repo, multi-team project: core rebuilt in Nim, LLM Wiki + OKF background, alternatives, fit, in a [nimib](https://github.com/pietroppeter/nimib) page |
 | [declarative-dragging-nim](https://pietroppeter.github.io/claude-artifacts/declarative-dragging-nim/) | 2026-11-04 | [Declarative Dragging](https://declarative-dragging.github.io/) (UIST 2026 best paper) ported to Nim in a [nimib](https://github.com/pietroppeter/nimib) page: engine runs natively at build time and in the browser via `nim js` |
