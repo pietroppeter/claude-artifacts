@@ -1,5 +1,8 @@
 #!/usr/bin/env python3
-"""Add (or refresh) the small "all artifacts" link on every page.
+"""Add (or refresh) the small "← Claude artifacts" link on every page.
+
+The snippet also sets text-size-adjust on <html>, so iOS Safari does not inflate the text
+in code blocks that scroll sideways (every page gets it, whoever built it).
 
 Inserts a self-contained snippet before </body> in each <slug>/index.html,
 between marker comments, so re-running replaces it instead of duplicating it.
@@ -15,6 +18,7 @@ BEGIN, END = "<!-- claude-artifacts:backlink -->", "<!-- /claude-artifacts:backl
 
 SNIPPET = f"""{BEGIN}
 <style>
+html{{-webkit-text-size-adjust:100%;text-size-adjust:100%}}
 #ca-backlink{{all:initial;position:fixed;z-index:2147483647;left:max(10px,env(safe-area-inset-left,0px));bottom:max(10px,env(safe-area-inset-bottom,0px));
 font:500 12px/1 system-ui,-apple-system,"Segoe UI",sans-serif;color:#1f1a22;background:rgba(251,250,252,.96);
 border:1px solid rgba(0,0,0,.14);border-radius:999px;padding:6px 10px;text-decoration:none;box-shadow:0 1px 3px rgba(0,0,0,.12);
@@ -23,7 +27,7 @@ border:1px solid rgba(0,0,0,.14);border-radius:999px;padding:6px 10px;text-decor
 @media (prefers-color-scheme:dark){{#ca-backlink{{color:#ece6ef;background:rgba(23,19,26,.94);border-color:rgba(255,255,255,.18)}}}}
 @media print{{#ca-backlink{{display:none}}}}
 </style>
-<a id="ca-backlink" href="{INDEX_URL}" title="All Claude artifacts">&larr; all artifacts</a>
+<a id="ca-backlink" href="{INDEX_URL}" title="All Claude artifacts">&larr; Claude artifacts</a>
 {END}"""
 
 BLOCK = re.compile(re.escape(BEGIN) + r".*?" + re.escape(END) + r"\n?", re.S)

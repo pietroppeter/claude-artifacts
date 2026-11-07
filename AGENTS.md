@@ -10,8 +10,8 @@ Static pages made with Claude, served by GitHub Pages from `main` (root). No bui
 - No runtime dependency on claude.ai: no `window.claude.*` capabilities. If a page relied on them, replace with static data or drop the feature.
 - Put any scripts/data used to generate the page in `<slug>/src/` so it can be regenerated.
 - Add an entry (newest first) to both the root `index.html` list and the `README.md` table.
-- Run `python3 tools/backlink.py` after adding or regenerating any page. It adds the small "← all artifacts" link back to the
-  index before `</body>` (between `claude-artifacts:backlink` marker comments; re-running replaces it, never duplicates it).
+- Run `python3 tools/backlink.py` after adding or regenerating any page. It adds the small "← Claude artifacts" link back to the
+  index before `</body>`, plus `-webkit-text-size-adjust:100%` on `html` (between `claude-artifacts:backlink` marker comments; re-running replaces it, never duplicates it).
   Page generators (`src/build.py`, nimib `index.nim`) overwrite `index.html`, so run it again after every rebuild.
   Don't hand-edit or restyle the link inside a page: change `tools/backlink.py` and re-run it on all pages.
 - Keep the root `index.html` in its basic style: a card grid with one `<li>` per page (link to `<slug>/index.html`, not `<slug>/`, so branch previews and local files work too; `<time>`, short description `<p>`; the card clamps it to four lines), no per-page theming.
@@ -33,6 +33,11 @@ Static pages made with Claude, served by GitHub Pages from `main` (root). No bui
   `pre > code {font-size:1.2em}`, so override it with a selector at least as specific (`body pre > code`). Set
   `-webkit-text-size-adjust:100%` on `html` so iOS Safari doesn't inflate text in blocks that scroll sideways.
   Check a phone-width screenshot before publishing.
+- Every code block scrolls sideways instead of spilling out of its box: give each `pre` (including nimib's `pre.nb-output`,
+  which has no `<code>` inside) `overflow-x:auto`. At 390px wide, `document.documentElement.scrollWidth` must equal the viewport width.
+- Highlight code the same way across a page. In nimib, code shown with a markdown fence or raw `<pre>` is not highlighted
+  (the CDN highlight.js has no Nim grammar either): wrap it with nimib's `highlightNim` in
+  `<pre><code class="nohighlight nim hljs">`, like the `nbCode` blocks.
 
 ## When a source can't be read
 - If a site is blocked by the environment's network policy, tell Pietro what couldn't be read and give him a copy-pastable

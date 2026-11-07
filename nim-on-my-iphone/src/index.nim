@@ -47,7 +47,11 @@ template window(title: string, body: untyped) =
   nbRawHtml("</div></section>")
 
 template code(lang, src: string) =
-  nbRawHtml("<pre><code class=\"language-" & lang & "\">" & src.multiReplace(("&", "&amp;"), ("<", "&lt;"), (">", "&gt;")) & "</code></pre>")
+  # highlight.js from cdnjs has no Nim grammar, so Nim is highlighted at build time like nbCode blocks.
+  if lang == "nim":
+    nbRawHtml("<pre><code class=\"nohighlight nim hljs\">" & highlightNim(src) & "</code></pre>")
+  else:
+    nbRawHtml("<pre><code class=\"language-" & lang & "\">" & src.multiReplace(("&", "&amp;"), ("<", "&lt;"), (">", "&gt;")) & "</code></pre>")
 
 # ----------------------------------------------------------------- intro ---
 nbRawHtml """<section class="hero">

@@ -54,6 +54,7 @@ figcaption {
 <hr>
 </header>
 <main>
+<style>pre.nb-output{overflow-x:auto}</style>
 <h1 id="affinity-propagation,-animated-with-nimanim">Affinity Propagation, animated with nimanim</h1>
 <p><a href="https://github.com/himanshm/nimanim">nimanim</a> is a young, manim-inspired 2D animation
 library for Nim: Cairo draws the frames, ffmpeg encodes them. To give it a dry run,
@@ -239,6 +240,9 @@ nbInit
 nb.title = <span class="hljs-string">&quot;Affinity Propagation, animated with nimanim&quot;</span>
 <span class="hljs-comment"># write the page next to src/, wherever the build is run from</span>
 nb.doc.filename = currentSourcePath().parentDir.parentDir / <span class="hljs-string">&quot;index.html&quot;</span>
+<span class="hljs-comment"># Output blocks are &lt;pre class=&quot;nb-output&quot;&gt; with no &lt;code&gt; inside, so water.css doesn't make them</span>
+<span class="hljs-comment"># scroll; without this, long lines push the whole page sideways on a phone.</span>
+nbRawHtml: <span class="hljs-string">&quot;&lt;style&gt;pre.nb-output{overflow-x:auto}&lt;/style&gt;&quot;</span>
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 # Affinity Propagation, animated with nimanim
@@ -468,6 +472,7 @@ nbSave
   
 <!-- claude-artifacts:backlink -->
 <style>
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
 #ca-backlink{all:initial;position:fixed;z-index:2147483647;left:max(10px,env(safe-area-inset-left,0px));bottom:max(10px,env(safe-area-inset-bottom,0px));
 font:500 12px/1 system-ui,-apple-system,"Segoe UI",sans-serif;color:#1f1a22;background:rgba(251,250,252,.96);
 border:1px solid rgba(0,0,0,.14);border-radius:999px;padding:6px 10px;text-decoration:none;box-shadow:0 1px 3px rgba(0,0,0,.12);
@@ -476,6 +481,6 @@ border:1px solid rgba(0,0,0,.14);border-radius:999px;padding:6px 10px;text-decor
 @media (prefers-color-scheme:dark){#ca-backlink{color:#ece6ef;background:rgba(23,19,26,.94);border-color:rgba(255,255,255,.18)}}
 @media print{#ca-backlink{display:none}}
 </style>
-<a id="ca-backlink" href="https://pietroppeter.github.io/claude-artifacts/" title="All Claude artifacts">&larr; all artifacts</a>
+<a id="ca-backlink" href="https://pietroppeter.github.io/claude-artifacts/" title="All Claude artifacts">&larr; Claude artifacts</a>
 <!-- /claude-artifacts:backlink -->
 </body>
