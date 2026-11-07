@@ -1,0 +1,72 @@
+<style>
+.ck-bar { display: flex; border: 1px solid #000; height: 22px; margin: 6px 0 4px; overflow: hidden; background: #fff; }
+.ck-seg { height: 100%; border-right: 1px solid #000; background: repeating-linear-gradient(45deg, #fff 0 3px, #ccc 3px 4px); }
+.ck-seg.done { background: var(--accent); }
+.ck-seg:last-child { border-right: 0; }
+.ck-meta { font-family: var(--font-display); font-size: 13px; margin-bottom: 10px; font-variant-numeric: tabular-nums; }
+.ck-phase { font-family: var(--font-display); font-size: 13px; margin: 14px 0 6px; padding: 2px 8px; background: var(--chrome); border: 1px solid #000; display: inline-block; }
+.ck-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.ck-item { display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: start; padding: 6px 8px; border: 1px solid #bbb; background: #fff; }
+.ck-item input { width: 16px; height: 16px; margin: 3px 0 0; accent-color: var(--accent); }
+.ck-item label { cursor: pointer; }
+.ck-item .t { font-family: var(--font-mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
+.ck-item.done { background: #f1f1ff; }
+.ck-item.done label b { text-decoration: line-through; }
+.ck-item small { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+</style>
+<div class="ck-bar" id="ck-bar" aria-hidden="true"></div>
+<div class="ck-meta" id="ck-meta" aria-live="polite"></div>
+<div id="ck-root"></div>
+<script>
+(function(){
+  var P = [
+    ["Mac", [
+      ["Get a Mac on a recent macOS", "Any Apple Silicon Mac is ideal. Xcode always requires a fairly recent macOS; check the App Store page for the minimum.", 0],
+      ["Install Xcode from the Mac App Store", "Open it once, accept the license, and let it download the iOS platform. This is the long wait.", 60],
+      ["Install Nim on the Mac", "<code>brew install nim</code> (or choosenim), then <code>nim -v</code>. Note where it lives: <code>which nim</code>.", 5],
+      ["Add your Apple ID to Xcode", "Xcode → Settings → Accounts → + → Apple ID. A <i>Personal Team</i> appears. No payment, no enrollment.", 2]
+    ]],
+    ["App", [
+      ["Create the SwiftUI app", "File → New → Project → iOS App. Interface SwiftUI, Team: (Personal Team), bundle ID like <code>com.pietro.nimhello</code> (must be unique to you).", 5],
+      ["Run the empty template in the Simulator", "Pick an iPhone simulator, press ⌘R. Proves Xcode works before Nim enters.", 5],
+      ["Add <code>nim/core.nim</code> and <code>nimcore.h</code>", "Copy them from Route A. Point <i>Objective-C Bridging Header</i> at the header.", 5],
+      ["Add the Run Script phase and three build settings", "Script above Compile Sources. Library Search Paths, <code>-lnimcore</code>, User Script Sandboxing = No.", 10],
+      ["Run in the Simulator with Nim", "You should see <i>Hello from Nim</i> and a live fib. Fix linking here, where signing cannot get in the way.", 10]
+    ]],
+    ["iPhone", [
+      ["Plug in the iPhone and tap Trust", "Then wait for Xcode to finish <i>Preparing iPhone for development</i>.", 5],
+      ["Turn on Developer Mode", "Settings → Privacy & Security → Developer Mode → On, restart, confirm. Appears only after the phone has met Xcode.", 3],
+      ["Choose the iPhone as destination and press Run", "If Xcode complains about signing, open Signing & Capabilities and let it fix the profile.", 3],
+      ["Trust your developer certificate on the phone", "Settings → General → VPN & Device Management → Developer App → Trust. Tap the icon again.", 2],
+      ["Enable Wi-Fi installs and set a weekly reminder", "Window → Devices and Simulators → Connect via network. Re-run within 7 days to keep it alive.", 2]
+    ]]
+  ];
+  var KEY = "nim-iphone-checklist-v1", done = {};
+  try { done = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { done = {}; }
+  var items = [], root = document.getElementById("ck-root"), h = "", n = 0;
+  P.forEach(function(ph){
+    h += '<div class="ck-phase">' + ph[0] + '</div><ol class="ck-list">';
+    ph[1].forEach(function(it){
+      var id = "ck-" + n; items.push({ id: id, min: it[2] });
+      h += '<li class="ck-item" id="li-' + id + '"><input type="checkbox" id="' + id + '"><label for="' + id + '"><b>' + (n + 1) + '. ' + it[0] + '</b><small>' + it[1] + '</small></label><span class="t">' + (it[2] ? "~" + it[2] + " min" : "") + '</span></li>';
+      n++;
+    });
+    h += '</ol>';
+  });
+  root.innerHTML = h;
+  var total = items.reduce(function(a, x){ return a + x.min; }, 0);
+  function render(){
+    var bar = "", left = 0, cnt = 0;
+    items.forEach(function(x){
+      var on = !!done[x.id]; if (on) cnt++; else left += x.min;
+      document.getElementById(x.id).checked = on;
+      document.getElementById("li-" + x.id).classList.toggle("done", on);
+      if (x.min) bar += '<div class="ck-seg' + (on ? " done" : "") + '" style="flex:' + x.min + '"></div>';
+    });
+    document.getElementById("ck-bar").innerHTML = bar;
+    document.getElementById("ck-meta").textContent = cnt + " of " + items.length + " steps done · about " + left + " of " + total + " minutes left";
+  }
+  root.addEventListener("change", function(e){ if (!e.target.id) return; done[e.target.id] = e.target.checked; try { localStorage.setItem(KEY, JSON.stringify(done)); } catch (er) {} render(); });
+  render();
+})();
+</script>
