@@ -1,0 +1,84 @@
+<style>
+.pl-controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin: 4px 0 14px; font-family: var(--font-display); font-size: 13px; }
+.pl-seg { display: inline-flex; }
+.pl-seg button { border-radius: 0; }
+.pl-seg button:first-child { border-radius: 6px 0 0 6px; }
+.pl-seg button:last-child { border-radius: 0 6px 6px 0; border-left: 0; }
+.pl-track { display: grid; grid-template-columns: repeat(7, minmax(92px, 1fr)); gap: 0; overflow-x: auto; padding-bottom: 6px; }
+.pl-st { position: relative; display: flex; flex-direction: column; align-items: stretch; padding-right: 14px; }
+.pl-st:not(:last-child)::after { content: ""; position: absolute; right: 2px; top: 30px; border: 6px solid transparent; border-left: 8px solid #000; }
+.pl-box { text-align: left; border-radius: 0; padding: 8px 8px; min-height: 64px; font-size: 12px; line-height: 1.25; background: #fff; box-shadow: 2px 2px 0 #000; display: flex; flex-direction: column; gap: 4px; }
+.pl-box .n { font-size: 11px; color: var(--muted); }
+.pl-box[aria-pressed="true"] { background: var(--hilite); color: var(--ink); box-shadow: 2px 2px 0 #000, inset 0 0 0 2px var(--accent); }
+.pl-box.skip { opacity: .45; }
+.pl-lane { margin-top: 6px; font-size: 11px; font-family: var(--font-display); padding: 2px 4px; color: #fff; text-align: center; }
+.lane-any { background: var(--ok); } .lane-mac { background: var(--accent); } .lane-apple { background: var(--warn); } .lane-phone { background: #444; }
+.pl-legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; margin: 6px 0 12px; }
+.pl-legend span { display: inline-flex; gap: 5px; align-items: center; }
+.pl-legend i { width: 12px; height: 12px; display: inline-block; border: 1px solid #000; }
+.pl-detail { border: 1px solid #000; background: #fffef2; padding: 10px 14px; box-shadow: 2px 2px 0 #000; }
+.pl-detail h3 { margin: 0 0 4px; font-size: 15px; }
+.pl-detail p { margin: 0 0 8px; max-width: 68ch; }
+.pl-detail pre { margin: 6px 0 0; white-space: pre-wrap; word-break: break-word; }
+</style>
+<div class="pl-controls">
+  <span>Target:</span>
+  <span class="pl-seg" role="group" aria-label="Build target">
+    <button id="pl-dev" type="button" aria-pressed="true">My iPhone</button>
+    <button id="pl-sim" type="button" aria-pressed="false">Simulator</button>
+  </span>
+  <label for="pl-min">Minimum iOS:</label>
+  <select id="pl-min"><option>15.0</option><option selected>16.0</option><option>17.0</option><option>18.0</option></select>
+</div>
+<div class="pl-legend" aria-label="Where each station runs">
+  <span><i class="lane-any"></i>any OS</span><span><i class="lane-mac"></i>needs a Mac + Xcode</span><span><i class="lane-apple"></i>talks to Apple's servers</span><span><i class="lane-phone"></i>on the device</span>
+</div>
+<div class="pl-track" id="pl-track"></div>
+<div class="pl-detail" id="pl-detail" aria-live="polite"></div>
+<script>
+(function(){
+  var state = { sim: false, min: "16.0", sel: 1 };
+  var S = [
+    { t: "core.nim", s: "You write Nim", lane: "any", laneT: "any OS",
+      d: function(){ return "<p>Plain Nim. Anything that should be callable from Swift gets <code>{.exportc, cdecl.}</code>, and should take and return C-friendly types (<code>cint</code>, <code>cdouble</code>, <code>cstring</code>, pointers). You can develop and unit-test this on any computer with <code>nim c -r</code>.</p>"; } },
+    { t: "nim → C", s: "Nim compiler", lane: "any", laneT: "any OS",
+      d: function(){ return "<p>Nim translates your code to C. The target flags decide which standard-library branches are compiled in. This step alone runs fine on Linux, as the proof window below shows.</p><pre>nim c --os:ios --cpu:arm64 --app:staticlib --noMain:on \\\n      -d:release --mm:orc ...</pre>"; } },
+    { t: "C → libnimcore.a", s: "clang + " + "SDK", lane: "mac", laneT: "Mac",
+      d: function(){ var sdk = state.sim ? "iphonesimulator" : "iphoneos"; var min = state.sim ? "-mios-simulator-version-min=" : "-mios-version-min=";
+        return "<p>Apple's clang compiles the C against the " + (state.sim ? "Simulator" : "iPhone") + " SDK headers and archives it into a static library. Pass the same flags to compiler and linker (wiish's lesson #2). A library built for one SDK will not link into the other, even though both are arm64 on Apple Silicon.</p><pre>FLAGS=\"-isysroot $(xcrun --sdk " + sdk + " --show-sdk-path) -arch arm64 " + min + state.min + "\"\nnim c --os:ios --cpu:arm64 --app:staticlib --noMain:on \\\n      --passC:\"$FLAGS\" --passL:\"$FLAGS\" \\\n      --out:build/" + sdk + "/libnimcore.a nim/core.nim</pre>"; } },
+    { t: "NimApp.app", s: "Xcode links Swift + Nim", lane: "mac", laneT: "Mac",
+      d: function(){ return "<p>Xcode compiles your SwiftUI files, imports <code>nimcore.h</code> through the bridging header, and links <code>-lnimcore</code> into one executable inside an <code>.app</code> bundle with an <code>Info.plist</code> carrying your bundle ID (e.g. <code>com.pietro.nimhello</code>).</p>"; } },
+    { t: "Sign", s: state.sim ? "local ad-hoc" : "certificate + profile", lane: "apple", laneT: "Apple ID",
+      d: function(){ return state.sim
+        ? "<p><b>Simulator:</b> no Apple ID, no certificate, no profile. Xcode signs ad-hoc locally and the Simulator does not care. This is why the Simulator is the place to get Nim linking right first.</p>"
+        : "<p><b>Device:</b> Xcode asks Apple for a development certificate tied to your Apple ID, registers your iPhone's UDID and the bundle ID, and downloads a provisioning profile that says <i>this cert may run this app on this phone</i>. Free team: the profile expires in 7 days. Paid team: 1 year.</p><pre>Signing &amp; Capabilities → Team: Pietro (Personal Team)\n[x] Automatically manage signing</pre>"; } },
+    { t: "Install", s: state.sim ? "simctl" : "cable or Wi-Fi", lane: state.sim ? "mac" : "phone", laneT: state.sim ? "Mac" : "device",
+      d: function(){ return state.sim
+        ? "<p>Xcode boots the Simulator and installs the app (under the hood: <code>xcrun simctl install booted NimApp.app</code>).</p>"
+        : "<p>First time over USB: tap <i>Trust This Computer</i> on the phone, then wait while Xcode prepares the device for development. Afterwards you can tick <i>Connect via network</i> in Devices and Simulators and install over Wi-Fi.</p>"; } },
+    { t: "Launch", s: state.sim ? "always opens" : "iOS checks signature", lane: "phone", laneT: "device",
+      d: function(){ return state.sim
+        ? "<p>It just opens. No expiry, no trust prompt.</p>"
+        : "<p>Every launch, iOS verifies the signature and the profile's dates. Needs <b>Developer Mode</b> on (iOS 16+) and, for a free team, your certificate trusted once under <i>VPN &amp; Device Management</i>. After 7 days the check fails and the icon stays but the app will not open.</p>"; } }
+  ];
+  var track = document.getElementById("pl-track"), detail = document.getElementById("pl-detail");
+  function render(){
+    // labels that depend on target
+    S[4].s = state.sim ? "local ad-hoc" : "certificate + profile";
+    S[5].s = state.sim ? "simctl" : "cable or Wi-Fi"; S[5].lane = state.sim ? "mac" : "phone"; S[5].laneT = state.sim ? "Mac" : "device";
+    S[6].s = state.sim ? "always opens" : "iOS checks signature";
+    S[4].lane = state.sim ? "mac" : "apple"; S[4].laneT = state.sim ? "Mac" : "Apple ID";
+    track.innerHTML = S.map(function(x, i){
+      return '<div class="pl-st"><button type="button" class="pl-box" id="pl-b' + i + '" aria-pressed="' + (i === state.sel) + '" data-i="' + i + '"><span class="n">' + (i + 1) + '</span><b>' + x.t + '</b><span>' + x.s + '</span></button><div class="pl-lane lane-' + x.lane + '">' + x.laneT + '</div></div>';
+    }).join("");
+    detail.innerHTML = "<h3>" + (state.sel + 1) + ". " + S[state.sel].t + "</h3>" + S[state.sel].d();
+    document.getElementById("pl-dev").setAttribute("aria-pressed", !state.sim);
+    document.getElementById("pl-sim").setAttribute("aria-pressed", state.sim);
+  }
+  track.addEventListener("click", function(e){ var b = e.target.closest(".pl-box"); if (!b) return; state.sel = +b.dataset.i; render(); document.getElementById("pl-b" + state.sel).focus(); });
+  document.getElementById("pl-dev").onclick = function(){ state.sim = false; render(); };
+  document.getElementById("pl-sim").onclick = function(){ state.sim = true; render(); };
+  document.getElementById("pl-min").onchange = function(e){ state.min = e.target.value; state.sel = 2; render(); };
+  render();
+})();
+</script>

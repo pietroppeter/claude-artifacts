@@ -1,0 +1,955 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <title>Nim on My iPhone</title>
+  <meta content="text/html; charset=utf-8" http-equiv="content-type">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <meta content="nimib 0.4.3" name="generator">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&family=Pixelify+Sans:wght@400;600&display=swap" rel="stylesheet">
+<style>:root {
+  /* Platinum desktop: grey dithered desk, white-bodied windows, lavender highlight, ink-blue accent */
+  --desk: #8f93a8;
+  --chrome: #dddddd;
+  --paper: #ffffff;
+  --ink: #111111;
+  --muted: #555555;
+  --accent: #2a2aa8;
+  --hilite: #ccccff;
+  --ok: #2d7a35;
+  --bad: #b23a2e;
+  --warn: #9a6a00;
+  --font-display: "Chicago", "ChicagoFLF", "Charcoal", "Pixelify Sans", system-ui, sans-serif;
+  --font-body: "Geneva", "Verdana", "Segoe UI", system-ui, sans-serif;
+  --font-mono: "Monaco", "IBM Plex Mono", "Menlo", ui-monospace, monospace;
+  color-scheme: light;
+  /* layout: one centred column of stacked classic windows on a dithered desktop */
+}
+* { box-sizing: border-box; }
+html { background: var(--desk); -webkit-text-size-adjust: 100%; text-size-adjust: 100%; }
+body {
+  margin: 0; padding: 0 16px 48px;
+  background-color: var(--desk);
+  background-image:
+    linear-gradient(45deg, rgba(0,0,0,.06) 25%, transparent 25%, transparent 75%, rgba(0,0,0,.06) 75%),
+    linear-gradient(45deg, rgba(0,0,0,.06) 25%, transparent 25%, transparent 75%, rgba(0,0,0,.06) 75%);
+  background-size: 4px 4px; background-position: 0 0, 2px 2px;
+  color: var(--ink); font-family: var(--font-body); font-size: 15px; line-height: 1.55;
+}
+main { max-width: 860px; margin: 0 auto; display: flex; flex-direction: column; gap: 28px; }
+a { color: var(--accent); }
+a:focus-visible, button:focus-visible, input:focus-visible, select:focus-visible, label:focus-within { outline: 2px dotted var(--ink); outline-offset: 2px; }
+h1, h2, h3 { font-family: var(--font-display); font-weight: 600; text-wrap: balance; }
+code, pre, body pre > code { font-family: var(--font-mono); font-size: 13px; }
+p code, li code, td code { background: #eeeeee; border: 1px solid #cfcfcf; padding: 0 3px; }
+
+/* menu bar */
+.menubar {
+  position: sticky; top: 0; z-index: 5; margin: 0 -16px 28px;
+  display: flex; align-items: center; gap: 18px; padding: 3px 16px;
+  background: var(--chrome); border-bottom: 1px solid #000;
+  font-family: var(--font-display); font-size: 14px;
+  box-shadow: 0 1px 0 #fff inset;
+}
+.mb-logo { font-size: 17px; }
+.mb-spacer { flex: 1; }
+.mb-title { color: var(--muted); }
+@media (max-width: 520px) { .mb-item:not(.mb-title):not(:first-of-type) { display: none; } }
+
+/* hero */
+.hero { display: flex; gap: 24px; align-items: center; color: #fff; text-shadow: 1px 1px 0 #333; }
+.hero h1 { font-size: clamp(34px, 6vw, 52px); margin: 0 0 6px; line-height: 1.05; }
+.eyebrow { margin: 0; font-family: var(--font-display); font-size: 13px; letter-spacing: .04em; }
+.lede { margin: 0; font-size: 17px; max-width: 40em; }
+.phone { width: 74px; height: 140px; border: 3px solid #111; border-radius: 16px; background: #222; padding: 10px 6px; box-shadow: 4px 4px 0 rgba(0,0,0,.35); }
+.screen { height: 100%; background: var(--hilite); border-radius: 4px; display: grid; place-items: center; }
+.screen span { font-family: var(--font-display); font-size: 34px; color: var(--accent); text-shadow: none; background: #ffe066; width: 44px; height: 44px; display: grid; place-items: center; border-radius: 10px; border: 2px solid #111; }
+
+/* windows */
+.win { background: var(--chrome); border: 1px solid #000; box-shadow: 2px 2px 0 rgba(0,0,0,.55), inset 1px 1px 0 #fff, inset -1px -1px 0 #999; padding: 0 4px 4px; }
+.titlebar {
+  display: flex; align-items: center; gap: 8px; height: 26px; padding: 0 6px;
+  background: repeating-linear-gradient(to bottom, #f4f4f4 0 1px, #a6a6a6 1px 2px) center / 100% 12px no-repeat;
+}
+.wtitle { margin: 0 auto; padding: 0 10px; background: var(--chrome); font-size: 15px; line-height: 26px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: calc(100% - 60px); }
+.closebox, .zoombox { width: 13px; height: 13px; flex: none; background: var(--chrome); border: 1px solid #000; box-shadow: inset 1px 1px 0 #fff, inset -1px -1px 0 #888; }
+.win-body { background: var(--paper); border: 1px solid #000; box-shadow: inset 1px 1px 0 #888; padding: 18px 24px 22px; }
+.win-body > p, .win-body > ol, .win-body > ul { max-width: 68ch; }
+@media (max-width: 520px) { .win-body { padding: 14px 14px 18px; } }
+
+/* chips */
+.verdict-row { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 10px; margin-top: 8px; }
+.chip { border: 1px solid #000; padding: 8px 10px; display: flex; flex-direction: column; gap: 2px; box-shadow: 2px 2px 0 #000; background: #fff; }
+.chip b { font-family: var(--font-display); }
+.chip span { font-size: 13px; color: var(--muted); }
+.chip.ok { border-left: 8px solid var(--ok); }
+.chip.warn { border-left: 8px solid var(--warn); }
+.chip.need { border-left: 8px solid var(--accent); }
+
+/* tables */
+table { border-collapse: collapse; width: 100%; font-size: 14px; display: block; overflow-x: auto; }
+th, td { border: 1px solid #999; padding: 5px 8px; text-align: left; vertical-align: top; }
+thead th { background: var(--chrome); font-family: var(--font-display); font-weight: 600; }
+tbody tr:nth-child(odd) td { background: #f6f6f6; }
+
+/* code */
+pre { background: #fafafa; border: 1px solid #000; box-shadow: inset 1px 1px 0 #ccc; padding: 10px 12px; overflow-x: auto; margin: 10px 0; }
+pre code { background: none; border: 0; padding: 0; }
+pre.nb-output, .nb-output { background: #111; color: #9fef9f; border-color: #000; }
+pre.nb-output code { color: inherit; }
+.hljs-keyword, .hljs-built_in { color: #1d1d9e; font-weight: 600; }
+.hljs-string { color: #8a1c1c; }
+.hljs-comment { color: #6b6b6b; font-style: italic; }
+.hljs-number, .hljs-literal { color: #7a3fa0; }
+.hljs-title, .hljs-title.function_ { color: #0b6b6b; }
+.hljs-meta, .hljs-pragma { color: #9a6a00; }
+.hljs-type { color: #0b6b6b; }
+
+/* shapes */
+.shapes { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 12px; }
+.shape { border: 1px solid #000; padding: 10px 12px; background: #fff; box-shadow: 2px 2px 0 #000; display: flex; flex-direction: column; }
+.shape h3 { margin: 0; font-size: 15px; }
+.shape .tag { margin: 2px 0 6px; font-size: 12px; color: var(--muted); font-family: var(--font-display); }
+.shape p { margin: 0 0 8px; font-size: 14px; }
+.shape .meta { margin-top: auto; font-size: 12px; color: var(--muted); border-top: 1px dotted #999; padding-top: 6px; }
+.shape.pick { background: var(--hilite); }
+.shape.pick .tag { color: var(--accent); }
+
+.lessons { padding-left: 22px; display: flex; flex-direction: column; gap: 8px; }
+.sources { font-size: 12px; color: #fff; text-shadow: 1px 1px 0 #333; max-width: 860px; margin: 0 auto; }
+.sources code { background: rgba(255,255,255,.2); border: 0; }
+
+/* classic controls */
+button, .btn {
+  font-family: var(--font-display); font-size: 13px; color: var(--ink);
+  background: linear-gradient(#fafafa, #d6d6d6); border: 1px solid #000; border-radius: 6px;
+  padding: 4px 12px; box-shadow: inset 1px 1px 0 #fff, 1px 1px 0 #777; cursor: pointer;
+}
+button:active, button[aria-pressed="true"] { background: #666; color: #fff; box-shadow: inset 1px 1px 2px #000; }
+select { font-family: var(--font-display); font-size: 13px; border: 1px solid #000; background: #fff; padding: 2px 4px; }
+
+/* nimib footer */
+footer { max-width: 860px; margin: 28px auto 0; color: #fff; text-shadow: 1px 1px 0 #333; }
+footer .nb-box { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+footer a { color: #fff; }
+footer hr { display: none; }
+#source { background: var(--paper); }
+
+@media (prefers-reduced-motion: reduce) { * { transition: none !important; animation: none !important; } }
+</style>
+  
+  <style>
+.nb-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nb-small {
+  font-size: 0.8rem;
+}
+button.nb-small {
+  float: right;
+  padding: 2px;
+  padding-right: 5px;
+  padding-left: 5px;
+}
+section#source {
+  display:none
+}
+pre > code {
+  font-size: 1.2em;
+}
+.nb-output {
+  line-height: 1.15;
+}
+figure {
+  margin: 2rem 0;
+}
+figcaption {
+  text-align: center;
+}
+  
+</style>
+  
+    
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+<script>document.querySelectorAll('pre code:not(.nohighlight)').forEach(function(el){ if(!/language-|hljs/.test(el.className)) el.classList.add('nohighlight'); }); hljs.highlightAll();</script>
+</head>
+<body>
+<header class="menubar" role="banner">
+  <span class="mb-logo" aria-hidden="true">&#x2318;</span>
+  <span class="mb-item"><b>File</b></span><span class="mb-item">Edit</span><span class="mb-item">View</span><span class="mb-item">Special</span>
+  <span class="mb-spacer"></span>
+  <span class="mb-item mb-title">Nim on My iPhone</span>
+</header>
+<main>
+<section class="hero">
+<div class="hero-icon" aria-hidden="true"><div class="phone"><div class="screen"><span>N</span></div></div></div>
+<div>
+<p class="eyebrow">An explorable explanation · written in nimib</p>
+<h1>Nim on My iPhone</h1>
+<p class="lede">What it really takes to build a Nim app and keep it running on your own phone, with no App Store and no distribution.</p>
+</div>
+</section>
+<section class="win" aria-labelledby="w1"><div class="titlebar"><span class="closebox" aria-hidden="true"></span><h2 id="w1" class="wtitle">Read Me First</h2><span class="zoombox" aria-hidden="true"></span></div><div class="win-body">
+<p><strong>The short answer.</strong> You do <strong>not</strong> need the paid Apple Developer Program to put an app on your own iPhone.
+A free Apple ID gives you a <em>Personal Team</em> in Xcode, and Xcode signs the app for your device.
+The catch is that the signature lasts <strong>7 days</strong>: after that the app refuses to launch until you plug in and press Run again.</p>
+<p>What you cannot avoid is <strong>a Mac with Xcode</strong>. Nim itself is happy anywhere (it writes C), but the iOS SDK,
+the Apple linker and code signing only exist inside Xcode.</p>
+<p><strong>The fastest route</strong> I would take, in one sentence: make a plain SwiftUI app from Xcode's template, compile your Nim code
+into a static library with one build-phase script, call it from Swift, and run it on your phone with your free Apple ID.
+Budget an afternoon, most of it waiting for Xcode to download.</p>
+<div class="verdict-row">
+<div class="chip ok"><b>Free Apple ID</b><span>Own device · 7-day signature · enough to start</span></div>
+<div class="chip warn"><b>$99 / year program</b><span>1-year signature · TestFlight · only if re-signing annoys you</span></div>
+<div class="chip need"><b>Mac + Xcode</b><span>Not optional for a native app</span></div>
+</div>
+</div></section>
+<section class="win" aria-labelledby="w2"><div class="titlebar"><span class="closebox" aria-hidden="true"></span><h2 id="w2" class="wtitle">The Pipeline: from .nim to a tap on the home screen</h2><span class="zoombox" aria-hidden="true"></span></div><div class="win-body">
+<p>Every native iOS app, whatever language it starts in, goes through the same stations. Nim only owns the first two.
+<strong>Click a station</strong> to see what happens there, and flip the target between your iPhone and the Simulator to watch the flags change.</p>
+<style>
+.pl-controls { display: flex; flex-wrap: wrap; gap: 14px; align-items: center; margin: 4px 0 14px; font-family: var(--font-display); font-size: 13px; }
+.pl-seg { display: inline-flex; }
+.pl-seg button { border-radius: 0; }
+.pl-seg button:first-child { border-radius: 6px 0 0 6px; }
+.pl-seg button:last-child { border-radius: 0 6px 6px 0; border-left: 0; }
+.pl-track { display: grid; grid-template-columns: repeat(7, minmax(92px, 1fr)); gap: 0; overflow-x: auto; padding-bottom: 6px; }
+.pl-st { position: relative; display: flex; flex-direction: column; align-items: stretch; padding-right: 14px; }
+.pl-st:not(:last-child)::after { content: ""; position: absolute; right: 2px; top: 30px; border: 6px solid transparent; border-left: 8px solid #000; }
+.pl-box { text-align: left; border-radius: 0; padding: 8px 8px; min-height: 64px; font-size: 12px; line-height: 1.25; background: #fff; box-shadow: 2px 2px 0 #000; display: flex; flex-direction: column; gap: 4px; }
+.pl-box .n { font-size: 11px; color: var(--muted); }
+.pl-box[aria-pressed="true"] { background: var(--hilite); color: var(--ink); box-shadow: 2px 2px 0 #000, inset 0 0 0 2px var(--accent); }
+.pl-box.skip { opacity: .45; }
+.pl-lane { margin-top: 6px; font-size: 11px; font-family: var(--font-display); padding: 2px 4px; color: #fff; text-align: center; }
+.lane-any { background: var(--ok); } .lane-mac { background: var(--accent); } .lane-apple { background: var(--warn); } .lane-phone { background: #444; }
+.pl-legend { display: flex; flex-wrap: wrap; gap: 10px; font-size: 12px; margin: 6px 0 12px; }
+.pl-legend span { display: inline-flex; gap: 5px; align-items: center; }
+.pl-legend i { width: 12px; height: 12px; display: inline-block; border: 1px solid #000; }
+.pl-detail { border: 1px solid #000; background: #fffef2; padding: 10px 14px; box-shadow: 2px 2px 0 #000; }
+.pl-detail h3 { margin: 0 0 4px; font-size: 15px; }
+.pl-detail p { margin: 0 0 8px; max-width: 68ch; }
+.pl-detail pre { margin: 6px 0 0; white-space: pre-wrap; word-break: break-word; }
+</style>
+<div class="pl-controls">
+  <span>Target:</span>
+  <span class="pl-seg" role="group" aria-label="Build target">
+    <button id="pl-dev" type="button" aria-pressed="true">My iPhone</button>
+    <button id="pl-sim" type="button" aria-pressed="false">Simulator</button>
+  </span>
+  <label for="pl-min">Minimum iOS:</label>
+  <select id="pl-min"><option>15.0</option><option selected>16.0</option><option>17.0</option><option>18.0</option></select>
+</div>
+<div class="pl-legend" aria-label="Where each station runs">
+  <span><i class="lane-any"></i>any OS</span><span><i class="lane-mac"></i>needs a Mac + Xcode</span><span><i class="lane-apple"></i>talks to Apple's servers</span><span><i class="lane-phone"></i>on the device</span>
+</div>
+<div class="pl-track" id="pl-track"></div>
+<div class="pl-detail" id="pl-detail" aria-live="polite"></div>
+<script>
+(function(){
+  var state = { sim: false, min: "16.0", sel: 1 };
+  var S = [
+    { t: "core.nim", s: "You write Nim", lane: "any", laneT: "any OS",
+      d: function(){ return "<p>Plain Nim. Anything that should be callable from Swift gets <code>{.exportc, cdecl.}</code>, and should take and return C-friendly types (<code>cint</code>, <code>cdouble</code>, <code>cstring</code>, pointers). You can develop and unit-test this on any computer with <code>nim c -r</code>.</p>"; } },
+    { t: "nim → C", s: "Nim compiler", lane: "any", laneT: "any OS",
+      d: function(){ return "<p>Nim translates your code to C. The target flags decide which standard-library branches are compiled in. This step alone runs fine on Linux, as the proof window below shows.</p><pre>nim c --os:ios --cpu:arm64 --app:staticlib --noMain:on \\\n      -d:release --mm:orc ...</pre>"; } },
+    { t: "C → libnimcore.a", s: "clang + " + "SDK", lane: "mac", laneT: "Mac",
+      d: function(){ var sdk = state.sim ? "iphonesimulator" : "iphoneos"; var min = state.sim ? "-mios-simulator-version-min=" : "-mios-version-min=";
+        return "<p>Apple's clang compiles the C against the " + (state.sim ? "Simulator" : "iPhone") + " SDK headers and archives it into a static library. Pass the same flags to compiler and linker (wiish's lesson #2). A library built for one SDK will not link into the other, even though both are arm64 on Apple Silicon.</p><pre>FLAGS=\"-isysroot $(xcrun --sdk " + sdk + " --show-sdk-path) -arch arm64 " + min + state.min + "\"\nnim c --os:ios --cpu:arm64 --app:staticlib --noMain:on \\\n      --passC:\"$FLAGS\" --passL:\"$FLAGS\" \\\n      --out:build/" + sdk + "/libnimcore.a nim/core.nim</pre>"; } },
+    { t: "NimApp.app", s: "Xcode links Swift + Nim", lane: "mac", laneT: "Mac",
+      d: function(){ return "<p>Xcode compiles your SwiftUI files, imports <code>nimcore.h</code> through the bridging header, and links <code>-lnimcore</code> into one executable inside an <code>.app</code> bundle with an <code>Info.plist</code> carrying your bundle ID (e.g. <code>com.pietro.nimhello</code>).</p>"; } },
+    { t: "Sign", s: state.sim ? "local ad-hoc" : "certificate + profile", lane: "apple", laneT: "Apple ID",
+      d: function(){ return state.sim
+        ? "<p><b>Simulator:</b> no Apple ID, no certificate, no profile. Xcode signs ad-hoc locally and the Simulator does not care. This is why the Simulator is the place to get Nim linking right first.</p>"
+        : "<p><b>Device:</b> Xcode asks Apple for a development certificate tied to your Apple ID, registers your iPhone's UDID and the bundle ID, and downloads a provisioning profile that says <i>this cert may run this app on this phone</i>. Free team: the profile expires in 7 days. Paid team: 1 year.</p><pre>Signing &amp; Capabilities → Team: Pietro (Personal Team)\n[x] Automatically manage signing</pre>"; } },
+    { t: "Install", s: state.sim ? "simctl" : "cable or Wi-Fi", lane: state.sim ? "mac" : "phone", laneT: state.sim ? "Mac" : "device",
+      d: function(){ return state.sim
+        ? "<p>Xcode boots the Simulator and installs the app (under the hood: <code>xcrun simctl install booted NimApp.app</code>).</p>"
+        : "<p>First time over USB: tap <i>Trust This Computer</i> on the phone, then wait while Xcode prepares the device for development. Afterwards you can tick <i>Connect via network</i> in Devices and Simulators and install over Wi-Fi.</p>"; } },
+    { t: "Launch", s: state.sim ? "always opens" : "iOS checks signature", lane: "phone", laneT: "device",
+      d: function(){ return state.sim
+        ? "<p>It just opens. No expiry, no trust prompt.</p>"
+        : "<p>Every launch, iOS verifies the signature and the profile's dates. Needs <b>Developer Mode</b> on (iOS 16+) and, for a free team, your certificate trusted once under <i>VPN &amp; Device Management</i>. After 7 days the check fails and the icon stays but the app will not open.</p>"; } }
+  ];
+  var track = document.getElementById("pl-track"), detail = document.getElementById("pl-detail");
+  function render(){
+    // labels that depend on target
+    S[4].s = state.sim ? "local ad-hoc" : "certificate + profile";
+    S[5].s = state.sim ? "simctl" : "cable or Wi-Fi"; S[5].lane = state.sim ? "mac" : "phone"; S[5].laneT = state.sim ? "Mac" : "device";
+    S[6].s = state.sim ? "always opens" : "iOS checks signature";
+    S[4].lane = state.sim ? "mac" : "apple"; S[4].laneT = state.sim ? "Mac" : "Apple ID";
+    track.innerHTML = S.map(function(x, i){
+      return '<div class="pl-st"><button type="button" class="pl-box" id="pl-b' + i + '" aria-pressed="' + (i === state.sel) + '" data-i="' + i + '"><span class="n">' + (i + 1) + '</span><b>' + x.t + '</b><span>' + x.s + '</span></button><div class="pl-lane lane-' + x.lane + '">' + x.laneT + '</div></div>';
+    }).join("");
+    detail.innerHTML = "<h3>" + (state.sel + 1) + ". " + S[state.sel].t + "</h3>" + S[state.sel].d();
+    document.getElementById("pl-dev").setAttribute("aria-pressed", !state.sim);
+    document.getElementById("pl-sim").setAttribute("aria-pressed", state.sim);
+  }
+  track.addEventListener("click", function(e){ var b = e.target.closest(".pl-box"); if (!b) return; state.sel = +b.dataset.i; render(); document.getElementById("pl-b" + state.sel).focus(); });
+  document.getElementById("pl-dev").onclick = function(){ state.sim = false; render(); };
+  document.getElementById("pl-sim").onclick = function(){ state.sim = true; render(); };
+  document.getElementById("pl-min").onchange = function(e){ state.min = e.target.value; state.sel = 2; render(); };
+  render();
+})();
+</script>
+</div></section>
+<section class="win" aria-labelledby="w3"><div class="titlebar"><span class="closebox" aria-hidden="true"></span><h2 id="w3" class="wtitle">Proof: Nim already speaks iOS (even on Linux)</h2><span class="zoombox" aria-hidden="true"></span></div><div class="win-body">
+<p>This page was rendered on a Linux box with no Apple software at all. The block below really ran while the page was built:
+it asks the Nim compiler to <em>generate</em> the C for an iOS arm64 static library, then lists what came out.
+The Mac is only needed for the next step, turning that C into ARM machine code against Apple's SDK.</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">let</span> cmd = <span class="hljs-string">&quot;nim c --os:ios --cpu:arm64 --app:staticlib --noMain:on &quot;</span> &amp;
+          <span class="hljs-string">&quot;-d:release --compileOnly --nimcache:ioscache --hints:off core.nim&quot;</span>
+<span class="hljs-keyword">let</span> (output, exitCode) = execCmdEx(cmd)
+<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;exit code: &quot;</span>, exitCode, output.strip
+<span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> walkFiles(<span class="hljs-string">&quot;ioscache/*.c&quot;</span>):
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;  generated &quot;</span>, f.extractFilename.replace(<span class="hljs-string">&quot;@m&quot;</span>, <span class="hljs-string">&quot;&quot;</span>).split(<span class="hljs-string">&quot;@s&quot;</span>)[^<span class="hljs-number">1</span>]
+<span class="hljs-keyword">let</span> main = readFile(<span class="hljs-string">&quot;ioscache/@mcore.nim.c&quot;</span>)
+<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;exports NimMain: &quot;</span>, <span class="hljs-string">&quot;N_CDECL(void, NimMain)(void)&quot;</span> <span class="hljs-keyword">in</span> main
+<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;exports fib:     &quot;</span>, <span class="hljs-string">&quot;fib&quot;</span> <span class="hljs-keyword">in</span> main</code></pre>
+<pre class="nb-output">exit code: 0
+  generated digitsutils.nim.c
+  generated system.nim.c
+  generated dollars.nim.c
+  generated core.nim.c
+exports NimMain: true
+exports fib:     true
+</pre>
+<p><code>--os:ios</code> flips on <code>defined(ios)</code> everywhere in the standard library, <code>--app:staticlib</code> produces a <code>.a</code> instead of
+a program, and <code>--noMain</code> stops Nim from writing a C <code>main()</code>, because on iOS <strong>UIKit owns <code>main</code></strong>.
+Your Nim code is a library that the app calls into; you call <code>NimMain()</code> once at startup to initialise Nim's globals.</p>
+</div></section>
+<section class="win" aria-labelledby="w4"><div class="titlebar"><span class="closebox" aria-hidden="true"></span><h2 id="w4" class="wtitle">The Apple Part: signing, explained with a calendar</h2><span class="zoombox" aria-hidden="true"></span></div><div class="win-body">
+<p>iOS runs only code signed by a certificate Apple issued, for a device Apple knows about, in an app ID Apple registered.
+Xcode bundles all three into a <strong>provisioning profile</strong> and does it for you when <em>Automatically manage signing</em> is on.
+The only difference between free and paid that you will feel day to day is <strong>how long that profile lives</strong>.</p>
+<p><strong>Click days</strong> on the calendar to mark when you plugged in and pressed <em>Run</em> in Xcode. Green days the app opens; red days it shows
+<em>&quot;…is no longer available&quot;</em> and refuses to launch. Your data inside the app survives a re-sign.</p>
+<style>
+.cal-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 4px 0 12px; font-family: var(--font-display); font-size: 13px; }
+.cal-seg { display: inline-flex; }
+.cal-seg button { border-radius: 0; }
+.cal-seg button:first-child { border-radius: 6px 0 0 6px; }
+.cal-seg button:last-child { border-radius: 0 6px 6px 0; border-left: 0; }
+.cal-grid { display: grid; grid-template-columns: 52px repeat(7, minmax(30px, 1fr)); gap: 3px; max-width: 520px; }
+.cal-h { font-family: var(--font-display); font-size: 11px; text-align: center; color: var(--muted); }
+.cal-wk { font-family: var(--font-display); font-size: 11px; color: var(--muted); align-self: center; }
+.cal-d { position: relative; height: 34px; padding: 0; border-radius: 0; font-family: var(--font-mono); font-size: 11px; color: #fff; border: 1px solid #000; box-shadow: none; font-variant-numeric: tabular-nums; }
+.cal-d.ok { background: var(--ok); }
+.cal-d.bad { background: var(--bad); }
+.cal-d.sign::after { content: "RUN"; position: absolute; left: 0; right: 0; bottom: 1px; font-size: 8px; font-family: var(--font-display); color: #ffe066; }
+.cal-d.sign { box-shadow: inset 0 0 0 2px #ffe066; }
+.cal-sum { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 10px; }
+.cal-meter { flex: 1 1 260px; border: 1px solid #000; height: 18px; background: var(--bad); position: relative; }
+.cal-meter > div { height: 100%; background: var(--ok); }
+.cal-stat { font-family: var(--font-display); font-size: 13px; }
+</style>
+<div class="cal-controls">
+  <span class="cal-seg" role="group" aria-label="Signing team">
+    <button id="cal-free" type="button" aria-pressed="true">Free Apple ID</button>
+    <button id="cal-paid" type="button" aria-pressed="false">$99 program</button>
+  </span>
+  <button id="cal-weekly" type="button">Re-sign every Sunday</button>
+  <button id="cal-once" type="button">Install once, forget</button>
+</div>
+<div class="cal-grid" id="cal-grid" role="grid" aria-label="Eight weeks after first install"></div>
+<div class="cal-sum">
+  <div class="cal-meter" aria-hidden="true"><div id="cal-bar"></div></div>
+  <div class="cal-stat" id="cal-stat" aria-live="polite"></div>
+</div>
+<script>
+(function(){
+  var DAYS = 56, start = new Date(Date.UTC(2026, 10, 7)); // Sat 7 Nov 2026
+  var st = { paid: false, sign: { 0: true, 8: true, 15: true, 29: true } };
+  var grid = document.getElementById("cal-grid");
+  var names = ["Sat","Sun","Mon","Tue","Wed","Thu","Fri"];
+  function valid(d){ var life = st.paid ? 365 : 7; for (var k = d; k >= 0; k--) if (st.sign[k]) return d - k < life; return false; }
+  function render(){
+    var h = '<div></div>' + names.map(function(n){ return '<div class="cal-h">' + n + '</div>'; }).join("");
+    var ok = 0, runs = 0;
+    for (var d = 0; d < DAYS; d++){
+      if (d % 7 === 0) h += '<div class="cal-wk">wk ' + (d / 7 + 1) + '</div>';
+      var v = valid(d); if (v) ok++; if (st.sign[d]) runs++;
+      var dt = new Date(start.getTime() + d * 864e5);
+      var lab = dt.getUTCDate() + "/" + (dt.getUTCMonth() + 1);
+      h += '<button type="button" class="cal-d ' + (v ? "ok" : "bad") + (st.sign[d] ? " sign" : "") + '" data-d="' + d + '" aria-pressed="' + !!st.sign[d] + '" aria-label="' + lab + (v ? ", app opens" : ", app will not open") + (st.sign[d] ? ", you pressed Run" : "") + '">' + lab + '</button>';
+    }
+    grid.innerHTML = h;
+    document.getElementById("cal-bar").style.width = (100 * ok / DAYS) + "%";
+    document.getElementById("cal-stat").textContent = "Opens on " + ok + " of " + DAYS + " days · " + runs + " trip" + (runs === 1 ? "" : "s") + " to Xcode";
+    document.getElementById("cal-free").setAttribute("aria-pressed", !st.paid);
+    document.getElementById("cal-paid").setAttribute("aria-pressed", st.paid);
+  }
+  grid.addEventListener("click", function(e){ var b = e.target.closest(".cal-d"); if (!b) return; var d = +b.dataset.d; if (st.sign[d]) delete st.sign[d]; else st.sign[d] = true; render(); });
+  document.getElementById("cal-free").onclick = function(){ st.paid = false; render(); };
+  document.getElementById("cal-paid").onclick = function(){ st.paid = true; render(); };
+  document.getElementById("cal-weekly").onclick = function(){ st.sign = {}; st.sign[0] = true; for (var d = 1; d < DAYS; d += 7) st.sign[d] = true; render(); };
+  document.getElementById("cal-once").onclick = function(){ st.sign = { 0: true }; render(); };
+  render();
+})();
+</script>
+<table>
+<thead>
+<tr>
+<th></th>
+<th>Free Apple ID (Personal Team)</th>
+<th>Apple Developer Program</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Cost</td>
+<td>€0</td>
+<td>$99 / year (€99 in the eurozone)</td>
+</tr>
+<tr>
+<td>Signature lifetime</td>
+<td>7 days</td>
+<td>1 year (profile), as long as membership is active</td>
+</tr>
+<tr>
+<td>Devices</td>
+<td>the ones you plug into Xcode</td>
+<td>up to 100 iPhones per year</td>
+</tr>
+<tr>
+<td>Apps at once</td>
+<td>3 free-signed apps per device</td>
+<td>no practical limit</td>
+</tr>
+<tr>
+<td>New app IDs</td>
+<td>10 per 7 days</td>
+<td>unlimited</td>
+</tr>
+<tr>
+<td>Capabilities</td>
+<td>basics only: no push notifications, iCloud, Apple Pay, Sign in with Apple</td>
+<td>all</td>
+</tr>
+<tr>
+<td>Share with friends</td>
+<td>no</td>
+<td>TestFlight (builds last 90 days) or App Store</td>
+</tr>
+<tr>
+<td>Approval needed</td>
+<td>none</td>
+<td>none for your own devices</td>
+</tr></tbody></table>
+<p>Two settings on the iPhone itself trip up everyone the first time. Since iOS 16 you must turn on
+<strong>Developer Mode</strong> (<em>Settings → Privacy &amp; Security → Developer Mode</em>, then restart), and the first launch of a free-signed app needs
+<strong>trusting your certificate</strong> (<em>Settings → General → VPN &amp; Device Management → your Apple ID → Trust</em>).</p>
+</div></section>
+<section class="win" aria-labelledby="w5"><div class="titlebar"><span class="closebox" aria-hidden="true"></span><h2 id="w5" class="wtitle">Three Ways to Shape a Nim iOS App</h2><span class="zoombox" aria-hidden="true"></span></div><div class="win-body">
+<p>Nim cannot draw an iOS screen on its own; something has to talk to UIKit. These are the three realistic options, from easiest to most Nim-pure.</p>
+<div class="shapes">
+<article class="shape pick"><h3>A. SwiftUI shell + Nim core</h3><p class="tag">Recommended to start</p>
+<p>Xcode's template gives you a working app. Nim compiles to <code>libnimcore.a</code>; Swift calls your <code>{.exportc.}</code> procs through a one-file C header. You write a few lines of Swift for the UI and keep all logic in Nim.</p>
+<p class="meta">Swift you write: ~20 lines · Risk: low</p></article>
+<article class="shape"><h3>B. WebView shell + Nim (the wiish way)</h3><p class="tag">Great if you think in HTML</p>
+<p>A tiny Objective-C app hosts a <code>WKWebView</code>. The UI is HTML/JS (could even be a nimib page or Nim compiled to JS) and messages pass between JavaScript and Nim. Same signing story as A.</p>
+<p class="meta">Native code you write: ~100 lines of ObjC, or use wiish · Risk: medium</p></article>
+<article class="shape"><h3>C. Pure Nim talking to UIKit</h3><p class="tag">For later, for fun</p>
+<p>Call the Objective-C runtime from Nim (<code>nim objc</code>, <code>{.emit.}</code>, <code>objc_msgSend</code>) and build views in Nim. Possible, but you are writing bindings before you write your app.</p>
+<p class="meta">Native code you write: all of it · Risk: high</p></article>
+</div>
+<p><strong>And the no-Mac escape hatch.</strong> If what you really want is <em>something made in Nim on your home screen</em>, a web app gets there
+with zero Apple process: compile Nim to JavaScript (<code>nim js</code>, or nimib's <code>nbJsFromCode</code>), host the page, open it in Safari and
+choose <em>Share → Add to Home Screen</em>. No Mac, no account, no 7-day clock. It is not native (no App Store APIs, limited background work),
+but it is the honest fastest answer to the literal question.</p>
+</div></section>
+<section class="win" aria-labelledby="w6"><div class="titlebar"><span class="closebox" aria-hidden="true"></span><h2 id="w6" class="wtitle">Route A, in Full: the files you add to Xcode's template</h2><span class="zoombox" aria-hidden="true"></span></div><div class="win-body">
+<p>Create <em>File → New → Project → iOS → App</em>, Interface <strong>SwiftUI</strong>, Language <strong>Swift</strong>, Team <strong>(Personal Team)</strong>.
+Then add these four things. The Nim file is the one proven above.</p>
+<p><strong>1. <code>nim/core.nim</code></strong>: your Nim. Every proc Swift should see gets <code>{.exportc, cdecl.}</code>.</p>
+<pre><code class="language-nim">proc fib*(n: cint): cint {.exportc, cdecl.} =
+  if n &lt; 2: n else: fib(n - 1) + fib(n - 2)
+
+proc nimVersion*(): cstring {.exportc, cdecl.} = NimVersion</code></pre>
+<p><strong>2. <code>NimApp/nimcore.h</code></strong>: the C signatures Swift will import. Set <em>Build Settings → Objective-C Bridging Header</em> to this path.
+<code>cint</code> becomes Swift <code>Int32</code>, <code>cstring</code> becomes <code>UnsafePointer&lt;CChar&gt;</code>.</p>
+<pre><code class="language-c">#pragma once
+void NimMain(void);
+int fib(int n);
+const char* nimVersion(void);</code></pre>
+<p><strong>3. A Run Script build phase</strong> (<em>Target → Build Phases → + → New Run Script Phase</em>, dragged above <em>Compile Sources</em>).
+It uses the variables Xcode already sets, so the same script builds for the Simulator and the phone.</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-comment"># This block runs at page-build time: it renders the exact script for the</span>
+<span class="hljs-comment"># current choices, so the flags on this page cannot drift from the prose.</span>
+<span class="hljs-keyword">proc</span> xcodeRunScript(nimFile = <span class="hljs-string">&quot;nim/core.nim&quot;</span>, lib = <span class="hljs-string">&quot;nimcore&quot;</span>): <span class="hljs-built_in">string</span> =
+  <span class="hljs-keyword">let</span> nimFlags = @[
+    <span class="hljs-string">&quot;--os:ios&quot;</span>, <span class="hljs-string">&quot;--cpu:arm64&quot;</span>, <span class="hljs-string">&quot;--app:staticlib&quot;</span>, <span class="hljs-string">&quot;--noMain:on&quot;</span>,
+    <span class="hljs-string">&quot;--mm:orc&quot;</span>, <span class="hljs-string">&quot;--threads:on&quot;</span>, <span class="hljs-string">&quot;--tlsEmulation:off&quot;</span>, <span class="hljs-string">&quot;-d:release&quot;</span>,
+    <span class="hljs-string">&quot;--cc:clang&quot;</span>, <span class="hljs-string">&quot;--passC:</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">$FLAGS</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&quot;</span>, <span class="hljs-string">&quot;--passL:</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">$FLAGS</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&quot;</span>,
+    <span class="hljs-string">&quot;--nimcache:</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">$DERIVED_FILE_DIR/nimcache</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&quot;</span>,
+    &amp;<span class="hljs-string">&quot;--out:</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">$PROJECT_DIR/build/$PLATFORM_NAME/lib{lib}.a</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&quot;</span>]
+  <span class="hljs-literal">result</span> = <span class="hljs-string">&quot;&quot;&quot;set -e
+export PATH=&quot;/opt/homebrew/bin:$HOME/.nimble/bin:$PATH&quot;   # Xcode's PATH has no Homebrew
+if [ &quot;$PLATFORM_NAME&quot; = &quot;iphonesimulator&quot; ]; then
+  MIN=&quot;-mios-simulator-version-min=$IPHONEOS_DEPLOYMENT_TARGET&quot;
+else
+  MIN=&quot;-mios-version-min=$IPHONEOS_DEPLOYMENT_TARGET&quot;
+fi
+FLAGS=&quot;-isysroot $SDKROOT -arch arm64 $MIN&quot;
+nim c &quot;&quot;&quot;</span> &amp; nimFlags.join(<span class="hljs-string">&quot; </span><span class="hljs-meta">\\</span><span class="hljs-meta">\n</span><span class="hljs-string">      &quot;</span>) &amp; &amp;<span class="hljs-string">&quot; </span><span class="hljs-meta">\\</span><span class="hljs-meta">\n</span><span class="hljs-string">      </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">$PROJECT_DIR/{nimFile}</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&quot;</span>
+<span class="hljs-keyword">echo</span> xcodeRunScript()</code></pre>
+<pre class="nb-output">set -e
+export PATH="/opt/homebrew/bin:$HOME/.nimble/bin:$PATH"   # Xcode's PATH has no Homebrew
+if [ "$PLATFORM_NAME" = "iphonesimulator" ]; then
+  MIN="-mios-simulator-version-min=$IPHONEOS_DEPLOYMENT_TARGET"
+else
+  MIN="-mios-version-min=$IPHONEOS_DEPLOYMENT_TARGET"
+fi
+FLAGS="-isysroot $SDKROOT -arch arm64 $MIN"
+nim c --os:ios \
+      --cpu:arm64 \
+      --app:staticlib \
+      --noMain:on \
+      --mm:orc \
+      --threads:on \
+      --tlsEmulation:off \
+      -d:release \
+      --cc:clang \
+      --passC:"$FLAGS" \
+      --passL:"$FLAGS" \
+      --nimcache:"$DERIVED_FILE_DIR/nimcache" \
+      --out:"$PROJECT_DIR/build/$PLATFORM_NAME/libnimcore.a" \
+      "$PROJECT_DIR/nim/core.nim"
+</pre>
+<p>Then in <em>Build Settings</em>: <strong>Library Search Paths</strong> <code>$(PROJECT_DIR)/build/$(PLATFORM_NAME)</code>, <strong>Other Linker Flags</strong> <code>-lnimcore</code>,
+and <strong>User Script Sandboxing = No</strong> (Xcode 15+ sandboxes build scripts, and this one writes outside its declared outputs).</p>
+<p><strong>4. Swift that calls Nim.</strong> Replace the template's two files with this:</p>
+<pre><code class="language-swift">import SwiftUI
+
+@main
+struct NimApp: App {
+    init() { NimMain() }            // initialise Nim once, before any Nim call
+    var body: some Scene { WindowGroup { ContentView() } }
+}
+
+struct ContentView: View {
+    @State private var n = 20
+    var body: some View {
+        VStack(spacing: 16) {
+            Text("Hello from Nim \(String(cString: nimVersion()))")
+            Stepper("n = \(n)", value: $n, in: 0...35)
+            Text("fib(n) = \(fib(Int32(n)))").font(.largeTitle.monospacedDigit())
+        }
+        .padding()
+    }
+}</code></pre>
+</div></section>
+<section class="win" aria-labelledby="w7"><div class="titlebar"><span class="closebox" aria-hidden="true"></span><h2 id="w7" class="wtitle">What wiish Learned the Hard Way</h2><span class="zoombox" aria-hidden="true"></span></div><div class="win-body">
+<p>The library you were thinking of is <strong><a href="https://github.com/iffy/wiish">wiish</a></strong>, <em>&quot;Why Is It So Hard&quot;</em>, by Matt Haggard (<strong>iffy</strong>),
+who builds the Buckets budgeting app. It aims at one Nim codebase for macOS, Windows, Linux, iOS and Android using a WebView UI.
+It describes itself as <strong>alpha</strong>, the last commit is from March 2024, and its own support table marks iOS <strong>Simulator</strong> builds as working while
+<strong>real-device</strong> builds are <em>planned</em>. So I would read it rather than depend on it. Reading <code>wiish/plugins/webview.nim</code> and the iOS template gives five lessons:</p>
+<ol class="lessons">
+<li><b>Nim is a static library, Xcode is the app.</b> wiish compiles with <code>nim objc --os:ios --app:staticlib -d:ios</code>, then hands the <code>.a</code> to a template Xcode project and runs <code>xcodebuild</code>. Route A above is the same shape with Swift instead of Objective-C.</li>
+<li><b>Pass the SDK flags to both compiler and linker.</b> Its <code>linkAndCompile</code> helper adds <code>-arch arm64</code>, <code>-isysroot &lt;iPhoneOS.sdk&gt;</code> and <code>-mios-version-min</code> to <em>both</em> <code>--passC</code> and <code>--passL</code>. Forget one and you get baffling link errors.</li>
+<li><b>UIKit owns the main loop.</b> <code>main.m</code> calls <code>UIApplicationMain</code>, and Nim's async loop is pumped by an <code>NSTimer</code> every 10 ms (the source itself says "this polling is terrible"). If your Nim code is synchronous, as in Route A, you skip this problem entirely.</li>
+<li><b>Let Xcode do the signing.</b> wiish passes <code>-allowProvisioningUpdates</code> and only overrides the bundle ID and team. Automatic signing is the one part of Apple's process that already works well.</li>
+<li><b>Simulator flags have moved on.</b> wiish builds the Simulator slice with <code>--cpu:amd64</code>, which was right for Intel Macs. On Apple Silicon the Simulator is arm64 too, and the platform (iphoneos vs iphonesimulator SDK) is what differs, which is why the script above keys off <code>$PLATFORM_NAME</code>.</li>
+</ol>
+<p>If you want to try it anyway: <code>nimble install https://github.com/iffy/wiish.git</code>, then <code>wiish doctor</code>, <code>wiish init hello</code>, <code>cd hello</code>, <code>wiish run --os ios-simulator</code>.</p>
+</div></section>
+<section class="win" aria-labelledby="w8"><div class="titlebar"><span class="closebox" aria-hidden="true"></span><h2 id="w8" class="wtitle">The Checklist</h2><span class="zoombox" aria-hidden="true"></span></div><div class="win-body">
+<p>Every step in order, with rough times. Tick them as you go; the bar shows where your afternoon stands.
+The ticks stay in this browser only.</p>
+<style>
+.ck-bar { display: flex; border: 1px solid #000; height: 22px; margin: 6px 0 4px; overflow: hidden; background: #fff; }
+.ck-seg { height: 100%; border-right: 1px solid #000; background: repeating-linear-gradient(45deg, #fff 0 3px, #ccc 3px 4px); }
+.ck-seg.done { background: var(--accent); }
+.ck-seg:last-child { border-right: 0; }
+.ck-meta { font-family: var(--font-display); font-size: 13px; margin-bottom: 10px; font-variant-numeric: tabular-nums; }
+.ck-phase { font-family: var(--font-display); font-size: 13px; margin: 14px 0 6px; padding: 2px 8px; background: var(--chrome); border: 1px solid #000; display: inline-block; }
+.ck-list { list-style: none; padding: 0; margin: 0; display: flex; flex-direction: column; gap: 6px; }
+.ck-item { display: grid; grid-template-columns: 22px 1fr auto; gap: 8px; align-items: start; padding: 6px 8px; border: 1px solid #bbb; background: #fff; }
+.ck-item input { width: 16px; height: 16px; margin: 3px 0 0; accent-color: var(--accent); }
+.ck-item label { cursor: pointer; }
+.ck-item .t { font-family: var(--font-mono); font-size: 12px; color: var(--muted); white-space: nowrap; }
+.ck-item.done { background: #f1f1ff; }
+.ck-item.done label b { text-decoration: line-through; }
+.ck-item small { display: block; color: var(--muted); font-size: 13px; margin-top: 2px; }
+</style>
+<div class="ck-bar" id="ck-bar" aria-hidden="true"></div>
+<div class="ck-meta" id="ck-meta" aria-live="polite"></div>
+<div id="ck-root"></div>
+<script>
+(function(){
+  var P = [
+    ["Mac", [
+      ["Get a Mac on a recent macOS", "Any Apple Silicon Mac is ideal. Xcode always requires a fairly recent macOS; check the App Store page for the minimum.", 0],
+      ["Install Xcode from the Mac App Store", "Open it once, accept the license, and let it download the iOS platform. This is the long wait.", 60],
+      ["Install Nim on the Mac", "<code>brew install nim</code> (or choosenim), then <code>nim -v</code>. Note where it lives: <code>which nim</code>.", 5],
+      ["Add your Apple ID to Xcode", "Xcode → Settings → Accounts → + → Apple ID. A <i>Personal Team</i> appears. No payment, no enrollment.", 2]
+    ]],
+    ["App", [
+      ["Create the SwiftUI app", "File → New → Project → iOS App. Interface SwiftUI, Team: (Personal Team), bundle ID like <code>com.pietro.nimhello</code> (must be unique to you).", 5],
+      ["Run the empty template in the Simulator", "Pick an iPhone simulator, press ⌘R. Proves Xcode works before Nim enters.", 5],
+      ["Add <code>nim/core.nim</code> and <code>nimcore.h</code>", "Copy them from Route A. Point <i>Objective-C Bridging Header</i> at the header.", 5],
+      ["Add the Run Script phase and three build settings", "Script above Compile Sources. Library Search Paths, <code>-lnimcore</code>, User Script Sandboxing = No.", 10],
+      ["Run in the Simulator with Nim", "You should see <i>Hello from Nim</i> and a live fib. Fix linking here, where signing cannot get in the way.", 10]
+    ]],
+    ["iPhone", [
+      ["Plug in the iPhone and tap Trust", "Then wait for Xcode to finish <i>Preparing iPhone for development</i>.", 5],
+      ["Turn on Developer Mode", "Settings → Privacy & Security → Developer Mode → On, restart, confirm. Appears only after the phone has met Xcode.", 3],
+      ["Choose the iPhone as destination and press Run", "If Xcode complains about signing, open Signing & Capabilities and let it fix the profile.", 3],
+      ["Trust your developer certificate on the phone", "Settings → General → VPN & Device Management → Developer App → Trust. Tap the icon again.", 2],
+      ["Enable Wi-Fi installs and set a weekly reminder", "Window → Devices and Simulators → Connect via network. Re-run within 7 days to keep it alive.", 2]
+    ]]
+  ];
+  var KEY = "nim-iphone-checklist-v1", done = {};
+  try { done = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { done = {}; }
+  var items = [], root = document.getElementById("ck-root"), h = "", n = 0;
+  P.forEach(function(ph){
+    h += '<div class="ck-phase">' + ph[0] + '</div><ol class="ck-list">';
+    ph[1].forEach(function(it){
+      var id = "ck-" + n; items.push({ id: id, min: it[2] });
+      h += '<li class="ck-item" id="li-' + id + '"><input type="checkbox" id="' + id + '"><label for="' + id + '"><b>' + (n + 1) + '. ' + it[0] + '</b><small>' + it[1] + '</small></label><span class="t">' + (it[2] ? "~" + it[2] + " min" : "") + '</span></li>';
+      n++;
+    });
+    h += '</ol>';
+  });
+  root.innerHTML = h;
+  var total = items.reduce(function(a, x){ return a + x.min; }, 0);
+  function render(){
+    var bar = "", left = 0, cnt = 0;
+    items.forEach(function(x){
+      var on = !!done[x.id]; if (on) cnt++; else left += x.min;
+      document.getElementById(x.id).checked = on;
+      document.getElementById("li-" + x.id).classList.toggle("done", on);
+      if (x.min) bar += '<div class="ck-seg' + (on ? " done" : "") + '" style="flex:' + x.min + '"></div>';
+    });
+    document.getElementById("ck-bar").innerHTML = bar;
+    document.getElementById("ck-meta").textContent = cnt + " of " + items.length + " steps done · about " + left + " of " + total + " minutes left";
+  }
+  root.addEventListener("change", function(e){ if (!e.target.id) return; done[e.target.id] = e.target.checked; try { localStorage.setItem(KEY, JSON.stringify(done)); } catch (er) {} render(); });
+  render();
+})();
+</script>
+</div></section>
+<section class="win" aria-labelledby="w9"><div class="titlebar"><span class="closebox" aria-hidden="true"></span><h2 id="w9" class="wtitle">Living with the 7-Day Clock</h2><span class="zoombox" aria-hidden="true"></span></div><div class="win-body">
+<p>If you install today, these are the dates the app stops launching unless you press Run again. Computed when this page was built:</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">let</span> installed = dateTime(<span class="hljs-number">2026</span>, mNov, <span class="hljs-number">7</span>, zone = utc())
+<span class="hljs-keyword">for</span> week <span class="hljs-keyword">in</span> <span class="hljs-number">1.</span>.<span class="hljs-number">4</span>:
+  <span class="hljs-keyword">let</span> expiry = installed + initDuration(days = <span class="hljs-number">7</span> * week)
+  <span class="hljs-keyword">echo</span> &amp;<span class="hljs-string">&quot;re-sign #{week}: before {expiry.format(</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">ddd d MMM</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">)}&quot;</span></code></pre>
+<pre class="nb-output">re-sign #1: before Sat 14 Nov
+re-sign #2: before Sat 21 Nov
+re-sign #3: before Sat 28 Nov
+re-sign #4: before Sat 5 Dec
+</pre>
+<p>Three things make it bearable. After the first cable install, Xcode can install <strong>over Wi-Fi</strong> when both are on the same network
+(<em>Window → Devices and Simulators → Connect via network</em>). Re-running only re-signs, it does not wipe data. And if the clock really annoys you after a few weeks,
+that is exactly the moment the $99 program earns its price; nothing you built has to change except the Team dropdown.</p>
+</div></section>
+<p class="sources">Sources: the wiish repository (README support matrix, <code>wiish/plugins/webview.nim</code>, <code>build_ios.nim</code>, iOS template <code>main.m</code>), Apple's documentation on free provisioning and the Developer Program, and a Nim 1.6 compile run on this page. Apple's limits change between Xcode releases; if Xcode shows a different number, believe Xcode.</p>
+</main>
+<footer>
+<div class="nb-box">
+ <span><span class="nb-small">made with <a href="https://pietroppeter.github.io/nimib/">nimib 🐳</a></span></span>
+ <span></span>
+ <span><button class="nb-small" id="show" onclick="toggleSourceDisplay()">Show Source</button></span>
+</div>
+</footer>
+<section id="source">
+<pre><code class="nohighlight nim hljs"><span class="hljs-comment">## A nimib explainer: the fastest path from Nim source to an app on *your own* iPhone.</span>
+<span class="hljs-comment">## Build from the page folder:  sh src/deps.sh &amp;&amp; nim r src/index.nim   (writes ../index.html)</span>
+<span class="hljs-keyword">import</span> std/[os, osproc, strutils, strformat, times, json]
+<span class="hljs-keyword">import</span> nimib
+
+nbInit
+nb.doc.filename = currentSourcePath().parentDir.parentDir / <span class="hljs-string">&quot;index.html&quot;</span>
+<span class="hljs-comment"># scratch files (core.nim, ioscache/) go to a temp folder, not the repo</span>
+<span class="hljs-keyword">let</span> work = getTempDir() / <span class="hljs-string">&quot;nim-on-my-iphone&quot;</span>
+createDir(work)
+setCurrentDir(work)
+nb.title = <span class="hljs-string">&quot;Nim on My iPhone&quot;</span>
+
+<span class="hljs-comment"># ---------------------------------------------------------------- theme ---</span>
+<span class="hljs-comment"># Replace water.css + remote highlight assets with an inline &quot;Platinum&quot; theme.</span>
+<span class="hljs-keyword">const</span>
+  platinumCss = staticRead(<span class="hljs-string">&quot;platinum.css&quot;</span>)
+  pipelineHtml = staticRead(<span class="hljs-string">&quot;pipeline.html&quot;</span>)
+  calendarHtml = staticRead(<span class="hljs-string">&quot;calendar.html&quot;</span>)
+  checklistHtml = staticRead(<span class="hljs-string">&quot;checklist.html&quot;</span>)
+nb.doc.context[<span class="hljs-string">&quot;stylesheet&quot;</span>] = %(<span class="hljs-string">&quot;&quot;&quot;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.googleapis.com&quot;&gt;
+&lt;link rel=&quot;preconnect&quot; href=&quot;https://fonts.gstatic.com&quot; crossorigin&gt;
+&lt;link href=&quot;https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;600&amp;family=Pixelify+Sans:wght@400;600&amp;display=swap&quot; rel=&quot;stylesheet&quot;&gt;
+&lt;style&gt;&quot;&quot;&quot;</span> &amp; platinumCss &amp; <span class="hljs-string">&quot;&lt;/style&gt;&quot;</span>)
+nb.doc.context[<span class="hljs-string">&quot;highlight&quot;</span>] = %<span class="hljs-string">&quot;&quot;</span>
+nb.doc.context[<span class="hljs-string">&quot;highlightJs&quot;</span>] = %<span class="hljs-string">&quot;&quot;&quot;
+&lt;script src=&quot;https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js&quot;&gt;&lt;/script&gt;
+&lt;script&gt;document.querySelectorAll('pre code:not(.nohighlight)').forEach(function(el){ if(!/language-|hljs/.test(el.className)) el.classList.add('nohighlight'); }); hljs.highlightAll();&lt;/script&gt;
+&quot;&quot;&quot;</span>
+
+<span class="hljs-keyword">func</span> menuBar(blk: <span class="hljs-type">JsonNode</span>, nb: <span class="hljs-type">Nb</span>): <span class="hljs-built_in">string</span> =
+  <span class="hljs-string">&quot;&quot;&quot;&lt;header class=&quot;menubar&quot; role=&quot;banner&quot;&gt;
+  &lt;span class=&quot;mb-logo&quot; aria-hidden=&quot;true&quot;&gt;&amp;#x2318;&lt;/span&gt;
+  &lt;span class=&quot;mb-item&quot;&gt;&lt;b&gt;File&lt;/b&gt;&lt;/span&gt;&lt;span class=&quot;mb-item&quot;&gt;Edit&lt;/span&gt;&lt;span class=&quot;mb-item&quot;&gt;View&lt;/span&gt;&lt;span class=&quot;mb-item&quot;&gt;Special&lt;/span&gt;
+  &lt;span class=&quot;mb-spacer&quot;&gt;&lt;/span&gt;
+  &lt;span class=&quot;mb-item mb-title&quot;&gt;Nim on My iPhone&lt;/span&gt;
+&lt;/header&gt;&quot;&quot;&quot;</span>
+nb.backend.partials[<span class="hljs-string">&quot;header&quot;</span>] = menuBar
+
+<span class="hljs-comment"># Helpers: a classic window around a group of blocks.</span>
+<span class="hljs-keyword">var</span> winCount = <span class="hljs-number">0</span>
+<span class="hljs-keyword">template</span> window(title: <span class="hljs-built_in">string</span>, body: <span class="hljs-built_in">untyped</span>) =
+  inc winCount
+  nbRawHtml(<span class="hljs-string">&quot;&lt;section class=</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">win</span><span class="hljs-meta">\&quot;</span><span class="hljs-string"> aria-labelledby=</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">w&quot;</span> &amp; $winCount &amp; <span class="hljs-string">&quot;</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&gt;&lt;div class=</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">titlebar</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&gt;&lt;span class=</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">closebox</span><span class="hljs-meta">\&quot;</span><span class="hljs-string"> aria-hidden=</span><span class="hljs-meta">\&quot;</span><span class="hljs-literal">true</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&gt;&lt;/span&gt;&lt;h2 id=</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">w&quot;</span> &amp; $winCount &amp; <span class="hljs-string">&quot;</span><span class="hljs-meta">\&quot;</span><span class="hljs-string"> class=</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">wtitle</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&gt;&quot;</span> &amp; title &amp; <span class="hljs-string">&quot;&lt;/h2&gt;&lt;span class=</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">zoombox</span><span class="hljs-meta">\&quot;</span><span class="hljs-string"> aria-hidden=</span><span class="hljs-meta">\&quot;</span><span class="hljs-literal">true</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&gt;&lt;/span&gt;&lt;/div&gt;&lt;div class=</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">win-body</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&gt;&quot;</span>)
+  body
+  nbRawHtml(<span class="hljs-string">&quot;&lt;/div&gt;&lt;/section&gt;&quot;</span>)
+
+<span class="hljs-keyword">template</span> code(lang, src: <span class="hljs-built_in">string</span>) =
+  nbRawHtml(<span class="hljs-string">&quot;&lt;pre&gt;&lt;code class=</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">language-&quot;</span> &amp; lang &amp; <span class="hljs-string">&quot;</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&gt;&quot;</span> &amp; src.multiReplace((<span class="hljs-string">&quot;&amp;&quot;</span>, <span class="hljs-string">&quot;&amp;amp;&quot;</span>), (<span class="hljs-string">&quot;&lt;&quot;</span>, <span class="hljs-string">&quot;&amp;lt;&quot;</span>), (<span class="hljs-string">&quot;&gt;&quot;</span>, <span class="hljs-string">&quot;&amp;gt;&quot;</span>)) &amp; <span class="hljs-string">&quot;&lt;/code&gt;&lt;/pre&gt;&quot;</span>)
+
+<span class="hljs-comment"># ----------------------------------------------------------------- intro ---</span>
+nbRawHtml <span class="hljs-string">&quot;&quot;&quot;&lt;section class=&quot;hero&quot;&gt;
+&lt;div class=&quot;hero-icon&quot; aria-hidden=&quot;true&quot;&gt;&lt;div class=&quot;phone&quot;&gt;&lt;div class=&quot;screen&quot;&gt;&lt;span&gt;N&lt;/span&gt;&lt;/div&gt;&lt;/div&gt;&lt;/div&gt;
+&lt;div&gt;
+&lt;p class=&quot;eyebrow&quot;&gt;An explorable explanation · written in nimib&lt;/p&gt;
+&lt;h1&gt;Nim on My iPhone&lt;/h1&gt;
+&lt;p class=&quot;lede&quot;&gt;What it really takes to build a Nim app and keep it running on your own phone, with no App Store and no distribution.&lt;/p&gt;
+&lt;/div&gt;
+&lt;/section&gt;&quot;&quot;&quot;</span>
+
+window <span class="hljs-string">&quot;Read Me First&quot;</span>:
+  nbText <span class="hljs-string">&quot;&quot;&quot;
+**The short answer.** You do **not** need the paid Apple Developer Program to put an app on your own iPhone.
+A free Apple ID gives you a *Personal Team* in Xcode, and Xcode signs the app for your device.
+The catch is that the signature lasts **7 days**: after that the app refuses to launch until you plug in and press Run again.
+
+What you cannot avoid is **a Mac with Xcode**. Nim itself is happy anywhere (it writes C), but the iOS SDK,
+the Apple linker and code signing only exist inside Xcode.
+
+**The fastest route** I would take, in one sentence: make a plain SwiftUI app from Xcode's template, compile your Nim code
+into a static library with one build-phase script, call it from Swift, and run it on your phone with your free Apple ID.
+Budget an afternoon, most of it waiting for Xcode to download.
+&quot;&quot;&quot;</span>
+  nbRawHtml <span class="hljs-string">&quot;&quot;&quot;&lt;div class=&quot;verdict-row&quot;&gt;
+&lt;div class=&quot;chip ok&quot;&gt;&lt;b&gt;Free Apple ID&lt;/b&gt;&lt;span&gt;Own device · 7-day signature · enough to start&lt;/span&gt;&lt;/div&gt;
+&lt;div class=&quot;chip warn&quot;&gt;&lt;b&gt;$99 / year program&lt;/b&gt;&lt;span&gt;1-year signature · TestFlight · only if re-signing annoys you&lt;/span&gt;&lt;/div&gt;
+&lt;div class=&quot;chip need&quot;&gt;&lt;b&gt;Mac + Xcode&lt;/b&gt;&lt;span&gt;Not optional for a native app&lt;/span&gt;&lt;/div&gt;
+&lt;/div&gt;&quot;&quot;&quot;</span>
+
+<span class="hljs-comment"># ------------------------------------------------------------- pipeline ---</span>
+window <span class="hljs-string">&quot;The Pipeline: from .nim to a tap on the home screen&quot;</span>:
+  nbText <span class="hljs-string">&quot;&quot;&quot;
+Every native iOS app, whatever language it starts in, goes through the same stations. Nim only owns the first two.
+**Click a station** to see what happens there, and flip the target between your iPhone and the Simulator to watch the flags change.
+&quot;&quot;&quot;</span>
+  nbRawHtml pipelineHtml
+
+<span class="hljs-comment"># ------------------------------------------------------- proof on Linux ---</span>
+window <span class="hljs-string">&quot;Proof: Nim already speaks iOS (even on Linux)&quot;</span>:
+  nbText <span class="hljs-string">&quot;&quot;&quot;
+This page was rendered on a Linux box with no Apple software at all. The block below really ran while the page was built:
+it asks the Nim compiler to *generate* the C for an iOS arm64 static library, then lists what came out.
+The Mac is only needed for the next step, turning that C into ARM machine code against Apple's SDK.
+&quot;&quot;&quot;</span>
+  writeFile(<span class="hljs-string">&quot;core.nim&quot;</span>, <span class="hljs-string">&quot;&quot;&quot;
+proc fib*(n: cint): cint {.exportc, cdecl.} =
+  if n &lt; 2: n else: fib(n - 1) + fib(n - 2)
+
+proc nimVersion*(): cstring {.exportc, cdecl.} = NimVersion
+&quot;&quot;&quot;</span>)
+  nbCode:
+    <span class="hljs-keyword">let</span> cmd = <span class="hljs-string">&quot;nim c --os:ios --cpu:arm64 --app:staticlib --noMain:on &quot;</span> &amp;
+              <span class="hljs-string">&quot;-d:release --compileOnly --nimcache:ioscache --hints:off core.nim&quot;</span>
+    <span class="hljs-keyword">let</span> (output, exitCode) = execCmdEx(cmd)
+    <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;exit code: &quot;</span>, exitCode, output.strip
+    <span class="hljs-keyword">for</span> f <span class="hljs-keyword">in</span> walkFiles(<span class="hljs-string">&quot;ioscache/*.c&quot;</span>):
+      <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;  generated &quot;</span>, f.extractFilename.replace(<span class="hljs-string">&quot;@m&quot;</span>, <span class="hljs-string">&quot;&quot;</span>).split(<span class="hljs-string">&quot;@s&quot;</span>)[^<span class="hljs-number">1</span>]
+    <span class="hljs-keyword">let</span> main = readFile(<span class="hljs-string">&quot;ioscache/@mcore.nim.c&quot;</span>)
+    <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;exports NimMain: &quot;</span>, <span class="hljs-string">&quot;N_CDECL(void, NimMain)(void)&quot;</span> <span class="hljs-keyword">in</span> main
+    <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;exports fib:     &quot;</span>, <span class="hljs-string">&quot;fib&quot;</span> <span class="hljs-keyword">in</span> main
+  nbText <span class="hljs-string">&quot;&quot;&quot;
+`--os:ios` flips on `defined(ios)` everywhere in the standard library, `--app:staticlib` produces a `.a` instead of
+a program, and `--noMain` stops Nim from writing a C `main()`, because on iOS **UIKit owns `main`**.
+Your Nim code is a library that the app calls into; you call `NimMain()` once at startup to initialise Nim's globals.
+&quot;&quot;&quot;</span>
+
+<span class="hljs-comment"># ----------------------------------------------------------- signing ---</span>
+window <span class="hljs-string">&quot;The Apple Part: signing, explained with a calendar&quot;</span>:
+  nbText <span class="hljs-string">&quot;&quot;&quot;
+iOS runs only code signed by a certificate Apple issued, for a device Apple knows about, in an app ID Apple registered.
+Xcode bundles all three into a **provisioning profile** and does it for you when *Automatically manage signing* is on.
+The only difference between free and paid that you will feel day to day is **how long that profile lives**.
+
+**Click days** on the calendar to mark when you plugged in and pressed *Run* in Xcode. Green days the app opens; red days it shows
+*&quot;…is no longer available&quot;* and refuses to launch. Your data inside the app survives a re-sign.
+&quot;&quot;&quot;</span>
+  nbRawHtml calendarHtml
+  nbText <span class="hljs-string">&quot;&quot;&quot;
+| | Free Apple ID (Personal Team) | Apple Developer Program |
+|---|---|---|
+| Cost | €0 | $99 / year (€99 in the eurozone) |
+| Signature lifetime | 7 days | 1 year (profile), as long as membership is active |
+| Devices | the ones you plug into Xcode | up to 100 iPhones per year |
+| Apps at once | 3 free-signed apps per device | no practical limit |
+| New app IDs | 10 per 7 days | unlimited |
+| Capabilities | basics only: no push notifications, iCloud, Apple Pay, Sign in with Apple | all |
+| Share with friends | no | TestFlight (builds last 90 days) or App Store |
+| Approval needed | none | none for your own devices |
+
+Two settings on the iPhone itself trip up everyone the first time. Since iOS 16 you must turn on
+**Developer Mode** (*Settings → Privacy &amp; Security → Developer Mode*, then restart), and the first launch of a free-signed app needs
+**trusting your certificate** (*Settings → General → VPN &amp; Device Management → your Apple ID → Trust*).
+&quot;&quot;&quot;</span>
+
+<span class="hljs-comment"># ------------------------------------------------------- the 3 shapes ---</span>
+window <span class="hljs-string">&quot;Three Ways to Shape a Nim iOS App&quot;</span>:
+  nbText <span class="hljs-string">&quot;&quot;&quot;
+Nim cannot draw an iOS screen on its own; something has to talk to UIKit. These are the three realistic options, from easiest to most Nim-pure.
+&quot;&quot;&quot;</span>
+  nbRawHtml <span class="hljs-string">&quot;&quot;&quot;&lt;div class=&quot;shapes&quot;&gt;
+&lt;article class=&quot;shape pick&quot;&gt;&lt;h3&gt;A. SwiftUI shell + Nim core&lt;/h3&gt;&lt;p class=&quot;tag&quot;&gt;Recommended to start&lt;/p&gt;
+&lt;p&gt;Xcode's template gives you a working app. Nim compiles to &lt;code&gt;libnimcore.a&lt;/code&gt;; Swift calls your &lt;code&gt;{.exportc.}&lt;/code&gt; procs through a one-file C header. You write a few lines of Swift for the UI and keep all logic in Nim.&lt;/p&gt;
+&lt;p class=&quot;meta&quot;&gt;Swift you write: ~20 lines · Risk: low&lt;/p&gt;&lt;/article&gt;
+&lt;article class=&quot;shape&quot;&gt;&lt;h3&gt;B. WebView shell + Nim (the wiish way)&lt;/h3&gt;&lt;p class=&quot;tag&quot;&gt;Great if you think in HTML&lt;/p&gt;
+&lt;p&gt;A tiny Objective-C app hosts a &lt;code&gt;WKWebView&lt;/code&gt;. The UI is HTML/JS (could even be a nimib page or Nim compiled to JS) and messages pass between JavaScript and Nim. Same signing story as A.&lt;/p&gt;
+&lt;p class=&quot;meta&quot;&gt;Native code you write: ~100 lines of ObjC, or use wiish · Risk: medium&lt;/p&gt;&lt;/article&gt;
+&lt;article class=&quot;shape&quot;&gt;&lt;h3&gt;C. Pure Nim talking to UIKit&lt;/h3&gt;&lt;p class=&quot;tag&quot;&gt;For later, for fun&lt;/p&gt;
+&lt;p&gt;Call the Objective-C runtime from Nim (&lt;code&gt;nim objc&lt;/code&gt;, &lt;code&gt;{.emit.}&lt;/code&gt;, &lt;code&gt;objc_msgSend&lt;/code&gt;) and build views in Nim. Possible, but you are writing bindings before you write your app.&lt;/p&gt;
+&lt;p class=&quot;meta&quot;&gt;Native code you write: all of it · Risk: high&lt;/p&gt;&lt;/article&gt;
+&lt;/div&gt;&quot;&quot;&quot;</span>
+  nbText <span class="hljs-string">&quot;&quot;&quot;
+**And the no-Mac escape hatch.** If what you really want is *something made in Nim on your home screen*, a web app gets there
+with zero Apple process: compile Nim to JavaScript (`nim js`, or nimib's `nbJsFromCode`), host the page, open it in Safari and
+choose *Share → Add to Home Screen*. No Mac, no account, no 7-day clock. It is not native (no App Store APIs, limited background work),
+but it is the honest fastest answer to the literal question.
+&quot;&quot;&quot;</span>
+
+<span class="hljs-comment"># --------------------------------------------------------- the code ---</span>
+window <span class="hljs-string">&quot;Route A, in Full: the files you add to Xcode's template&quot;</span>:
+  nbText <span class="hljs-string">&quot;&quot;&quot;
+Create *File → New → Project → iOS → App*, Interface **SwiftUI**, Language **Swift**, Team **(Personal Team)**.
+Then add these four things. The Nim file is the one proven above.
+
+**1. `nim/core.nim`**: your Nim. Every proc Swift should see gets `{.exportc, cdecl.}`.
+&quot;&quot;&quot;</span>
+  code(<span class="hljs-string">&quot;nim&quot;</span>, readFile(<span class="hljs-string">&quot;core.nim&quot;</span>).strip)
+  nbText <span class="hljs-string">&quot;&quot;&quot;
+**2. `NimApp/nimcore.h`**: the C signatures Swift will import. Set *Build Settings → Objective-C Bridging Header* to this path.
+`cint` becomes Swift `Int32`, `cstring` becomes `UnsafePointer&lt;CChar&gt;`.
+&quot;&quot;&quot;</span>
+  code(<span class="hljs-string">&quot;c&quot;</span>, <span class="hljs-string">&quot;&quot;&quot;#pragma once
+void NimMain(void);
+int fib(int n);
+const char* nimVersion(void);&quot;&quot;&quot;</span>)
+  nbText <span class="hljs-string">&quot;&quot;&quot;
+**3. A Run Script build phase** (*Target → Build Phases → + → New Run Script Phase*, dragged above *Compile Sources*).
+It uses the variables Xcode already sets, so the same script builds for the Simulator and the phone.
+&quot;&quot;&quot;</span>
+  nbCode:
+    <span class="hljs-comment"># This block runs at page-build time: it renders the exact script for the</span>
+    <span class="hljs-comment"># current choices, so the flags on this page cannot drift from the prose.</span>
+    <span class="hljs-keyword">proc</span> xcodeRunScript(nimFile = <span class="hljs-string">&quot;nim/core.nim&quot;</span>, lib = <span class="hljs-string">&quot;nimcore&quot;</span>): <span class="hljs-built_in">string</span> =
+      <span class="hljs-keyword">let</span> nimFlags = @[
+        <span class="hljs-string">&quot;--os:ios&quot;</span>, <span class="hljs-string">&quot;--cpu:arm64&quot;</span>, <span class="hljs-string">&quot;--app:staticlib&quot;</span>, <span class="hljs-string">&quot;--noMain:on&quot;</span>,
+        <span class="hljs-string">&quot;--mm:orc&quot;</span>, <span class="hljs-string">&quot;--threads:on&quot;</span>, <span class="hljs-string">&quot;--tlsEmulation:off&quot;</span>, <span class="hljs-string">&quot;-d:release&quot;</span>,
+        <span class="hljs-string">&quot;--cc:clang&quot;</span>, <span class="hljs-string">&quot;--passC:</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">$FLAGS</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&quot;</span>, <span class="hljs-string">&quot;--passL:</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">$FLAGS</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&quot;</span>,
+        <span class="hljs-string">&quot;--nimcache:</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">$DERIVED_FILE_DIR/nimcache</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&quot;</span>,
+        &amp;<span class="hljs-string">&quot;--out:</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">$PROJECT_DIR/build/$PLATFORM_NAME/lib{lib}.a</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&quot;</span>]
+      <span class="hljs-literal">result</span> = <span class="hljs-string">&quot;&quot;&quot;set -e
+export PATH=&quot;/opt/homebrew/bin:$HOME/.nimble/bin:$PATH&quot;   # Xcode's PATH has no Homebrew
+if [ &quot;$PLATFORM_NAME&quot; = &quot;iphonesimulator&quot; ]; then
+  MIN=&quot;-mios-simulator-version-min=$IPHONEOS_DEPLOYMENT_TARGET&quot;
+else
+  MIN=&quot;-mios-version-min=$IPHONEOS_DEPLOYMENT_TARGET&quot;
+fi
+FLAGS=&quot;-isysroot $SDKROOT -arch arm64 $MIN&quot;
+nim c &quot;&quot;&quot;</span> &amp; nimFlags.join(<span class="hljs-string">&quot; </span><span class="hljs-meta">\\</span><span class="hljs-meta">\n</span><span class="hljs-string">      &quot;</span>) &amp; &amp;<span class="hljs-string">&quot; </span><span class="hljs-meta">\\</span><span class="hljs-meta">\n</span><span class="hljs-string">      </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">$PROJECT_DIR/{nimFile}</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&quot;</span>
+    <span class="hljs-keyword">echo</span> xcodeRunScript()
+  nbText <span class="hljs-string">&quot;&quot;&quot;
+Then in *Build Settings*: **Library Search Paths** `$(PROJECT_DIR)/build/$(PLATFORM_NAME)`, **Other Linker Flags** `-lnimcore`,
+and **User Script Sandboxing = No** (Xcode 15+ sandboxes build scripts, and this one writes outside its declared outputs).
+
+**4. Swift that calls Nim.** Replace the template's two files with this:
+&quot;&quot;&quot;</span>
+  code(<span class="hljs-string">&quot;swift&quot;</span>, <span class="hljs-string">&quot;&quot;&quot;import SwiftUI
+
+@main
+struct NimApp: App {
+    init() { NimMain() }            // initialise Nim once, before any Nim call
+    var body: some Scene { WindowGroup { ContentView() } }
+}
+
+struct ContentView: View {
+    @State private var n = 20
+    var body: some View {
+        VStack(spacing: 16) {
+            Text(&quot;Hello from Nim \(String(cString: nimVersion()))&quot;)
+            Stepper(&quot;n = \(n)&quot;, value: $n, in: 0...35)
+            Text(&quot;fib(n) = \(fib(Int32(n)))&quot;).font(.largeTitle.monospacedDigit())
+        }
+        .padding()
+    }
+}&quot;&quot;&quot;</span>)
+
+<span class="hljs-comment"># ------------------------------------------------------------ wiish ---</span>
+window <span class="hljs-string">&quot;What wiish Learned the Hard Way&quot;</span>:
+  nbText <span class="hljs-string">&quot;&quot;&quot;
+The library you were thinking of is **[wiish](https://github.com/iffy/wiish)**, *&quot;Why Is It So Hard&quot;*, by Matt Haggard (**iffy**),
+who builds the Buckets budgeting app. It aims at one Nim codebase for macOS, Windows, Linux, iOS and Android using a WebView UI.
+It describes itself as **alpha**, the last commit is from March 2024, and its own support table marks iOS **Simulator** builds as working while
+**real-device** builds are *planned*. So I would read it rather than depend on it. Reading `wiish/plugins/webview.nim` and the iOS template gives five lessons:
+&quot;&quot;&quot;</span>
+  nbRawHtml <span class="hljs-string">&quot;&quot;&quot;&lt;ol class=&quot;lessons&quot;&gt;
+&lt;li&gt;&lt;b&gt;Nim is a static library, Xcode is the app.&lt;/b&gt; wiish compiles with &lt;code&gt;nim objc --os:ios --app:staticlib -d:ios&lt;/code&gt;, then hands the &lt;code&gt;.a&lt;/code&gt; to a template Xcode project and runs &lt;code&gt;xcodebuild&lt;/code&gt;. Route A above is the same shape with Swift instead of Objective-C.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Pass the SDK flags to both compiler and linker.&lt;/b&gt; Its &lt;code&gt;linkAndCompile&lt;/code&gt; helper adds &lt;code&gt;-arch arm64&lt;/code&gt;, &lt;code&gt;-isysroot &amp;lt;iPhoneOS.sdk&amp;gt;&lt;/code&gt; and &lt;code&gt;-mios-version-min&lt;/code&gt; to &lt;em&gt;both&lt;/em&gt; &lt;code&gt;--passC&lt;/code&gt; and &lt;code&gt;--passL&lt;/code&gt;. Forget one and you get baffling link errors.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;UIKit owns the main loop.&lt;/b&gt; &lt;code&gt;main.m&lt;/code&gt; calls &lt;code&gt;UIApplicationMain&lt;/code&gt;, and Nim's async loop is pumped by an &lt;code&gt;NSTimer&lt;/code&gt; every 10 ms (the source itself says &quot;this polling is terrible&quot;). If your Nim code is synchronous, as in Route A, you skip this problem entirely.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Let Xcode do the signing.&lt;/b&gt; wiish passes &lt;code&gt;-allowProvisioningUpdates&lt;/code&gt; and only overrides the bundle ID and team. Automatic signing is the one part of Apple's process that already works well.&lt;/li&gt;
+&lt;li&gt;&lt;b&gt;Simulator flags have moved on.&lt;/b&gt; wiish builds the Simulator slice with &lt;code&gt;--cpu:amd64&lt;/code&gt;, which was right for Intel Macs. On Apple Silicon the Simulator is arm64 too, and the platform (iphoneos vs iphonesimulator SDK) is what differs, which is why the script above keys off &lt;code&gt;$PLATFORM_NAME&lt;/code&gt;.&lt;/li&gt;
+&lt;/ol&gt;
+&lt;p&gt;If you want to try it anyway: &lt;code&gt;nimble install https://github.com/iffy/wiish.git&lt;/code&gt;, then &lt;code&gt;wiish doctor&lt;/code&gt;, &lt;code&gt;wiish init hello&lt;/code&gt;, &lt;code&gt;cd hello&lt;/code&gt;, &lt;code&gt;wiish run --os ios-simulator&lt;/code&gt;.&lt;/p&gt;&quot;&quot;&quot;</span>
+
+<span class="hljs-comment"># --------------------------------------------------------- checklist ---</span>
+window <span class="hljs-string">&quot;The Checklist&quot;</span>:
+  nbText <span class="hljs-string">&quot;&quot;&quot;
+Every step in order, with rough times. Tick them as you go; the bar shows where your afternoon stands.
+The ticks stay in this browser only.
+&quot;&quot;&quot;</span>
+  nbRawHtml checklistHtml
+
+<span class="hljs-comment"># ------------------------------------------------------------ re-sign ---</span>
+window <span class="hljs-string">&quot;Living with the 7-Day Clock&quot;</span>:
+  nbText <span class="hljs-string">&quot;&quot;&quot;
+If you install today, these are the dates the app stops launching unless you press Run again. Computed when this page was built:
+&quot;&quot;&quot;</span>
+  nbCode:
+    <span class="hljs-keyword">let</span> installed = dateTime(<span class="hljs-number">2026</span>, mNov, <span class="hljs-number">7</span>, zone = utc())
+    <span class="hljs-keyword">for</span> week <span class="hljs-keyword">in</span> <span class="hljs-number">1.</span>.<span class="hljs-number">4</span>:
+      <span class="hljs-keyword">let</span> expiry = installed + initDuration(days = <span class="hljs-number">7</span> * week)
+      <span class="hljs-keyword">echo</span> &amp;<span class="hljs-string">&quot;re-sign #{week}: before {expiry.format(</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">ddd d MMM</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">)}&quot;</span>
+  nbText <span class="hljs-string">&quot;&quot;&quot;
+Three things make it bearable. After the first cable install, Xcode can install **over Wi-Fi** when both are on the same network
+(*Window → Devices and Simulators → Connect via network*). Re-running only re-signs, it does not wipe data. And if the clock really annoys you after a few weeks,
+that is exactly the moment the $99 program earns its price; nothing you built has to change except the Team dropdown.
+&quot;&quot;&quot;</span>
+
+nbRawHtml <span class="hljs-string">&quot;&quot;&quot;&lt;p class=&quot;sources&quot;&gt;Sources: the wiish repository (README support matrix, &lt;code&gt;wiish/plugins/webview.nim&lt;/code&gt;, &lt;code&gt;build_ios.nim&lt;/code&gt;, iOS template &lt;code&gt;main.m&lt;/code&gt;), Apple's documentation on free provisioning and the Developer Program, and a Nim 1.6 compile run on this page. Apple's limits change between Xcode releases; if Xcode shows a different number, believe Xcode.&lt;/p&gt;&quot;&quot;&quot;</span>
+
+nbSave
+</code></pre>
+</section>
+  
+<script>
+  function toggleSourceDisplay() {
+    var btn = document.getElementById("show")
+    var source = document.getElementById("source");
+    if (btn.innerHTML=="Show Source") {
+      btn.innerHTML = "Hide Source";
+      source.style.display = "block";
+    } else {
+      btn.innerHTML = "Show Source";
+      source.style.display = "none";
+    }
+  }
+</script>
+  
+</body>

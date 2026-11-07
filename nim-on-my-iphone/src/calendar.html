@@ -1,0 +1,63 @@
+<style>
+.cal-controls { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin: 4px 0 12px; font-family: var(--font-display); font-size: 13px; }
+.cal-seg { display: inline-flex; }
+.cal-seg button { border-radius: 0; }
+.cal-seg button:first-child { border-radius: 6px 0 0 6px; }
+.cal-seg button:last-child { border-radius: 0 6px 6px 0; border-left: 0; }
+.cal-grid { display: grid; grid-template-columns: 52px repeat(7, minmax(30px, 1fr)); gap: 3px; max-width: 520px; }
+.cal-h { font-family: var(--font-display); font-size: 11px; text-align: center; color: var(--muted); }
+.cal-wk { font-family: var(--font-display); font-size: 11px; color: var(--muted); align-self: center; }
+.cal-d { position: relative; height: 34px; padding: 0; border-radius: 0; font-family: var(--font-mono); font-size: 11px; color: #fff; border: 1px solid #000; box-shadow: none; font-variant-numeric: tabular-nums; }
+.cal-d.ok { background: var(--ok); }
+.cal-d.bad { background: var(--bad); }
+.cal-d.sign::after { content: "RUN"; position: absolute; left: 0; right: 0; bottom: 1px; font-size: 8px; font-family: var(--font-display); color: #ffe066; }
+.cal-d.sign { box-shadow: inset 0 0 0 2px #ffe066; }
+.cal-sum { margin-top: 12px; display: flex; flex-wrap: wrap; gap: 10px; }
+.cal-meter { flex: 1 1 260px; border: 1px solid #000; height: 18px; background: var(--bad); position: relative; }
+.cal-meter > div { height: 100%; background: var(--ok); }
+.cal-stat { font-family: var(--font-display); font-size: 13px; }
+</style>
+<div class="cal-controls">
+  <span class="cal-seg" role="group" aria-label="Signing team">
+    <button id="cal-free" type="button" aria-pressed="true">Free Apple ID</button>
+    <button id="cal-paid" type="button" aria-pressed="false">$99 program</button>
+  </span>
+  <button id="cal-weekly" type="button">Re-sign every Sunday</button>
+  <button id="cal-once" type="button">Install once, forget</button>
+</div>
+<div class="cal-grid" id="cal-grid" role="grid" aria-label="Eight weeks after first install"></div>
+<div class="cal-sum">
+  <div class="cal-meter" aria-hidden="true"><div id="cal-bar"></div></div>
+  <div class="cal-stat" id="cal-stat" aria-live="polite"></div>
+</div>
+<script>
+(function(){
+  var DAYS = 56, start = new Date(Date.UTC(2026, 10, 7)); // Sat 7 Nov 2026
+  var st = { paid: false, sign: { 0: true, 8: true, 15: true, 29: true } };
+  var grid = document.getElementById("cal-grid");
+  var names = ["Sat","Sun","Mon","Tue","Wed","Thu","Fri"];
+  function valid(d){ var life = st.paid ? 365 : 7; for (var k = d; k >= 0; k--) if (st.sign[k]) return d - k < life; return false; }
+  function render(){
+    var h = '<div></div>' + names.map(function(n){ return '<div class="cal-h">' + n + '</div>'; }).join("");
+    var ok = 0, runs = 0;
+    for (var d = 0; d < DAYS; d++){
+      if (d % 7 === 0) h += '<div class="cal-wk">wk ' + (d / 7 + 1) + '</div>';
+      var v = valid(d); if (v) ok++; if (st.sign[d]) runs++;
+      var dt = new Date(start.getTime() + d * 864e5);
+      var lab = dt.getUTCDate() + "/" + (dt.getUTCMonth() + 1);
+      h += '<button type="button" class="cal-d ' + (v ? "ok" : "bad") + (st.sign[d] ? " sign" : "") + '" data-d="' + d + '" aria-pressed="' + !!st.sign[d] + '" aria-label="' + lab + (v ? ", app opens" : ", app will not open") + (st.sign[d] ? ", you pressed Run" : "") + '">' + lab + '</button>';
+    }
+    grid.innerHTML = h;
+    document.getElementById("cal-bar").style.width = (100 * ok / DAYS) + "%";
+    document.getElementById("cal-stat").textContent = "Opens on " + ok + " of " + DAYS + " days · " + runs + " trip" + (runs === 1 ? "" : "s") + " to Xcode";
+    document.getElementById("cal-free").setAttribute("aria-pressed", !st.paid);
+    document.getElementById("cal-paid").setAttribute("aria-pressed", st.paid);
+  }
+  grid.addEventListener("click", function(e){ var b = e.target.closest(".cal-d"); if (!b) return; var d = +b.dataset.d; if (st.sign[d]) delete st.sign[d]; else st.sign[d] = true; render(); });
+  document.getElementById("cal-free").onclick = function(){ st.paid = false; render(); };
+  document.getElementById("cal-paid").onclick = function(){ st.paid = true; render(); };
+  document.getElementById("cal-weekly").onclick = function(){ st.sign = {}; st.sign[0] = true; for (var d = 1; d < DAYS; d += 7) st.sign[d] = true; render(); };
+  document.getElementById("cal-once").onclick = function(){ st.sign = { 0: true }; render(); };
+  render();
+})();
+</script>
