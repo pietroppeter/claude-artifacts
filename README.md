@@ -7,6 +7,7 @@ https://pietroppeter.github.io/claude-artifacts/
 
 | Page | Date | Description |
 |---|---|---|
+| [nim-python-bridges](https://pietroppeter.github.io/claude-artifacts/nim-python-bridges/) | 2026-11-07 | Calling a Nim library from Python: C ABI + ctypes vs nimpy, built with [nimlang](https://pypi.org/project/nimlang/) and measured on [diagrammari](https://github.com/pietroppeter/diagrammari); a shared thread bug and its fix; five wheels cross-built from Linux |
 | [nim-on-my-iphone](https://pietroppeter.github.io/claude-artifacts/nim-on-my-iphone/) | 2026-11-07 | The fastest path from Nim source to an app on your own iPhone: free Apple ID signing, Nim as an iOS static library behind a SwiftUI shell, and [wiish](https://github.com/iffy/wiish), in a [nimib](https://github.com/pietroppeter/nimib) page |
 | [diagrammari-python](https://pietroppeter.github.io/claude-artifacts/diagrammari-python/) | 2026-11-07 | [diagrammari](https://github.com/pietroppeter/diagrammari) (Pele-drawn Mermaid for Nim) in Python, Jupyter and marimo: Nim library in a uv-installable wheel, Pele in QuickJS compiled in, one anywidget editor, personalized SVG export; real outputs, screenshots, live editor |
 | [cartographer-nim](https://pietroppeter.github.io/claude-artifacts/cartographer-nim/) | 2026-11-04 | Evaluating [Cartographer](https://github.com/BeppeTemp/cartographer) (agent-maintained git wiki over MCP) for a multi-repo, multi-team project: core rebuilt in Nim, LLM Wiki + OKF background, alternatives, fit, in a [nimib](https://github.com/pietroppeter/nimib) page |

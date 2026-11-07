@@ -1,0 +1,3 @@
+$ python -c "import mari; mari._lib.mari_free(12345)"
+SIGSEGV: Illegal storage access. (Attempt to read from nil?)
+Segmentation fault       # exit 139

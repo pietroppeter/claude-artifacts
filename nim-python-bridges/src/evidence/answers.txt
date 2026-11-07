@@ -1,0 +1,6 @@
+>>> mari.draw("flowchart LR\n  a --> b")
+{"ok": true, "svg": "<svg xmlns=\"http://www.w3.org/2000/svg\" ...", "type": "flowchart",
+ "ids": {"nodes": ["a", "b"], "edges": ["L_a_b_0"]}}
+>>> mari_draw('{"source": "flowchart LR\n  a --> ["}')
+{"ok":false,"code":"syntax","message":"Parse error on line 2:\n  a --> [\n--------^\nExpecting 'NODE_STRING', got 'SQS'",
+ "line":2,"column":9,"snippet":"  a --> [\n--------^"}

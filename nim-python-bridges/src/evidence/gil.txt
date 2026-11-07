@@ -1,0 +1,2 @@
+ctypes (lets go of the GIL): 100 draws in 1189 ms, other Python thread counted to 38,062,108
+nimpy  (holds the GIL)     : 100 draws in 718 ms, other Python thread counted to 8,553,729

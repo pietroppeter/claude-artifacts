@@ -1,0 +1,11 @@
+python 3.13.18
+same svg: True
+tiny call, ctypes: 0.10 us
+tiny call, nimpy:  0.06 us
+1 MB string round trip, nimpy: 229 us
+draw, ctypes+json: 0.958 ms
+draw, nimpy:       0.818 ms
+nimpy error: ValueError Unexpected error encountered: syntax: Parse error on line 2:
+  a --> [
+--------^
+ctypes error: DiagramError syntax 2 9

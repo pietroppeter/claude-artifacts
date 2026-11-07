@@ -1,0 +1,6 @@
+$ uv run --python 3.10 --with diagrammari-0.0.1-py3-none-manylinux_2_17_x86_64.whl python -c "..."
+3.10.20 quickjs 1.13.0 {'nodes': ['a', 'b'], 'edges': ['L_a_b_0']}
+$ uv run --python 3.14 --with diagrammari-0.0.1-py3-none-manylinux_2_17_x86_64.whl python -c "..."
+3.14.6 quickjs 1.13.0 {'nodes': ['a', 'b'], 'edges': ['L_a_b_0']}
+$ uvx auditwheel show diagrammari-0.0.1-py3-none-manylinux_2_17_x86_64.whl
+versions {'GLIBC_2.2.5', 'GLIBC_2.3.3'} ... constrains the platform tag to "manylinux_2_17_x86_64"
