@@ -1,4 +1,4 @@
-# marinp.nim: plug B, the same library through nimpy
+# marinp.nim: all of plug B
 include capi
 import nimpy
 

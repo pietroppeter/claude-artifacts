@@ -25,11 +25,11 @@ for tag, t, checked in order:
 
 repl = {"{{stack}}": (ev / "stack.svg").read_text(), "{{stack_narrow}}": (ev / "stack_narrow.svg").read_text(),
         "{{wheel_rows}}": "\n".join(rows)}
-for k, f in {"bench": "bench.txt", "versions": "versions.txt", "gil": "gil.txt", "mistake": "mistake.txt",
+for k, f in {"bench": "bench.txt", "versions": "versions.txt", "gil": "gil.txt", "mistake_a": "mistake_a.txt", "mistake_b": "mistake_b.txt", "answers": "answers.txt",
              "threads_before": "threads_before.txt", "threads_after": "threads_after.txt", "wheel_run": "wheel_run.txt"}.items():
     repl["{{%s}}" % k] = esc(ev / f)
 for k, f in {"shim_c": "shim.c", "shim_nim": "shim.nim", "cabi_nim": "cabi.nim", "cabi_py": "cabi.py",
-             "nimpy_nim": "nimpy.nim", "nimpy_py": "nimpy.py", "pyproject": "pyproject.toml", "native": "native.nim",
+             "nimpy_nim": "nimpy.nim", "use_a": "use_a.py", "use_b": "use_b.py", "core": "core.nim", "glue": "glue.js", "pyproject": "pyproject.toml", "native": "native.nim",
              "build_sh": "build.sh", "threadfix_c": "threadfix.c", "threadfix_nim": "threadfix.nim", "pathfix": "pathfix.nim"}.items():
     repl["{{%s}}" % k] = esc(ex / f)
 for k, v in repl.items():

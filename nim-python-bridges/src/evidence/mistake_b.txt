@@ -1,0 +1,3 @@
+$ python -c "import marinp; marinp.svg(42)"
+TypeError: Can't convert python obj of type
+'int' to string
