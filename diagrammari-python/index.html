@@ -85,6 +85,7 @@ ol.toc{columns:2;font-size:15px;padding-left:20px}
     <li><a href="#choices">The choices, and why</a></li>
     <li><a href="#next">What is proposed next</a></li>
     <li><a href="#case-repo">Case 2: one repo or two?</a></li>
+    <li><a href="#appeal">Case 2 on appeal, in an AI world</a></li>
   </ol>
   <p class="links"><a href="https://github.com/pietroppeter/diagrammari/pull/3">diagrammari PR #3</a>
   <a href="https://github.com/pietroppeter/diagrammari/tree/claude/project-thread-ekbf6s/experiments/python">experiments/python</a></p>
@@ -430,9 +431,59 @@ same SVG as Node: [True, True, True, True]</code></pre>
     <p><b>The layout:</b> <code>pyproject.toml</code> at the root (distribution <code>diagrammari</code>, import <code>mari</code>), Python code in
     <code>python/mari/</code>, the C ABI in <code>src/mari/capi.nim</code> next to the library, and wheels built by <code>.github/workflows/wheels.yml</code> on
     <code>py-v*</code> tags. The Python spec lives in <code>openspec/specs/python/</code> with the others.</p>
-    <p><b>Court:</b> Claude sat as the jury, in the first degree. Pietro is the <i>corte d'appello</i>, the second degree, and his ruling is final.</p>
+    <p><b>Court:</b> Claude sat as the jury, in the first degree. Pietro is the <i>corte d'appello</i>, the second degree; he appealed. See <a href="#appeal">the appeal</a>.</p>
     <p><b>When to reopen the case:</b> if the Python side grows its own large surface, such as Python builders, Pyodide or a JupyterLab extension with a
     build, or gets its own maintainers. Splitting out later is a <code>git subtree split</code>; merging two drifted repos back together is much harder.</p>
+  </div>
+</section>
+
+<section class="sheet" id="appeal">
+  <div class="tab">CASE 2 · APPEAL</div>
+  <div class="stamp green">reformed on appeal</div>
+  <h2>Corte d'appello: the same case, with agents doing the work</h2>
+  <p><b>The appeal.</b> Pietro objects that the first degree judged the case by pre-AI rules. Drift kills when people forget the second repo. In this project,
+  agents keep twelve repos moving at once, so the case is reopened with that as the premise.</p>
+
+  <div class="suspect">
+    <h3>Drift, cross-examined</h3>
+    <p class="alibi">Drift needed two things: a change that has to land in two places, and nobody remembering to do the second one. Agents remove the second
+    condition, but only when something asks them. The coordination cost (two PRs, a Pele bump done twice) is now minutes of agent time instead of an
+    evening of yours. What agents don't remove is silent drift, a mismatch nobody asks about. So drift has to be made <i>loud</i>: the second repo
+    <b>pins</b> diagrammari to a tag, its CI runs the shared spec examples against that pin, and a routine opens the bump PR when diagrammari tags a
+    release. Then drift is a version lag you can see, not a mismatch you discover. <b>Downgraded from murder to a misdemeanour, if the pin and the
+    routine exist.</b></p>
+  </div>
+  <div class="suspect">
+    <h3>New witness: the agents themselves</h3>
+    <p class="alibi">This morning three threads worked on diagrammari at once: the build PR, the series PR and this one. They had to coordinate over
+    <code>BACKLOG.md</code> to avoid a conflict. With one repo per front door, a Python thread and a Nim thread don't share a branch, a backlog or a CI run.
+    Each repo also gets an <code>AGENTS.md</code> for one toolchain: atlas, nimble and nimib pages there; uv, cibuildwheel, Jupyter and marimo here. A focused
+    checkout is less context per task, so fewer mistakes. <b>Testifies for two repos.</b></p>
+  </div>
+  <div class="suspect">
+    <h3>New witness: CI time</h3>
+    <p class="alibi">A wheel matrix (Linux, macOS, Windows) with Nim and QuickJS compiled in takes about 15 minutes per run. In one repo, every Nim docs fix
+    either waits for it or needs path filters. In two repos, each runs its own CI, and agents iterate faster on each side. <b>Testifies for two repos.</b></p>
+  </div>
+  <div class="suspect">
+    <h3>Suspect 4 again: the build that can't see the Nim code</h3>
+    <p class="alibi">A pinned dependency solves it: the Python build fetches diagrammari at the pinned tag (git dependency or atlas lock), and the sdist
+    vendors that snapshot. That's the same idea as pinning Pele and QuickJS, which diagrammari already does. <b>Disarmed by the pin.</b></p>
+  </div>
+
+  <div class="verdict">
+    <p><b>Ruling on appeal: two repos, with a contract.</b> In an AI world the cost that made one repo win, keeping two places in step, is cheap, and the
+    costs of one repo (agents colliding, mixed toolchains, slow shared CI) matter more. The ruling holds only under three conditions, or drift is back:</p>
+    <ol>
+      <li><b>diagrammari owns everything that must match:</b> the Nim library, the C ABI (<code>src/mari/capi.nim</code>), Pele, QuickJS, the layer engine,
+      the editor's JavaScript (also for nimib pages, a BACKLOG item), and the specs with their examples.</li>
+      <li><b>diagrammari-py owns only the Python side:</b> <code>pyproject.toml</code>, the Python API and widget wrapper, the wheels workflow and the notebook docs.
+      It pins diagrammari to a tag, and its CI runs the shared examples against the pin.</li>
+      <li><b>A routine closes the loop:</b> when diagrammari tags a release, an agent opens the bump PR in diagrammari-py, and nothing ships to PyPI until it's green.</li>
+    </ol>
+    <p><b>Open detail:</b> which org gets the repo, <code>pietroppeter/diagrammari-py</code> or <code>nimib-land/</code>. It should follow wherever diagrammari ends up.</p>
+    <p class="note">The first degree isn't wrong about drift; the appeal changes who pays to prevent it. In the proposals, <code>add-python-package</code> is
+    updated to this layout: the C ABI stays in diagrammari, and the package moves to its own repo.</p>
   </div>
 </section>
 
