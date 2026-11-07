@@ -147,6 +147,7 @@ ol.refs li{margin-bottom:5px;overflow-wrap:anywhere}
   <div class="col-src">
     <div class="panel">
       <h4>1 · Source, Mermaid</h4>
+      <div class="seg" id="examples"></div>
       <textarea id="src" spellcheck="false" aria-label="Mermaid source"></textarea>
       <div class="err" id="err"></div>
       <h4>Theme</h4><div class="seg" id="themes"></div>
@@ -257,27 +258,53 @@ const THEMES={
 };
 const ARROWS=["pele","straight","elbow","curve"];
 const ROUTES=["auto","straight","elbow","curve","bezier"];
-const BASE=`flowchart LR
+const FAMILY=`flowchart TD
+  mermaid([Mermaid text]) --> pele[Pele]
+  nim([Nim]) --> lib{{diagrams lib}}
+  pele --> lib
+  nim --> nimib[nimib]
+  lib --> nimib
+  nimib --> nimibook[nimibook]
+  nimib --> nblog[nblog]
+  nimib --> tabelline[tabelline]
+  lib --> nimibook
+  lib --> nblog
+  tabelline -.-> nblog`;
+const RELEASE=`flowchart LR
   idea[Idea] --> draft(Draft)
   draft --> review{Review?}
   review -->|yes| ship((Ship))
   review -.->|no| draft
   ship --> users[Users]`;
-const EDITED=BASE.replace("flowchart LR\n","flowchart LR\n  start((Start)) --> idea\n");
+const SEQUENCE=`sequenceDiagram
+  participant A as Author
+  participant N as nimib
+  participant P as Pele
+  A->>N: nim r page.nim
+  N->>P: render(source)
+  P-->>N: SVG
+  N-->>A: page.html`;
+const EXAMPLES={"nimib family":FAMILY,"release flow":RELEASE,"sequence (themes only)":SEQUENCE};
+const BASE=FAMILY;
+const EDITED=FAMILY.replace("flowchart TD\n","flowchart TD\n  you([You]) --> mermaid\n");
 const emptyLayer=()=>({theme:"pele",arrows:"pele",nodes:{},edges:{}});
 const clone=o=>JSON.parse(JSON.stringify(o));
+const MOVES={mermaid:{dx:-40,dy:96},pele:{dx:96},nim:{dx:72},lib:{dx:88,dy:16},nimib:{dx:72,dy:-80},nimibook:{dx:-64,dy:-64},tabelline:{dx:96,dy:-64},nblog:{dx:-72,dy:-160}};
+const BEND={L_tabelline_nblog_0:{route:"bezier",c1:[-40,70],c2:[40,70]}};
+const withFill=(m,fills)=>{const o=clone(m);for(const[k,v]of Object.entries(fills))o[k]={...(o[k]||{}),fill:v};return o;};
+const FILLS={lib:"#c8402b",pele:"#2d5d8c",mermaid:"#2d5d8c"};
 const STEPS=[
-  {t:"1 · write",c:"<b>Write the standard diagram.</b> Plain Mermaid on the left; Pele lays it out and draws it. Nothing personal yet: the layer on the right is empty.",
+  {t:"1 · write",c:"<b>Write the standard diagram.</b> Plain Mermaid on the left, here a map of the nimib family. Pele lays it out top to bottom and routes every arrow. Nothing personal yet: the layer on the right is empty.",
    f:()=>({src:BASE,layer:emptyLayer()})},
   {t:"2 · theme",c:"<b>Theme it.</b> One word in the layer, <code>\"theme\": \"isotype\"</code>. Pele draws it again with the theme’s font, so the boxes fit the new text.",
    f:()=>({src:BASE,layer:{...emptyLayer(),theme:"isotype"}})},
-  {t:"3 · move",c:"<b>Move things.</b> Ship and Users go below the decision. The layer stores offsets from Pele’s positions. The arrows of the moved nodes are re-routed by the algorithm you choose under <em>Arrows after a move</em>.",
-   f:()=>({src:BASE,layer:{...emptyLayer(),theme:"isotype",arrows:"elbow",nodes:{ship:{dx:-120,dy:104},users:{dx:-120,dy:104}}}})},
-  {t:"4 · shape arrows",c:"<b>Shape the arrows.</b> Algorithmic arrows become curves, and the “no” loop becomes a hand-shaped Bézier. Click it to see its handles, and pull them.",
-   f:()=>({src:BASE,layer:{...emptyLayer(),theme:"isotype",arrows:"curve",nodes:{ship:{dx:-120,dy:104},users:{dx:-120,dy:104}},edges:{L_review_draft_0:{route:"bezier",c1:[-20,-70],c2:[20,-70]}}}})},
-  {t:"5 · restyle",c:"<b>Make it yours.</b> Colour the decision red and the outcome blue. Each choice is one line in the layer, keyed by the Mermaid id.",
-   f:()=>({src:BASE,layer:{...emptyLayer(),theme:"isotype",arrows:"curve",nodes:{review:{fill:"#c8402b"},ship:{dx:-120,dy:104,fill:"#2d5d8c"},users:{dx:-120,dy:104}},edges:{L_review_draft_0:{route:"bezier",c1:[-20,-70],c2:[20,-70]}}}})},
-  {t:"6 · edit source",c:"<b>Keep editing the standard part.</b> A new line adds a Start node in front. Pele lays out the new diagram, everything shifts right, and the layer still applies, because it is keyed by ids and stores offsets.",
+  {t:"3 · move",c:"<b>Rearrange it.</b> Inputs in a row on top, the library and nimib in the middle, outputs in a row below. Eight offsets in the layer. Every arrow is re-routed with <em>elbow</em>: try <em>straight</em> and <em>curve</em> on the left, and drag the hub around to watch its five arrows follow.",
+   f:()=>({src:BASE,layer:{...emptyLayer(),theme:"isotype",arrows:"elbow",nodes:clone(MOVES)}})},
+  {t:"4 · shape arrows",c:"<b>Shape the arrows.</b> Curves everywhere, and the dotted tabelline → nblog link becomes a hand-shaped Bézier that dips under the bottom row. Click it to see its handles, and pull them.",
+   f:()=>({src:BASE,layer:{...emptyLayer(),theme:"isotype",arrows:"curve",nodes:clone(MOVES),edges:clone(BEND)}})},
+  {t:"5 · restyle",c:"<b>Make it yours.</b> The library in red, its inputs in blue. Each choice is one line in the layer, keyed by the Mermaid id.",
+   f:()=>({src:BASE,layer:{...emptyLayer(),theme:"isotype",arrows:"curve",nodes:withFill(MOVES,FILLS),edges:clone(BEND)}})},
+  {t:"6 · edit source",c:"<b>Keep editing the standard part.</b> A new line puts <em>You</em> at the top. Pele lays out the new diagram, everything shifts down a row, and the layer still applies, because it is keyed by ids and stores offsets. You is new, so it sits where Pele put it: drag it into place.",
    f:()=>({src:EDITED,layer:null})},
   {t:"7 · swap style",c:"<b>Swap the whole style.</b> Same source, same layer, another theme. Your moves and curves carry over. Try the other themes on the left.",
    f:()=>({src:EDITED,layer:"quaderno"})}
@@ -321,7 +348,7 @@ function draw(stage,src,layer,opts){
   const st={svg,stage,src,type:r.type,nodes:new Map(),edges:[],vb0:svg.getAttribute("viewBox").split(/\s+/).map(Number),pre};
   if(th.rough){
     const defs=document.createElementNS("http://www.w3.org/2000/svg","defs");
-    defs.innerHTML=`<filter id="${pre}rough"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="2.6"/></filter>`;
+    defs.innerHTML=`<filter id="${pre}rough" filterUnits="userSpaceOnUse" x="-5000" y="-5000" width="10000" height="10000"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="2.6"/></filter>`;
     svg.prepend(defs);
   }
   if(r.type!=="flowchart") return st;
@@ -425,6 +452,7 @@ function showLayer(fromUser){
 }
 function seg(el,items,cur,on){el.innerHTML="";items.forEach(v=>{const b=document.createElement("button");b.textContent=v;b.setAttribute("aria-pressed",v===cur);b.onclick=()=>on(v);el.appendChild(b);});}
 function controls(){
+  seg($("examples"),Object.keys(EXAMPLES),Object.keys(EXAMPLES).find(k=>EXAMPLES[k]===src),v=>{src=EXAMPLES[v];srcEl.value=src;layer={...emptyLayer(),theme:layer.theme};sel=null;setStep(-1);full();});
   seg($("themes"),Object.keys(THEMES),layer.theme,v=>{layer.theme=v;full();});
   seg($("arrows"),ARROWS,layer.arrows,v=>{layer.arrows=v;refresh(true);});
 }
