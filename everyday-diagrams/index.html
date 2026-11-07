@@ -46,7 +46,11 @@ ol.points{list-style:none;padding:0;counter-reset:p;max-width:700px}
 ol.points li{counter-increment:p;position:relative;padding-left:46px;margin:0 0 16px}
 ol.points li::before{content:counter(p);position:absolute;left:0;top:2px;width:30px;height:30px;border-radius:50%;background:var(--blue);color:var(--paper);display:grid;place-items:center;font-weight:700;font-size:15px}
 .code2{display:grid;grid-template-columns:1fr 1.6fr;gap:16px;margin:16px 0}
-.code2 h3{margin:0 0 6px;font-size:14px}.code2>div{min-width:0}
+.code2 h3{margin:0 0 6px;font-size:14px}
+.out{border:2px solid var(--ink);border-top:0;background:#fbf7ec;padding:14px;min-height:60px;display:grid;place-items:center;--pele-bg:#fbf7ec;--pele-fg:#1c1b19;--pele-surface:#e2a52a;--pele-border:#1c1b19;--pele-line:#1c1b19;--pele-radius:0px}
+.out svg{width:100%;height:auto;max-width:480px}
+#d3-out rect{fill:#e2a52a;stroke:#1c1b19;stroke-width:1.2}#d3-out text{font:15px Jost,sans-serif;fill:#1c1b19}#d3-out line{stroke:#1c1b19;stroke-width:1.2}#d3-out marker path{fill:#1c1b19}
+.out .err{color:var(--red);font:13px var(--mono)}.code2>div{min-width:0}
 body pre>code,body pre{font-family:var(--mono);font-size:12.5px;line-height:1.45}
 pre{margin:0;background:var(--ink);color:#efe7d3;padding:12px 14px;overflow-x:auto}
 .people{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:16px 0}
@@ -182,26 +186,33 @@ ol.refs li{margin-bottom:6px;overflow-wrap:anywhere}
 <li><b>It is easy for machines to write.</b> The syntax is small enough that language models produce it reliably, which is why Mermaid has become the default way for chat assistants to draw.</li>
 </ol>
 
-<p>The difference in effort is easy to see. Here is the same four-step process in Mermaid and in D3. The D3 version is shortened, and it still has to decide every coordinate:</p>
+<p>The difference in effort is easy to see. Here is the same four-step process in Mermaid and in D3, each with what it draws underneath. Both run live on this page, from copies of Pele 1.13.0 and D3 7.9.2 kept in the repository. The D3 version is complete, and it decides every coordinate itself:</p>
 <div class="code2">
-<div><h3>Mermaid or Pele</h3><pre><code>flowchart LR
+<div><h3>Mermaid, drawn by Pele</h3><pre><code id="mer-src">flowchart LR
   idea --&gt; draft
   draft --&gt; review
-  review --&gt; ship</code></pre></div>
-<div><h3>D3 (abridged)</h3><pre><code>const steps = ["idea","draft","review","ship"];
-const svg = d3.select("body").append("svg")
-  .attr("width", 520).attr("height", 60);
+  review --&gt; ship</code></pre><div class="out" id="mer-out" aria-label="Pele's drawing of the Mermaid source"></div></div>
+<div><h3>D3</h3><pre><code id="d3-src">const steps = ["idea", "draft", "review", "ship"];
+const svg = d3.select("#d3-out").append("svg")
+  .attr("viewBox", "0 0 480 60");
+svg.append("defs").append("marker")
+  .attr("id", "arrow").attr("viewBox", "0 0 10 10")
+  .attr("refX", 10).attr("refY", 5)
+  .attr("markerWidth", 8).attr("markerHeight", 8)
+  .attr("orient", "auto")
+  .append("path").attr("d", "M0,0L10,5L0,10Z");
 const g = svg.selectAll("g").data(steps).join("g")
-  .attr("transform", (d, i) =&gt; `translate(${i*130},10)`);
+  .attr("transform", (d, i) =&gt; `translate(${i * 130},10)`);
 g.append("rect").attr("width", 90).attr("height", 40);
 g.append("text").attr("x", 45).attr("y", 25)
   .attr("text-anchor", "middle").text(d =&gt; d);
 svg.selectAll("line").data(steps.slice(1)).join("line")
-  .attr("x1", (d, i) =&gt; i*130 + 90).attr("y1", 30)
-  .attr("x2", (d, i) =&gt; i*130 + 130).attr("y2", 30)
+  .attr("x1", (d, i) =&gt; i * 130 + 90).attr("y1", 30)
+  .attr("x2", (d, i) =&gt; i * 130 + 128).attr("y2", 30)
   .attr("marker-end", "url(#arrow)");
-// …plus the arrow marker, styles, and a resize handler</code></pre></div>
+// fill, stroke and font come from the page's CSS</code></pre><div class="out" id="d3-out" aria-label="D3's drawing"></div></div>
 </div>
+<p class="cap">Four lines against nineteen, for the same picture. Pele also chose the box sizes from the text, the spacing and the arrowheads, and it would rearrange everything if a fifth step were added. The D3 code would need new numbers.</p>
 <p>The D3 version can become a Tufte graphic. The Mermaid version never will, and it took ten seconds.</p>
 
 <h2><span class="n">5</span>The figure: Otto Neurath</h2>
@@ -258,10 +269,24 @@ svg.selectAll("line").data(steps.slice(1)).join("line")
 <li>Simon Brown, <a href="https://c4model.com">The C4 model for visualising software architecture</a>.</li>
 <li>Michael Bostock, Vadim Ogievetsky &amp; Jeffrey Heer, “D³: Data-Driven Documents”, <i>IEEE TVCG</i> 17(12) (2011).</li>
 <li>Tools: <a href="https://mermaid.js.org">Mermaid</a>, <a href="https://github.com/obsidianmd/pele">Pele</a>, <a href="https://graphviz.org">Graphviz</a>, <a href="https://plantuml.com">PlantUML</a>, <a href="https://d2lang.com">D2</a>, <a href="https://structurizr.com">Structurizr</a>, <a href="https://www.drawio.com">draw.io</a> (<a href="https://en.wikipedia.org/wiki/Diagrams.net">history</a>), <a href="https://en.wikipedia.org/wiki/Microsoft_Visio">Visio</a>, <a href="https://en.wikipedia.org/wiki/Lucidchart">Lucidchart</a>, <a href="https://excalidraw.com">Excalidraw</a>, <a href="https://d3js.org">D3</a>, <a href="https://vega.github.io/vega-lite/">Vega-Lite</a>.</li>
+<li>Part three: <a href="../personal-diagrams/">Ready-made, Then Made Yours</a>, a proof of concept for personalising standard diagrams.</li>
 <li>Part one: <a href="../diagram-history/">Boxes, Lines and Arrows, a short history of diagrams</a>.</li>
 </ol>
 
 <p class="foot">Made with Claude for Pietro Peterlongo, November 2026. Set in Jost, a free typeface after Futura, the face Isotype used; the pictograms are new drawings in the Isotype manner, not Arntz’s originals. Dates follow the references. Corrections are welcome on <a href="https://github.com/pietroppeter/claude-artifacts">GitHub</a>.</p>
 </main>
+<script src="vendor/pele-1.13.0.global.js"></script>
+<script src="vendor/d3-7.9.2.min.js"></script>
+<script>
+// Run the two snippets exactly as shown above.
+(async function(){
+  try{await document.fonts.load("16px Jost");}catch(e){}
+  const mer=document.getElementById("mer-out"),d3o=document.getElementById("d3-out");
+  try{mer.innerHTML=pele.render(document.getElementById("mer-src").textContent,{fontFamily:"Jost, sans-serif"}).svg;}
+  catch(e){mer.innerHTML='<span class="err">Pele did not load: '+e.message+'</span>';}
+  try{new Function("d3",document.getElementById("d3-src").textContent)(d3);}
+  catch(e){d3o.innerHTML='<span class="err">D3 did not load: '+e.message+'</span>';}
+})();
+</script>
 </body>
 </html>
