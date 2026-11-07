@@ -1,0 +1,3 @@
+$ python qjs_vs_node.py
+same SVG as Node: [True, True, True, True]
+QuickJS: load Pele 114 ms, then 0.93 ms a diagram

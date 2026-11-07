@@ -1,0 +1,396 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>diagrammari in Python, Jupyter and marimo: the evidence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Special+Elite&family=IBM+Plex+Sans:ital,wght@0,400;0,600;1,400&family=IBM+Plex+Mono:wght@400;600&display=swap">
+<style>
+:root{--paper:#f4ecd8;--folder:#e3cf9f;--ink:#26221c;--mute:#6d6250;--red:#b3261e;--blue:#1f4e79;--line:#cdbb8d;
+  padding:env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left)}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--folder);color:var(--ink);font:17px/1.55 "IBM Plex Sans",system-ui,sans-serif}
+[hidden]{display:none!important}
+main{max-width:860px;margin:0 auto;padding:28px 18px 80px}
+.sheet{background:var(--paper);border:1px solid var(--line);box-shadow:0 2px 0 #c9b47f,0 10px 30px rgba(60,40,0,.12);padding:28px 30px;margin:0 0 26px;position:relative}
+h1,h2,h3{font-family:"Special Elite","Courier New",monospace;font-weight:400;line-height:1.2}
+h1{font-size:34px;margin:6px 0 10px}
+h2{font-size:24px;margin:0 0 12px}
+h3{font-size:18px;margin:22px 0 6px}
+.kicker{font:600 12px "IBM Plex Mono",monospace;letter-spacing:.12em;text-transform:uppercase;color:var(--mute)}
+.lede{font-size:19px}
+.tab{position:absolute;top:-14px;left:22px;background:var(--paper);border:1px solid var(--line);border-bottom:none;padding:2px 12px;font:600 12px "IBM Plex Mono",monospace;letter-spacing:.08em;color:var(--mute)}
+.stamp{position:absolute;top:18px;right:18px;transform:rotate(-7deg);border:3px solid var(--red);color:var(--red);font:16px "Special Elite",monospace;padding:4px 10px;border-radius:4px;opacity:.85;text-transform:uppercase;letter-spacing:.05em;background:rgba(255,255,255,.15)}
+.stamp.blue{border-color:var(--blue);color:var(--blue)}
+.stamp.grey{border-color:var(--mute);color:var(--mute)}
+pre{background:#fffaf0;border:1px solid var(--line);border-left:4px solid var(--ink);padding:10px 12px;overflow-x:auto;margin:10px 0 16px}
+body pre > code,pre{font:12.5px/1.5 "IBM Plex Mono",ui-monospace,monospace}
+code{font:0.88em "IBM Plex Mono",ui-monospace,monospace;background:rgba(255,255,255,.5);padding:0 3px}
+pre code{background:none;padding:0}
+.cmd{color:var(--blue);font-weight:600}
+figure{margin:14px 0 18px}
+figure img{width:100%;height:auto;border:1px solid var(--line);display:block;background:#fff}
+figcaption{font-size:14px;color:var(--mute);margin-top:6px}
+.svgbox{background:#fff;border:1px solid var(--line);padding:12px;overflow-x:auto}
+.svgbox svg{max-width:100%;height:auto}
+.wide{display:block}.narrow{display:none}
+table{border-collapse:collapse;width:100%;font-size:15px;margin:10px 0 16px}
+th,td{border-bottom:1px solid var(--line);text-align:left;padding:6px 8px;vertical-align:top}
+th{font:600 12px "IBM Plex Mono",monospace;text-transform:uppercase;letter-spacing:.06em;color:var(--mute)}
+.pick{background:rgba(179,38,30,.08)}
+.two{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px}.two>*{min-width:0}
+.two .svgbox{padding:8px}
+.note{font-size:14px;color:var(--mute)}
+a{color:var(--blue)}
+ol.toc{columns:2;font-size:15px;padding-left:20px}
+#layer{min-height:60px;white-space:pre}
+.links a{margin-right:14px}
+@media (max-width:640px){
+  body{font-size:16px}main{padding:22px 10px 60px}.sheet{padding:22px 16px}
+  h1{font-size:27px}h2{font-size:21px}.stamp{position:static;display:inline-block;margin:0 0 10px;font-size:13px}
+  .wide{display:none}.narrow{display:block}table{display:block;overflow-x:auto;font-size:13.5px}th,td{padding:5px 5px}.two{grid-template-columns:minmax(0,1fr)}ol.toc{columns:1}
+}
+</style>
+</head>
+<body>
+<main>
+
+<section class="sheet">
+  <div class="kicker">diagrammari · case file · 7 Nov 2026</div>
+  <h1>diagrammari in Python, Jupyter and marimo</h1>
+  <p class="lede">Pietro asked for diagrammari from Python with <code>uv add</code>, an editor in Jupyter and marimo
+  where you drag boxes around, the changes back as JSON, and a personalized SVG exported from the
+  Mermaid text plus those changes. A proof of concept now does all of that. This page is the evidence:
+  every output below was copied from a real run, and every screenshot is from a real browser driven by Playwright.</p>
+  <div class="svgbox wide"><svg xmlns="http://www.w3.org/2000/svg" class="pele pele-flowchart" viewBox="0 0 1086 168" width="1086" height="168" style="max-width:100%;height:auto;--_bg:var(--pele-bg,#fff);--_fg:var(--pele-fg,#1f1f1f);--_m:var(--pele-muted,#6e6e6e);--_l:var(--pele-line,#1f1f1f);--_s:var(--pele-surface,#f3f3f3);--_a:var(--pele-surface-alt,#e6e6e6);--_b:var(--pele-border,#8a8a8a);--_c:var(--pele-accent,#5b7bd5);color:var(--_fg);--_r:var(--pele-radius,4px);--_fm:var(--pele-font-mono,monospace);font:16px sans-serif;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;font-family:var(--pele-font,IBM Plex Sans, sans-serif)" fill="var(--_fg)" role="graphics-document document" aria-roledescription="flowchart"><g class="pele-edges" fill="none" stroke="var(--_l)" stroke-linecap="round"><g class="pele-edge" data-id="L_text_lib_0"><path d="M152.46,84L193.46,84"/><path class="pele-marker" d="M200.46,84L192.46,87.36L192.46,80.64Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="L_lib_svg_0"><path d="M327.1,72L336.07,72C341.84,72 341.84,32 347.6,32L504.7,32"/><path class="pele-marker" d="M511.7,32L503.7,35.36L503.7,28.64Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="L_svg_ed_0"><path d="M581.49,32L648.28,32"/><path class="pele-marker" d="M655.28,32L647.28,35.36L647.28,28.64Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="L_ed_py_0"><path d="M860.22,32L964.29,32C971.98,32 971.98,50 979.66,50L984.79,50"/><path class="pele-marker" d="M991.79,50L983.79,53.36L983.79,46.64Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="L_py_lib_0"><path d="M991.79,66L978.79,66C919.5,66 919.5,84 860.22,84L334.1,84"/><path class="pele-marker" d="M327.1,84L335.1,80.64L335.1,87.36Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="L_lib_out_0"><path d="M327.1,96L336.07,96C341.84,96 341.84,136 347.6,136L478.92,136"/><path class="pele-marker" d="M485.92,136L477.92,139.36L477.92,132.64Z" fill="var(--_l)" stroke="none"/></g></g><g class="pele-edge-labels" font-size="14"><g class="pele-edge-label" data-id="L_lib_svg_0"><rect x="349.6" y="21.5" width="106.81" height="21" rx="3" fill="var(--_bg)"/><text x="403.01" y="36.9" text-anchor="middle">Pele in QuickJS</text></g><g class="pele-edge-label" data-id="L_ed_py_0"><rect x="882.72" y="21.5" width="79.57" height="21" rx="3" fill="var(--_bg)"/><text x="922.5" y="36.9" text-anchor="middle">layer JSON</text></g><g class="pele-edge-label" data-id="L_lib_out_0"><rect x="359.33" y="125.5" width="87.37" height="21" rx="3" fill="var(--_bg)"/><text x="403.01" y="140.9" text-anchor="middle">layer applied</text></g></g><g class="pele-nodes"><g class="pele-node pele-shape-stadium" data-id="text" transform="translate(80.23,84)"><rect x="-72.23" y="-24" width="144.46" height="48" rx="24" fill="var(--_s)" stroke="var(--_b)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">Mermaid text</text></g><g class="pele-node pele-shape-rect" data-id="lib" transform="translate(263.78,84)"><rect x="-63.32" y="-24" width="126.64" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">libmari (Nim)</text></g><g class="pele-node pele-shape-rect" data-id="svg" transform="translate(546.6,32)"><rect x="-34.9" y="-24" width="69.79" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">SVG</text></g><g class="pele-node pele-shape-hex" data-id="ed" transform="translate(757.75,32)"><polygon points="-90.47,-24 90.47,-24 102.47,0 90.47,24 -90.47,24 -102.47,0" fill="var(--_s)" stroke="var(--_b)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">editor in the browser</text></g><g class="pele-node pele-shape-rect" data-id="py" transform="translate(1034.69,58)"><rect x="-42.9" y="-24" width="85.81" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">Python</text></g><g class="pele-node pele-shape-stadium" data-id="out" transform="translate(546.6,136)"><rect x="-60.68" y="-24" width="121.36" height="48" rx="24" fill="var(--_s)" stroke="var(--_b)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">your SVG</text></g></g></svg></div>
+  <div class="svgbox narrow"><svg xmlns="http://www.w3.org/2000/svg" class="pele pele-flowchart" viewBox="0 0 399 498" width="399" height="498" style="max-width:100%;height:auto;--_bg:var(--pele-bg,#fff);--_fg:var(--pele-fg,#1f1f1f);--_m:var(--pele-muted,#6e6e6e);--_l:var(--pele-line,#1f1f1f);--_s:var(--pele-surface,#f3f3f3);--_a:var(--pele-surface-alt,#e6e6e6);--_b:var(--pele-border,#8a8a8a);--_c:var(--pele-accent,#5b7bd5);color:var(--_fg);--_r:var(--pele-radius,4px);--_fm:var(--pele-font-mono,monospace);font:16px sans-serif;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;font-family:var(--pele-font,IBM Plex Sans, sans-serif)" fill="var(--_fg)" role="graphics-document document" aria-roledescription="flowchart"><g class="pele-edges" fill="none" stroke="var(--_l)" stroke-linecap="round"><g class="pele-edge" data-id="L_text_lib_0"><path d="M240.94,56L240.94,97"/><path class="pele-marker" d="M240.94,104L237.58,96L244.3,96Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="L_lib_svg_0"><path d="M224.94,152L224.94,160.97C224.94,165.62 110.47,167.85 110.47,172.5L110.47,218"/><path class="pele-marker" d="M110.47,225L107.11,217L113.83,217Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="L_svg_ed_0"><path d="M110.47,273L110.47,314"/><path class="pele-marker" d="M110.47,321L107.11,313L113.83,313Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="L_ed_py_0"><path d="M110.47,369L110.47,414.5C110.47,422.19 167.71,422.19 167.71,429.88L167.71,435"/><path class="pele-marker" d="M167.71,442L164.35,434L171.07,434Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="L_py_lib_0"><path d="M183.71,442L183.71,429C183.71,399 240.94,399 240.94,369L240.94,159"/><path class="pele-marker" d="M240.94,152L244.3,160L237.58,160Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="L_lib_out_0"><path d="M256.94,152L256.94,160.97C256.94,166.73 329.62,166.73 329.62,172.5L329.62,218"/><path class="pele-marker" d="M329.62,225L326.26,217L332.98,217Z" fill="var(--_l)" stroke="none"/></g></g><g class="pele-edge-labels" font-size="14"><g class="pele-edge-label" data-id="L_lib_svg_0"><rect x="57.07" y="174.5" width="106.81" height="21" rx="3" fill="var(--_bg)"/><text x="110.47" y="189.9" text-anchor="middle">Pele in QuickJS</text></g><g class="pele-edge-label" data-id="L_ed_py_0"><rect x="70.69" y="391.5" width="79.57" height="21" rx="3" fill="var(--_bg)"/><text x="110.47" y="406.9" text-anchor="middle">layer JSON</text></g><g class="pele-edge-label" data-id="L_lib_out_0"><rect x="285.94" y="174.5" width="87.37" height="21" rx="3" fill="var(--_bg)"/><text x="329.62" y="189.9" text-anchor="middle">layer applied</text></g></g><g class="pele-nodes"><g class="pele-node pele-shape-stadium" data-id="text" transform="translate(240.94,32)"><rect x="-72.23" y="-24" width="144.46" height="48" rx="24" fill="var(--_s)" stroke="var(--_b)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">Mermaid text</text></g><g class="pele-node pele-shape-rect" data-id="lib" transform="translate(240.94,128)"><rect x="-63.32" y="-24" width="126.64" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">libmari (Nim)</text></g><g class="pele-node pele-shape-rect" data-id="svg" transform="translate(110.47,249)"><rect x="-34.9" y="-24" width="69.79" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">SVG</text></g><g class="pele-node pele-shape-hex" data-id="ed" transform="translate(110.47,345)"><polygon points="-90.47,-24 90.47,-24 102.47,0 90.47,24 -90.47,24 -102.47,0" fill="var(--_s)" stroke="var(--_b)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">editor in the browser</text></g><g class="pele-node pele-shape-rect" data-id="py" transform="translate(175.71,466)"><rect x="-42.9" y="-24" width="85.81" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">Python</text></g><g class="pele-node pele-shape-stadium" data-id="out" transform="translate(329.62,249)"><rect x="-60.68" y="-24" width="121.36" height="48" rx="24" fill="var(--_s)" stroke="var(--_b)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">your SVG</text></g></g></svg></div>
+  <p class="note">The loop, drawn by Pele from Mermaid text. Write standard Mermaid, the Nim library draws it, the editor
+  gives back a layer of hand edits, and the library applies the layer to give your SVG.</p>
+  <ol class="toc">
+    <li><a href="#wheel">A Nim library in a Python wheel</a></li>
+    <li><a href="#uvadd">uv add, and no Node anywhere</a></li>
+    <li><a href="#layer-export">The layer, exported headless</a></li>
+    <li><a href="#marimo">The editor in marimo</a></li>
+    <li><a href="#jupyter">The editor in JupyterLab</a></li>
+    <li><a href="#tab">The editor in a browser tab</a></li>
+    <li><a href="#try">Try the editor here</a></li>
+    <li><a href="#node">Why Node was needed, and how QuickJS replaced it</a></li>
+    <li><a href="#choices">The choices, and why</a></li>
+    <li><a href="#next">What is proposed next</a></li>
+  </ol>
+  <p class="links"><a href="https://github.com/pietroppeter/diagrammari/pull/3">diagrammari PR #3</a>
+  <a href="https://github.com/pietroppeter/diagrammari/tree/claude/project-thread-ekbf6s/experiments/python">experiments/python</a></p>
+</section>
+
+<section class="sheet" id="wheel">
+  <div class="tab">EXHIBIT A</div>
+  <div class="stamp">seen running</div>
+  <h2>A Nim library in a Python wheel</h2>
+  <p>The Nim side is compiled with <code>nim c --app:lib</code> into <code>libmari.so</code>. It exports a few plain C functions:
+  <code>mari_draw</code> takes a JSON request (Mermaid text, layer, options) and returns a JSON answer (the SVG, or Pele's error),
+  <code>mari_free</code> releases the answer, and <code>mari_pele_version</code> and <code>mari_engine</code> report the Pele version and the engine. Python loads the library with <code>ctypes</code> from the standard library.
+  There is no nimpy and no compiled Python extension, so one wheel works with every Python 3 on a platform.</p>
+  <pre><code>proc mari_draw(request: cstring): cstring {.exportc, dynlib, cdecl.}
+proc mari_free(p: cstring) {.exportc, dynlib, cdecl.}</code></pre>
+  <p>A small hatchling build hook runs Nim during <code>uv build</code> and tags the wheel <code>py3-none-&lt;platform&gt;</code>:</p>
+  <pre><code><span class="cmd">$ uv build --wheel</span>
+Building wheel...
+Successfully built dist/diagrammari-0.0.1-py3-none-linux_x86_64.whl
+
+<span class="cmd">$ unzip -l dist/diagrammari-0.0.1-py3-none-linux_x86_64.whl</span>
+Archive:  /home/user/diagrammari/experiments/python/dist/diagrammari-0.0.1-py3-none-linux_x86_64.whl
+  Length      Date    Time    Name
+---------  ---------- -----   ----
+     4135  2020-02-02 00:00   mari/__init__.py
+     2769  2020-02-02 00:00   mari/browser.py
+   733670  2020-02-02 00:00   mari/pele.global.js
+    17020  2020-02-02 00:00   mari/widget.js
+      800  2020-02-02 00:00   mari/widget.py
+  2379008  2020-02-02 00:00   mari/_lib/libmari.so
+     4584  2020-02-02 00:00   diagrammari-0.0.1.dist-info/METADATA
+       97  2020-02-02 00:00   diagrammari-0.0.1.dist-info/WHEEL
+      663  2020-02-02 00:00   diagrammari-0.0.1.dist-info/RECORD
+---------                     -------
+  3142746                     9 files</code></pre>
+  <p class="note">The library is 2.4 MB: QuickJS (about 1.2 MB, see exhibit H), Pele's bundle (730 kB, embedded with <code>staticRead</code>) and
+  the Nim code. The widget gets its own copy of Pele (<code>pele.global.js</code>) because the browser draws too. The compressed wheel is 1.3 MB.</p>
+</section>
+
+<section class="sheet" id="uvadd">
+  <div class="tab">EXHIBIT B</div>
+  <div class="stamp">seen running</div>
+  <h2>uv add, and no Node anywhere</h2>
+  <p>This is a new project. <code>uv add</code> installs one package and nothing else. Pele runs inside the library, in QuickJS, and to prove it the
+  script runs with <code>node</code> taken off the <code>PATH</code>.</p>
+  <pre><code>$ uv init --bare
+Initialized project `fresh2`
+$ uv add ./diagrammari-0.0.1-py3-none-linux_x86_64.whl
+Using CPython 3.13.18 interpreter at: /usr/local/bin/python3
+Creating virtual environment at: .venv
+Resolved 2 packages in 19ms
+Installed 1 package in 1ms
+ + diagrammari==0.0.1 (from file://./diagrammari-0.0.1-py3-none-linux_x86_64.whl)</code></pre>
+  <details><summary>demo.py</summary><pre><code>import shutil, time, mari
+
+print(&quot;node on PATH:&quot;, shutil.which(&quot;node&quot;), &quot;| engine:&quot;, mari.engine())
+src = &quot;&quot;&quot;flowchart LR
+  idea[Idea] --&gt; draft(Draft)
+  draft --&gt; review{Review?}
+  review --&gt;|yes| ship((Ship))
+  review -.-&gt;|no| draft&quot;&quot;&quot;
+d = mari.Diagram(src)
+t = time.perf_counter(); plain = d.svg; t1 = time.perf_counter() - t
+print(&quot;Pele&quot;, mari.pele_version(), &quot;drew&quot;, len(plain), &quot;bytes of SVG in&quot;, f&quot;{t1*1000:.0f} ms (first call loads Pele)&quot;)
+print(&quot;ids:&quot;, d.ids())
+d.layer = {&quot;theme&quot;: &quot;isotype&quot;, &quot;arrows&quot;: &quot;curve&quot;,
+           &quot;nodes&quot;: {&quot;ship&quot;: {&quot;dy&quot;: 120, &quot;fill&quot;: &quot;#c8402b&quot;}},
+           &quot;edges&quot;: {&quot;L_review_draft_0&quot;: {&quot;route&quot;: &quot;bezier&quot;, &quot;c1&quot;: [-30, -80], &quot;c2&quot;: [30, -80]}}}
+t = time.perf_counter(); d.save(&quot;personal.svg&quot;); t2 = time.perf_counter() - t
+open(&quot;plain.svg&quot;, &quot;w&quot;).write(plain)
+print(&quot;with the layer:&quot;, f&quot;{t2*1000:.1f} ms&quot;)
+try:
+    mari.Diagram(&quot;flowchart LR\n  a --&gt; [&quot;).svg
+except mari.DiagramError as e:
+    print(&quot;DiagramError:&quot;, e.code, &quot;at&quot;, f&quot;{e.line}:{e.column}&quot;)</code></pre></details>
+  <pre><code>$ PATH=/usr/bin:/bin uv run python demo.py
+node on PATH: None | engine: quickjs
+Pele 1.13.0 drew 3101 bytes of SVG in 90 ms (first call loads Pele)
+ids: {&#x27;nodes&#x27;: [&#x27;idea&#x27;, &#x27;draft&#x27;, &#x27;review&#x27;, &#x27;ship&#x27;], &#x27;edges&#x27;: [&#x27;L_review_draft_0&#x27;, &#x27;L_draft_review_0&#x27;, &#x27;L_review_ship_0&#x27;, &#x27;L_idea_draft_0&#x27;]}
+with the layer: 1.9 ms
+DiagramError: syntax at 2:9</code></pre>
+  <p class="note">The first call loads Pele into QuickJS, which takes about 90 ms. Later diagrams take under a millisecond, and the layer is applied in
+  Nim in about 2 ms. The <code>personal.svg</code> written here is identical, byte for byte, to the one from the Node run below.</p>
+  <h3>Before QuickJS: Node from PyPI</h3>
+  <p>The first version ran Pele in Node. The <code>[node]</code> extra brings Node as a PyPI wheel (<code>nodejs-wheel-binaries</code>), and
+  <code>MARI_ENGINE=node</code> still selects it:</p>
+  <pre><code>$ uv init --bare
+Initialized project `fresh`
+$ uv add &quot;./diagrammari-0.0.1-py3-none-linux_x86_64.whl[node]&quot;
+Using CPython 3.13.18 interpreter at: /usr/local/bin/python3
+Creating virtual environment at: .venv
+Resolved 3 packages in 219ms
+Installed 2 packages in 262ms
+ + diagrammari==0.0.1 (from file://./diagrammari-0.0.1-py3-none-linux_x86_64.whl)
+ + nodejs-wheel-binaries==24.19.0</code></pre>
+  <pre><code>$ PATH=/usr/bin:/bin uv run python demo.py
+node on PATH: None
+Pele 1.13.0 drew 3101 bytes of SVG in 3898 ms (first call starts Node)
+ids: {&#x27;nodes&#x27;: [&#x27;idea&#x27;, &#x27;draft&#x27;, &#x27;review&#x27;, &#x27;ship&#x27;], &#x27;edges&#x27;: [&#x27;L_review_draft_0&#x27;, &#x27;L_draft_review_0&#x27;, &#x27;L_review_ship_0&#x27;, &#x27;L_idea_draft_0&#x27;]}
+with the layer: 2.3 ms
+DiagramError: syntax at 2:9</code></pre>
+  <p class="note">That first call had to start Node from a cold disk and took 3.9 s. A second run took 71 ms.</p>
+</section>
+
+<section class="sheet" id="layer-export">
+  <div class="tab">EXHIBIT C</div>
+  <div class="stamp">seen running</div>
+  <h2>The layer, exported headless</h2>
+  <p>Below are the two files that run wrote: <code>plain.svg</code> is what Pele draws, and <code>personal.svg</code> is the same Mermaid text with this layer applied:</p>
+  <pre><code>{"theme": "isotype", "arrows": "curve",
+ "nodes": {"ship": {"dy": 120, "fill": "#c8402b"}},
+ "edges": {"L_review_draft_0": {"route": "bezier", "c1": [-30, -80], "c2": [30, -80]}}}</code></pre>
+  <div class="two">
+    <figure><div class="svgbox"><svg xmlns="http://www.w3.org/2000/svg" class="pele pele-flowchart" viewBox="0 0 544 97" width="544" height="97" style="max-width:100%;height:auto;--_bg:var(--pele-bg,#fff);--_fg:var(--pele-fg,#1f1f1f);--_m:var(--pele-muted,#6e6e6e);--_l:var(--pele-line,#1f1f1f);--_s:var(--pele-surface,#f3f3f3);--_a:var(--pele-surface-alt,#e6e6e6);--_b:var(--pele-border,#8a8a8a);--_c:var(--pele-accent,#5b7bd5);color:var(--_fg);--_r:var(--pele-radius,4px);--_fm:var(--pele-font-mono,monospace);font:16px sans-serif;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;font-family:var(--pele-font,sans-serif)" fill="var(--_fg)" role="graphics-document document" aria-roledescription="flowchart"><g class="pele-edges" fill="none" stroke="var(--_l)" stroke-linecap="round"><g class="pele-edge" data-id="L_idea_draft_0"><path d="M75.14,48.17L116.14,48.17"/><path class="pele-marker" d="M123.14,48.17L115.14,51.53L115.14,44.81Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="L_draft_review_0"><path d="M193.81,40.17L275.18,40.17"/><path class="pele-marker" d="M282.18,40.17L274.18,43.53L274.18,36.81Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="L_review_ship_0"><path d="M397.92,48.17L472.7,48.17"/><path class="pele-marker" d="M479.7,48.17L471.7,51.53L471.7,44.81Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="L_review_draft_0"><path d="M289.38,60.67L221.31,60.67C213.62,60.67 213.62,60.17 205.93,60.17L200.81,60.17" stroke-dasharray="3 4"/><path class="pele-marker" d="M193.81,60.17L201.81,56.81L201.81,63.53Z" fill="var(--_l)" stroke="none"/></g></g><g class="pele-edge-labels" font-size="14"><g class="pele-edge-label" data-id="L_review_ship_0"><rect x="420.42" y="37.67" width="29.78" height="21" rx="3" fill="var(--_bg)"/><text x="435.31" y="53.07" text-anchor="middle">yes</text></g><g class="pele-edge-label" data-id="L_review_draft_0"><rect x="223.31" y="50.17" width="23.57" height="21" rx="3" fill="var(--_bg)"/><text x="235.09" y="65.57" text-anchor="middle">no</text></g></g><g class="pele-nodes"><g class="pele-node pele-shape-rect" data-id="idea" transform="translate(41.57,48.17)"><rect x="-33.57" y="-24" width="67.14" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">Idea</text></g><g class="pele-node pele-shape-rounded" data-id="draft" transform="translate(158.47,48.17)"><rect x="-35.34" y="-24" width="70.67" height="48" rx="12" fill="var(--_s)" stroke="var(--_b)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">Draft</text></g><g class="pele-node pele-shape-diam" data-id="review" transform="translate(333.65,48.17)"><polygon points="0,-40.17 64.27,0 0,40.17 -64.27,0" fill="var(--_s)" stroke="var(--_b)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">Review?</text></g><g class="pele-node pele-shape-circle" data-id="ship" transform="translate(507.71,48.17)"><circle r="28.01" fill="var(--_s)" stroke="var(--_b)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">Ship</text></g></g></svg></div><figcaption>plain.svg: Pele's layout</figcaption></figure>
+    <figure><div class="svgbox" style="background:#f1ead9"><svg height="244.01" style="--pele-bg:#f1ead9;--pele-fg:#1c1b19;--pele-surface:#e2a52a;--pele-border:#1c1b19;--pele-line:#1c1b19;--pele-accent:#c8402b;--pele-radius:0px;max-width:100%;height:auto;--_bg:var(--pele-bg,#fff);--_fg:var(--pele-fg,#1f1f1f);--_m:var(--pele-muted,#6e6e6e);--_l:var(--pele-line,#1f1f1f);--_s:var(--pele-surface,#f3f3f3);--_a:var(--pele-surface-alt,#e6e6e6);--_b:var(--pele-border,#8a8a8a);--_c:var(--pele-accent,#5b7bd5);color:var(--_fg);--_r:var(--pele-radius,4px);--_fm:var(--pele-font-mono,monospace);font:16px sans-serif;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;font-family:var(--pele-font,Jost, Futura, sans-serif)" xmlns="http://www.w3.org/2000/svg" class="pele pele-flowchart" role="graphics-document document" width="551.72" aria-roledescription="flowchart" viewBox="-4 -35.83 551.72 244.01" fill="var(--_fg)">
+  <g stroke-linecap="round" stroke="var(--_l)" class="pele-edges" fill="none">
+    <g class="pele-edge" data-id="L_idea_draft_0">
+      <path d="M75.14,48.17C111.14,48.17 87.14,48.17 116.14,48.17" />
+      <path stroke="none" d="M123.14,48.17L115.14,51.53L115.14,44.81Z" class="pele-marker" fill="var(--_l)" />
+    </g>
+    <g class="pele-edge" data-id="L_draft_review_0">
+      <path d="M193.81,48.17C231.59,48.17 231.59,48.17 262.38,48.17" />
+      <path stroke="none" d="M269.38,48.17L261.38,51.53L261.38,44.81Z" class="pele-marker" fill="var(--_l)" />
+    </g>
+    <g class="pele-edge" data-id="L_review_ship_0">
+      <path d="M397.92,48.17C438.81,48.17 438.81,168.17 472.7,168.17" />
+      <path stroke="none" d="M479.7,168.17L471.7,171.53L471.7,164.81Z" class="pele-marker" fill="var(--_l)" />
+    </g>
+    <g class="pele-edge" data-id="L_review_draft_0">
+      <path stroke-dasharray="3 4" d="M269.38,48.17C239.38,-31.83 223.81,-31.83 196.26,41.62" />
+      <path stroke="none" d="M193.81,48.17L193.47,39.5L199.76,41.86Z" class="pele-marker" fill="var(--_l)" />
+    </g>
+  </g>
+  <g class="pele-edge-labels" font-size="14">
+    <g transform="translate(3.5,60)" class="pele-edge-label" data-id="L_review_ship_0">
+      <rect x="420.42" height="21" y="37.67" rx="3" width="29.78" fill="var(--_bg)" />
+      <text x="435.31" text-anchor="middle" y="53.07">yes</text>
+    </g>
+    <g transform="translate(-3.5,-72.5)" class="pele-edge-label" data-id="L_review_draft_0">
+      <rect x="223.31" height="21" y="50.17" rx="3" width="23.57" fill="var(--_bg)" />
+      <text x="235.09" text-anchor="middle" y="65.57">no</text>
+    </g>
+  </g>
+  <g class="pele-nodes">
+    <g transform="translate(41.57,48.17)" class="pele-node pele-shape-rect" data-id="idea">
+      <rect x="-33.57" height="48" y="-24" stroke="var(--_b)" style="rx:var(--_r)" width="67.14" fill="var(--_s)" />
+      <text x="0" text-anchor="middle" y="5.6" class="pele-label">Idea</text>
+    </g>
+    <g transform="translate(158.47,48.17)" class="pele-node pele-shape-rounded" data-id="draft">
+      <rect x="-35.34" height="48" y="-24" stroke="var(--_b)" rx="12" width="70.67" fill="var(--_s)" />
+      <text x="0" text-anchor="middle" y="5.6" class="pele-label">Draft</text>
+    </g>
+    <g transform="translate(333.65,48.17)" class="pele-node pele-shape-diam" data-id="review">
+      <polygon stroke="var(--_b)" points="0,-40.17 64.27,0 0,40.17 -64.27,0" fill="var(--_s)" />
+      <text x="0" text-anchor="middle" y="5.6" class="pele-label">Review?</text>
+    </g>
+    <g transform="translate(507.71,168.17)" class="pele-node pele-shape-circle" data-id="ship">
+      <circle stroke="var(--_b)" r="28.01" fill="#c8402b" />
+      <text x="0" text-anchor="middle" y="5.6" class="pele-label">Ship</text>
+    </g>
+  </g>
+</svg></div><figcaption>personal.svg: Ship moved down and filled red, the arrows into it re-routed as curves, "no" as a hand-shaped Bézier arch, isotype colours</figcaption></figure>
+  </div>
+  <p>The layer is keyed by Mermaid's node ids and by Pele's edge ids (<code>L_review_draft_0</code>), and it stores offsets, not
+  positions. If you add a line to the text, Pele lays out the diagram again and the layer still applies. The Nim code (<code>layer.nim</code>)
+  works on the SVG text with <code>std/xmltree</code> and uses the same geometry as the browser editor.</p>
+</section>
+
+<section class="sheet" id="marimo">
+  <div class="tab">EXHIBIT D</div>
+  <div class="stamp blue">seen in marimo 0.25.2</div>
+  <h2>The editor in marimo</h2>
+  <p>The editor is an <a href="https://anywidget.dev">anywidget</a>: one ES module (Pele's bundle followed by about 250 lines of editor) and three synced traits,
+  <code>source</code>, <code>layer</code> and <code>svg</code>. marimo runs any anywidget through <code>mo.ui.anywidget</code>, and a cell that reads
+  <code>editor.value</code> runs again on every edit. Here Playwright dragged Ship down, clicked the dotted arrow, picked <em>bezier</em>
+  and switched the theme. The second cell showed the layer and the SVG exported by Nim from it, as you went.</p>
+  <pre><code>editor = mo.ui.anywidget(mari.Diagram(src).edit())
+# next cell, reruns on each edit:
+layer = editor.value["layer"]
+mari.Diagram(src, layer).save("from_marimo.svg")</code></pre>
+  <figure><img src="img/marimo.png" alt="marimo: the editor with a moved Ship node, the layer JSON, and the SVG exported by Nim" loading="lazy">
+  <figcaption>Top: the editor (browser, Pele). Middle: the layer in Python. Bottom: the export (Nim, Pele in Node). The fonts differ because
+  Jost is not installed in the sandbox.</figcaption></figure>
+</section>
+
+<section class="sheet" id="jupyter">
+  <div class="tab">EXHIBIT E</div>
+  <div class="stamp blue">seen in JupyterLab 4.6.6</div>
+  <h2>The editor in JupyterLab</h2>
+  <p>This is the same widget, unchanged. In a notebook it shows on its own (<code>w = d.edit(); w</code>), and <code>d.layer</code> follows it. Here Playwright dragged
+  nblog to the right, picked <em>elbow</em> arrows, and ran the next cell:</p>
+  <pre><code>{'theme': 'pele',
+ 'arrows': 'elbow',
+ 'nodes': {'nblog': {'dx': 196, 'dy': -20}},
+ 'edges': {}}</code></pre>
+  <figure><img src="img/jupyterlab.png" alt="JupyterLab: the editor with nblog moved and elbow arrows, and d.layer printed below" loading="lazy">
+  <figcaption>nblog is selected (red outline), the arrows are elbows, and the layer is printed below.</figcaption></figure>
+</section>
+
+<section class="sheet" id="tab">
+  <div class="tab">EXHIBIT F</div>
+  <div class="stamp">seen running</div>
+  <h2>The editor in a browser tab</h2>
+  <p>To work without a notebook, from a script or the REPL, <code>d.edit_in_browser()</code> serves the same module on <code>127.0.0.1</code> with a
+  stand-in for the anywidget model, opens a tab, and blocks until you press Done:</p>
+  <pre><code>diagrammari editor: http://127.0.0.1:8765/
+layer back in Python: {'theme': 'pele', 'arrows': 'pele', 'nodes': {'b': {'dx': 68, 'dy': 124}}, 'edges': {}}</code></pre>
+  <p class="note">This uses only <code>http.server</code> and <code>webbrowser</code> from the standard library, so it adds no dependency.</p>
+</section>
+
+<section class="sheet" id="try">
+  <div class="tab">EXHIBIT G</div>
+  <div class="stamp grey">running in this page</div>
+  <h2>Try the editor here</h2>
+  <p>This is the widget module itself, as it ships in the wheel, with the same stand-in model as the browser tab. Drag a box. Click an arrow and pick a route;
+  with <em>bezier</em>, drag its two handles. The layer that Python would receive shows below.</p>
+  <div id="app"></div>
+  <pre id="layer"></pre>
+  <p class="note">The exported SVG needs the Nim library, so it is not in this page. In a notebook, the next cell would draw it.</p>
+</section>
+
+<section class="sheet" id="node">
+  <div class="tab">EXHIBIT H</div>
+  <div class="stamp">seen running</div>
+  <h2>Why Node was needed, and how QuickJS replaced it</h2>
+  <p>Pele is a JavaScript program, and Nim cannot run JavaScript by itself, so something has to execute it.
+  diagrammari (PR #1) starts one Node process and talks to it in JSON lines. That works wherever Node is installed, but for Python it means
+  a 61 MB download (204 MB installed) when Node isn't already there.</p>
+  <p><a href="https://github.com/quickjs-ng/quickjs">QuickJS</a> is a small JavaScript engine written in C (quickjs-ng 0.18, MIT). It runs Pele unchanged. I first checked that with the
+  <code>quickjs</code> package from PyPI:</p>
+  <pre><code>$ python qjs_vs_node.py
+same SVG as Node: [True, True, True, True]
+QuickJS: load Pele 114 ms, then 0.93 ms a diagram</code></pre>
+  <p>Then, with Pietro's go, I compiled it into the Nim library. Four C files are built by Nim's <code>{.compile.}</code> pragma, with no CMake, and a
+  40-line C shim gives Nim four functions: make a context, evaluate Pele, call a function with a string, and free. The sources are vendored and pinned
+  to a commit. The test below draws the same four diagrams from Nim and compares them with Node's:</p>
+  <pre><code>{.compile(qjsDir / "quickjs.c", qjsFlags).}
+{.compile(qjsDir / "libregexp.c", qjsFlags).}
+{.compile(qjsDir / "libunicode.c", qjsFlags).}
+{.compile(qjsDir / "dtoa.c", qjsFlags).}
+{.compile(here / "mari_qjs.c", qjsFlags).}</code></pre>
+  <pre><code>$ nim c -d:release qtest.nim &amp;&amp; ./qtest cmp_src.json out.json
+load Pele in QuickJS: 92 ms
+per diagram: 709 µs
+$ python3 compare.py   # against Node, same sources, same options
+same SVG as Node: [True, True, True, True]</code></pre>
+  <p class="note">The four sources were a flowchart, a sequence diagram, a pie and a class diagram. The test binary is 2.1 MB and needs only libc and libm.
+  The same engine can draw nimib pages at build time too, which is a BACKLOG item for the Nim library.</p>
+</section>
+
+<section class="sheet" id="choices">
+  <div class="tab">FINDINGS</div>
+  <h2>The choices, and why</h2>
+  <h3>Nim to Python</h3>
+  <table>
+    <tr><th>way</th><th>state (Nov 2026)</th><th>verdict</th></tr>
+    <tr class="pick"><td>C ABI + <code>ctypes</code></td><td>standard library on both sides</td><td><b>chosen</b>: no dependency, one wheel per platform, and the API is JSON in, JSON out</td></tr>
+    <tr><td>nimpy</td><td>active, supports Python 3.14</td><td>the pick if the Python API grows into many small calls (builders)</td></tr>
+    <tr><td>nimporter</td><td>last release 2021</td><td>not maintained</td></tr>
+  </table>
+  <h3>Something to run Pele</h3>
+  <table>
+    <tr><th>engine</th><th>size</th><th>per diagram</th><th>note</th></tr>
+    <tr><td>Node (<code>nodejs-wheel-binaries</code>)</td><td>61 MB wheel, 204 MB installed</td><td>~1 ms after start</td><td>kept as an option, <code>MARI_ENGINE=node</code></td></tr>
+    <tr><td>V8 (<code>mini-racer</code>)</td><td>about 80 MB</td><td>13 ms</td><td>works, but heavy</td></tr>
+    <tr class="pick"><td>QuickJS, compiled into libmari</td><td>about 1.2 MB in the library</td><td>0.7 to 0.9 ms</td><td><b>chosen</b>: the same SVG as Node, nothing to install</td></tr>
+  </table>
+  <h3>Notebook widgets</h3>
+  <table>
+    <tr><th>option</th><th>verdict</th></tr>
+    <tr class="pick"><td>anywidget</td><td><b>chosen</b>: one ES module with no build step, for JupyterLab, Notebook 7, VS Code, Colab and marimo</td></tr>
+    <tr><td>ipywidgets alone</td><td>needs a JupyterLab extension with a build, and doesn't reach marimo</td></tr>
+    <tr><td>a marimo-only plugin</td><td>leaves Jupyter out; <code>mo.ui.anywidget</code> already gives marimo's reactivity</td></tr>
+  </table>
+  <h3>Found on the way</h3>
+  <ul>
+    <li>marimo puts each anywidget in a shadow root, so a <code>&lt;style&gt;</code> added to <code>document.head</code> doesn't reach it. The style now goes inside the widget.</li>
+    <li><code>std/re</code> loads libpcre at run time. That's fine for a Nim program, but in a wheel it broke the import, so <code>layer.nim</code> reads numbers by hand.</li>
+    <li>The editor measures text with the browser's fonts, while Pele in Node uses Arial's widths. A theme font that isn't installed looks different in the export (see exhibit D).</li>
+  </ul>
+</section>
+
+<section class="sheet" id="next">
+  <div class="tab">PROPOSED</div>
+  <h2>What is proposed next</h2>
+  <p>Three OpenSpec changes in <a href="https://github.com/pietroppeter/diagrammari/pull/3">diagrammari PR #3</a>, in build order:</p>
+  <ol>
+    <li><b>add-personal-layer</b>: <code>Layer</code> as a Nim value, <code>toSvg(d, layer)</code>, <code>ids</code> and <code>orphans</code>, plus <code>nbDiagram(…, layer)</code> for nimib.</li>
+    <li><b>add-python-package</b>: <code>uv add diagrammari</code>, <code>import mari</code>, wheels built by cibuildwheel and published to PyPI with trusted publishing.</li>
+    <li><b>add-notebook-editor</b>: the widget for Jupyter and marimo, plus <code>edit_in_browser()</code>.</li>
+  </ol>
+  <p>New BACKLOG items include QuickJS for the Nim library and nimib pages too, one layer engine written in Nim and compiled to JS for the editor, the editor in nimib pages,
+  layer files next to the text, a <code>%%mari</code> cell magic, PNG export, Pyodide and conda-forge.</p>
+  <p>One open question for Pietro: should the Python package live in the diagrammari repo, as proposed, or in a repo of its own?</p>
+</section>
+
+</main>
+<script src="vendor/pele-1.13.0.global.js"></script>
+<script type="module">
+import w from "./widget.js";
+const state = {
+  source: `flowchart TD
+  mermaid([Mermaid text]) --> lib["libmari (Nim)"]
+  lib --> py[Python]
+  lib --> nimib[nimib]
+  py --> jupyter[Jupyter]
+  py --> marimo[marimo]
+  nimib -.-> nblog[nblog]`,
+  layer: {theme: "pele", arrows: "pele", nodes: {}, edges: {}}, svg: ""};
+const model = {get: k => state[k], set: (k, v) => { state[k] = v; }, on: () => {},
+  save_changes() { document.getElementById("layer").textContent = JSON.stringify(state.layer, null, 2); }};
+if (window.pele) { w.render({model, el: document.getElementById("app")}); model.save_changes(); }
+else document.getElementById("app").textContent = "Pele did not load, so the editor cannot draw.";
+</script>
+</body>
+</html>

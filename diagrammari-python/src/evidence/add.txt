@@ -1,0 +1,9 @@
+$ uv init --bare
+Initialized project `fresh`
+$ uv add "./diagrammari-0.0.1-py3-none-linux_x86_64.whl[node]"
+Using CPython 3.13.18 interpreter at: /usr/local/bin/python3
+Creating virtual environment at: .venv
+Resolved 3 packages in 219ms
+Installed 2 packages in 262ms
+ + diagrammari==0.0.1 (from file://./diagrammari-0.0.1-py3-none-linux_x86_64.whl)
+ + nodejs-wheel-binaries==24.19.0
