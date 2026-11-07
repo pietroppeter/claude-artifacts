@@ -1,0 +1,292 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Diagrams Nobody Has to Think About</title>
+<meta name="description" content="Crafted graphics versus everyday diagrams: what Mermaid and Pele do differently from draw.io, D3 and the rest, and Otto Neurath, the Isotype pioneer who standardised pictures, in his style.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Jost:ital,wght@0,400;0,500;0,700;1,400&family=Inconsolata:wght@400;600&display=swap">
+<style>
+:root{--paper:#f1ead9;--ink:#1c1b19;--mute:#5d5a52;--red:#c8402b;--blue:#2d5d8c;--ochre:#e2a52a;--green:#4c7a47;--line:#cfc6b0;
+  --sans:Jost,Futura,"Century Gothic","Avenir Next",system-ui,sans-serif;--mono:Inconsolata,Consolas,ui-monospace,monospace;
+  padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0)}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:17px/1.55 var(--sans)}
+[hidden]{display:none!important}
+main{max-width:860px;margin:0 auto;padding:0 20px 80px}
+header.hero{background:var(--ink);color:var(--paper);margin:0 0 40px;padding:56px 20px 40px}
+header.hero .in{max-width:860px;margin:0 auto}
+.kicker{font-weight:500;letter-spacing:.18em;text-transform:uppercase;font-size:13px;color:var(--ochre);margin:0 0 14px}
+h1{font-weight:700;font-size:clamp(34px,6vw,56px);line-height:1.02;margin:0 0 18px;letter-spacing:-.01em;text-transform:uppercase}
+.lede{font-size:19px;max-width:640px;margin:0;color:#e8e0cc}
+h2{font-weight:700;text-transform:uppercase;letter-spacing:.06em;font-size:22px;margin:56px 0 14px;display:flex;gap:12px;align-items:center}
+h2 .n{display:inline-grid;place-items:center;width:34px;height:34px;background:var(--red);color:var(--paper);font-size:17px;flex:none}
+h3{font-weight:700;font-size:17px;margin:26px 0 6px;text-transform:uppercase;letter-spacing:.05em}
+p{margin:0 0 16px;max-width:680px}
+a{color:var(--blue);text-underline-offset:2px}
+em{font-style:italic}
+code{font-family:var(--mono);font-size:.9em;background:#e6dcc4;padding:0 3px;overflow-wrap:anywhere}
+pre code{background:none;padding:0}
+.panel{background:#fbf7ec;border:2px solid var(--ink);padding:20px;margin:22px 0}
+.cap{font-size:14px;color:var(--mute);margin-top:10px;max-width:680px}
+svg{display:block;max-width:100%;height:auto}
+svg text{font-family:var(--sans)}
+.two{display:grid;grid-template-columns:1fr 1fr;gap:0;border:2px solid var(--ink);margin:22px 0}
+.two>div{padding:18px 20px}
+.two>div+div{border-left:2px solid var(--ink)}
+.two h3{margin-top:0}
+.two .tag{display:inline-block;background:var(--ink);color:var(--paper);font-size:12px;letter-spacing:.12em;text-transform:uppercase;padding:2px 8px;margin-bottom:8px}
+.two .tufte .tag{background:var(--blue)}.two .neurath .tag{background:var(--red)}
+table.vs{border-collapse:collapse;width:100%;font-size:15px;margin:10px 0}
+table.vs th,table.vs td{text-align:left;vertical-align:top;padding:8px 10px;border-bottom:1px solid var(--line)}
+table.vs th{font-weight:500;text-transform:uppercase;letter-spacing:.06em;font-size:12px;border-bottom:2px solid var(--ink)}
+table.vs td:first-child{font-weight:500;white-space:nowrap}
+table.vs .b{color:var(--blue)}table.vs .r{color:var(--red)}
+ol.points{list-style:none;padding:0;counter-reset:p;max-width:700px}
+ol.points li{counter-increment:p;position:relative;padding-left:46px;margin:0 0 16px}
+ol.points li::before{content:counter(p);position:absolute;left:0;top:2px;width:30px;height:30px;border-radius:50%;background:var(--blue);color:var(--paper);display:grid;place-items:center;font-weight:700;font-size:15px}
+.code2{display:grid;grid-template-columns:1fr 1.6fr;gap:16px;margin:16px 0}
+.code2 h3{margin:0 0 6px;font-size:14px}
+.out{border:2px solid var(--ink);border-top:0;background:#fbf7ec;padding:14px;min-height:60px;display:grid;place-items:center;--pele-bg:#fbf7ec;--pele-fg:#1c1b19;--pele-surface:#e2a52a;--pele-border:#1c1b19;--pele-line:#1c1b19;--pele-radius:0px}
+.out svg{width:100%;height:auto;max-width:480px}
+#d3-out rect{fill:#e2a52a;stroke:#1c1b19;stroke-width:1.2}#d3-out text{font:15px Jost,sans-serif;fill:#1c1b19}#d3-out line{stroke:#1c1b19;stroke-width:1.2}#d3-out marker path{fill:#1c1b19}
+.out .err{color:var(--red);font:13px var(--mono)}.code2>div{min-width:0}
+body pre>code,body pre{font-family:var(--mono);font-size:12.5px;line-height:1.45}
+pre{margin:0;background:var(--ink);color:#efe7d3;padding:12px 14px;overflow-x:auto}
+.people{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:16px 0}
+.people div{border-top:4px solid var(--ink);padding-top:8px;font-size:15px}
+.people b{display:block;text-transform:uppercase;letter-spacing:.05em;font-size:13px}
+.bio{display:grid;grid-template-columns:120px 1fr;gap:4px 18px;font-size:15.5px;margin:12px 0}
+.bio dt{font-weight:700;color:var(--red)}.bio dd{margin:0}
+.rules{display:grid;grid-template-columns:repeat(2,1fr);gap:14px;margin:16px 0}
+.rules div{background:var(--ink);color:var(--paper);padding:14px 16px;font-size:15px}
+.rules b{display:block;color:var(--ochre);text-transform:uppercase;letter-spacing:.06em;font-size:13px;margin-bottom:4px}
+blockquote{margin:22px 0;padding:0 0 0 18px;border-left:8px solid var(--red);font-size:22px;line-height:1.3;font-weight:500;max-width:640px}
+blockquote footer{font-size:14px;font-weight:400;color:var(--mute);margin-top:6px}
+ol.refs{font-size:14.5px;padding-left:22px;max-width:720px}
+ol.refs li{margin-bottom:6px;overflow-wrap:anywhere}
+.foot{font-size:13px;color:var(--mute);margin-top:40px;border-top:2px solid var(--ink);padding-top:12px}
+.dec{display:grid;grid-template-columns:minmax(0,2.4fr) repeat(6,minmax(0,1fr));align-items:center;row-gap:10px}
+.dh{font-size:12px;font-weight:500;letter-spacing:.1em;text-transform:uppercase;color:var(--mute);text-align:center}
+.dl{font-weight:500;font-size:15px;padding-right:10px}
+.dc{text-align:center}
+.ic{display:inline-block;vertical-align:middle;height:30px;width:auto}
+.ic.p{fill:var(--red);height:30px}.ic.g{fill:var(--blue);height:28px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 24px;margin-top:16px;font-size:14px}
+.legend .ic{height:20px;margin-right:4px}
+.land{display:grid;grid-template-columns:28px 1fr 1fr;gap:8px}
+.land .q{padding:14px 16px;font-size:15.5px}
+.land ul{list-style:none;margin:0;padding:0}.land li{margin:0 0 5px;font-weight:500}
+.land i{font-style:normal;font-weight:400;color:var(--mute);font-size:13px}
+.land p{font-size:13px;color:var(--mute);margin:10px 0 0}
+.q1{background:#e8dcc0}.q2{background:#dfe6ea}.q3{background:#efd8cf}.q4{background:#1c1b19;color:var(--paper)}
+.q4 i{color:#cfc6b0!important}.land .bl{color:var(--blue)}.land .hi{color:var(--ochre);font-weight:700;font-size:19px}
+.ax{font-size:12px;font-weight:700;letter-spacing:.12em;text-transform:uppercase;color:var(--mute);text-align:center}
+.ay1,.ay2{writing-mode:vertical-rl;transform:rotate(180deg);align-self:center}
+@media (max-width:700px){.dec{grid-template-columns:repeat(6,1fr);row-gap:4px}.dec>.dh:first-child{display:none}.dl{grid-column:1/-1;margin-top:10px;padding:0}.ic.p{height:26px}.ic.g{height:24px}
+ .land{grid-template-columns:22px 1fr 1fr;gap:6px}.land .q{padding:10px;font-size:14px}.land .hi{font-size:16px}}
+@media (max-width:700px){
+  body{font-size:16px}
+  .two{grid-template-columns:1fr}.two>div+div{border-left:0;border-top:2px solid var(--ink)}
+  .code2,.rules{grid-template-columns:1fr}.people{grid-template-columns:1fr 1fr}
+  .bio{grid-template-columns:76px 1fr}
+  table.vs{font-size:13.5px}table.vs td:first-child{white-space:normal}
+  .panel{padding:14px}
+}
+</style>
+</head>
+<body>
+<header class="hero"><div class="in">
+<p class="kicker">Diagrams, part two</p>
+<h1>Diagrams nobody has to think about</h1>
+<p class="lede">Tufte taught us to craft one graphic with great care. Mermaid and Pele do something else: they make the box-and-arrow drawing everybody already knows how to read, so the author thinks only about the content. That other tradition has its own pioneer, and this page is drawn in his style.</p>
+</div></header>
+<main>
+
+<svg viewBox="0 0 860 70" aria-hidden="true">
+  <defs>
+    <symbol id="box" viewBox="0 0 40 40"><rect x="4" y="9" width="32" height="22" fill="currentColor"/></symbol>
+  </defs>
+  <g fill="#1c1b19">
+    <rect x="0" y="20" width="120" height="34"/><polygon points="130,24 152,37 130,50"/>
+    <rect x="160" y="20" width="120" height="34" fill="#c8402b"/><polygon points="290,24 312,37 290,50"/>
+    <rect x="320" y="20" width="120" height="34"/><polygon points="450,24 472,37 450,50"/>
+    <rect x="480" y="20" width="120" height="34" fill="#2d5d8c"/><polygon points="610,24 632,37 610,50"/>
+    <rect x="640" y="20" width="120" height="34"/><polygon points="770,24 792,37 770,50"/>
+    <rect x="800" y="20" width="60" height="34" fill="#e2a52a"/>
+  </g>
+</svg>
+
+<h2><span class="n">1</span>Two traditions</h2>
+<p>Every diagram sits somewhere between two poles. At one end is the graphic made for this data and this argument only. Its maker chooses every mark, and the reader is expected to study it. At the other end is the diagram whose form is already agreed: a flowchart, a sequence diagram, an org chart, a metro map. Nobody admires its design, because the design has disappeared into a convention. You read the content directly.</p>
+
+<div class="two">
+  <div class="tufte"><span class="tag">The crafted graphic</span><h3>Tufte’s line</h3><p style="font-size:15.5px">Minard’s march, Playfair’s trade balance, a sparkline in a sentence. Each is a one-off solution. The goal is maximum data per drop of ink for a reader who will look closely. The tools that serve it are toolkits for building marks: D3, Vega-Lite, ggplot2, Observable Plot. They give you full control and expect you to use it.</p></div>
+  <div class="neurath"><span class="tag">The standard diagram</span><h3>Neurath’s line</h3><p style="font-size:15.5px">Isotype charts, Beck’s Underground, the ISO flowchart symbols, UML, C4. The value is in the shared form: once you know the convention, you read every example of it without effort. The tools that serve it are notations with a renderer: Graphviz, PlantUML, Mermaid, D2, Pele. They take control away from you, on purpose.</p></div>
+</div>
+
+<table class="vs">
+<thead><tr><th></th><th class="b">Crafted graphic</th><th class="r">Standard diagram</th></tr></thead>
+<tbody>
+<tr><td>Reader</td><td>An expert with time to study</td><td>Anyone, at a glance</td></tr>
+<tr><td>Unit of design</td><td>One graphic</td><td>A system of symbols and rules</td></tr>
+<tr><td>Who decides the form</td><td>The designer, each time</td><td>The convention, once</td></tr>
+<tr><td>Measure of quality</td><td>Data density, data-ink, integrity</td><td>Recognisability, consistency, speed of reading</td></tr>
+<tr><td>Typical failure</td><td>Chartjunk</td><td>Spaghetti: boxes and arrows that say nothing</td></tr>
+<tr><td>Tools</td><td>D3, Vega-Lite, ggplot2, Plot</td><td>Graphviz, PlantUML, Mermaid, D2, Pele</td></tr>
+</tbody>
+</table>
+
+<p>The word “industrial” fits better than it sounds. Neurath ran picture-making as a workshop with a division of labour: researchers collected the data, a <em>transformer</em> turned it into a chart design following fixed rules, and artists drew it with a library of standard symbols. Mermaid and Pele automate the transformer. Researchers call these forms <em>visual notations</em>. Practitioners say <em>diagrams as code</em>. “Everyday diagrams” would also work.</p>
+
+<h2><span class="n">2</span>Who decides what</h2>
+<p>The clearest way to compare diagram tools is to count the decisions they leave to you. Here are six for a box-and-arrow diagram. In the Isotype manner, each decision is one symbol, and nothing is shown by size.</p>
+<div class="panel">
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<symbol id="person" viewBox="0 0 30 40"><circle cx="15" cy="8" r="6.5"/><path d="M4 40V24c0-5 4-9 11-9s11 4 11 9v16z"/></symbol>
+<symbol id="cog" viewBox="0 0 40 40"><path fill-rule="evenodd" d="M17 2h6l1 5 4 2 4-3 4 4-3 4 2 4 5 1v6l-5 1-2 4 3 4-4 4-4-3-4 2-1 5h-6l-1-5-4-2-4 3-4-4 3-4-2-4-5-1v-6l5-1 2-4-3-4 4-4 4 3 4-2zM20 14a6 6 0 1 0 0 12a6 6 0 1 0 0-12z"/></symbol>
+</defs></svg>
+<div class="dec" role="table" aria-label="Which decisions the author makes and which the tool makes">
+<div class="dh"></div><div class="dh">What</div><div class="dh">Links</div><div class="dh">Kind</div><div class="dh">Place</div><div class="dh">Route</div><div class="dh">Look</div>
+<div class="dl">Pen, whiteboard, Excalidraw</div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div>
+<div class="dl">D3 (you also write the drawing)</div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div>
+<div class="dl">draw.io, Visio, Lucidchart</div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 40 40" class="ic g" aria-label="tool"><use href="#cog"/></svg></div><div class="dc"><svg viewBox="0 0 40 40" class="ic g" aria-label="tool"><use href="#cog"/></svg></div>
+<div class="dl">Graphviz dot</div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 40 40" class="ic g" aria-label="tool"><use href="#cog"/></svg></div><div class="dc"><svg viewBox="0 0 40 40" class="ic g" aria-label="tool"><use href="#cog"/></svg></div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div>
+<div class="dl">Mermaid, Pele, PlantUML, D2</div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 40 40" class="ic g" aria-label="tool"><use href="#cog"/></svg></div><div class="dc"><svg viewBox="0 0 40 40" class="ic g" aria-label="tool"><use href="#cog"/></svg></div><div class="dc"><svg viewBox="0 0 40 40" class="ic g" aria-label="tool"><use href="#cog"/></svg></div>
+<div class="dl">C4 model in Structurizr</div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg></div><div class="dc"><svg viewBox="0 0 40 40" class="ic g" aria-label="tool"><use href="#cog"/></svg></div><div class="dc"><svg viewBox="0 0 40 40" class="ic g" aria-label="tool"><use href="#cog"/></svg></div><div class="dc"><svg viewBox="0 0 40 40" class="ic g" aria-label="tool"><use href="#cog"/></svg></div><div class="dc"><svg viewBox="0 0 40 40" class="ic g" aria-label="tool"><use href="#cog"/></svg></div>
+</div>
+<div class="legend"><span><svg viewBox="0 0 30 40" class="ic p" aria-label="you"><use href="#person"/></svg> you decide</span><span><svg viewBox="0 0 40 40" class="ic g" aria-label="tool"><use href="#cog"/></svg> the tool decides (layout algorithm, default theme, the notation itself)</span></div>
+<p class="cap">WHAT: the labels and content. LINKS: which things connect. KIND: which notation (flowchart, sequence, ER…). PLACE: positions and sizes. ROUTE: the path of each arrow. LOOK: colours, fonts, shapes. The placement is a judgment: draw.io routes connectors automatically, Graphviz lets you style every node, and in C4 the model fixes the diagram kinds.</p>
+</div>
+
+<p>Going down the chart, you hand over more decisions, and the diagram gets cheaper to make and to change. Mermaid’s bet is that for most diagrams in a README, a design doc or a chat answer, the last three decisions are not worth a human’s time.</p>
+
+<h2><span class="n">3</span>The landscape</h2>
+<p>Two questions place almost every tool. Is the source a picture you drag, or text you write? Does a person lay it out, or an algorithm?</p>
+<div class="panel">
+<div class="land">
+<div class="ax ay1">You draw a picture</div>
+<div class="q q1"><ul><li>Visio <i>1992</i></li><li>OmniGraffle <i>2000</i></li><li>Lucidchart <i>2008</i></li><li>draw.io / diagrams.net <i>2011</i></li><li>Miro, FigJam</li><li>Excalidraw <i>2020</i>, tldraw</li></ul></div>
+<div class="q q2"><ul><li>yEd <i>auto-layout in a GUI</i></li><li>“Arrange” buttons in the tools on the left</li></ul><p>A thin quadrant: once a machine does the layout, writing text is faster than dragging.</p></div>
+<div class="ax ay2">You write text</div>
+<div class="q q3"><ul><li>TikZ <i>c. 2005</i></li><li>PIC <i>1982</i>, Pikchr <i>2020</i></li><li>hand-written SVG</li><li class="bl"><b>D3</b> <i>2011</i></li><li class="bl">Vega-Lite, ggplot2, Plot</li></ul><p>The crafted-graphic corner: code, but you decide.</p></div>
+<div class="q q4"><ul><li>Graphviz dot <i>c. 1990</i></li><li>PlantUML <i>2009</i></li><li>Structurizr (C4)</li><li>D2 <i>2022</i></li><li class="hi">Mermaid <i>2014</i></li><li class="hi">Pele <i>2026</i></li></ul></div>
+<div></div><div class="ax ax1">You place the boxes</div><div class="ax ax2">An algorithm places them</div>
+</div>
+<p class="cap">Mermaid and draw.io are not really competitors: they sit in opposite corners. draw.io is for when the position of every box matters, and its files are XML that nobody reads in a diff. Mermaid is for when the relations matter and positions don’t. Mermaid’s real competitors are in its own corner: PlantUML for UML, D2 for architecture, Structurizr for C4, Graphviz for anything graph-shaped. Pele competes with Mermaid’s renderer, not its language.</p>
+</div>
+
+<h2><span class="n">4</span>What Mermaid and Pele do differently</h2>
+<ol class="points">
+<li><b>The first word picks a convention.</b> <code>flowchart</code>, <code>sequenceDiagram</code>, <code>erDiagram</code>, <code>gantt</code>, <code>gitGraph</code>, <code>mindmap</code>: more than twenty diagram kinds, each with its layout rules built in. You choose a notation, not a drawing.</li>
+<li><b>You write relations, never positions.</b> <code>A --&gt; B</code> says that A leads to B. Where A ends up on the page is not something you can say, so it is not something you have to think about.</li>
+<li><b>An algorithm lays it out.</b> Flowcharts use layered (Sugiyama) layout, sequence diagrams lay themselves out on a timeline, Gantt charts on a calendar. Pele brings “its own layout and visual style” and adapts to the container’s width.</li>
+<li><b>The source sits with the content.</b> It goes in a Markdown fence, gets reviewed in a diff, and renders on GitHub, in Obsidian, or in a chat answer. Diagrams become cheap enough to write for a single paragraph.</li>
+<li><b>Style is global.</b> Mermaid has themes; Pele exposes CSS variables (<code>--pele-series-1</code>…), so every diagram on a site matches the page and follows dark mode without re-rendering. There is no per-diagram art direction, and that is the point.</li>
+<li><b>It is easy for machines to write.</b> The syntax is small enough that language models produce it reliably, which is why Mermaid has become the default way for chat assistants to draw.</li>
+</ol>
+
+<p>The difference in effort is easy to see. Here is the same four-step process in Mermaid and in D3, each with what it draws underneath. Both run live on this page, from copies of Pele 1.13.0 and D3 7.9.2 kept in the repository. The D3 version is complete, and it decides every coordinate itself:</p>
+<div class="code2">
+<div><h3>Mermaid, drawn by Pele</h3><pre><code id="mer-src">flowchart LR
+  idea --&gt; draft
+  draft --&gt; review
+  review --&gt; ship</code></pre><div class="out" id="mer-out" aria-label="Pele's drawing of the Mermaid source"></div></div>
+<div><h3>D3</h3><pre><code id="d3-src">const steps = ["idea", "draft", "review", "ship"];
+const svg = d3.select("#d3-out").append("svg")
+  .attr("viewBox", "0 0 480 60");
+svg.append("defs").append("marker")
+  .attr("id", "arrow").attr("viewBox", "0 0 10 10")
+  .attr("refX", 10).attr("refY", 5)
+  .attr("markerWidth", 8).attr("markerHeight", 8)
+  .attr("orient", "auto")
+  .append("path").attr("d", "M0,0L10,5L0,10Z");
+const g = svg.selectAll("g").data(steps).join("g")
+  .attr("transform", (d, i) =&gt; `translate(${i * 130},10)`);
+g.append("rect").attr("width", 90).attr("height", 40);
+g.append("text").attr("x", 45).attr("y", 25)
+  .attr("text-anchor", "middle").text(d =&gt; d);
+svg.selectAll("line").data(steps.slice(1)).join("line")
+  .attr("x1", (d, i) =&gt; i * 130 + 90).attr("y1", 30)
+  .attr("x2", (d, i) =&gt; i * 130 + 128).attr("y2", 30)
+  .attr("marker-end", "url(#arrow)");
+// fill, stroke and font come from the page's CSS</code></pre><div class="out" id="d3-out" aria-label="D3's drawing"></div></div>
+</div>
+<p class="cap">Four lines against nineteen, for the same picture. Pele also chose the box sizes from the text, the spacing and the arrowheads, and it would rearrange everything if a fifth step were added. The D3 code would need new numbers.</p>
+<p>The D3 version can become a Tufte graphic. The Mermaid version never will, and it took ten seconds.</p>
+
+<h2><span class="n">5</span>The figure: Otto Neurath</h2>
+<p>Is there a Tufte for standard diagrams? There is no single obvious name, but the strongest candidate, and the style of this page, is Otto Neurath (1882–1945). He was a Viennese economist and philosopher who decided that statistics belonged to everyone, and built a standard picture language so that a worker could read a chart about housing or mortality in a museum without training.</p>
+
+<blockquote>To remember simplified pictures is better than to forget accurate figures.<footer>A catch-phrase of Neurath’s Vienna museum</footer></blockquote>
+
+<dl class="bio">
+<dt>1882</dt><dd>Born in Vienna. He studies mathematics, economics and history, and becomes part of the Vienna Circle of logical empiricists. Philosophers still cite “Neurath’s boat”: we rebuild our knowledge plank by plank while staying afloat in it.</dd>
+<dt>1925</dt><dd>Founds the Gesellschafts- und Wirtschaftsmuseum in Wien (Museum of Society and Economy). Its exhibitions explain the city’s statistics with pictures: the <em>Vienna Method of Pictorial Statistics</em>.</dd>
+<dt>c. 1929</dt><dd>Gerd Arntz, a German woodcut artist, joins and designs the pictograms: flat, frontal, simplified, cut to work in rows. Over the years he draws thousands.</dd>
+<dt>1934</dt><dd>The museum is closed after the Austrian civil war. The team flees to The Hague and sets up the International Foundation for Visual Education. Around 1935 the method is renamed <em>Isotype</em>: International System Of TYpographic Picture Education.</dd>
+<dt>1940</dt><dd>Neurath and Marie Reidemeister escape to England as the Germans invade the Netherlands. They marry in 1941 and found the Isotype Institute in 1942.</dd>
+<dt>1945</dt><dd>Neurath dies. Marie Neurath runs Isotype for another three decades, making picture books for children and information material for newly independent countries.</dd>
+</dl>
+
+<h3>The Isotype rules</h3>
+<div class="rules">
+<div><b>Count by repetition</b>Ten thousand people is ten symbols, never one symbol ten times bigger. Size cannot be read reliably; counting can.</div>
+<div><b>One symbol, one meaning</b>A worker or a car looks the same on every chart, so a reader learns it once.</div>
+<div><b>Glance, then look</b>The main point must come at the first glance and the details at the second. If a third look still finds something new, the chart has too much in it.</div>
+<div><b>A transformer in between</b>Someone translates the data into a picture by applying the rules, and does not invent a new design each time.</div>
+</div>
+
+<p>Now compare that last rule with how Mermaid works. The person who knows the content writes text. The transformer is now a parser and a layout algorithm. The symbols are a fixed library of shapes, and the rules are the notation. Neurath’s workshop has become a function call: <code>render(text)</code>.</p>
+
+<p>The credit is shared. Marie Reidemeister was the principal transformer from the start, and Gerd Arntz drew the symbols. Isotype was a team method, which is one more reason it fits this tradition: standard diagrams are about the system, not the author.</p>
+
+<h3>Other candidates for the title</h3>
+<div class="people">
+<div><b>Harry Beck</b>The Underground diagram (1933): a schematic that drops geography so the structure shows. Every transit map since copies it.</div>
+<div><b>Jacques Bertin</b><em>Sémiologie graphique</em> (1967). He sits between the two lines, with a grammar of visual variables that serves both.</div>
+<div><b>Daniel Moody</b>“The Physics of Notations” (2009) is the theory of good notations: semiotic clarity, perceptual discriminability, semantic transparency, complexity management, cognitive integration, visual expressiveness, dual coding, graphic economy and cognitive fit. It has often been used to critique UML.</div>
+<div><b>Barbara Tversky</b>A cognitive psychologist who studies why lines, boxes and arrows work so well for ordinary people (<em>Mind in Motion</em>, 2019).</div>
+<div><b>Helen Purchase</b>Her experiments (1997) measured which layout rules actually help readers. Fewer edge crossings mattered most, which is what layout algorithms optimise.</div>
+<div><b>Simon Brown</b>Created the C4 model of software architecture: a few levels of zoom (system, containers, components, code), deliberately independent of notation and tooling.</div>
+</div>
+
+<h2><span class="n">6</span>Where a Nim library fits</h2>
+<p>A Nim wrapper around Pele sits in the dark corner of the map. Its job is to make the standard diagram free: one line in a nimib page, rendered at build time to SVG that inherits the page’s theme. Tufte-style graphics in Nim are a different library, closer to D3 or Vega-Lite, and both can exist. Neurath would have liked the first one: a transformer anyone can call.</p>
+
+<h2><span class="n">7</span>References</h2>
+<ol class="refs">
+<li>Otto Neurath, <i>International Picture Language</i> (London: Kegan Paul, 1936).</li>
+<li>Marie Neurath &amp; Robin Kinross, <i>The Transformer: Principles of Making Isotype Charts</i> (Hyphen Press, 2009).</li>
+<li>Christopher Burke, Eric Kindel &amp; Sue Walker (eds.), <i>Isotype: Design and Contexts 1925–1971</i> (Hyphen Press, 2013).</li>
+<li><a href="https://en.wikipedia.org/wiki/Isotype_(picture_language)">Isotype (picture language)</a>, Wikipedia.</li>
+<li>Edward R. Tufte, <i>The Visual Display of Quantitative Information</i> (Graphics Press, 1983).</li>
+<li>Jacques Bertin, <i>Sémiologie graphique</i> (1967).</li>
+<li>Daniel L. Moody, “The ‘Physics’ of Notations: Toward a Scientific Basis for Constructing Visual Notations in Software Engineering”, <i>IEEE Transactions on Software Engineering</i> 35(6) (2009).</li>
+<li>Barbara Tversky, “Visualizing Thought”, <i>Topics in Cognitive Science</i> 3 (2011); <i>Mind in Motion: How Action Shapes Thought</i> (Basic Books, 2019).</li>
+<li>Helen C. Purchase, “Which Aesthetic Has the Greatest Effect on Human Understanding?”, <i>Graph Drawing</i> (GD ’97), LNCS 1353.</li>
+<li>Ken Garland, <i>Mr Beck’s Underground Map</i> (1994).</li>
+<li>Simon Brown, <a href="https://c4model.com">The C4 model for visualising software architecture</a>.</li>
+<li>Michael Bostock, Vadim Ogievetsky &amp; Jeffrey Heer, “D³: Data-Driven Documents”, <i>IEEE TVCG</i> 17(12) (2011).</li>
+<li>Tools: <a href="https://mermaid.js.org">Mermaid</a>, <a href="https://github.com/obsidianmd/pele">Pele</a>, <a href="https://graphviz.org">Graphviz</a>, <a href="https://plantuml.com">PlantUML</a>, <a href="https://d2lang.com">D2</a>, <a href="https://structurizr.com">Structurizr</a>, <a href="https://www.drawio.com">draw.io</a> (<a href="https://en.wikipedia.org/wiki/Diagrams.net">history</a>), <a href="https://en.wikipedia.org/wiki/Microsoft_Visio">Visio</a>, <a href="https://en.wikipedia.org/wiki/Lucidchart">Lucidchart</a>, <a href="https://excalidraw.com">Excalidraw</a>, <a href="https://d3js.org">D3</a>, <a href="https://vega.github.io/vega-lite/">Vega-Lite</a>.</li>
+<li>Part three: <a href="../personal-diagrams/">Ready-made, Then Made Yours</a>, a proof of concept for personalising standard diagrams.</li>
+<li>Part one: <a href="../diagram-history/">Boxes, Lines and Arrows, a short history of diagrams</a>.</li>
+</ol>
+
+<p class="foot">Made with Claude for Pietro Peterlongo, November 2026. Set in Jost, a free typeface after Futura, the face Isotype used; the pictograms are new drawings in the Isotype manner, not Arntz’s originals. Dates follow the references. Corrections are welcome on <a href="https://github.com/pietroppeter/claude-artifacts">GitHub</a>.</p>
+</main>
+<script src="vendor/pele-1.13.0.global.js"></script>
+<script src="vendor/d3-7.9.2.min.js"></script>
+<script>
+// Run the two snippets exactly as shown above.
+(async function(){
+  try{await document.fonts.load("16px Jost");}catch(e){}
+  const mer=document.getElementById("mer-out"),d3o=document.getElementById("d3-out");
+  try{mer.innerHTML=pele.render(document.getElementById("mer-src").textContent,{fontFamily:"Jost, sans-serif"}).svg;}
+  catch(e){mer.innerHTML='<span class="err">Pele did not load: '+e.message+'</span>';}
+  try{new Function("d3",document.getElementById("d3-src").textContent)(d3);}
+  catch(e){d3o.innerHTML='<span class="err">D3 did not load: '+e.message+'</span>';}
+})();
+</script>
+</body>
+</html>

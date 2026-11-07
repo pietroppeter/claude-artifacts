@@ -1,0 +1,560 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Ready-made, Then Made Yours</title>
+<meta name="description" content="Diagrams, part three: start from a standard Mermaid diagram rendered by Pele, then theme it, move it and reshape its arrows in a personal layer. A working proof of concept, in the spirit of Enzo Mari's Autoprogettazione.">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Archivo:ital,wght@0,400;0,500;0,700;0,800;1,400&family=IBM+Plex+Mono:wght@400;500&family=Crimson+Pro:wght@400;600&family=Jost:wght@400;600&family=Patrick+Hand&display=swap">
+<style>
+:root{--paper:#fbfaf6;--ink:#161616;--mute:#6a675f;--pine:#e3c48c;--pine-d:#b8904c;--red:#d2361f;--line:#d8d4c8;
+  --sans:Archivo,"Helvetica Neue",Helvetica,Arial,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+  padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0)}
+html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font:16.5px/1.55 var(--sans)}
+[hidden]{display:none!important}
+.wrap{max-width:1180px;margin:0 auto;padding:0 22px}
+header{border-bottom:2px solid var(--ink);padding:44px 0 30px}
+.hero{display:grid;grid-template-columns:1.05fr 1fr;gap:28px;align-items:center}
+.kicker{font:500 12.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;margin:0 0 12px;color:var(--mute)}
+h1{font-weight:800;font-size:clamp(36px,5.4vw,62px);line-height:.98;margin:0 0 18px;letter-spacing:-.02em}
+.lede{font-size:18.5px;margin:0;max-width:560px}
+h2{font-weight:800;font-size:28px;letter-spacing:-.01em;margin:58px 0 12px;display:flex;align-items:baseline;gap:14px}
+h2 .no{font:500 14px var(--mono);color:var(--paper);background:var(--ink);padding:2px 8px}
+h3{font-weight:700;font-size:17px;margin:24px 0 6px}
+p{margin:0 0 14px;max-width:720px}
+a{color:inherit;text-decoration-color:var(--pine-d);text-underline-offset:2px;text-decoration-thickness:2px}
+code{font-family:var(--mono);font-size:.86em;background:#efeadc;padding:0 3px}
+body pre>code,body pre{font-family:var(--mono);font-size:12.5px;line-height:1.5}
+pre{margin:0;background:#f1ede1;border-left:3px solid var(--ink);padding:10px 12px;overflow-x:auto}
+pre code{background:none;padding:0}
+.parts{border-collapse:collapse;font-size:14.5px;margin:12px 0 6px;width:100%;max-width:720px}
+.parts td{border-top:1px solid var(--ink);padding:7px 10px 7px 0;vertical-align:top}
+.parts td:first-child{font:500 13px var(--mono);width:44px}
+.parts td:nth-child(2){font-weight:700;white-space:nowrap}
+/* lab */
+.tour{display:flex;flex-wrap:wrap;gap:6px;margin:16px 0 8px}
+.tour button{font:500 13px var(--mono);border:1.5px solid var(--ink);background:var(--paper);padding:6px 10px;cursor:pointer}
+.tour button[aria-pressed=true]{background:var(--ink);color:var(--paper)}
+.caption{min-height:3.2em;font-size:15.5px;margin:6px 0 14px;max-width:820px}
+.caption b{font-weight:700}
+.lab{display:grid;grid-template-columns:270px 1fr 280px;gap:16px;align-items:start}
+.panel{border:1.5px solid var(--ink);background:#fff;padding:12px}
+.panel h4{font:500 11.5px var(--mono);letter-spacing:.08em;text-transform:uppercase;margin:0 0 8px;color:var(--mute)}
+.panel h4+*{margin-top:0}
+textarea{width:100%;box-sizing:border-box;font:12.5px/1.5 var(--mono);border:1px solid var(--line);background:#fbfaf6;padding:8px;resize:vertical;color:var(--ink)}
+#src{height:176px}#layerText{height:300px}
+.err{color:var(--red);font:12px var(--mono);min-height:1em;margin-top:4px}
+.seg{display:flex;flex-wrap:wrap;gap:4px;margin:0 0 12px}
+.seg button{font:500 12px var(--mono);border:1px solid var(--ink);background:#fff;padding:4px 7px;cursor:pointer}
+.seg button[aria-pressed=true]{background:var(--ink);color:#fff}
+.chk{font-size:13.5px;display:flex;gap:6px;align-items:center}
+.stagebox{border:1.5px solid var(--ink);position:relative}
+.stage{min-height:300px;display:grid;place-items:center;padding:18px;overflow:hidden;touch-action:none;transition:background .25s}
+.stage svg{overflow:visible;max-width:100%;height:auto;user-select:none;-webkit-user-select:none}
+.stage .pele-node{cursor:grab}
+.stage .pele-node.sel>:not(text){stroke:var(--red)!important;stroke-width:2.5px}
+.stage .hit{stroke:transparent;stroke-width:14;fill:none;pointer-events:stroke;cursor:pointer}
+.stage .pele-edge.sel path:not(.hit):not(.pele-marker){stroke:var(--red)}
+.stage .handles line{stroke:var(--red);stroke-width:1;stroke-dasharray:3 3}
+.stage .handles circle{fill:#fff;stroke:var(--red);stroke-width:2;cursor:move}
+.stagebar{display:flex;justify-content:space-between;gap:8px;border-top:1.5px solid var(--ink);padding:6px 10px;font:12px var(--mono);color:var(--mute);background:#fff;flex-wrap:wrap}
+#inspector{margin-top:12px;min-height:84px}
+#inspector .row{display:flex;flex-wrap:wrap;gap:6px;align-items:center;margin:6px 0}
+.sw{width:22px;height:22px;border:1.5px solid var(--ink);cursor:pointer;padding:0}
+.sw.none{background:repeating-linear-gradient(45deg,#fff 0 4px,#ddd 4px 8px)}
+.btn{font:500 12px var(--mono);border:1px solid var(--ink);background:#fff;padding:4px 8px;cursor:pointer}
+.orph{font:12px var(--mono);color:var(--red);margin-top:6px}
+/* themes on the stage background */
+.bg-pele{background:#fff}.bg-tufte{background:#fffff8}.bg-isotype{background:#f1ead9}
+.bg-blueprint{background-color:#1d4f7a;background-image:linear-gradient(rgba(255,255,255,.09) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.09) 1px,transparent 1px);background-size:16px 16px}
+.bg-quaderno{background-color:#fdfdf8;background-image:linear-gradient(#cfe0f0 1px,transparent 1px),linear-gradient(90deg,#cfe0f0 1px,transparent 1px);background-size:14px 14px}
+.bg-mari{background:#fbfaf6}
+.th-tufte .pele-edges path:not(.hit){stroke-width:.9px}.th-tufte .pele-nodes :not(text){stroke-width:.9px}
+.th-isotype .pele-edges path:not(.hit){stroke-width:3px}.th-isotype .pele-nodes :not(text){stroke-width:2.5px}.th-isotype text{font-weight:600}
+.th-blueprint .pele-edges path:not(.hit){stroke-width:1.3px}
+.th-mari .pele-nodes :not(text){stroke-width:1.6px}
+/* multiples */
+.multi{display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin:14px 0}
+.multi figure{margin:0;border:1.5px solid var(--ink)}
+.multi .stage{min-height:150px;padding:10px;cursor:default}
+.multi .stage .pele-node{cursor:default}
+.multi figcaption{font:12px var(--mono);border-top:1.5px solid var(--ink);padding:5px 8px;background:#fff}
+.people{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;margin:14px 0}
+.people div{border-top:3px solid var(--ink);padding-top:8px;font-size:14.5px}
+.people b{display:block;font-size:15px}
+.bio{display:grid;grid-template-columns:90px 1fr;gap:6px 16px;font-size:15px;max-width:760px;margin:10px 0 16px}
+.bio dt{font:500 14px var(--mono);color:var(--pine-d)}.bio dd{margin:0}
+ol.refs{font-size:14px;padding-left:22px;max-width:760px}
+ol.refs li{margin-bottom:5px;overflow-wrap:anywhere}
+.foot{font-size:13px;color:var(--mute);margin:40px 0 60px;border-top:2px solid var(--ink);padding-top:12px}
+.note{font-size:13.5px;color:var(--mute)}
+@media (max-width:980px){.lab{grid-template-columns:1fr 1fr}.lab .col-stage{grid-column:1/-1;order:-1}}
+@media (max-width:700px){
+  body{font-size:16px}.hero{grid-template-columns:1fr}.lab{grid-template-columns:1fr}
+  .multi,.people{grid-template-columns:1fr}.bio{grid-template-columns:64px 1fr}
+  #layerText{height:200px}h2{font-size:24px}.stage{min-height:180px;padding:10px}
+}
+</style>
+</head>
+<body>
+<header><div class="wrap hero">
+<div>
+<p class="kicker">Diagrams, part three</p>
+<h1>Ready-made, then made yours</h1>
+<p class="lede">Start from the standard diagram everybody knows, written in plain Mermaid and drawn by Pele. Then theme it, move it, bend its arrows and make it your own, in a separate layer that never touches the standard. Below is a working proof of concept.</p>
+</div>
+<svg viewBox="0 0 600 330" role="img" aria-label="Exploded drawing of three stacked sheets: the Mermaid source, the Pele drawing, and the personal layer">
+  <g font-family="IBM Plex Mono, monospace" font-size="12" fill="#161616">
+    <g transform="translate(0 214)">
+      <path d="M40 40L250 0L470 40L260 80Z" fill="#fff" stroke="#161616" stroke-width="1.5"/>
+      <g stroke="#161616" stroke-width="1.2"><path d="M110 37L250 11"/><path d="M130 45L270 19"/><path d="M150 53L250 34"/><path d="M170 61L300 37"/></g>
+      <text x="480" y="44">1 · source</text><text x="480" y="60" fill="#6a675f">Mermaid text</text>
+    </g>
+    <g transform="translate(0 112)">
+      <path d="M40 40L250 0L470 40L260 80Z" fill="#fff" stroke="#161616" stroke-width="1.5"/>
+      <g fill="#f3f3f3" stroke="#161616" stroke-width="1.2"><path d="M130 38l30-6 26 5-30 6z"/><path d="M230 19l30-6 26 5-30 6z"/><path d="M300 45l30-6 26 5-30 6z"/></g>
+      <path d="M186 34L230 24M286 21L320 40" stroke="#161616" stroke-width="1.2" fill="none"/>
+      <text x="480" y="44">2 · drawing</text><text x="480" y="60" fill="#6a675f">Pele, standard</text>
+    </g>
+    <g transform="translate(0 10)">
+      <path d="M40 40L250 0L470 40L260 80Z" fill="#e3c48c" fill-opacity=".55" stroke="#161616" stroke-width="1.5" stroke-dasharray="5 4"/>
+      <path d="M156 43l30-6 26 5-30 6z" fill="#d2361f" stroke="#161616" stroke-width="1.2"/>
+      <path d="M186 40C215 10 300 60 326 46" stroke="#d2361f" stroke-width="2" fill="none"/>
+      <circle cx="215" cy="20" r="4" fill="#fff" stroke="#d2361f" stroke-width="1.5"/>
+      <text x="480" y="44">3 · layer</text><text x="480" y="60" fill="#6a675f">JSON, yours</text>
+    </g>
+    <g stroke="#161616" stroke-width="1" stroke-dasharray="2 4"><path d="M40 50V152M470 50V152M40 152V254M470 152V254"/></g>
+  </g>
+</svg>
+</div></header>
+
+<main class="wrap">
+<h2><span class="no">1</span>Two layers, one diagram</h2>
+<p>Part one was Tufte: every graphic made by hand. Part two was Neurath: the standard diagram that nobody has to think about. This page tries to have both. The standard part stays standard: a Mermaid source that renders anywhere, on GitHub or in Obsidian, with Pele’s layout. On top of it sits a <b>personal layer</b>, a small file of choices about that one diagram. It names the theme, nudges a box, bends an arrow, colours a node. Every entry is keyed by the ids that are already in the Mermaid source, so the layer survives when you edit the source.</p>
+<table class="parts">
+<tr><td>1 ×</td><td>Source</td><td>Mermaid text. Standard, portable, diffable. Says <em>what</em> and <em>which links</em>.</td></tr>
+<tr><td>1 ×</td><td>Drawing</td><td>Pele’s SVG. Every node carries <code>data-id</code> and its position, and every edge carries its id, which is what makes a layer possible.</td></tr>
+<tr><td>0–1 ×</td><td>Layer</td><td>JSON. Optional and personal. Offsets, not coordinates, so a nudge still means something after the algorithm moves things.</td></tr>
+<tr><td>n ×</td><td>Themes</td><td>Fonts and colours as Pele CSS variables, plus a few line weights. The same source and layer can be drawn in any of them.</td></tr>
+</table>
+
+<h2><span class="no">2</span>Try it</h2>
+<p>Follow the steps, or skip them and play: drag a box, click an arrow to change how it is routed, pick “bézier” and pull its handles, click a node to colour it, or edit either text panel. The diagram is rendered by the real Pele library, so any Mermaid flowchart works.</p>
+<div class="tour" id="tour" role="group" aria-label="Guided steps"></div>
+<p class="caption" id="caption"></p>
+<div class="lab">
+  <div class="col-src">
+    <div class="panel">
+      <h4>1 · Source, Mermaid</h4>
+      <div class="seg" id="examples"></div>
+      <textarea id="src" spellcheck="false" aria-label="Mermaid source"></textarea>
+      <div class="err" id="err"></div>
+      <h4>Theme</h4><div class="seg" id="themes"></div>
+      <h4>Arrows after a move</h4><div class="seg" id="arrows"></div>
+      <label class="chk"><input type="checkbox" id="snap" checked> snap moves to an 8-px grid</label>
+    </div>
+  </div>
+  <div class="col-stage">
+    <div class="stagebox">
+      <div class="stage" id="stage"></div>
+      <div class="stagebar"><span id="status">2 · drawing</span><span>drag boxes · click arrows · click empty space to deselect</span></div>
+    </div>
+    <div class="panel" id="inspector"><h4>Inspector</h4><p class="note" style="margin:0">Select a box or an arrow.</p></div>
+  </div>
+  <div class="col-layer">
+    <div class="panel">
+      <h4>3 · Personal layer, JSON</h4>
+      <textarea id="layerText" spellcheck="false" aria-label="Personal layer JSON"></textarea>
+      <div class="err" id="lerr"></div>
+      <div class="orph" id="orphans"></div>
+      <div class="seg" style="margin-top:8px"><button class="btn" id="copy">Copy layer</button><button class="btn" id="reset">Reset layer</button></div>
+    </div>
+  </div>
+</div>
+
+<h2><span class="no">3</span>One layer, many styles</h2>
+<p>The same source and the same layer, drawn in every theme. The moves and the bent arrows carry over, because they are stored relative to Pele’s layout, and Pele lays the diagram out again for each font. These copies follow whatever you do above.</p>
+<div class="multi" id="multi"></div>
+
+<h2><span class="no">4</span>How it would work in Nim and nimib</h2>
+<p>The process you just followed is a loop, and nimib is a good home for it because a nimib page is already “write code, build, look”. A sketch, with a placeholder name:</p>
+<pre><code>import nimib, diagrammi        # placeholder name
+
+nbInit
+nbDiagram(layer = "release.layer.json", theme = "isotype"): """
+flowchart LR
+  idea[Idea] --&gt; draft(Draft)
+  draft --&gt; review{Review?}
+  review --&gt;|yes| ship((Ship))
+"""
+nbSave</code></pre>
+<ol>
+<li><b>Write</b> the standard diagram in the notebook. Without a layer it renders like any Mermaid block, and the source still renders on GitHub.</li>
+<li><b>Build</b>. Pele renders the SVG at build time (in a Node process, as the other diagrams thread already does), and the layer is applied to it as a pure transform of the SVG. The published page needs no JavaScript.</li>
+<li><b>Edit</b>. A dev flag (say <code>-d:diagramEdit</code>) adds this page’s editor to every diagram. Dragging and styling write the layer file next to the notebook.</li>
+<li><b>Commit</b> the source and the layer. The diff says “review moved 80 px down” in a file you can read, instead of a binary drawing.</li>
+</ol>
+<p>The layer logic is small and deterministic: offsets, the ports a route uses, cubic curves, arrowheads. It could be written once in Nim and compiled twice, natively to apply the layer at build time and with <code>nim js</code> to drive the editor in the browser. A nimib page compiled to JS already showed that pattern working, in the declarative dragging page.</p>
+
+<h3>The layer format, as built here</h3>
+<pre><code>{
+  "theme":  "isotype",                 // any theme name
+  "arrows": "curve",                   // routing after a move: pele | straight | elbow | curve
+  "nodes":  { "ship":   { "dx": -40, "dy": 96, "fill": "#2d5d8c" } },
+  "edges":  { "L_review_draft_0": { "route": "bezier", "c1": [10, 90], "c2": [-10, 90] } }
+}</code></pre>
+<p class="note">Node keys are Mermaid ids. Edge keys are Pele’s edge ids (<code>L_from_to_n</code>), which stay stable as long as an edge keeps its endpoints. Bézier handles are stored relative to the arrow’s two ends, so they follow the nodes. When an id disappears from the source, its entries are listed as orphans instead of being deleted. Offsets have a limit: if an edit makes Pele rearrange the diagram a lot, a nudged box can land on another one. Absolute pins would be the other choice, and a real library would probably offer both. Only flowcharts are draggable in this proof of concept; themes apply to everything Pele draws.</p>
+
+<h2><span class="no">5</span>The figure: Enzo Mari</h2>
+<p>For a page about taking the industrial and making it personal, the patron is Enzo Mari (1932–2020), the Italian designer who spent his career inside industry and argued with it. In 1974 he published <em>Proposta per un’autoprogettazione</em> (“a proposal for self-design”): drawings of 19 pieces of furniture, chairs, tables, beds and shelves, to be built by anyone from standard pine boards and nails. He offered the plans free to whoever wrote to ask for them. Owners were invited to change the designs and send back photos of what they had made.</p>
+<dl class="bio">
+<dt>1932</dt><dd>Born near Novara. Largely self-taught, he studies at the Brera academy in Milan.</dd>
+<dt>1950s–60s</dt><dd>Programmed art and research on perception, then decades of objects for Danese, Driade, Olivetti and others, along with children’s books and the 16-animal wooden puzzle <em>16 animali</em> (1957).</dd>
+<dt>1974</dt><dd><em>Autoprogettazione</em>: an exhibition at Galleria Milano and the book of plans. The point was not cheap furniture. By building a chair you understand why it is made the way it is, and you become able to judge, and change, the design of things.</dd>
+<dt>2010</dt><dd>Artek puts the <em>Sedia 1</em> chair from the book into production, sold as a kit to assemble.</dd>
+<dt>2020</dt><dd>Dies in Milan in October, days after the opening of a major retrospective at the Triennale.</dd>
+</dl>
+<p>Autoprogettazione maps closely onto this page. The plan is the standard: anyone can follow it and get a chair that works. Building it yourself is the personal layer: you cut, adjust, paint and keep a record of what you changed. Mari never asked people to design chairs from scratch, only to stop being passive about the ones they used. This page has the look of his book: plain sans type, line drawings, numbered parts lists and the colour of pine.</p>
+
+<h3>Other figures for this part</h3>
+<div class="people">
+<div><b>Bret Victor</b>“Inventing on Principle” (2012), <em>Learnable Programming</em>, Dynamicland. He argues that a creator needs an immediate connection to what they create. This editor follows him: drag the picture, watch the data change. His essays also switch visual style to suit each idea, as you noticed.</div>
+<div><b>Ivan Sutherland</b>Sketchpad (1963), the first interactive drawing program. Its drawings were made of constraints that the computer kept satisfied while you dragged with a light pen. That is the ancestor of “arrows that stay algorithmic”.</div>
+<div><b>Donald Knuth</b>Metafont (1977–79): one standard design of a typeface, with dozens of parameters that give you your own font. That is the layer idea applied to letters. Literate programming, nimib’s grandparent, is his too.</div>
+<div><b>Alan Kay</b>The Dynabook and Smalltalk: computing as a personal medium you can reach into and change, not a product you consume.</div>
+<div><b>Bruno Munari</b>Mari’s elder in Milan, designer of useless machines and children’s books. He thought play is how people learn to design.</div>
+<div><b>Steph Ango</b>Pele’s home at Obsidian, and the essay “File over app” (2023): your data should live in files you control, readable without the app. The personal layer is a file over app.</div>
+</div>
+
+<h2><span class="no">6</span>References</h2>
+<ol class="refs">
+<li>Enzo Mari, <i>Autoprogettazione?</i> (Corraini, reprinted 2002, from the 1974 <i>Proposta per un’autoprogettazione</i>).</li>
+<li>Hans Ulrich Obrist &amp; Francesca Giacomelli (eds.), <i>Enzo Mari</i> (Triennale Milano / Electa, 2020).</li>
+<li>Dezeen, “<a href="https://www.dezeen.com/2010/04/16/sedia-1-chair-by-enzo-mari-for-artek/">Sedia 1 chair by Enzo Mari for Artek</a>” (2010); Core77, “<a href="https://www.core77.com/posts/17283/Enzo-Mari-on-Film-Arteks-Short-Documentary-of-Autoprogettazione">Enzo Mari on film</a>”.</li>
+<li>Bret Victor, “<a href="https://worrydream.com/InventingOnPrinciple/">Inventing on Principle</a>” (2012); “<a href="https://worrydream.com/LearnableProgramming/">Learnable Programming</a>” (2012); “<a href="https://worrydream.com/ExplorableExplanations/">Explorable Explanations</a>” (2011).</li>
+<li>Ivan E. Sutherland, <i>Sketchpad: A Man-Machine Graphical Communication System</i>, PhD thesis, MIT (1963).</li>
+<li>Donald E. Knuth, <i>The METAFONTbook</i> (1986); “Literate Programming”, <i>The Computer Journal</i> 27(2) (1984).</li>
+<li>Alan Kay &amp; Adele Goldberg, “Personal Dynamic Media”, <i>Computer</i> 10(3) (1977).</li>
+<li>Bruno Munari, <i>Design as Art</i> (1966; Penguin Modern Classics 2008).</li>
+<li>Steph Ango, “<a href="https://stephango.com/file-over-app">File over app</a>” (2023).</li>
+<li>Pele: <a href="https://github.com/obsidianmd/pele">github.com/obsidianmd/pele</a> (MIT), version 1.13.0, a copy kept in this page’s <code>vendor/</code> folder. Mermaid: <a href="https://mermaid.js.org">mermaid.js.org</a>.</li>
+<li>Earlier parts: <a href="../diagram-history/">Boxes, Lines and Arrows</a> and <a href="../everyday-diagrams/">Diagrams Nobody Has to Think About</a>.</li>
+</ol>
+<p class="foot">Made with Claude for Pietro Peterlongo, November 2026: a proof of concept for a Nim and nimib diagram library built on Pele. The editor is about 300 lines of plain JavaScript over Pele’s SVG output. Fonts: Archivo and IBM Plex Mono, with each theme’s own face.</p>
+</main>
+
+<script src="vendor/pele-1.13.0.global.js"></script>
+<script>
+(function(){
+"use strict";
+const THEMES={
+  pele:{label:"pele",font:"sans-serif",vars:{},palette:["#5b7bd5","#e6e6e6","#f6d365","#9bd3ae"]},
+  tufte:{label:"tufte",font:'"Crimson Pro", Georgia, serif',vars:{"--pele-bg":"#fffff8","--pele-fg":"#111","--pele-surface":"#fffff8","--pele-border":"#111","--pele-line":"#111","--pele-accent":"#a4161a","--pele-radius":"0px"},palette:["#f1d9d9","#e6e1cc","#a4161a","#111111"]},
+  isotype:{label:"isotype",font:"Jost, Futura, sans-serif",vars:{"--pele-bg":"#f1ead9","--pele-fg":"#1c1b19","--pele-surface":"#e2a52a","--pele-border":"#1c1b19","--pele-line":"#1c1b19","--pele-accent":"#c8402b","--pele-radius":"0px"},palette:["#c8402b","#2d5d8c","#4c7a47","#f1ead9"]},
+  blueprint:{label:"blueprint",font:'"IBM Plex Mono", monospace',vars:{"--pele-bg":"#1d4f7a","--pele-fg":"#f4f8fb","--pele-surface":"#1d4f7a","--pele-border":"#f4f8fb","--pele-line":"#f4f8fb","--pele-accent":"#ffd166","--pele-radius":"0px","--pele-muted":"#bcd"},palette:["#2f6c9f","#ffd166","#0f2f4d","#e76f51"]},
+  quaderno:{label:"quaderno",font:'"Patrick Hand", cursive',rough:true,vars:{"--pele-bg":"#fdfdf8","--pele-fg":"#1d2a5a","--pele-surface":"#fff6b3","--pele-border":"#1d2a5a","--pele-line":"#1d2a5a","--pele-accent":"#d2361f","--pele-radius":"6px"},palette:["#ffd0c2","#c8f0d0","#cfe3ff","#fff6b3"]},
+  mari:{label:"mari",font:"Archivo, Helvetica, sans-serif",vars:{"--pele-bg":"#fbfaf6","--pele-fg":"#161616","--pele-surface":"#e3c48c","--pele-border":"#161616","--pele-line":"#161616","--pele-accent":"#d2361f","--pele-radius":"0px"},palette:["#d2361f","#fbfaf6","#b8904c","#161616"]}
+};
+const ARROWS=["pele","straight","elbow","curve"];
+const ROUTES=["auto","straight","elbow","curve","bezier"];
+const FAMILY=`flowchart TD
+  mermaid([Mermaid text]) --> pele[Pele]
+  nim([Nim]) --> lib{{diagrams lib}}
+  pele --> lib
+  nim --> nimib[nimib]
+  lib --> nimib
+  nimib --> nimibook[nimibook]
+  nimib --> nblog[nblog]
+  nimib --> tabelline[tabelline]
+  lib --> nimibook
+  lib --> nblog
+  tabelline -.-> nblog`;
+const RELEASE=`flowchart LR
+  idea[Idea] --> draft(Draft)
+  draft --> review{Review?}
+  review -->|yes| ship((Ship))
+  review -.->|no| draft
+  ship --> users[Users]`;
+const SEQUENCE=`sequenceDiagram
+  participant A as Author
+  participant N as nimib
+  participant P as Pele
+  A->>N: nim r page.nim
+  N->>P: render(source)
+  P-->>N: SVG
+  N-->>A: page.html`;
+const EXAMPLES={"nimib family":FAMILY,"release flow":RELEASE,"sequence (themes only)":SEQUENCE};
+const BASE=FAMILY;
+const EDITED=FAMILY.replace("flowchart TD\n","flowchart TD\n  you([You]) --> mermaid\n");
+const emptyLayer=()=>({theme:"pele",arrows:"pele",nodes:{},edges:{}});
+const clone=o=>JSON.parse(JSON.stringify(o));
+const MOVES={mermaid:{dx:-40,dy:96},pele:{dx:96},nim:{dx:72},lib:{dx:88,dy:16},nimib:{dx:72,dy:-80},nimibook:{dx:-64,dy:-64},tabelline:{dx:96,dy:-64},nblog:{dx:-72,dy:-160}};
+const BEND={L_tabelline_nblog_0:{route:"bezier",c1:[-40,70],c2:[40,70]}};
+const withFill=(m,fills)=>{const o=clone(m);for(const[k,v]of Object.entries(fills))o[k]={...(o[k]||{}),fill:v};return o;};
+const FILLS={lib:"#c8402b",pele:"#2d5d8c",mermaid:"#2d5d8c"};
+const STEPS=[
+  {t:"1 · write",c:"<b>Write the standard diagram.</b> Plain Mermaid on the left, here a map of the nimib family. Pele lays it out top to bottom and routes every arrow. Nothing personal yet: the layer on the right is empty.",
+   f:()=>({src:BASE,layer:emptyLayer()})},
+  {t:"2 · theme",c:"<b>Theme it.</b> One word in the layer, <code>\"theme\": \"isotype\"</code>. Pele draws it again with the theme’s font, so the boxes fit the new text.",
+   f:()=>({src:BASE,layer:{...emptyLayer(),theme:"isotype"}})},
+  {t:"3 · move",c:"<b>Rearrange it.</b> Inputs in a row on top, the library and nimib in the middle, outputs in a row below. Eight offsets in the layer. Every arrow is re-routed with <em>elbow</em>: try <em>straight</em> and <em>curve</em> on the left, and drag the hub around to watch its five arrows follow.",
+   f:()=>({src:BASE,layer:{...emptyLayer(),theme:"isotype",arrows:"elbow",nodes:clone(MOVES)}})},
+  {t:"4 · shape arrows",c:"<b>Shape the arrows.</b> Curves everywhere, and the dotted tabelline → nblog link becomes a hand-shaped Bézier that dips under the bottom row. Click it to see its handles, and pull them.",
+   f:()=>({src:BASE,layer:{...emptyLayer(),theme:"isotype",arrows:"curve",nodes:clone(MOVES),edges:clone(BEND)}})},
+  {t:"5 · restyle",c:"<b>Make it yours.</b> The library in red, its inputs in blue. Each choice is one line in the layer, keyed by the Mermaid id.",
+   f:()=>({src:BASE,layer:{...emptyLayer(),theme:"isotype",arrows:"curve",nodes:withFill(MOVES,FILLS),edges:clone(BEND)}})},
+  {t:"6 · edit source",c:"<b>Keep editing the standard part.</b> A new line puts <em>You</em> at the top. Pele lays out the new diagram, everything shifts down a row, and the layer still applies, because it is keyed by ids and stores offsets. You is new, so it sits where Pele put it: drag it into place.",
+   f:()=>({src:EDITED,layer:null})},
+  {t:"7 · swap style",c:"<b>Swap the whole style.</b> Same source, same layer, another theme. Your moves and curves carry over. Try the other themes on the left.",
+   f:()=>({src:EDITED,layer:"quaderno"})}
+];
+
+// ---------- geometry ----------
+const P=(x,y)=>({x,y}), add=(a,b)=>P(a.x+b.x,a.y+b.y), sub=(a,b)=>P(a.x-b.x,a.y-b.y), mul=(a,k)=>P(a.x*k,a.y*k);
+const len=a=>Math.hypot(a.x,a.y)||1, unit=a=>mul(a,1/len(a)), f=n=>Math.round(n*100)/100;
+function boundary(n,t){
+  const d=sub(t,n), hw=n.w/2, hh=n.h/2;
+  if(!d.x&&!d.y) return P(n.x,n.y);
+  let s;
+  if(n.shape==="circle") s=hw/len(d);
+  else if(n.shape==="diam") s=1/(Math.abs(d.x)/hw+Math.abs(d.y)/hh);
+  else s=Math.min(d.x?hw/Math.abs(d.x):Infinity,d.y?hh/Math.abs(d.y):Infinity);
+  return add(n,mul(d,s));
+}
+function ports(A,B){
+  const d=sub(B,A), hz=Math.abs(d.x)>=Math.abs(d.y);
+  if(hz){const s=Math.sign(d.x)||1;return {hz,s,a:P(A.x+s*A.w/2,A.y),b:P(B.x-s*B.w/2,B.y)};}
+  const s=Math.sign(d.y)||1;return {hz,s,a:P(A.x,A.y+s*A.h/2),b:P(B.x,B.y-s*B.h/2)};
+}
+const cubic=(p0,c1,c2,p1,t)=>{const u=1-t;return P(u*u*u*p0.x+3*u*u*t*c1.x+3*u*t*t*c2.x+t*t*t*p1.x,u*u*u*p0.y+3*u*u*t*c1.y+3*u*t*t*c2.y+t*t*t*p1.y);};
+function curveCtl(pr){const k=Math.max(36,Math.abs(pr.hz?pr.b.x-pr.a.x:pr.b.y-pr.a.y)/2);
+  return pr.hz?[P(pr.a.x+pr.s*k,pr.a.y),P(pr.b.x-pr.s*k,pr.b.y)]:[P(pr.a.x,pr.a.y+pr.s*k),P(pr.b.x,pr.b.y-pr.s*k)];}
+function tri(tip,dir){const u=unit(dir),n=P(-u.y,u.x),b=sub(tip,mul(u,8));
+  return `M${f(tip.x)},${f(tip.y)}L${f(b.x+n.x*3.36)},${f(b.y+n.y*3.36)}L${f(b.x-n.x*3.36)},${f(b.y-n.y*3.36)}Z`;}
+
+// ---------- render one diagram ----------
+let uid=0;
+function draw(stage,src,layer,opts){
+  opts=opts||{};
+  const th=THEMES[layer.theme]||THEMES.pele;
+  stage.className="stage bg-"+(THEMES[layer.theme]?layer.theme:"pele")+" th-"+(THEMES[layer.theme]?layer.theme:"pele");
+  for(const k of Object.keys(THEMES.blueprint.vars)) stage.style.removeProperty(k);
+  for(const [k,v] of Object.entries(th.vars)) stage.style.setProperty(k,v);
+  const pre="d"+(uid++)+"-";
+  const r=pele.render(src,{fontFamily:th.font,idPrefix:pre});
+  stage.innerHTML=r.svg;
+  const svg=stage.querySelector("svg");
+  const st={svg,stage,src,type:r.type,nodes:new Map(),edges:[],vb0:svg.getAttribute("viewBox").split(/\s+/).map(Number),pre};
+  if(th.rough){
+    const defs=document.createElementNS("http://www.w3.org/2000/svg","defs");
+    defs.innerHTML=`<filter id="${pre}rough" filterUnits="userSpaceOnUse" x="-5000" y="-5000" width="10000" height="10000"><feTurbulence type="fractalNoise" baseFrequency="0.035" numOctaves="2" seed="4"/><feDisplacementMap in="SourceGraphic" scale="2.6"/></filter>`;
+    svg.prepend(defs);
+  }
+  if(r.type!=="flowchart") return st;
+  let model; try{model=pele.parse(src);}catch(e){return st;}
+  const ends=new Map(model.edges.map(e=>[e.id,[e.start,e.end]]));
+  svg.querySelectorAll("g.pele-node[data-id]").forEach(g=>{
+    const m=/translate\(([-\d.]+)[ ,]+([-\d.]+)\)/.exec(g.getAttribute("transform")||"");
+    if(!m) return;
+    const shapes=[...g.children].filter(e=>e.tagName!=="text"&&!e.classList.contains("pele-label"));
+    const bb=g.getBBox();
+    const cls=g.getAttribute("class");
+    const shape=/circle|ellipse/.test(cls)?"circle":/diam|hex/.test(cls)?"diam":"rect";
+    st.nodes.set(g.dataset.id,{id:g.dataset.id,g,shapes,fill0:shapes.map(s=>s.getAttribute("fill")),cx:+m[1],cy:+m[2],w:bb.width,h:bb.height,shape,x:+m[1],y:+m[2]});
+    if(th.rough) shapes.forEach(s=>s.setAttribute("filter",`url(#${pre}rough)`));
+  });
+  svg.querySelectorAll("g.pele-edge[data-id]").forEach(g=>{
+    const id=g.dataset.id, se=ends.get(id); if(!se) return;
+    const path=g.querySelector("path:not(.pele-marker)"); if(!path) return;
+    const d0=path.getAttribute("d"), nums=d0.match(/-?\d*\.?\d+/g).map(Number);
+    const S=P(nums[0],nums[1]),E=P(nums[nums.length-2],nums[nums.length-1]);
+    const markers=[...g.querySelectorAll("path.pele-marker")].map(el=>{const q=el.getAttribute("d").match(/-?\d*\.?\d+/g).map(Number);const tip=P(q[0],q[1]);
+      return {el,d0:el.getAttribute("d"),atEnd:len(sub(tip,E))<=len(sub(tip,S))};});
+    const lab=svg.querySelector(`g.pele-edge-label[data-id="${id}"]`);
+    let label=null;if(lab){const rc=lab.querySelector("rect");label={g:lab,c0:rc?P(+rc.getAttribute("x")+ +rc.getAttribute("width")/2,+rc.getAttribute("y")+ +rc.getAttribute("height")/2):null};}
+    let hit=null;
+    if(opts.interactive){hit=document.createElementNS("http://www.w3.org/2000/svg","path");hit.setAttribute("class","hit");hit.dataset.edge=id;g.appendChild(hit);}
+    if(th.rough) path.setAttribute("filter",`url(#${pre}rough)`);
+    st.edges.push({id,g,path,d0,markers,label,hit,from:se[0],to:se[1]});
+  });
+  if(opts.interactive){const h=document.createElementNS("http://www.w3.org/2000/svg","g");h.setAttribute("class","handles");svg.appendChild(h);st.handles=h;}
+  return st;
+}
+
+function apply(st,layer,sel,fit){
+  if(st.type!=="flowchart"){return;}
+  const pts=[];
+  for(const n of st.nodes.values()){
+    const o=layer.nodes[n.id]||{};
+    n.x=n.cx+(+o.dx||0);n.y=n.cy+(+o.dy||0);n.moved=!!(+o.dx||+o.dy);
+    n.g.setAttribute("transform",`translate(${f(n.x)},${f(n.y)})`);
+    n.shapes.forEach((s,i)=>{if(n.fill0[i]!=null) s.setAttribute("fill",o.fill&&n.fill0[i]!=="none"?o.fill:n.fill0[i]);});
+    n.g.classList.toggle("sel",!!sel&&sel.node===n.id);
+    pts.push(P(n.x-n.w/2,n.y-n.h/2),P(n.x+n.w/2,n.y+n.h/2));
+  }
+  if(st.handles) st.handles.innerHTML="";
+  for(const e of st.edges){
+    const A=st.nodes.get(e.from),B=st.nodes.get(e.to),o=layer.edges[e.id]||{};
+    let mode=o.route&&o.route!=="auto"?o.route:((A&&A.moved)||(B&&B.moved)?(layer.arrows==="pele"?"curve":layer.arrows):layer.arrows);
+    e.g.classList.toggle("sel",!!sel&&sel.edge===e.id);
+    if(!A||!B||A===B||mode==="pele"||!ROUTES.includes(mode)){
+      e.path.setAttribute("d",e.d0);e.markers.forEach(m=>m.el.setAttribute("d",m.d0));
+      if(e.label) e.label.g.removeAttribute("transform");if(e.hit) e.hit.setAttribute("d",e.d0);continue;
+    }
+    let a,b,c1,c2,mid,dA,dB,d;
+    const hasS=e.markers.some(m=>!m.atEnd),hasE=e.markers.some(m=>m.atEnd);
+    if(mode==="straight"){a=boundary(A,B);b=boundary(B,A);dA=sub(a,b);dB=sub(b,a);mid=mul(add(a,b),.5);}
+    else{
+      const pr=ports(A,B);a=pr.a;b=pr.b;
+      if(mode==="elbow"){
+        if(pr.hz){const mx=(a.x+b.x)/2;mid=P(mx,(a.y+b.y)/2);c1=P(mx,a.y);c2=P(mx,b.y);}
+        else{const my=(a.y+b.y)/2;mid=P((a.x+b.x)/2,my);c1=P(a.x,my);c2=P(b.x,my);}
+        dA=sub(a,c1);dB=sub(b,c2);
+      }else{
+        [c1,c2]=curveCtl(pr);
+        if(mode==="bezier"){const k1=o.c1||[c1.x-a.x,c1.y-a.y],k2=o.c2||[c2.x-b.x,c2.y-b.y];c1=P(a.x+k1[0],a.y+k1[1]);c2=P(b.x+k2[0],b.y+k2[1]);}
+        dA=sub(a,c1);dB=sub(b,c2);mid=cubic(a,c1,c2,b,.5);
+      }
+    }
+    const a2=hasS?sub(a,mul(unit(dA),7)):a, b2=hasE?sub(b,mul(unit(dB),7)):b;
+    if(mode==="straight") d=`M${f(a2.x)},${f(a2.y)}L${f(b2.x)},${f(b2.y)}`;
+    else if(mode==="elbow") d=`M${f(a2.x)},${f(a2.y)}L${f(c1.x)},${f(c1.y)}L${f(c2.x)},${f(c2.y)}L${f(b2.x)},${f(b2.y)}`;
+    else d=`M${f(a2.x)},${f(a2.y)}C${f(c1.x)},${f(c1.y)} ${f(c2.x)},${f(c2.y)} ${f(b2.x)},${f(b2.y)}`;
+    e.path.setAttribute("d",d);if(e.hit) e.hit.setAttribute("d",d);
+    e.markers.forEach(m=>m.el.setAttribute("d",m.atEnd?tri(b,dB):tri(a,dA)));
+    if(e.label&&e.label.c0){const t=sub(mid,e.label.c0);e.label.g.setAttribute("transform",`translate(${f(t.x)},${f(t.y)})`);pts.push(P(mid.x-20,mid.y-12),P(mid.x+20,mid.y+12));}
+    if(mode==="bezier"||mode==="curve"){pts.push(cubic(a,c1,c2,b,.25),cubic(a,c1,c2,b,.75));}
+    if(st.handles&&sel&&sel.edge===e.id&&mode==="bezier"){
+      st.handles.innerHTML=`<line x1="${a.x}" y1="${a.y}" x2="${c1.x}" y2="${c1.y}"/><line x1="${b.x}" y1="${b.y}" x2="${c2.x}" y2="${c2.y}"/><circle data-h="c1" cx="${c1.x}" cy="${c1.y}" r="6"/><circle data-h="c2" cx="${c2.x}" cy="${c2.y}" r="6"/>`;
+      st.handles.anchor={a,b};
+    }
+  }
+  if(fit){
+    const [x0,y0,w0,h0]=st.vb0;let x1=x0,y1=y0,x2=x0+w0,y2=y0+h0;
+    pts.forEach(p=>{x1=Math.min(x1,p.x-12);y1=Math.min(y1,p.y-12);x2=Math.max(x2,p.x+12);y2=Math.max(y2,p.y+12);});
+    st.svg.setAttribute("viewBox",`${f(x1)} ${f(y1)} ${f(x2-x1)} ${f(y2-y1)}`);
+    st.svg.setAttribute("width",f(x2-x1));st.svg.setAttribute("height",f(y2-y1));
+  }
+}
+
+// ---------- the lab ----------
+const $=id=>document.getElementById(id);
+const srcEl=$("src"),layerEl=$("layerText"),stage=$("stage"),insp=$("inspector");
+let src=BASE,layer=emptyLayer(),sel=null,st=null;
+
+function knownIds(){if(!st) return {n:[],e:[]};return {n:[...st.nodes.keys()],e:st.edges.map(e=>e.id)};}
+function showLayer(fromUser){
+  if(!fromUser) layerEl.value=JSON.stringify(layer,null,2);
+  const k=knownIds(),orph=[...Object.keys(layer.nodes).filter(i=>!k.n.includes(i)),...Object.keys(layer.edges).filter(i=>!k.e.includes(i))];
+  $("orphans").textContent=st&&st.type==="flowchart"&&orph.length?"orphaned (id no longer in source): "+orph.join(", "):"";
+  multiples();
+}
+function seg(el,items,cur,on){el.innerHTML="";items.forEach(v=>{const b=document.createElement("button");b.textContent=v;b.setAttribute("aria-pressed",v===cur);b.onclick=()=>on(v);el.appendChild(b);});}
+function controls(){
+  seg($("examples"),Object.keys(EXAMPLES),Object.keys(EXAMPLES).find(k=>EXAMPLES[k]===src),v=>{src=EXAMPLES[v];srcEl.value=src;layer={...emptyLayer(),theme:layer.theme};sel=null;setStep(-1);full();});
+  seg($("themes"),Object.keys(THEMES),layer.theme,v=>{layer.theme=v;full();});
+  seg($("arrows"),ARROWS,layer.arrows,v=>{layer.arrows=v;refresh(true);});
+}
+function inspector(){
+  let h="<h4>Inspector</h4>";
+  const th=THEMES[layer.theme]||THEMES.pele;
+  if(sel&&sel.node){
+    const o=layer.nodes[sel.node]||{};
+    h+=`<div class="row"><b>box <code>${sel.node}</code></b> <span class="note">offset ${o.dx||0}, ${o.dy||0}</span></div><div class="row">fill:`+
+      th.palette.map(c=>`<button class="sw" data-fill="${c}" style="background:${c}" title="${c}"></button>`).join("")+
+      `<button class="sw none" data-fill="" title="theme default"></button></div><div class="row"><button class="btn" data-act="home">back to layout position</button><button class="btn" data-act="forget">forget this box</button></div>`;
+  }else if(sel&&sel.edge){
+    const o=layer.edges[sel.edge]||{},cur=o.route||"auto";
+    h+=`<div class="row"><b>arrow <code>${sel.edge}</code></b></div><div class="row">route:`+
+      ROUTES.map(r=>`<button class="btn" data-route="${r}" aria-pressed="${r===cur}" style="${r===cur?"background:#161616;color:#fff":""}">${r}</button>`).join("")+`</div>`+
+      `<div class="row note">${cur==="bezier"?"Drag the two red handles to shape it.":cur==="auto"?"Follows “arrows after a move”: Pele’s own route until an end moves.":"Computed from the current positions."}</div>`;
+  }else h+=`<p class="note" style="margin:0">Select a box or an arrow.</p>`;
+  insp.innerHTML=h;
+}
+insp.addEventListener("click",ev=>{
+  const b=ev.target.closest("button");if(!b||!sel) return;
+  if(b.dataset.fill!==undefined){const o=layer.nodes[sel.node]=layer.nodes[sel.node]||{};if(b.dataset.fill)o.fill=b.dataset.fill;else delete o.fill;tidy(sel.node);}
+  else if(b.dataset.act==="home"){const o=layer.nodes[sel.node];if(o){delete o.dx;delete o.dy;tidy(sel.node);}}
+  else if(b.dataset.act==="forget"){delete layer.nodes[sel.node];}
+  else if(b.dataset.route){const r=b.dataset.route;if(r==="auto")delete layer.edges[sel.edge];else{const o=layer.edges[sel.edge]={route:r};if(r==="bezier")seedBezier(sel.edge,o);}}
+  refresh(true);
+});
+function tidy(id){const o=layer.nodes[id];if(o&&!Object.keys(o).length)delete layer.nodes[id];}
+function seedBezier(id,o){
+  const e=st.edges.find(x=>x.id===id),A=st.nodes.get(e.from),B=st.nodes.get(e.to);if(!A||!B)return;
+  const pr=ports(A,B),[c1,c2]=curveCtl(pr);o.c1=[f(c1.x-pr.a.x),f(c1.y-pr.a.y)];o.c2=[f(c2.x-pr.b.x),f(c2.y-pr.b.y)];
+}
+function refresh(fit){apply(st,layer,sel,fit);inspector();controls();showLayer();}
+async function full(){
+  const th=THEMES[layer.theme]||THEMES.pele;
+  try{await document.fonts.load("16px "+th.font);}catch(e){}
+  try{st=draw(stage,src,layer,{interactive:true});$("err").textContent="";}
+  catch(e){$("err").textContent=e.message||String(e);return;}
+  $("status").textContent=st.type==="flowchart"?"2 · drawing, flowchart: drag to move":"2 · drawing, "+st.type+": themes apply, moving is for flowcharts in this demo";
+  if(sel&&sel.node&&!st.nodes.has(sel.node))sel=null;
+  refresh(true);
+}
+// pointer interaction
+function svgPt(ev){const p=st.svg.createSVGPoint();p.x=ev.clientX;p.y=ev.clientY;return p.matrixTransform(st.svg.getScreenCTM().inverse());}
+let drag=null;
+stage.addEventListener("pointerdown",ev=>{
+  if(!st||st.type!=="flowchart") return;
+  const h=ev.target.closest(".handles circle"),hit=ev.target.closest(".hit"),node=ev.target.closest("g.pele-node");
+  const p=svgPt(ev);
+  if(h){drag={kind:"h",h:h.dataset.h,p0:p};}
+  else if(hit){sel={edge:hit.dataset.edge};refresh(false);return;}
+  else if(node&&st.nodes.has(node.dataset.id)){const id=node.dataset.id,o=layer.nodes[id]||{};sel={node:id};drag={kind:"n",id,p0:p,dx:+o.dx||0,dy:+o.dy||0,moved:false};refresh(false);}
+  else{sel=null;refresh(false);return;}
+  stage.setPointerCapture(ev.pointerId);ev.preventDefault();
+});
+stage.addEventListener("pointermove",ev=>{
+  if(!drag) return;const p=svgPt(ev);
+  if(drag.kind==="n"){
+    let dx=drag.dx+(p.x-drag.p0.x),dy=drag.dy+(p.y-drag.p0.y);
+    if($("snap").checked){dx=Math.round(dx/8)*8;dy=Math.round(dy/8)*8;}else{dx=Math.round(dx);dy=Math.round(dy);}
+    if(Math.abs(p.x-drag.p0.x)+Math.abs(p.y-drag.p0.y)>2)drag.moved=true;
+    const o=layer.nodes[drag.id]=layer.nodes[drag.id]||{};o.dx=dx;o.dy=dy;if(!dx)delete o.dx;if(!dy)delete o.dy;tidy(drag.id);
+    apply(st,layer,sel,false);
+  }else{
+    const o=layer.edges[sel.edge],an=st.handles.anchor;if(!o||!an)return;
+    const base=drag.h==="c1"?an.a:an.b;o[drag.h]=[Math.round(p.x-base.x),Math.round(p.y-base.y)];apply(st,layer,sel,false);
+  }
+});
+const end=()=>{if(drag){drag=null;refresh(true);}};
+stage.addEventListener("pointerup",end);stage.addEventListener("pointercancel",end);
+// text panels
+let t1;srcEl.addEventListener("input",()=>{clearTimeout(t1);t1=setTimeout(()=>{src=srcEl.value;full();setStep(-1);},250);});
+layerEl.addEventListener("input",()=>{
+  try{const v=JSON.parse(layerEl.value);layer={...emptyLayer(),...v,nodes:v.nodes||{},edges:v.edges||{}};$("lerr").textContent="";
+    const fontChange=!st||st.svg.dataset.theme!==layer.theme;full().then(()=>{});setStep(-1);}
+  catch(e){$("lerr").textContent="not valid JSON yet";}
+});
+$("copy").onclick=()=>{navigator.clipboard&&navigator.clipboard.writeText(JSON.stringify(layer,null,2)).then(()=>{$("copy").textContent="Copied";setTimeout(()=>$("copy").textContent="Copy layer",1200);},()=>{layerEl.select();});};
+$("reset").onclick=()=>{layer=emptyLayer();sel=null;full();setStep(-1);};
+// tour
+function setStep(i){[...$("tour").children].forEach((b,j)=>b.setAttribute("aria-pressed",j===i));if(i>=0)$("caption").innerHTML=STEPS[i].c;}
+STEPS.forEach((s,i)=>{const b=document.createElement("button");b.textContent=s.t;b.onclick=()=>{
+  const r=s.f();src=r.src;srcEl.value=src;
+  if(r.layer===null){/* keep layer */}else if(typeof r.layer==="string"){layer.theme=r.layer;}else layer=clone(r.layer);
+  sel=null;setStep(i);full();};$("tour").appendChild(b);});
+// multiples
+let tm;
+function multiples(){clearTimeout(tm);tm=setTimeout(async()=>{
+  const box=$("multi");
+  if(!box.children.length){Object.keys(THEMES).forEach(k=>{box.insertAdjacentHTML("beforeend",`<figure><div class="stage" data-th="${k}"></div><figcaption>${k}</figcaption></figure>`);});}
+  for(const el of box.querySelectorAll(".stage")){
+    const k=el.dataset.th,l={...clone(layer),theme:k};
+    try{await document.fonts.load("16px "+THEMES[k].font);}catch(e){}
+    try{const s=draw(el,src,l,{});apply(s,l,null,true);}catch(e){el.textContent="—";}
+  }},350);}
+// start
+function start(){
+  if(!window.pele){$("err").textContent="Pele could not be loaded, so the demo cannot draw.";return;}
+  srcEl.value=src;setStep(0);full();
+}
+if(document.readyState==="loading")document.addEventListener("DOMContentLoaded",start);else start();
+})();
+</script>
+</body>
+</html>
