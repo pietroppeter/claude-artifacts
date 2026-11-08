@@ -1,0 +1,1223 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <title>A month of building with Claude, as an operetta</title>
+  <meta content="text/html; charset=utf-8" http-equiv="content-type">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <meta content="nimib 0.4.3" name="generator">
+  <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22>🎭</text></svg>">
+<style>
+:root {
+  --carta: #F7F2E8; --inchiostro: #221C1A; --rosso: #8E1B24; --oro: #A9843A;
+  --grigio: #6E625A; --filetto: #D9CDB8; --velluto: #F1E3DA;
+  --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
+  --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+}
+html { -webkit-text-size-adjust: 100%; }
+body { margin: 0; background: var(--carta); color: var(--inchiostro); font: 18px/1.6 var(--serif); }
+[hidden] { display: none !important; }
+main { max-width: 46rem; margin: 0 auto; padding: 0 1.1rem 4rem; }
+a { color: var(--rosso); text-decoration-thickness: 1px; text-underline-offset: 2px; }
+header.sala { max-width: 46rem; margin: 0 auto; padding: 1rem 1.1rem 0; display: flex; justify-content: space-between;
+  font: .72rem/1 var(--serif); letter-spacing: .18em; text-transform: uppercase; color: var(--grigio); }
+header.sala a { color: var(--grigio); text-decoration: none; }
+
+/* the cover */
+.copertina { text-align: center; border-top: 3px double var(--inchiostro); border-bottom: 3px double var(--inchiostro);
+  margin: 1.4rem 0 2rem; padding: 1.6rem 0 1.4rem; }
+.copertina .sopra { font-size: .78rem; letter-spacing: .3em; text-transform: uppercase; color: var(--rosso); margin: 0; }
+.copertina h1 { font-weight: 400; font-size: 2.6rem; line-height: 1.08; margin: .5rem 0 .4rem; letter-spacing: -.01em; }
+.copertina h1 em { color: var(--rosso); }
+.copertina .lede { font-size: 1.15rem; font-style: italic; color: var(--grigio); margin: .6rem auto 0; max-width: 34rem; }
+.copertina .data { font-size: .78rem; letter-spacing: .2em; text-transform: uppercase; color: var(--grigio); margin-top: 1rem; }
+
+/* the playbill: the three parts */
+.programma { list-style: none; padding: 0; margin: 0 0 2.4rem; border: 1px solid var(--filetto); background: #FFFDF8; }
+.programma li { display: grid; grid-template-columns: 6.6rem 1fr; gap: .8rem; padding: .8rem 1rem; border-top: 1px solid var(--filetto); }
+.programma li:first-child { border-top: 0; }
+.programma .atto { font-size: .72rem; letter-spacing: .18em; text-transform: uppercase; color: var(--rosso); padding-top: .3rem; }
+.programma a { font-size: 1.15rem; color: var(--inchiostro); text-decoration: none; border-bottom: 1px solid var(--rosso); }
+.programma p { margin: .2rem 0 0; font-size: .92rem; color: var(--grigio); line-height: 1.45; }
+@media (max-width: 520px) { .programma li { grid-template-columns: 1fr; gap: .1rem; } }
+
+/* part headings: a curtain-red label over a big title */
+h2.parte { text-align: center; font-weight: 400; font-size: 2rem; line-height: 1.15; margin: 4rem 0 1.6rem;
+  padding-top: 1.6rem; border-top: 1px solid var(--inchiostro); scroll-margin-top: 1rem; }
+h2.parte small { display: block; font-size: .78rem; letter-spacing: .3em; text-transform: uppercase; color: var(--rosso); margin-bottom: .5rem; }
+h2.parte + .lede { text-align: center; font-style: italic; color: var(--grigio); margin: -.8rem auto 1.8rem; max-width: 34rem; }
+h3 { font-weight: 400; font-size: 1.45rem; margin: 2.4rem 0 .6rem; }
+h3::before { content: "❦ "; color: var(--oro); font-size: .9em; }
+blockquote { margin: 1.2rem 0; padding: .2rem 1.2rem; border-left: 3px solid var(--oro); font-style: italic; }
+
+/* code: small, on a slightly warmer sheet */
+body pre > code { display: block; font: 12.5px/1.5 var(--mono); background: #FFFDF8; border: 1px solid var(--filetto);
+  padding: .8rem .9rem; overflow-x: auto; }
+:not(pre) > code { font: .84em var(--mono); background: var(--velluto); padding: .05em .3em; }
+pre { margin: 1rem 0; }
+.hljs-keyword { color: var(--rosso); } .hljs-string { color: #2F5D50; } .hljs-comment { color: var(--grigio); font-style: italic; }
+
+/* tabs: 👑 Nim, 🐍 Python, 🏴‍☠️ R */
+.lingue { margin: 1.2rem 0; }
+.lingue-tab { display: flex; flex-wrap: wrap; }
+.lingue-tab button { font: .78rem var(--serif); letter-spacing: .12em; text-transform: uppercase; color: var(--inchiostro);
+  background: transparent; border: 1px solid var(--inchiostro); padding: .3rem .8rem; cursor: pointer; margin-right: -1px; }
+.lingue-tab button[aria-selected="true"] { background: var(--inchiostro); color: var(--carta); }
+.lingue-pannello { border-top: 1px solid var(--inchiostro); }
+
+/* tabelline's tables in the programme's look */
+.tabella { margin: 1.4rem 0; }
+.tabella .tb_table { font-family: var(--serif) !important; background: #FFFDF8 !important; color: var(--inchiostro) !important;
+  border-top: 2px solid var(--inchiostro) !important; border-bottom: 2px solid var(--inchiostro) !important; }
+.tabella .tb_title { font-weight: 400 !important; font-size: 1.25rem !important; }
+.tabella .tb_subtitle { font-style: italic; color: var(--grigio) !important; }
+.tabella .tb_heading_last { border-bottom: 1px solid var(--rosso) !important; }
+.tabella .tb_col_heading { color: var(--grigio) !important; font-size: .85rem !important; letter-spacing: .04em; }
+.tabella .tb_row { border-top-color: var(--filetto) !important; }
+.tabella .tb_stub { border-right-color: var(--filetto) !important; }
+.tabella .tb_group_heading { background: var(--velluto) !important; color: var(--rosso) !important; font-size: .8rem !important;
+  letter-spacing: .12em; text-transform: uppercase; border-color: var(--inchiostro) !important; }
+.tabella .tb_footnote, .tabella .tb_sourcenote { color: var(--grigio) !important; font-size: .8rem !important; }
+
+footer.sala { max-width: 46rem; margin: 0 auto; padding: 1.4rem 1.1rem 3rem; border-top: 3px double var(--inchiostro);
+  font-size: .85rem; color: var(--grigio); text-align: center; }
+</style>
+  
+  
+  
+    
+<!-- claude-artifacts:codeblocks -->
+<style>pre{overflow-x:auto}pre>code{overflow-x:auto}</style>
+<!-- /claude-artifacts:codeblocks -->
+</head>
+<body>
+<header class="sala"><a href="../">claude-artifacts</a><span>programma di sala</span></header>
+<main>
+<div class="copertina">
+<p class="sopra">An operetta in three parts</p>
+<h1>A month of building<br>with <em>Claude</em></h1>
+<p class="lede">Seven weeks of open source made with an AI agent, mostly from a phone: what happened, the
+way of working that grew out of it, and the next part of that way of working, skills.</p>
+<p class="data">Pietro Peterlongo · 7 November 2026</p>
+</div>
+<ol class="programma">
+<li><span class="atto">Parte prima</span><div><a href="#part-one">The month in seven acts</a>
+<p>289 pull requests in 30 public repositories, told as seven acts with one moment each, and the nineteen parts of a way of working that grew along the way.</p></div></li>
+<li><span class="atto">Parte seconda</span><div><a href="#part-two">Operetta, a first sketch</a>
+<p>The parts as five groups that a project picks from, by what it is and how far along it is.</p></div></li>
+<li><span class="atto">Parte terza</span><div><a href="#part-three">Skills, from the beginning</a>
+<p>What an agent skill is, where skills live in an open source project, who does them well, and how to tell whether one helps.</p></div></li>
+</ol>
+<p>The three parts were first written on 7 November 2026 as posts in the devlog of
+<a href="https://github.com/pietroppeter/tabelline">tabelline</a>, great tables for Nim, by the thread that
+uses each tabelline release on real data. They are about the way of working rather than about
+tabelline, so they live here, as one article. Every table in it is still a tabelline table.</p>
+<h2 class="parte" id="part-one"><small>Parte prima</small>The month in seven acts</h2><p class="lede">Seven weeks of open source made with Claude: what happened, one moment from each act, and the parts of a way of working that grew along the way.</p>
+<p>Since Opus 5.5 came out, Pietro has been writing open source with Claude, mostly from his phone.
+From 20 September to 7 November that made <strong>289 pull requests and issues</strong> in
+<strong>30 public repositories</strong>, his own and a few of others. That is too much to show, and
+this article does not try: no dashboard, no grid, no chart of every day. It picks.</p>
+<p>It picks three things: the acts the month falls into, one moment from each act, and the parts
+of a way of working that each act added. The last are the point. They are what the second part
+puts together and names: <a href="#part-two">Operetta</a>.</p>
+<p>This is also the first time tabelline is used on real data, by its own <em>use it</em> thread for 0.1
+(see the <a href="https://pietroppeter.github.io/tabelline/roadmap/">roadmap</a>): every table below is a tabelline table, and what it was
+missing is at the end.</p>
+<h3>Seven acts</h3>
+<p>An operetta is a light opera: an overture, a few acts, an interlude, a finale, songs between
+spoken parts. The month had that shape.</p>
+<div id="tabella-fe27228c" class="tabella">
+<style>
+#tabella-fe27228c { overflow-x: auto; }
+#tabella-fe27228c table, #tabella-fe27228c thead, #tabella-fe27228c tbody, #tabella-fe27228c tfoot, #tabella-fe27228c tr, #tabella-fe27228c td, #tabella-fe27228c th { border-style: none; }
+#tabella-fe27228c .tb_table { display: table; border-collapse: collapse; line-height: normal;
+  margin-left: auto; margin-right: auto; width: auto;
+  color: #333333; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px;
+  background-color: #FFFFFF;
+  border-top: 2px solid #A8A8A8;
+  border-bottom: 2px solid #A8A8A8;
+  border-left: 2px none #D3D3D3;
+  border-right: 2px none #D3D3D3; }
+#tabella-fe27228c .tb_caption { caption-side: top; padding: 4px 5px; color: #333333; font-style: italic; }
+#tabella-fe27228c .tb_heading { background-color: #FFFFFF; text-align: center; color: #333333; }
+#tabella-fe27228c .tb_title { font-size: 125%; font-weight: initial;
+  padding: 4px 5px; }
+#tabella-fe27228c .tb_subtitle { font-size: 85%; font-weight: normal; padding: 0 5px 4px 5px; }
+#tabella-fe27228c .tb_heading_last { border-bottom: 2px solid #D3D3D3; }
+#tabella-fe27228c .tb_col_headings th { background-color: #FFFFFF; color: #333333;
+  font-size: 100%; font-weight: normal;
+  text-transform: inherit; vertical-align: bottom;
+  padding: 5px 5px; overflow-x: hidden; }
+#tabella-fe27228c .tb_col_headings_last th { border-bottom: 2px solid #D3D3D3; }
+#tabella-fe27228c .tb_spanner { display: inline-block; width: 100%; padding-bottom: 4px;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-fe27228c .tb_spanner_empty { border-bottom: none; }
+#tabella-fe27228c .tb_group_heading { background-color: #FFFFFF; font-weight: initial;
+  padding: 8px 5px; text-align: left; border-top: 2px solid #D3D3D3;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-fe27228c .tb_row { padding: 8px 5px; margin: 10px;
+  border-top: 1px solid #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+#tabella-fe27228c .tb_stub { background-color: transparent; font-weight: initial; text-align: left;
+  border-right: 2px solid #D3D3D3; }
+#tabella-fe27228c tbody tr:first-child .tb_row { border-top: none; }
+#tabella-fe27228c .tb_striped { background-color: rgba(128,128,128,0.05); }
+#tabella-fe27228c .tb_left { text-align: left; } #tabella-fe27228c .tb_center { text-align: center; } #tabella-fe27228c .tb_right { text-align: right; font-variant-numeric: tabular-nums; }
+#tabella-fe27228c .tb_footnotes, #tabella-fe27228c .tb_sourcenotes { color: #333333; background-color: #FFFFFF; }
+#tabella-fe27228c .tb_footnote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-fe27228c .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-fe27228c tfoot tr:first-child td { padding-top: 8px; }
+#tabella-fe27228c .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
+#tabella-fe27228c .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
+#tabella-fe27228c .tb_bar_track { display: inline-block; height: 0.8em; }
+#tabella-fe27228c .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
+#tabella-fe27228c .tb_bar_label { min-width: 2.5em; text-align: right; }
+</style>
+<table class="tb_table" aria-labelledby="tabella-fe27228c-title">
+<thead>
+<tr class="tb_heading"><th colspan="3" id="tabella-fe27228c-title" class="tb_title">The month in seven acts</th></tr>
+<tr class="tb_heading"><th colspan="3" class="tb_subtitle tb_heading_last">20 September to 7 November 2026</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_left" scope="col" id="story">what happened</th><th class="tb_col_heading tb_right" scope="col" id="prs">PRs<span class="tb_footnote_marks">1</span></th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Ouverture</strong><br>overture<br>20–22 Sep</th><td class="tb_row tb_left">A bug in Knuth's long division in nim-lang/bigints, fixed by Claude and checked by Pietro.<br><strong>One moment:</strong> <a href="https://github.com/nim-lang/bigints/pull/151"><em>&quot;Fix was produced by Claude… My effort was to review, understand and validate.&quot;</em></a></td><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:2.5em"><span class="tb_bar_fill" style="width:1.1%;background:var(--rosso)"></span></span><span class="tb_bar_label">1</span></span></td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Atto primo</strong><br>act one: Toulouse<br>4–8 Oct</th><td class="tb_row tb_left">At the Agile Lab Nomads in Toulouse, Nim meets Python: <code>uv add nimlang</code> puts a Nim compiler in any Python project, and libraries ship as wheels.<br><strong>One moment:</strong> <a href="https://github.com/pietroppeter/naffprop">naffprop</a>: affinity propagation in Nim, on PyPI, with an animated explainer</td><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:2.5em"><span class="tb_bar_fill" style="width:57.4%;background:var(--rosso)"></span></span><span class="tb_bar_label">54</span></span></td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Intermezzo</strong><br>interlude: the talk<br>24–28 Oct</th><td class="tb_row tb_left">Slides for <em>Sailing Seas of Scientific Nim</em>, planned with OpenSpec; the first pages in claude-artifacts; the State of NimibLand.<br><strong>One moment:</strong> <a href="https://github.com/pietroppeter/talk-sailing-seas-scientific-nim/pull/7">a talk planned as specs</a>: OpenSpec with a schema of its own</td><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:2.5em"><span class="tb_bar_fill" style="width:39.4%;background:var(--rosso)"></span></span><span class="tb_bar_label">37</span></span></td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Atto secondo</strong><br>act two: nanuq<br>27 Oct – 2 Nov</th><td class="tb_row tb_left">The talk paused for Polars in Nim: six releases in six days, each with a design post, an explainer on real data and chapters of a book of ports.<br><strong>One moment:</strong> <a href="https://github.com/pietroppeter/nanuq/pull/60">a coverage map of Polars</a>: what is there and what is not, as a page</td><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:2.5em"><span class="tb_bar_fill" style="width:100.0%;background:var(--rosso)"></span></span><span class="tb_bar_label">94</span></span></td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Atto terzo</strong><br>act three: the workshop<br>31 Oct – 7 Nov</th><td class="tb_row tb_left">From nanuq came cicak, a REPL for Nim, with benchmarks; then cadero, a small CAD in Nim, to plan the furniture of a room, in Italian.<br><strong>One moment:</strong> <a href="https://github.com/pietroppeter/cadero/pull/11">a 3D viewer written in Nim</a>, compiled to JavaScript in a nimib page</td><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:2.5em"><span class="tb_bar_fill" style="width:43.6%;background:var(--rosso)"></span></span><span class="tb_bar_label">41</span></span></td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Atto quarto</strong><br>act four: games<br>4–6 Nov</th><td class="tb_row tb_left">Parloku, a word puzzle to play with the fingers, and zogyn, the declarative dragging it is made with, both first tried as artifacts.<br><strong>One moment:</strong> <a href="https://github.com/pietroppeter/parloku/pull/11">specs whose drag scenarios run and animate</a></td><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:2.5em"><span class="tb_bar_fill" style="width:46.8%;background:var(--rosso)"></span></span><span class="tb_bar_label">44</span></span></td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Finale</strong><br>finale<br>7 Nov</th><td class="tb_row tb_left">tabelline, great tables for Nim, and diagrammari, diagrams that Mermaid reads; a FOSDEM proposal. And a name for the way of working: Operetta.<br><strong>One moment:</strong> <a href="https://github.com/pietroppeter/talk-sailing-seas-scientific-nim/pull/27">the talk's tables, redone with tabelline</a></td><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:2.5em"><span class="tb_bar_fill" style="width:19.1%;background:var(--rosso)"></span></span><span class="tb_bar_label">18</span></span></td></tr>
+</tbody>
+<tfoot>
+<tr class="tb_footnotes"><td class="tb_footnote" colspan="3"><span class="tb_footnote_marks">1</span> Pull requests and issues opened in the act, public repositories only.</td></tr>
+<tr class="tb_sourcenotes"><td class="tb_sourcenote" colspan="3">From GitHub's search API; the selection of acts and moments is by hand.</td></tr>
+</tfoot>
+</table>
+</div>
+<p>Two things stand out. The busiest act is nanuq, Polars for Nim, which went from a first proof
+of concept to 0.6 in six days. And the acts overlap: the talk ran under everything, and the
+workshop and the games shared the same week. A thread for each piece of work, in a project for
+each subject, is what made that possible: Claude carries one task while Pietro reads another.</p>
+<p>Where the work went, repository by repository, is the one count worth showing. Here it is in
+the three languages of tabelline's explainers: Nim with tabelline, Python with Great Tables, R
+with gt.</p>
+<div class="lingue"><div class="lingue-tab" role="tablist"><button type="button" role="tab" data-lingua="nim" aria-selected="true">👑 Nim</button><button type="button" role="tab" data-lingua="python" aria-selected="false">🐍 Python</button><button type="button" role="tab" data-lingua="r" aria-selected="false">🏴‍☠️ R</button></div><div class="lingue-pannello" role="tabpanel" data-lingua="nim"><pre><code class="nohighlight nim hljs"><span class="hljs-keyword">let</span> prs = readCsv(monthTsv, sep = <span class="hljs-string">'\t'</span>)
+<span class="hljs-keyword">var</span> counts: <span class="hljs-type">CountTable</span>[<span class="hljs-built_in">string</span>]
+<span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; prs.nrows:
+  counts.inc ($prs[<span class="hljs-string">&quot;repo&quot;</span>, i]).replace(<span class="hljs-string">&quot;pietroppeter/&quot;</span>, <span class="hljs-string">&quot;&quot;</span>)
+counts.sort()
+<span class="hljs-keyword">var</span> top: <span class="hljs-built_in">seq</span>[<span class="hljs-keyword">tuple</span>[repo: <span class="hljs-built_in">string</span>, prs: <span class="hljs-built_in">int</span>]]
+<span class="hljs-keyword">for</span> repo, n <span class="hljs-keyword">in</span> counts:
+  <span class="hljs-keyword">if</span> top.len &lt; <span class="hljs-number">7</span>: top.add (repo, n)
+<span class="hljs-keyword">let</span> t = tabella(top, rownameCol = <span class="hljs-string">&quot;repo&quot;</span>):
+  tabHeader <span class="hljs-string">&quot;Where the work went&quot;</span>, <span class="hljs-string">&quot;the seven busiest of 30 repositories&quot;</span>
+  colsLabel {<span class="hljs-string">&quot;prs&quot;</span>: <span class="hljs-string">&quot;PRs and issues&quot;</span>}
+  fmtBar <span class="hljs-string">&quot;prs&quot;</span>, color = <span class="hljs-string">&quot;var(--rosso)&quot;</span>, width = <span class="hljs-string">&quot;9em&quot;</span></code></pre><div id="tabella-9eb162a0" class="tabella">
+<style>
+#tabella-9eb162a0 { overflow-x: auto; }
+#tabella-9eb162a0 table, #tabella-9eb162a0 thead, #tabella-9eb162a0 tbody, #tabella-9eb162a0 tfoot, #tabella-9eb162a0 tr, #tabella-9eb162a0 td, #tabella-9eb162a0 th { border-style: none; }
+#tabella-9eb162a0 .tb_table { display: table; border-collapse: collapse; line-height: normal;
+  margin-left: auto; margin-right: auto; width: auto;
+  color: #333333; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px;
+  background-color: #FFFFFF;
+  border-top: 2px solid #A8A8A8;
+  border-bottom: 2px solid #A8A8A8;
+  border-left: 2px none #D3D3D3;
+  border-right: 2px none #D3D3D3; }
+#tabella-9eb162a0 .tb_caption { caption-side: top; padding: 4px 5px; color: #333333; font-style: italic; }
+#tabella-9eb162a0 .tb_heading { background-color: #FFFFFF; text-align: center; color: #333333; }
+#tabella-9eb162a0 .tb_title { font-size: 125%; font-weight: initial;
+  padding: 4px 5px; }
+#tabella-9eb162a0 .tb_subtitle { font-size: 85%; font-weight: normal; padding: 0 5px 4px 5px; }
+#tabella-9eb162a0 .tb_heading_last { border-bottom: 2px solid #D3D3D3; }
+#tabella-9eb162a0 .tb_col_headings th { background-color: #FFFFFF; color: #333333;
+  font-size: 100%; font-weight: normal;
+  text-transform: inherit; vertical-align: bottom;
+  padding: 5px 5px; overflow-x: hidden; }
+#tabella-9eb162a0 .tb_col_headings_last th { border-bottom: 2px solid #D3D3D3; }
+#tabella-9eb162a0 .tb_spanner { display: inline-block; width: 100%; padding-bottom: 4px;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-9eb162a0 .tb_spanner_empty { border-bottom: none; }
+#tabella-9eb162a0 .tb_group_heading { background-color: #FFFFFF; font-weight: initial;
+  padding: 8px 5px; text-align: left; border-top: 2px solid #D3D3D3;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-9eb162a0 .tb_row { padding: 8px 5px; margin: 10px;
+  border-top: 1px solid #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+#tabella-9eb162a0 .tb_stub { background-color: transparent; font-weight: initial; text-align: left;
+  border-right: 2px solid #D3D3D3; }
+#tabella-9eb162a0 tbody tr:first-child .tb_row { border-top: none; }
+#tabella-9eb162a0 .tb_striped { background-color: rgba(128,128,128,0.05); }
+#tabella-9eb162a0 .tb_left { text-align: left; } #tabella-9eb162a0 .tb_center { text-align: center; } #tabella-9eb162a0 .tb_right { text-align: right; font-variant-numeric: tabular-nums; }
+#tabella-9eb162a0 .tb_footnotes, #tabella-9eb162a0 .tb_sourcenotes { color: #333333; background-color: #FFFFFF; }
+#tabella-9eb162a0 .tb_footnote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-9eb162a0 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-9eb162a0 tfoot tr:first-child td { padding-top: 8px; }
+#tabella-9eb162a0 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
+#tabella-9eb162a0 .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
+#tabella-9eb162a0 .tb_bar_track { display: inline-block; height: 0.8em; }
+#tabella-9eb162a0 .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
+#tabella-9eb162a0 .tb_bar_label { min-width: 2.5em; text-align: right; }
+</style>
+<table class="tb_table" aria-labelledby="tabella-9eb162a0-title">
+<thead>
+<tr class="tb_heading"><th colspan="2" id="tabella-9eb162a0-title" class="tb_title">Where the work went</th></tr>
+<tr class="tb_heading"><th colspan="2" class="tb_subtitle tb_heading_last">the seven busiest of 30 repositories</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_right" scope="col" id="prs">PRs and issues</th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><th scope="row" class="tb_row tb_left tb_stub">nanuq</th><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:9em"><span class="tb_bar_fill" style="width:100.0%;background:var(--rosso)"></span></span><span class="tb_bar_label">64</span></span></td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">parloku</th><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:9em"><span class="tb_bar_fill" style="width:60.9%;background:var(--rosso)"></span></span><span class="tb_bar_label">39</span></span></td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">talk-sailing-seas-scientific-nim</th><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:9em"><span class="tb_bar_fill" style="width:42.2%;background:var(--rosso)"></span></span><span class="tb_bar_label">27</span></span></td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">cadero</th><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:9em"><span class="tb_bar_fill" style="width:31.2%;background:var(--rosso)"></span></span><span class="tb_bar_label">20</span></span></td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">cicak</th><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:9em"><span class="tb_bar_fill" style="width:26.6%;background:var(--rosso)"></span></span><span class="tb_bar_label">17</span></span></td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">uv-add-nimlang</th><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:9em"><span class="tb_bar_fill" style="width:25.0%;background:var(--rosso)"></span></span><span class="tb_bar_label">16</span></span></td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">nanuq-book</th><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:9em"><span class="tb_bar_fill" style="width:20.3%;background:var(--rosso)"></span></span><span class="tb_bar_label">13</span></span></td></tr>
+</tbody>
+</table>
+</div></div><div class="lingue-pannello" role="tabpanel" data-lingua="python" hidden><pre><code class="language-python"><span class="hljs-keyword">import</span> polars <span class="hljs-keyword">as</span> pl
+<span class="hljs-keyword">from</span> great_tables <span class="hljs-keyword">import</span> GT
+
+prs = pl.read_csv(<span class="hljs-string">"</span><span class="hljs-string">data/month-prs.tsv</span><span class="hljs-string">"</span>, separator=<span class="hljs-string">"</span><span class="hljs-char escape_">\t</span><span class="hljs-string">"</span>, quote_char=<span class="hljs-literal">None</span>)
+top = (prs.with_columns(pl.col(<span class="hljs-string">"</span><span class="hljs-string">repo</span><span class="hljs-string">"</span>).str.replace(<span class="hljs-string">"</span><span class="hljs-string">pietroppeter/</span><span class="hljs-string">"</span>, <span class="hljs-string">"</span><span class="hljs-string">"</span>))
+          .group_by(<span class="hljs-string">"</span><span class="hljs-string">repo</span><span class="hljs-string">"</span>).len(<span class="hljs-string">"</span><span class="hljs-string">prs</span><span class="hljs-string">"</span>)
+          .sort(<span class="hljs-string">"</span><span class="hljs-string">prs</span><span class="hljs-string">"</span>, descending=<span class="hljs-literal">True</span>).head(<span class="hljs-number">7</span>))
+(GT(top, rowname_col=<span class="hljs-string">"</span><span class="hljs-string">repo</span><span class="hljs-string">"</span>)
+    .tab_header(<span class="hljs-string">"</span><span class="hljs-string">Where the work went</span><span class="hljs-string">"</span>, <span class="hljs-string">"</span><span class="hljs-string">the seven busiest of 30 repositories</span><span class="hljs-string">"</span>)
+    .cols_label(prs=<span class="hljs-string">"</span><span class="hljs-string">PRs and issues</span><span class="hljs-string">"</span>)
+    .fmt_nanoplot(<span class="hljs-string">"</span><span class="hljs-string">prs</span><span class="hljs-string">"</span>, plot_type=<span class="hljs-string">"</span><span class="hljs-string">bar</span><span class="hljs-string">"</span>))</code></pre></div><div class="lingue-pannello" role="tabpanel" data-lingua="r" hidden><pre><code class="language-r"><span class="hljs-title function_">library</span>(gt)
+<span class="hljs-title function_">library</span>(dplyr)
+
+prs &lt;- <span class="hljs-title function_">read.delim</span>(<span class="hljs-string">"</span><span class="hljs-string">data/month-prs.tsv"</span>, quote = <span class="hljs-string">"</span><span class="hljs-string">"</span>)
+top &lt;- prs |&gt;
+  <span class="hljs-title function_">mutate</span>(repo = <span class="hljs-title function_">sub</span>(<span class="hljs-string">"</span><span class="hljs-string">pietroppeter/"</span>, <span class="hljs-string">"</span><span class="hljs-string">"</span>, repo)) |&gt;
+  <span class="hljs-title function_">count</span>(repo, name = <span class="hljs-string">"</span><span class="hljs-string">prs"</span>, sort = <span class="hljs-literal">TRUE</span>) |&gt;
+  <span class="hljs-title function_">head</span>(<span class="hljs-number">7</span>)
+<span class="hljs-title function_">gt</span>(top, rowname_col = <span class="hljs-string">"</span><span class="hljs-string">repo"</span>) |&gt;
+  <span class="hljs-title function_">tab_header</span>(<span class="hljs-string">"</span><span class="hljs-string">Where the work went"</span>, <span class="hljs-string">"</span><span class="hljs-string">the seven busiest of 30 repositories"</span>) |&gt;
+  <span class="hljs-title function_">cols_label</span>(prs = <span class="hljs-string">"</span><span class="hljs-string">PRs and issues"</span>) |&gt;
+  <span class="hljs-title function_">fmt_nanoplot</span>(prs, plot_type = <span class="hljs-string">"</span><span class="hljs-string">bar"</span>)</code></pre></div></div>
+<p>Six of the seven were started in these seven weeks. The talk is the exception: started in
+August, it is the one piece of work that runs through the whole month.</p>
+<h3>What grew</h3>
+<p>The month's real output is not in the counts. In every act a problem came up, a part of the way
+of working was made to solve it, and the next project copied it. Here is each part where it
+first shows up, in a pull request title:</p>
+<div id="tabella-b9586b80" class="tabella">
+<style>
+#tabella-b9586b80 { overflow-x: auto; }
+#tabella-b9586b80 table, #tabella-b9586b80 thead, #tabella-b9586b80 tbody, #tabella-b9586b80 tfoot, #tabella-b9586b80 tr, #tabella-b9586b80 td, #tabella-b9586b80 th { border-style: none; }
+#tabella-b9586b80 .tb_table { display: table; border-collapse: collapse; line-height: normal;
+  margin-left: auto; margin-right: auto; width: auto;
+  color: #333333; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px;
+  background-color: #FFFFFF;
+  border-top: 2px solid #A8A8A8;
+  border-bottom: 2px solid #A8A8A8;
+  border-left: 2px none #D3D3D3;
+  border-right: 2px none #D3D3D3; }
+#tabella-b9586b80 .tb_caption { caption-side: top; padding: 4px 5px; color: #333333; font-style: italic; }
+#tabella-b9586b80 .tb_heading { background-color: #FFFFFF; text-align: center; color: #333333; }
+#tabella-b9586b80 .tb_title { font-size: 125%; font-weight: initial;
+  padding: 4px 5px; }
+#tabella-b9586b80 .tb_subtitle { font-size: 85%; font-weight: normal; padding: 0 5px 4px 5px; }
+#tabella-b9586b80 .tb_heading_last { border-bottom: 2px solid #D3D3D3; }
+#tabella-b9586b80 .tb_col_headings th { background-color: #FFFFFF; color: #333333;
+  font-size: 100%; font-weight: normal;
+  text-transform: inherit; vertical-align: bottom;
+  padding: 5px 5px; overflow-x: hidden; }
+#tabella-b9586b80 .tb_col_headings_last th { border-bottom: 2px solid #D3D3D3; }
+#tabella-b9586b80 .tb_spanner { display: inline-block; width: 100%; padding-bottom: 4px;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-b9586b80 .tb_spanner_empty { border-bottom: none; }
+#tabella-b9586b80 .tb_group_heading { background-color: #FFFFFF; font-weight: initial;
+  padding: 8px 5px; text-align: left; border-top: 2px solid #D3D3D3;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-b9586b80 .tb_row { padding: 8px 5px; margin: 10px;
+  border-top: 1px solid #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+#tabella-b9586b80 .tb_stub { background-color: transparent; font-weight: initial; text-align: left;
+  border-right: 2px solid #D3D3D3; }
+#tabella-b9586b80 tbody tr:first-child .tb_row { border-top: none; }
+#tabella-b9586b80 .tb_striped { background-color: rgba(128,128,128,0.05); }
+#tabella-b9586b80 .tb_left { text-align: left; } #tabella-b9586b80 .tb_center { text-align: center; } #tabella-b9586b80 .tb_right { text-align: right; font-variant-numeric: tabular-nums; }
+#tabella-b9586b80 .tb_footnotes, #tabella-b9586b80 .tb_sourcenotes { color: #333333; background-color: #FFFFFF; }
+#tabella-b9586b80 .tb_footnote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-b9586b80 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-b9586b80 tfoot tr:first-child td { padding-top: 8px; }
+#tabella-b9586b80 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
+#tabella-b9586b80 .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
+#tabella-b9586b80 .tb_bar_track { display: inline-block; height: 0.8em; }
+#tabella-b9586b80 .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
+#tabella-b9586b80 .tb_bar_label { min-width: 2.5em; text-align: right; }
+</style>
+<table class="tb_table" aria-labelledby="tabella-b9586b80-title">
+<thead>
+<tr class="tb_heading"><th colspan="3" id="tabella-b9586b80-title" class="tb_title">The parts of a way of working</th></tr>
+<tr class="tb_heading"><th colspan="3" class="tb_subtitle tb_heading_last">where each first appears</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_left" scope="col" id="what">what it is</th><th class="tb_col_heading tb_left" scope="col" id="born" width="24%">first in</th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr class="tb_group_heading_row"><th colspan="3" class="tb_group_heading" scope="colgroup" id="Atto primo · act one: Toulouse">Atto primo · act one: Toulouse</th></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Cloud setup</strong></th><td class="tb_row tb_left">a script that installs Nim and the dependencies in a fresh sandbox</td><td class="tb_row tb_left"><a href="https://github.com/pietroppeter/talk-sailing-seas-scientific-nim/pull/4">talk#4</a><br>4 Oct</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Pages from CI</strong></th><td class="tb_row tb_left">CI builds the pages; no HTML is committed</td><td class="tb_row tb_left"><a href="https://github.com/pietroppeter/blog/pull/13">blog#13</a><br>4 Oct</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>AI disclosure</strong></th><td class="tb_row tb_left">a line in the README saying how AI was used</td><td class="tb_row tb_left"><a href="https://github.com/pietroppeter/uv-add-nimlang-lib-demo/pull/2">uv-add-nimlang-lib-demo#2</a><br>6 Oct</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Explainer</strong></th><td class="tb_row tb_left">a nimib page that explains the idea, with things that move</td><td class="tb_row tb_left"><a href="https://github.com/pietroppeter/naffprop/pull/5">naffprop#5</a><br>7 Oct</td></tr>
+<tr class="tb_group_heading_row"><th colspan="3" class="tb_group_heading" scope="colgroup" id="Intermezzo · interlude: the talk">Intermezzo · interlude: the talk</th></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Artifact first</strong></th><td class="tb_row tb_left">a claude-artifacts page before there is a repo</td><td class="tb_row tb_left"><a href="https://github.com/pietroppeter/claude-artifacts/pull/1">claude-artifacts#1</a><br>24 Oct</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Specs (OpenSpec)</strong></th><td class="tb_row tb_left">every agreed behaviour written down, changed by proposals</td><td class="tb_row tb_left"><a href="https://github.com/pietroppeter/talk-sailing-seas-scientific-nim/pull/7">talk#7</a><br>26 Oct</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Skills</strong><span class="tb_footnote_marks">1</span></th><td class="tb_row tb_left">instructions an agent loads when it needs them</td><td class="tb_row tb_left"><a href="https://github.com/pietroppeter/nimib/pull/264">nimib#264</a><br>28 Oct</td></tr>
+<tr class="tb_group_heading_row"><th colspan="3" class="tb_group_heading" scope="colgroup" id="Atto secondo · act two: nanuq">Atto secondo · act two: nanuq</th></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Devlog</strong></th><td class="tb_row tb_left">dated posts, not updated afterwards</td><td class="tb_row tb_left"><a href="https://github.com/pietroppeter/nanuq/pull/10">nanuq#10</a><br>27 Oct</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Backlog</strong></th><td class="tb_row tb_left">ideas go in BACKLOG.md, not straight into work</td><td class="tb_row tb_left"><a href="https://github.com/pietroppeter/nanuq/pull/4">nanuq#4</a><br>27 Oct</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Runnable specs</strong></th><td class="tb_row tb_left">spec examples that run against the code when the pages are built</td><td class="tb_row tb_left"><a href="https://github.com/pietroppeter/nanuq/pull/43">nanuq#43</a><br>31 Oct</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Design post</strong></th><td class="tb_row tb_left">a post per release: what was chosen and why</td><td class="tb_row tb_left"><a href="https://github.com/pietroppeter/nanuq/pull/45">nanuq#45</a><br>31 Oct</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Use-it explainer</strong></th><td class="tb_row tb_left">the release used on a subject with real data</td><td class="tb_row tb_left"><a href="https://github.com/pietroppeter/nanuq/pull/38">nanuq#38</a><br>31 Oct</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Book of ports</strong></th><td class="tb_row tb_left">the reference library's own tutorials, ported, the original beside</td><td class="tb_row tb_left"><a href="https://github.com/pietroppeter/nanuq-book/pull/1">nanuq-book#1</a><br>31 Oct</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Coverage map</strong></th><td class="tb_row tb_left">the reference library's features, one by one, with their status</td><td class="tb_row tb_left"><a href="https://github.com/pietroppeter/nanuq/pull/60">nanuq#60</a><br>1 Nov</td></tr>
+<tr class="tb_group_heading_row"><th colspan="3" class="tb_group_heading" scope="colgroup" id="Atto terzo · act three: the workshop">Atto terzo · act three: the workshop</th></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Benchmarks</strong></th><td class="tb_row tb_left">measured runs, with a results page</td><td class="tb_row tb_left"><a href="https://github.com/pietroppeter/cicak/pull/11">cicak#11</a><br>1 Nov</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>A look of its own</strong></th><td class="tb_row tb_left">a theme chosen for the project</td><td class="tb_row tb_left"><a href="https://github.com/pietroppeter/cadero/pull/2">cadero#2</a><br>2 Nov</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Living documents</strong></th><td class="tb_row tb_left">pages kept true as the code changes, listed first in the devlog</td><td class="tb_row tb_left"><a href="https://github.com/pietroppeter/cicak/pull/15">cicak#15</a><br>6 Nov</td></tr>
+<tr class="tb_group_heading_row"><th colspan="3" class="tb_group_heading" scope="colgroup" id="Atto quarto · act four: games">Atto quarto · act four: games</th></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>AGENTS.md</strong></th><td class="tb_row tb_left">the working rules for any coding agent, in the repo</td><td class="tb_row tb_left"><a href="https://github.com/pietroppeter/claude-artifacts/pull/7">claude-artifacts#7</a><br>6 Nov</td></tr>
+<tr class="tb_group_heading_row"><th colspan="3" class="tb_group_heading" scope="colgroup" id="Finale · finale">Finale · finale</th></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Three threads</strong></th><td class="tb_row tb_left">every release built, used and ported, in three threads at once</td><td class="tb_row tb_left"><a href="https://github.com/pietroppeter/tabelline/pull/8">tabelline#8</a><br>7 Nov</td></tr>
+</tbody>
+<tfoot>
+<tr class="tb_footnotes"><td class="tb_footnote" colspan="3"><span class="tb_footnote_marks">1</span> Tried for nimib (closed, kept for later), and the subject of the third part.</td></tr>
+<tr class="tb_sourcenotes"><td class="tb_sourcenote" colspan="3">Some parts existed earlier in a smaller form; this is where they first get a pull request of their own.</td></tr>
+</tfoot>
+</table>
+</div>
+<p>Read top to bottom, the table tells how the way of working was built: first what any repo needs
+when it is made in throwaway cloud sessions (a setup script, pages built by CI, a line saying
+AI was used), then places to think in (explainers, artifacts), then ways to agree with Claude
+before building (specs, a backlog, proposals in their own PRs), and last the parts that only a
+library growing toward a reference needs (a coverage map, a book of ports, design posts, three
+threads per release).</p>
+<h3>How the work went</h3>
+<p>Behind the tables there is one loop, and it is the same in every act:</p>
+<ol>
+<li><strong>An idea becomes a page.</strong> An explainer, often a claude-artifacts page made on the phone:
+the affinity propagation animation, the diagrams history, declarative dragging. Reading a
+page is how Pietro thinks with Claude.</li>
+<li><strong>The page becomes a repo</strong> when the idea holds. zogyn and diagrammari started as
+artifacts; parloku as a notebook.</li>
+<li><strong>The repo grows living documents</strong>: an explainer, the specs, a coverage map, a roadmap.
+They say how things are <em>now</em>, and are rebuilt on every push.</li>
+<li><strong>The devlog keeps the story</strong>: dated posts, written while the decisions are fresh.</li>
+<li><strong>Previews close the loop</strong>: a published page, read on the phone, with a link to the exact
+part that changed. Nothing reaches <code>main</code> without a &quot;go&quot;.</li>
+</ol>
+<h3>What it leaves</h3>
+<p>Two questions, each with a part of its own:</p>
+<ul>
+<li><strong>Can the parts be picked, rather than all copied?</strong> nanuq used almost every one; cadero, a
+furniture plan, needed few; a talk needs different ones. The second part,
+<a href="#part-two">Operetta, a first sketch</a>, lists the parts as modules and says which to pick
+for what.</li>
+<li><strong>What are skills, and where do they go?</strong> They were tried once and set aside. The third part,
+<a href="#part-three">Skills, from the beginning</a>, starts from the simplest idea and ends with what
+Operetta could do with them.</li>
+</ul>
+<h3>What tabelline was missing</h3>
+<p>This part used tabelline as a user would, and sent what it found to the thread that builds 0.1:</p>
+<div id="tabella-b1b4d218" class="tabella">
+<style>
+#tabella-b1b4d218 { overflow-x: auto; }
+#tabella-b1b4d218 table, #tabella-b1b4d218 thead, #tabella-b1b4d218 tbody, #tabella-b1b4d218 tfoot, #tabella-b1b4d218 tr, #tabella-b1b4d218 td, #tabella-b1b4d218 th { border-style: none; }
+#tabella-b1b4d218 .tb_table { display: table; border-collapse: collapse; line-height: normal;
+  margin-left: auto; margin-right: auto; width: auto;
+  color: #333333; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px;
+  background-color: #FFFFFF;
+  border-top: 2px solid #A8A8A8;
+  border-bottom: 2px solid #A8A8A8;
+  border-left: 2px none #D3D3D3;
+  border-right: 2px none #D3D3D3; }
+#tabella-b1b4d218 .tb_caption { caption-side: top; padding: 4px 5px; color: #333333; font-style: italic; }
+#tabella-b1b4d218 .tb_heading { background-color: #FFFFFF; text-align: center; color: #333333; }
+#tabella-b1b4d218 .tb_title { font-size: 125%; font-weight: initial;
+  padding: 4px 5px; }
+#tabella-b1b4d218 .tb_subtitle { font-size: 85%; font-weight: normal; padding: 0 5px 4px 5px; }
+#tabella-b1b4d218 .tb_heading_last { border-bottom: 2px solid #D3D3D3; }
+#tabella-b1b4d218 .tb_col_headings th { background-color: #FFFFFF; color: #333333;
+  font-size: 100%; font-weight: normal;
+  text-transform: inherit; vertical-align: bottom;
+  padding: 5px 5px; overflow-x: hidden; }
+#tabella-b1b4d218 .tb_col_headings_last th { border-bottom: 2px solid #D3D3D3; }
+#tabella-b1b4d218 .tb_spanner { display: inline-block; width: 100%; padding-bottom: 4px;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-b1b4d218 .tb_spanner_empty { border-bottom: none; }
+#tabella-b1b4d218 .tb_group_heading { background-color: #FFFFFF; font-weight: initial;
+  padding: 8px 5px; text-align: left; border-top: 2px solid #D3D3D3;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-b1b4d218 .tb_row { padding: 8px 5px; margin: 10px;
+  border-top: 1px solid #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+#tabella-b1b4d218 .tb_stub { background-color: transparent; font-weight: initial; text-align: left;
+  border-right: 2px solid #D3D3D3; }
+#tabella-b1b4d218 tbody tr:first-child .tb_row { border-top: none; }
+#tabella-b1b4d218 .tb_striped { background-color: rgba(128,128,128,0.05); }
+#tabella-b1b4d218 .tb_left { text-align: left; } #tabella-b1b4d218 .tb_center { text-align: center; } #tabella-b1b4d218 .tb_right { text-align: right; font-variant-numeric: tabular-nums; }
+#tabella-b1b4d218 .tb_footnotes, #tabella-b1b4d218 .tb_sourcenotes { color: #333333; background-color: #FFFFFF; }
+#tabella-b1b4d218 .tb_footnote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-b1b4d218 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-b1b4d218 tfoot tr:first-child td { padding-top: 8px; }
+#tabella-b1b4d218 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
+#tabella-b1b4d218 .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
+#tabella-b1b4d218 .tb_bar_track { display: inline-block; height: 0.8em; }
+#tabella-b1b4d218 .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
+#tabella-b1b4d218 .tb_bar_label { min-width: 2.5em; text-align: right; }
+</style>
+<table class="tb_table" aria-labelledby="tabella-b1b4d218-title">
+<thead>
+<tr class="tb_heading"><th colspan="2" id="tabella-b1b4d218-title" class="tb_title tb_heading_last">Gaps found by this part</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_left" scope="col" id="how"></th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><th scope="row" class="tb_row tb_left tb_stub">No TSV reader that leaves quotes alone</th><td class="tb_row tb_left"><code>readCsv(sep = '\t')</code> works, but a <code>&quot;</code> in the middle of a title starts a quoted field and the quotes vanish (<code>next to &quot;live&quot;</code> reads <code>next to live</code>). Python needs <code>quote_char=None</code>, R <code>quote = &quot;&quot;</code>.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">No count or group-by</th><td class="tb_row tb_left">Expected: tabelline is not a data frame library. A <code>CountTable</code> did the job; with nanuq it would be one line.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Small Markdown, no HTML</th><td class="tb_row tb_left"><code>fmtMarkdown</code> knows <code>&lt;br&gt;</code> but escapes any other tag (a <code>&lt;small&gt;</code> showed as text); an <code>html()</code> cell format would help. It also turned <code>~</code> and <code>^</code> into sub- and superscripts even with a space inside: fixed in 0.1 (#10).</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Markdown in a group label</th><td class="tb_row tb_left">Row group labels come from the data as plain text; <code>fmtMarkdown</code> reaches cells, not groups, so act names stay plain.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">No nanoplot for single values</th><td class="tb_row tb_left"><code>fmtBar</code> covers it here. Great Tables and gt draw a single value as a bar with <code>fmt_nanoplot(plot_type=&quot;bar&quot;)</code>, planned for 0.4.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">A colour from the page</th><td class="tb_row tb_left"><code>fmtBar(color = &quot;var(--blu, var(--pen))&quot;)</code> works because the colour goes into a style attribute, so a page's CSS variables reach it. Worth saying so in the docs.</td></tr>
+</tbody>
+</table>
+</div>
+<h3>How this article is built</h3>
+<p>The page is a nimib notebook, <code>docs/devlog/month_of_building.nim</code>, built with the others by
+<code>nim r -d:release docs/all.nim</code>. Its data comes in three layers:</p>
+<ul>
+<li><strong>The raw data</strong> is <code>docs/devlog/data/month-prs.tsv</code>: one line per pull request or issue that
+Pietro opened between 20 September and 7 November, with its date, repository, number, state
+and title. It comes from GitHub's search API (<code>author:pietroppeter</code>, once with <code>is:pr</code> and
+once with <code>is:issue</code>). Search also returns private repositories, so each repository's
+visibility was checked and the private ones were dropped before the file was written.</li>
+<li><strong>The selection</strong> is <code>docs/mese.nim</code>, written by hand: the seven acts (name, dates, story, one
+moment, the repositories that belong to it) and the nineteen parts (what each is, and the
+pull request where it first appears). <code>actOf</code> puts every pull request in an act: by its
+repository when that belongs to one act, by its date otherwise.</li>
+<li><strong>The tables</strong> are tabelline: each <code>tabella(rows, ...)</code> call takes a <code>seq</code> of Nim objects or
+tuples, one field per column. <code>rownameCol</code> makes the stub, <code>groupnameCol</code> the row groups,
+and <code>fmtMarkdown</code> turns <code>**bold**</code>, links and <code>&lt;br&gt;</code> in the cells into HTML. The bars are
+<code>fmtBar</code>, coloured with the page's own CSS variables. <code>tabella</code> is a macro: it makes the table
+with <code>initTabella</code>, then reads its indented body one line at a time, so that <code>tabHeader &quot;Title&quot;</code> becomes <code>t = t.tabHeader(&quot;Title&quot;)</code>. The rest is plain Nim: the verbs are procs.</li>
+</ul>
+<p>Nothing is fetched while the page is built: the TSV is in the repository, so the page builds
+offline and the same way every time.</p>
+<h2 class="parte" id="part-two"><small>Parte seconda</small>Operetta, a first sketch</h2><p class="lede">A name for the way of working that grew in the month: parts that a project picks by what it is and how far along it is, and adds to as it grows.</p>
+<p>Operetta is a way to make an open source library with an AI agent. It is not a tool and not a
+template: it is a list of parts (a setup script, an explainer, specs, a devlog, a coverage map,
+skills, ...), and a project uses the ones it needs. Each part is small, and each one was
+already made once, in a project of the last month (the <a href="#part-one">first part</a>
+says where). Until now they were copied by hand from one repo to the next, and every copy
+drifted a little; with a name they become something to pick from, and to improve in one place.</p>
+<p>The name is <strong>Operetta</strong>. It came with Opus 5.5, the model the month was built with: a small
+opus. And an operetta is a light, modular show, with songs between spoken parts; a company
+can stage a short one with a few numbers or a long one with all of them.</p>
+<h3>The idea in one sentence</h3>
+<blockquote>
+<p><em>The explainer is where the thinking happens; every other part keeps it true.</em></p>
+</blockquote>
+<p>A page that explains the idea, made with Claude and read on the phone, is how a project moves:
+first as a claude-artifacts sketch, then as the living explainer of a repo. Specs, the devlog,
+coverage maps, books and benchmarks are there so that the page, the code and Claude's next
+session agree.</p>
+<h3>Five groups of parts</h3>
+<p>Each group has an Italian name from the theatre, so the five are easy to tell apart, and a plain
+one, so they are easy to understand.</p>
+<div id="tabella-01e50145" class="tabella">
+<style>
+#tabella-01e50145 { overflow-x: auto; }
+#tabella-01e50145 table, #tabella-01e50145 thead, #tabella-01e50145 tbody, #tabella-01e50145 tfoot, #tabella-01e50145 tr, #tabella-01e50145 td, #tabella-01e50145 th { border-style: none; }
+#tabella-01e50145 .tb_table { display: table; border-collapse: collapse; line-height: normal;
+  margin-left: auto; margin-right: auto; width: auto;
+  color: #333333; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px;
+  background-color: #FFFFFF;
+  border-top: 2px solid #A8A8A8;
+  border-bottom: 2px solid #A8A8A8;
+  border-left: 2px none #D3D3D3;
+  border-right: 2px none #D3D3D3; }
+#tabella-01e50145 .tb_caption { caption-side: top; padding: 4px 5px; color: #333333; font-style: italic; }
+#tabella-01e50145 .tb_heading { background-color: #FFFFFF; text-align: center; color: #333333; }
+#tabella-01e50145 .tb_title { font-size: 125%; font-weight: initial;
+  padding: 4px 5px; }
+#tabella-01e50145 .tb_subtitle { font-size: 85%; font-weight: normal; padding: 0 5px 4px 5px; }
+#tabella-01e50145 .tb_heading_last { border-bottom: 2px solid #D3D3D3; }
+#tabella-01e50145 .tb_col_headings th { background-color: #FFFFFF; color: #333333;
+  font-size: 100%; font-weight: normal;
+  text-transform: inherit; vertical-align: bottom;
+  padding: 5px 5px; overflow-x: hidden; }
+#tabella-01e50145 .tb_col_headings_last th { border-bottom: 2px solid #D3D3D3; }
+#tabella-01e50145 .tb_spanner { display: inline-block; width: 100%; padding-bottom: 4px;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-01e50145 .tb_spanner_empty { border-bottom: none; }
+#tabella-01e50145 .tb_group_heading { background-color: #FFFFFF; font-weight: initial;
+  padding: 8px 5px; text-align: left; border-top: 2px solid #D3D3D3;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-01e50145 .tb_row { padding: 8px 5px; margin: 10px;
+  border-top: 1px solid #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+#tabella-01e50145 .tb_stub { background-color: transparent; font-weight: initial; text-align: left;
+  border-right: 2px solid #D3D3D3; }
+#tabella-01e50145 tbody tr:first-child .tb_row { border-top: none; }
+#tabella-01e50145 .tb_striped { background-color: rgba(128,128,128,0.05); }
+#tabella-01e50145 .tb_left { text-align: left; } #tabella-01e50145 .tb_center { text-align: center; } #tabella-01e50145 .tb_right { text-align: right; font-variant-numeric: tabular-nums; }
+#tabella-01e50145 .tb_footnotes, #tabella-01e50145 .tb_sourcenotes { color: #333333; background-color: #FFFFFF; }
+#tabella-01e50145 .tb_footnote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-01e50145 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-01e50145 tfoot tr:first-child td { padding-top: 8px; }
+#tabella-01e50145 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
+#tabella-01e50145 .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
+#tabella-01e50145 .tb_bar_track { display: inline-block; height: 0.8em; }
+#tabella-01e50145 .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
+#tabella-01e50145 .tb_bar_label { min-width: 2.5em; text-align: right; }
+</style>
+<table class="tb_table" aria-labelledby="tabella-01e50145-title">
+<thead>
+<tr class="tb_heading"><th colspan="2" id="tabella-01e50145-title" class="tb_title">Operetta's parts</th></tr>
+<tr class="tb_heading"><th colspan="2" class="tb_subtitle tb_heading_last">by group, with what each one is for</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_left" scope="col" id="does">what it is for</th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr class="tb_group_heading_row"><th colspan="2" class="tb_group_heading" scope="colgroup" id="Scena, the stage: what every repo needs; pick it always, from the first commit">Scena, the stage: what every repo needs; pick it always, from the first commit</th></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>AGENTS.md</strong></th><td class="tb_row tb_left">Every new session starts knowing the house rules.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Cloud setup</strong></th><td class="tb_row tb_left">Claude Code runs in throwaway containers, so every repo can set itself up.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Pages from CI</strong></th><td class="tb_row tb_left">Every merge publishes; a pull request can be previewed.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>AI disclosure</strong></th><td class="tb_row tb_left">Readers know what they are looking at.</td></tr>
+<tr class="tb_group_heading_row"><th colspan="2" class="tb_group_heading" scope="colgroup" id="Prove, rehearsals: places to think; pick it from the first idea">Prove, rehearsals: places to think; pick it from the first idea</th></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Artifact first</strong></th><td class="tb_row tb_left">A quick sketch on the phone; the repo comes when the idea holds.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Explainer</strong></th><td class="tb_row tb_left">Thinking happens in a page someone else can read.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Devlog</strong></th><td class="tb_row tb_left">The story of the decisions, told while they are fresh.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Living documents</strong></th><td class="tb_row tb_left">The current state is always one page away.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>A look of its own</strong></th><td class="tb_row tb_left">Each project is recognisable at a glance.</td></tr>
+<tr class="tb_group_heading_row"><th colspan="2" class="tb_group_heading" scope="colgroup" id="Partitura, the score: what the code must do; pick it when you start saying &quot;it should&quot;">Partitura, the score: what the code must do; pick it when you start saying &quot;it should&quot;</th></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Specs (OpenSpec)</strong></th><td class="tb_row tb_left">Claude and Pietro agree before building; the specs stay true after.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Runnable specs</strong></th><td class="tb_row tb_left">A spec that lies breaks the build.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Backlog</strong></th><td class="tb_row tb_left">Nothing is lost, and nothing starts by accident.</td></tr>
+<tr class="tb_group_heading_row"><th colspan="2" class="tb_group_heading" scope="colgroup" id="Repertorio, the repertoire: growing toward a reference; pick it when there is a library to follow (Polars, gt) or releases to plan">Repertorio, the repertoire: growing toward a reference; pick it when there is a library to follow (Polars, gt) or releases to plan</th></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Coverage map</strong></th><td class="tb_row tb_left">Says what is missing, and what each release adds.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Three threads</strong></th><td class="tb_row tb_left">The use and the ports feed the build while it happens.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Design post</strong></th><td class="tb_row tb_left">The release explained to its future users, and to Pietro.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Use-it explainer</strong></th><td class="tb_row tb_left">Finds what is missing, awkward or broken, as a user would.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Book of ports</strong></th><td class="tb_row tb_left">Proves the library on code written by others.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Benchmarks</strong></th><td class="tb_row tb_left">Claims about speed come with numbers.</td></tr>
+<tr class="tb_group_heading_row"><th colspan="2" class="tb_group_heading" scope="colgroup" id="Suggeritore, the prompter: help for other people's agents; pick it when others use it, or many sessions work on it">Suggeritore, the prompter: help for other people's agents; pick it when others use it, or many sessions work on it</th></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Skills</strong></th><td class="tb_row tb_left">Tried once for nimib and set aside; the next part to grow.</td></tr>
+</tbody>
+<tfoot>
+<tr class="tb_sourcenotes"><td class="tb_sourcenote" colspan="2">Every part comes from the month: <a href="#part-one">where each first appeared</a>.</td></tr>
+</tfoot>
+</table>
+</div>
+<p>The prompter, <em>il suggeritore</em>, sits in a box under the stage and whispers the lines to the
+singers when they need them, and only then. That is what a skill does for an agent, which is
+why the fifth group has his name and why it has only one part today: it is the next one to
+grow, and the subject of the <a href="#part-three">third part</a>.</p>
+<h3>Pick by kind of project</h3>
+<p>Not every project needs every part. Here is what each kind of project from the month picked,
+and what it could skip, from the one that needs least to the one that needs most:</p>
+<div id="tabella-61c52752" class="tabella">
+<style>
+#tabella-61c52752 { overflow-x: auto; }
+#tabella-61c52752 table, #tabella-61c52752 thead, #tabella-61c52752 tbody, #tabella-61c52752 tfoot, #tabella-61c52752 tr, #tabella-61c52752 td, #tabella-61c52752 th { border-style: none; }
+#tabella-61c52752 .tb_table { display: table; border-collapse: collapse; line-height: normal;
+  margin-left: auto; margin-right: auto; width: auto;
+  color: #333333; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px;
+  background-color: #FFFFFF;
+  border-top: 2px solid #A8A8A8;
+  border-bottom: 2px solid #A8A8A8;
+  border-left: 2px none #D3D3D3;
+  border-right: 2px none #D3D3D3; }
+#tabella-61c52752 .tb_caption { caption-side: top; padding: 4px 5px; color: #333333; font-style: italic; }
+#tabella-61c52752 .tb_heading { background-color: #FFFFFF; text-align: center; color: #333333; }
+#tabella-61c52752 .tb_title { font-size: 125%; font-weight: initial;
+  padding: 4px 5px; }
+#tabella-61c52752 .tb_subtitle { font-size: 85%; font-weight: normal; padding: 0 5px 4px 5px; }
+#tabella-61c52752 .tb_heading_last { border-bottom: 2px solid #D3D3D3; }
+#tabella-61c52752 .tb_col_headings th { background-color: #FFFFFF; color: #333333;
+  font-size: 100%; font-weight: normal;
+  text-transform: inherit; vertical-align: bottom;
+  padding: 5px 5px; overflow-x: hidden; }
+#tabella-61c52752 .tb_col_headings_last th { border-bottom: 2px solid #D3D3D3; }
+#tabella-61c52752 .tb_spanner { display: inline-block; width: 100%; padding-bottom: 4px;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-61c52752 .tb_spanner_empty { border-bottom: none; }
+#tabella-61c52752 .tb_group_heading { background-color: #FFFFFF; font-weight: initial;
+  padding: 8px 5px; text-align: left; border-top: 2px solid #D3D3D3;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-61c52752 .tb_row { padding: 8px 5px; margin: 10px;
+  border-top: 1px solid #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+#tabella-61c52752 .tb_stub { background-color: transparent; font-weight: initial; text-align: left;
+  border-right: 2px solid #D3D3D3; }
+#tabella-61c52752 tbody tr:first-child .tb_row { border-top: none; }
+#tabella-61c52752 .tb_striped { background-color: rgba(128,128,128,0.05); }
+#tabella-61c52752 .tb_left { text-align: left; } #tabella-61c52752 .tb_center { text-align: center; } #tabella-61c52752 .tb_right { text-align: right; font-variant-numeric: tabular-nums; }
+#tabella-61c52752 .tb_footnotes, #tabella-61c52752 .tb_sourcenotes { color: #333333; background-color: #FFFFFF; }
+#tabella-61c52752 .tb_footnote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-61c52752 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-61c52752 tfoot tr:first-child td { padding-top: 8px; }
+#tabella-61c52752 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
+#tabella-61c52752 .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
+#tabella-61c52752 .tb_bar_track { display: inline-block; height: 0.8em; }
+#tabella-61c52752 .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
+#tabella-61c52752 .tb_bar_label { min-width: 2.5em; text-align: right; }
+</style>
+<table class="tb_table" aria-labelledby="tabella-61c52752-title">
+<thead>
+<tr class="tb_heading"><th colspan="3" id="tabella-61c52752-title" class="tb_title">Seven kinds of project</th></tr>
+<tr class="tb_heading"><th colspan="3" class="tb_subtitle tb_heading_last">and the parts each one picks</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_left" scope="col" id="picks">picks</th><th class="tb_col_heading tb_left" scope="col" id="skips">can skip</th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>A sketch</strong><br>the diagrams history, declarative dragging before zogyn</th><td class="tb_row tb_left">an artifact page: Prove only</td><td class="tb_row tb_left">everything else, until the idea holds</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>An experiment</strong><br>cicak's hot code reloading, nanuqy</th><td class="tb_row tb_left">Scena, a devlog, benchmarks</td><td class="tb_row tb_left">specs, until it becomes a tool</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>An app or a game</strong><br>parloku, cadero</th><td class="tb_row tb_left">Scena, an explainer, a look of its own, specs as scenarios that run (parloku's drags)</td><td class="tb_row tb_left">coverage, book, releases</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>A small new library</strong><br>zogyn, diagrammari</th><td class="tb_row tb_left">Scena, an explainer, a devlog, specs with runnable examples</td><td class="tb_row tb_left">Repertorio: there is no reference to cover</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>A talk</strong><br>Sailing Seas of Scientific Nim</th><td class="tb_row tb_left">Scena, specs with a schema of its own (abstract, outline, islands), a talk log</td><td class="tb_row tb_left">releases, coverage</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>A port of a reference</strong><br>nanuq (Polars), tabelline (gt and Great Tables)</th><td class="tb_row tb_left">everything: the coverage map and three threads per release carry it</td><td class="tb_row tb_left">nothing; benchmarks when speed is a claim</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>A library with users</strong><br>nimib</th><td class="tb_row tb_left">what it has, plus the Suggeritore: skills and an llms.txt for its users</td><td class="tb_row tb_left">parts a mature project already does another way</td></tr>
+</tbody>
+</table>
+</div>
+<h3>Grow by adding</h3>
+<p>A project does not pick once. It starts small and adds a group when it reaches the stage that
+needs it. Each stage has a sign that says it is time:</p>
+<div id="tabella-b95a654a" class="tabella">
+<style>
+#tabella-b95a654a { overflow-x: auto; }
+#tabella-b95a654a table, #tabella-b95a654a thead, #tabella-b95a654a tbody, #tabella-b95a654a tfoot, #tabella-b95a654a tr, #tabella-b95a654a td, #tabella-b95a654a th { border-style: none; }
+#tabella-b95a654a .tb_table { display: table; border-collapse: collapse; line-height: normal;
+  margin-left: auto; margin-right: auto; width: auto;
+  color: #333333; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px;
+  background-color: #FFFFFF;
+  border-top: 2px solid #A8A8A8;
+  border-bottom: 2px solid #A8A8A8;
+  border-left: 2px none #D3D3D3;
+  border-right: 2px none #D3D3D3; }
+#tabella-b95a654a .tb_caption { caption-side: top; padding: 4px 5px; color: #333333; font-style: italic; }
+#tabella-b95a654a .tb_heading { background-color: #FFFFFF; text-align: center; color: #333333; }
+#tabella-b95a654a .tb_title { font-size: 125%; font-weight: initial;
+  padding: 4px 5px; }
+#tabella-b95a654a .tb_subtitle { font-size: 85%; font-weight: normal; padding: 0 5px 4px 5px; }
+#tabella-b95a654a .tb_heading_last { border-bottom: 2px solid #D3D3D3; }
+#tabella-b95a654a .tb_col_headings th { background-color: #FFFFFF; color: #333333;
+  font-size: 100%; font-weight: normal;
+  text-transform: inherit; vertical-align: bottom;
+  padding: 5px 5px; overflow-x: hidden; }
+#tabella-b95a654a .tb_col_headings_last th { border-bottom: 2px solid #D3D3D3; }
+#tabella-b95a654a .tb_spanner { display: inline-block; width: 100%; padding-bottom: 4px;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-b95a654a .tb_spanner_empty { border-bottom: none; }
+#tabella-b95a654a .tb_group_heading { background-color: #FFFFFF; font-weight: initial;
+  padding: 8px 5px; text-align: left; border-top: 2px solid #D3D3D3;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-b95a654a .tb_row { padding: 8px 5px; margin: 10px;
+  border-top: 1px solid #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+#tabella-b95a654a .tb_stub { background-color: transparent; font-weight: initial; text-align: left;
+  border-right: 2px solid #D3D3D3; }
+#tabella-b95a654a tbody tr:first-child .tb_row { border-top: none; }
+#tabella-b95a654a .tb_striped { background-color: rgba(128,128,128,0.05); }
+#tabella-b95a654a .tb_left { text-align: left; } #tabella-b95a654a .tb_center { text-align: center; } #tabella-b95a654a .tb_right { text-align: right; font-variant-numeric: tabular-nums; }
+#tabella-b95a654a .tb_footnotes, #tabella-b95a654a .tb_sourcenotes { color: #333333; background-color: #FFFFFF; }
+#tabella-b95a654a .tb_footnote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-b95a654a .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-b95a654a tfoot tr:first-child td { padding-top: 8px; }
+#tabella-b95a654a .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
+#tabella-b95a654a .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
+#tabella-b95a654a .tb_bar_track { display: inline-block; height: 0.8em; }
+#tabella-b95a654a .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
+#tabella-b95a654a .tb_bar_label { min-width: 2.5em; text-align: right; }
+</style>
+<table class="tb_table" aria-labelledby="tabella-b95a654a-title">
+<thead>
+<tr class="tb_heading"><th colspan="3" id="tabella-b95a654a-title" class="tb_title">Five stages</th></tr>
+<tr class="tb_heading"><th colspan="3" class="tb_subtitle tb_heading_last">and what each one adds</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_left" scope="col" id="adds">adds</th><th class="tb_col_heading tb_left" scope="col" id="sign">time to add it when</th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><th scope="row" class="tb_row tb_left tb_stub">0 · sketch</th><td class="tb_row tb_left">Prove: an artifact page</td><td class="tb_row tb_left">an idea worth a page</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">1 · repo</th><td class="tb_row tb_left">Scena; the explainer and the devlog move into the repo</td><td class="tb_row tb_left">the page still interests you a day later</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">2 · behaviour</th><td class="tb_row tb_left">Partitura: specs, examples that run, a backlog</td><td class="tb_row tb_left">you write &quot;it should&quot; twice, or a fix breaks something agreed</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">3 · releases</th><td class="tb_row tb_left">Repertorio: coverage, roadmap, three threads, a book</td><td class="tb_row tb_left">there is a reference to follow, or a 0.1 to tag</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">4 · users</th><td class="tb_row tb_left">Suggeritore: skills, llms.txt</td><td class="tb_row tb_left">someone else, or their agent, uses it</td></tr>
+</tbody>
+</table>
+</div>
+<p>nanuq reached stage 3 in its first week. tabelline went to stage 3 on its first day, because it
+follows gt and Great Tables from the start. parloku stopped at 2, which is right for a game.</p>
+<h3>A part has variations</h3>
+<p>Copying showed that a part is not one template. Each has a few ways to be done, and a project
+picks one:</p>
+<ul>
+<li><strong>Specs.</strong> nanuq writes the proposal and the implementation in separate pull requests;
+tabelline and parloku in one. parloku's scenarios are drags that run and animate on the specs
+page; the talk has a schema of its own, with an abstract, an outline and its islands.</li>
+<li><strong>Book.</strong> nanuq's book is a repository of its own, with a CI that rebuilds only the chapters
+that changed; tabelline's book will live in the main repository, until its CI grows heavy.</li>
+<li><strong>Look.</strong> Every project has its own theme; tabelline has two, and its devlog posts can have one
+each.</li>
+<li><strong>Explainers.</strong> Nim only, or Nim, Python and R in tabs, checked to agree.</li>
+</ul>
+<p>So Operetta describes each part with its variations and says when to pick which, rather than
+shipping one way of doing it.</p>
+<h3>Still open</h3>
+<ul>
+<li><strong>Where it lives.</strong> A repository of its own, later, holding the parts as short documents, a
+small template for each, and one skill per part (<em>add a devlog post</em>, <em>start a coverage map</em>,
+<em>publish a preview with deep links</em>). Installed as a plugin, the skills would be how a project
+picks parts: the third part explains why that fits.</li>
+<li><strong>Keeping copies in step.</strong> Today a part improved in one repo stays there. With skills, the
+next session in any project that picked it gets the improved version.</li>
+<li><strong>The garden.</strong> A place for ideas and notes that are neither backlog nor posts; how it works is
+not decided yet, so it is not a part yet.</li>
+<li><strong>How heavy it gets.</strong> Every part costs CI time and attention. The rule so far: a part comes in
+when a stage's sign shows, not before.</li>
+</ul>
+<p>This is a sketch. The next projects will move parts between groups, split some and drop others,
+and that is how it should go: <em>complicare è facile, semplificare è difficile</em>.</p>
+<h2 class="parte" id="part-three"><small>Parte terza</small>Skills, from the beginning</h2><p class="lede">What an agent skill is, where skills live in an open source project, who does them well, how they work from the phone, and how to tell whether one helps.</p>
+<p>Skills are the fifth group of <a href="#part-two">Operetta</a>, the <em>suggeritore</em>, and the one with the
+least in it. This part starts from nothing and goes step by step.</p>
+<h3>A skill is a folder</h3>
+<p>A skill is a folder with a file called <code>SKILL.md</code> in it. The file starts with two fields, a
+<code>name</code> and a <code>description</code>, and goes on with instructions in plain Markdown. The folder can also
+hold scripts to run and longer references to read. That is all: no code to install, no server.</p>
+<p>Here is the top of a skill that is in tabelline's repository, put there by OpenSpec:</p>
+<pre><code class="language-yaml">---
+<span class="hljs-tag">name</span>: <span class="hljs-literal">openspec-propose</span>
+<span class="hljs-tag">description</span>: <span class="hljs-literal">Propose</span> <span class="hljs-literal">a</span> <span class="hljs-literal">new</span> <span class="hljs-literal">OpenSpec</span> <span class="hljs-literal">change</span> <span class="hljs-literal">with</span> <span class="hljs-literal">all</span> <span class="hljs-literal">artifacts</span> <span class="hljs-literal">generated</span> <span class="hljs-literal">in</span> <span class="hljs-literal">one</span> <span class="hljs-literal">step.</span> <span class="hljs-literal">Use</span> <span class="hljs-literal">when</span> <span class="hljs-literal">the</span> <span class="hljs-literal">user</span> <span class="hljs-literal">wants</span> <span class="hljs-literal">to</span> <span class="hljs-literal">quickly</span> <span class="hljs-literal">describe</span> <span class="hljs-literal">what</span> <span class="hljs-literal">they</span> <span class="hljs-literal">want</span> <span class="hljs-literal">to</span> <span class="hljs-literal">build</span> <span class="hljs-literal">and</span> <span class="hljs-literal">get</span> <span class="hljs-literal">a</span> <span class="hljs-literal">complete</span> <span class="hljs-literal">proposal</span> <span class="hljs-literal">with</span> <span class="hljs-literal">design,</span> <span class="hljs-literal">specs,</span> <span class="hljs-literal">and</span> <span class="hljs-literal">tasks</span> <span class="hljs-literal">ready</span> <span class="hljs-literal">for</span> <span class="hljs-literal">implementation.</span> <span class="hljs-literal">Also</span> <span class="hljs-literal">use</span> <span class="hljs-literal">when</span> <span class="hljs-literal">the</span> <span class="hljs-literal">user</span> <span class="hljs-literal">says</span> <span class="hljs-literal">"openspec</span> <span class="hljs-literal">propose"</span> <span class="hljs-literal">or</span> <span class="hljs-literal">"opsx</span> <span class="hljs-literal">propose".</span>
+<span class="hljs-tag">allowed-tools</span>: <span class="hljs-literal">Bash(openspec:*)</span>
+<span class="hljs-tag">license</span>: <span class="hljs-literal">MIT</span>
+<span class="hljs-tag">compatibility</span>: <span class="hljs-literal">Requires</span> <span class="hljs-literal">openspec</span> <span class="hljs-literal">CLI.</span>
+<span class="hljs-tag">metadata</span>:
+  <span class="hljs-tag">author</span>: <span class="hljs-literal">openspec</span>
+  <span class="hljs-tag">version</span>: <span class="hljs-string">"</span><span class="hljs-string">1.0</span><span class="hljs-string">"</span>
+  <span class="hljs-tag">generatedBy</span>: <span class="hljs-string">"</span><span class="hljs-string">1.16.0</span><span class="hljs-string">"</span>
+---
+...
+</code></pre>
+<p>What makes skills work is <em>when</em> each part is read. The agent sees only the <code>name</code> and the
+<code>description</code> of every skill it has, a line or two each. It reads the rest of <code>SKILL.md</code> only
+when a task matches the description, and the scripts and references only if the instructions
+send it there. A project can carry many skills and pay for the ones in use. The
+<a href="https://agentskills.io">Agent Skills</a> format is an open standard: Claude Code, Codex, Cursor
+and others read the same folders.</p>
+<h3>Skills and their neighbours</h3>
+<p>There are other ways to give an agent knowledge, and the difference is mostly who loads it and
+when:</p>
+<div id="tabella-53474526" class="tabella">
+<style>
+#tabella-53474526 { overflow-x: auto; }
+#tabella-53474526 table, #tabella-53474526 thead, #tabella-53474526 tbody, #tabella-53474526 tfoot, #tabella-53474526 tr, #tabella-53474526 td, #tabella-53474526 th { border-style: none; }
+#tabella-53474526 .tb_table { display: table; border-collapse: collapse; line-height: normal;
+  margin-left: auto; margin-right: auto; width: auto;
+  color: #333333; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px;
+  background-color: #FFFFFF;
+  border-top: 2px solid #A8A8A8;
+  border-bottom: 2px solid #A8A8A8;
+  border-left: 2px none #D3D3D3;
+  border-right: 2px none #D3D3D3; }
+#tabella-53474526 .tb_caption { caption-side: top; padding: 4px 5px; color: #333333; font-style: italic; }
+#tabella-53474526 .tb_heading { background-color: #FFFFFF; text-align: center; color: #333333; }
+#tabella-53474526 .tb_title { font-size: 125%; font-weight: initial;
+  padding: 4px 5px; }
+#tabella-53474526 .tb_subtitle { font-size: 85%; font-weight: normal; padding: 0 5px 4px 5px; }
+#tabella-53474526 .tb_heading_last { border-bottom: 2px solid #D3D3D3; }
+#tabella-53474526 .tb_col_headings th { background-color: #FFFFFF; color: #333333;
+  font-size: 100%; font-weight: normal;
+  text-transform: inherit; vertical-align: bottom;
+  padding: 5px 5px; overflow-x: hidden; }
+#tabella-53474526 .tb_col_headings_last th { border-bottom: 2px solid #D3D3D3; }
+#tabella-53474526 .tb_spanner { display: inline-block; width: 100%; padding-bottom: 4px;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-53474526 .tb_spanner_empty { border-bottom: none; }
+#tabella-53474526 .tb_group_heading { background-color: #FFFFFF; font-weight: initial;
+  padding: 8px 5px; text-align: left; border-top: 2px solid #D3D3D3;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-53474526 .tb_row { padding: 8px 5px; margin: 10px;
+  border-top: 1px solid #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+#tabella-53474526 .tb_stub { background-color: transparent; font-weight: initial; text-align: left;
+  border-right: 2px solid #D3D3D3; }
+#tabella-53474526 tbody tr:first-child .tb_row { border-top: none; }
+#tabella-53474526 .tb_striped { background-color: rgba(128,128,128,0.05); }
+#tabella-53474526 .tb_left { text-align: left; } #tabella-53474526 .tb_center { text-align: center; } #tabella-53474526 .tb_right { text-align: right; font-variant-numeric: tabular-nums; }
+#tabella-53474526 .tb_footnotes, #tabella-53474526 .tb_sourcenotes { color: #333333; background-color: #FFFFFF; }
+#tabella-53474526 .tb_footnote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-53474526 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-53474526 tfoot tr:first-child td { padding-top: 8px; }
+#tabella-53474526 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
+#tabella-53474526 .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
+#tabella-53474526 .tb_bar_track { display: inline-block; height: 0.8em; }
+#tabella-53474526 .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
+#tabella-53474526 .tb_bar_label { min-width: 2.5em; text-align: right; }
+</style>
+<table class="tb_table" aria-labelledby="tabella-53474526-title">
+<thead>
+<tr class="tb_heading"><th colspan="3" id="tabella-53474526-title" class="tb_title">Six ways to teach an agent</th></tr>
+<tr class="tb_heading"><th colspan="3" class="tb_subtitle tb_heading_last">and who loads each one, when</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_left" scope="col" id="loaded">loaded</th><th class="tb_col_heading tb_left" scope="col" id="example">for example</th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>AGENTS.md</strong><br>the house rules of a repository</th><td class="tb_row tb_left">always, at the start of every session</td><td class="tb_row tb_left">tabelline's AGENTS.md: specs first, one PR per change, previews</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>slash command</strong><br>a prompt you call by name</th><td class="tb_row tb_left">by you, when you type it</td><td class="tb_row tb_left">/opsx:propose</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>skill</strong><br>a procedure or a body of knowledge, in a folder</th><td class="tb_row tb_left">by the agent, when a task matches its description</td><td class="tb_row tb_left">openspec-propose: how to write a change</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>llms.txt</strong><br>a library's docs, in one text file for any language model</th><td class="tb_row tb_left">fetched when someone points the model at it</td><td class="tb_row tb_left">Great Tables' llms.txt and llms-full.txt</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>MCP server</strong><br>tools the agent can call: a program, not text</th><td class="tb_row tb_left">always available, run when called</td><td class="tb_row tb_left">the GitHub tools that opened this article's pull request</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>plugin</strong><br>a package of skills, commands and servers, from a marketplace</th><td class="tb_row tb_left">installed once, then as its parts</td><td class="tb_row tb_left">posit-dev/skills, as a Claude Code marketplace</td></tr>
+</tbody>
+</table>
+</div>
+<h3>Who calls a skill</h3>
+<p>Either the agent, because the description matches, or you, by name. OpenSpec ships the same
+workflows both ways: in tabelline there are six skills and six commands, nearly the same text
+twice.</p>
+<div id="tabella-2741bba0" class="tabella">
+<style>
+#tabella-2741bba0 { overflow-x: auto; }
+#tabella-2741bba0 table, #tabella-2741bba0 thead, #tabella-2741bba0 tbody, #tabella-2741bba0 tfoot, #tabella-2741bba0 tr, #tabella-2741bba0 td, #tabella-2741bba0 th { border-style: none; }
+#tabella-2741bba0 .tb_table { display: table; border-collapse: collapse; line-height: normal;
+  margin-left: auto; margin-right: auto; width: auto;
+  color: #333333; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px;
+  background-color: #FFFFFF;
+  border-top: 2px solid #A8A8A8;
+  border-bottom: 2px solid #A8A8A8;
+  border-left: 2px none #D3D3D3;
+  border-right: 2px none #D3D3D3; }
+#tabella-2741bba0 .tb_caption { caption-side: top; padding: 4px 5px; color: #333333; font-style: italic; }
+#tabella-2741bba0 .tb_heading { background-color: #FFFFFF; text-align: center; color: #333333; }
+#tabella-2741bba0 .tb_title { font-size: 125%; font-weight: initial;
+  padding: 4px 5px; }
+#tabella-2741bba0 .tb_subtitle { font-size: 85%; font-weight: normal; padding: 0 5px 4px 5px; }
+#tabella-2741bba0 .tb_heading_last { border-bottom: 2px solid #D3D3D3; }
+#tabella-2741bba0 .tb_col_headings th { background-color: #FFFFFF; color: #333333;
+  font-size: 100%; font-weight: normal;
+  text-transform: inherit; vertical-align: bottom;
+  padding: 5px 5px; overflow-x: hidden; }
+#tabella-2741bba0 .tb_col_headings_last th { border-bottom: 2px solid #D3D3D3; }
+#tabella-2741bba0 .tb_spanner { display: inline-block; width: 100%; padding-bottom: 4px;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-2741bba0 .tb_spanner_empty { border-bottom: none; }
+#tabella-2741bba0 .tb_group_heading { background-color: #FFFFFF; font-weight: initial;
+  padding: 8px 5px; text-align: left; border-top: 2px solid #D3D3D3;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-2741bba0 .tb_row { padding: 8px 5px; margin: 10px;
+  border-top: 1px solid #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+#tabella-2741bba0 .tb_stub { background-color: transparent; font-weight: initial; text-align: left;
+  border-right: 2px solid #D3D3D3; }
+#tabella-2741bba0 tbody tr:first-child .tb_row { border-top: none; }
+#tabella-2741bba0 .tb_striped { background-color: rgba(128,128,128,0.05); }
+#tabella-2741bba0 .tb_left { text-align: left; } #tabella-2741bba0 .tb_center { text-align: center; } #tabella-2741bba0 .tb_right { text-align: right; font-variant-numeric: tabular-nums; }
+#tabella-2741bba0 .tb_footnotes, #tabella-2741bba0 .tb_sourcenotes { color: #333333; background-color: #FFFFFF; }
+#tabella-2741bba0 .tb_footnote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-2741bba0 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-2741bba0 tfoot tr:first-child td { padding-top: 8px; }
+#tabella-2741bba0 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
+#tabella-2741bba0 .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
+#tabella-2741bba0 .tb_bar_track { display: inline-block; height: 0.8em; }
+#tabella-2741bba0 .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
+#tabella-2741bba0 .tb_bar_label { min-width: 2.5em; text-align: right; }
+</style>
+<table class="tb_table" aria-labelledby="tabella-2741bba0-title">
+<thead>
+<tr class="tb_heading"><th colspan="3" id="tabella-2741bba0-title" class="tb_title">OpenSpec in tabelline's repository</th></tr>
+<tr class="tb_heading"><th colspan="3" class="tb_subtitle tb_heading_last">each workflow twice: a skill and a command</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_right" scope="col" id="skill">skill<br><code>.claude/skills/</code></th><th class="tb_col_heading tb_right" scope="col" id="command">command<br><code>/opsx:…</code></th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><th scope="row" class="tb_row tb_left tb_stub">apply</th><td class="tb_row tb_right">11.1 KB</td><td class="tb_row tb_right">10.9 KB</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">archive</th><td class="tb_row tb_right">16.2 KB</td><td class="tb_row tb_right">16.9 KB</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">explore</th><td class="tb_row tb_right">22.9 KB</td><td class="tb_row tb_right">20.0 KB</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">propose</th><td class="tb_row tb_right">16.3 KB</td><td class="tb_row tb_right">16.0 KB</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">sync</th><td class="tb_row tb_right">15.4 KB</td><td class="tb_row tb_right">15.2 KB</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">update</th><td class="tb_row tb_right">11.3 KB</td><td class="tb_row tb_right">10.9 KB</td></tr>
+</tbody>
+<tfoot>
+<tr class="tb_sourcenotes"><td class="tb_sourcenote" colspan="3">Sizes of the files in tabelline's <code>.claude/</code>, 7 Nov 2026. Written by <code>openspec init</code> (OpenSpec 1.16), MIT.</td></tr>
+</tfoot>
+</table>
+</div>
+<p>That is why OpenSpec can feel like it is not there. Typing <code>/opsx:propose</code> runs the command;
+asking <em>&quot;let's propose a change for summary rows&quot;</em> makes the agent load the skill on its own.
+Either way 11 to 23 KB of instructions arrive (3,000 to 6,000 tokens), only for that task, and the work
+just goes the OpenSpec way. A skill that works well is mostly invisible.</p>
+<h3>Where skills live</h3>
+<p>For an open source library there are two audiences, and they want different skills in
+different places:</p>
+<ul>
+<li><strong>People who work <em>on</em> the library</strong> (and their agents): how to build it, test it, write a
+spec, make a release. These skills belong in the repository, next to AGENTS.md, and change
+with it.</li>
+<li><strong>People who work <em>with</em> the library</strong>: how to use its API today. These belong with the
+documentation, versioned with the releases, so that a user gets the skill that matches the
+version they have.</li>
+</ul>
+<p>Then there is where a skill is put on a computer, or an account:</p>
+<div id="tabella-9896dbf3" class="tabella">
+<style>
+#tabella-9896dbf3 { overflow-x: auto; }
+#tabella-9896dbf3 table, #tabella-9896dbf3 thead, #tabella-9896dbf3 tbody, #tabella-9896dbf3 tfoot, #tabella-9896dbf3 tr, #tabella-9896dbf3 td, #tabella-9896dbf3 th { border-style: none; }
+#tabella-9896dbf3 .tb_table { display: table; border-collapse: collapse; line-height: normal;
+  margin-left: auto; margin-right: auto; width: auto;
+  color: #333333; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px;
+  background-color: #FFFFFF;
+  border-top: 2px solid #A8A8A8;
+  border-bottom: 2px solid #A8A8A8;
+  border-left: 2px none #D3D3D3;
+  border-right: 2px none #D3D3D3; }
+#tabella-9896dbf3 .tb_caption { caption-side: top; padding: 4px 5px; color: #333333; font-style: italic; }
+#tabella-9896dbf3 .tb_heading { background-color: #FFFFFF; text-align: center; color: #333333; }
+#tabella-9896dbf3 .tb_title { font-size: 125%; font-weight: initial;
+  padding: 4px 5px; }
+#tabella-9896dbf3 .tb_subtitle { font-size: 85%; font-weight: normal; padding: 0 5px 4px 5px; }
+#tabella-9896dbf3 .tb_heading_last { border-bottom: 2px solid #D3D3D3; }
+#tabella-9896dbf3 .tb_col_headings th { background-color: #FFFFFF; color: #333333;
+  font-size: 100%; font-weight: normal;
+  text-transform: inherit; vertical-align: bottom;
+  padding: 5px 5px; overflow-x: hidden; }
+#tabella-9896dbf3 .tb_col_headings_last th { border-bottom: 2px solid #D3D3D3; }
+#tabella-9896dbf3 .tb_spanner { display: inline-block; width: 100%; padding-bottom: 4px;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-9896dbf3 .tb_spanner_empty { border-bottom: none; }
+#tabella-9896dbf3 .tb_group_heading { background-color: #FFFFFF; font-weight: initial;
+  padding: 8px 5px; text-align: left; border-top: 2px solid #D3D3D3;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-9896dbf3 .tb_row { padding: 8px 5px; margin: 10px;
+  border-top: 1px solid #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+#tabella-9896dbf3 .tb_stub { background-color: transparent; font-weight: initial; text-align: left;
+  border-right: 2px solid #D3D3D3; }
+#tabella-9896dbf3 tbody tr:first-child .tb_row { border-top: none; }
+#tabella-9896dbf3 .tb_striped { background-color: rgba(128,128,128,0.05); }
+#tabella-9896dbf3 .tb_left { text-align: left; } #tabella-9896dbf3 .tb_center { text-align: center; } #tabella-9896dbf3 .tb_right { text-align: right; font-variant-numeric: tabular-nums; }
+#tabella-9896dbf3 .tb_footnotes, #tabella-9896dbf3 .tb_sourcenotes { color: #333333; background-color: #FFFFFF; }
+#tabella-9896dbf3 .tb_footnote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-9896dbf3 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-9896dbf3 tfoot tr:first-child td { padding-top: 8px; }
+#tabella-9896dbf3 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
+#tabella-9896dbf3 .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
+#tabella-9896dbf3 .tb_bar_track { display: inline-block; height: 0.8em; }
+#tabella-9896dbf3 .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
+#tabella-9896dbf3 .tb_bar_label { min-width: 2.5em; text-align: right; }
+</style>
+<table class="tb_table" aria-labelledby="tabella-9896dbf3-title">
+<thead>
+<tr class="tb_heading"><th colspan="2" id="tabella-9896dbf3-title" class="tb_title tb_heading_last">Five places for a skill</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_left" scope="col" id="install">how it gets there</th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><th scope="row" class="tb_row tb_left tb_stub"><code>.claude/skills/</code> in the repository<br>for everyone working on the repo, and every cloud session on it</th><td class="tb_row tb_left">nothing: they come with <code>git clone</code><br><em>for example:</em> tabelline's OpenSpec skills</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><code>~/.claude/skills/</code> (or <code>~/.agents/skills/</code>)<br>for you, in every project on that computer</th><td class="tb_row tb_left">copy, clone or symlink a folder<br><em>for example:</em> <a href="https://github.com/planetis-m/skills">planetis-m/skills</a>, cloned there</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">your claude.ai account<br>for you, in the Claude apps, and synced into Claude Code</th><td class="tb_row tb_left">Customize → Skills → upload a ZIP of the folder<br><em>for example:</em> a skill of your own</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">a plugin marketplace<br>for anyone using Claude Code</th><td class="tb_row tb_left"><code>/plugin marketplace add owner/repo</code>, then <code>/plugin install</code><br><em>for example:</em> <a href="https://github.com/posit-dev/skills">posit-dev/skills</a>, <a href="https://github.com/mattpocock/skills">mattpocock/skills</a>, <a href="https://github.com/anthropics/skills">anthropics/skills</a></td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">the library's docs site<br>for the library's users, with any agent</th><td class="tb_row tb_left"><code>npx skills add</code> and the site's address<br><em>for example:</em> Great Tables' <code>skill.md</code>, next to its <code>llms.txt</code></td></tr>
+</tbody>
+<tfoot>
+<tr class="tb_sourcenotes"><td class="tb_sourcenote" colspan="2">Install commands from each project's README and the <a href="https://support.claude.com/en/articles/12512180-using-skills-in-claude">Claude help center</a>, 7 Nov 2026.</td></tr>
+</tfoot>
+</table>
+</div>
+<p><code>npx skills</code> is a small installer that copies skills from a repository or a site into the
+folder each agent reads; a plugin, instead, stays managed and updates itself. Matt Pocock's
+README warns not to use both for the same skills, or the agent sees every skill twice.</p>
+<h3>Who does it well</h3>
+<p>Four collections worth reading, each with an idea worth taking:</p>
+<div id="tabella-0835c5e4" class="tabella">
+<style>
+#tabella-0835c5e4 { overflow-x: auto; }
+#tabella-0835c5e4 table, #tabella-0835c5e4 thead, #tabella-0835c5e4 tbody, #tabella-0835c5e4 tfoot, #tabella-0835c5e4 tr, #tabella-0835c5e4 td, #tabella-0835c5e4 th { border-style: none; }
+#tabella-0835c5e4 .tb_table { display: table; border-collapse: collapse; line-height: normal;
+  margin-left: auto; margin-right: auto; width: auto;
+  color: #333333; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px;
+  background-color: #FFFFFF;
+  border-top: 2px solid #A8A8A8;
+  border-bottom: 2px solid #A8A8A8;
+  border-left: 2px none #D3D3D3;
+  border-right: 2px none #D3D3D3; }
+#tabella-0835c5e4 .tb_caption { caption-side: top; padding: 4px 5px; color: #333333; font-style: italic; }
+#tabella-0835c5e4 .tb_heading { background-color: #FFFFFF; text-align: center; color: #333333; }
+#tabella-0835c5e4 .tb_title { font-size: 125%; font-weight: initial;
+  padding: 4px 5px; }
+#tabella-0835c5e4 .tb_subtitle { font-size: 85%; font-weight: normal; padding: 0 5px 4px 5px; }
+#tabella-0835c5e4 .tb_heading_last { border-bottom: 2px solid #D3D3D3; }
+#tabella-0835c5e4 .tb_col_headings th { background-color: #FFFFFF; color: #333333;
+  font-size: 100%; font-weight: normal;
+  text-transform: inherit; vertical-align: bottom;
+  padding: 5px 5px; overflow-x: hidden; }
+#tabella-0835c5e4 .tb_col_headings_last th { border-bottom: 2px solid #D3D3D3; }
+#tabella-0835c5e4 .tb_spanner { display: inline-block; width: 100%; padding-bottom: 4px;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-0835c5e4 .tb_spanner_empty { border-bottom: none; }
+#tabella-0835c5e4 .tb_group_heading { background-color: #FFFFFF; font-weight: initial;
+  padding: 8px 5px; text-align: left; border-top: 2px solid #D3D3D3;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-0835c5e4 .tb_row { padding: 8px 5px; margin: 10px;
+  border-top: 1px solid #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+#tabella-0835c5e4 .tb_stub { background-color: transparent; font-weight: initial; text-align: left;
+  border-right: 2px solid #D3D3D3; }
+#tabella-0835c5e4 tbody tr:first-child .tb_row { border-top: none; }
+#tabella-0835c5e4 .tb_striped { background-color: rgba(128,128,128,0.05); }
+#tabella-0835c5e4 .tb_left { text-align: left; } #tabella-0835c5e4 .tb_center { text-align: center; } #tabella-0835c5e4 .tb_right { text-align: right; font-variant-numeric: tabular-nums; }
+#tabella-0835c5e4 .tb_footnotes, #tabella-0835c5e4 .tb_sourcenotes { color: #333333; background-color: #FFFFFF; }
+#tabella-0835c5e4 .tb_footnote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-0835c5e4 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-0835c5e4 tfoot tr:first-child td { padding-top: 8px; }
+#tabella-0835c5e4 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
+#tabella-0835c5e4 .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
+#tabella-0835c5e4 .tb_bar_track { display: inline-block; height: 0.8em; }
+#tabella-0835c5e4 .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
+#tabella-0835c5e4 .tb_bar_label { min-width: 2.5em; text-align: right; }
+</style>
+<table class="tb_table" aria-labelledby="tabella-0835c5e4-title">
+<thead>
+<tr class="tb_heading"><th colspan="3" id="tabella-0835c5e4-title" class="tb_title tb_heading_last">Four collections</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_left" scope="col" id="what">what is in it</th><th class="tb_col_heading tb_left" scope="col" id="idea">the idea to take</th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Posit</strong><br><a href="https://github.com/posit-dev/skills">posit-dev/skills</a></th><td class="tb_row tb_left">About two dozen skills in eight groups (open source upkeep, r-lib, Shiny, Quarto, GitHub). Separately, Great Tables publishes its own skill and an llms.txt on its docs site, made by their docs tool, Great Docs.</td><td class="tb_row tb_left">Contributor skills in one shared repo; user skills built by the docs, with the docs.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Matt Pocock</strong><br><a href="https://github.com/mattpocock/skills">mattpocock/skills</a></th><td class="tb_row tb_left">A TypeScript teacher (Total TypeScript, AI Hero) who publishes the skills he uses: 27, such as grill-me (Claude asks you questions until the plan is clear), tdd, to-spec, to-tickets, diagnosing-bugs.</td><td class="tb_row tb_left">Small, composable skills that keep you in control, rather than one big framework that takes it.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Anthropic</strong><br><a href="https://github.com/anthropics/skills">anthropics/skills</a></th><td class="tb_row tb_left">The reference examples, the Word, PDF, PowerPoint and Excel skills, and skill-creator, a skill that writes and tests skills.</td><td class="tb_row tb_left">Test a skill against a baseline, and test its description on its own.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>planetis</strong><br><a href="https://github.com/planetis-m/skills">planetis-m/skills</a></th><td class="tb_row tb_left">Fourteen Nim skills: API design, C bindings, ownership hooks, error handling, testing, fuzzing, style, an atlas helper, and one for Nimony plugins. Licence CC BY-NC-SA 4.0.</td><td class="tb_row tb_left">&quot;Empirically verified&quot;: skills for Nim, checked rather than just written.</td></tr>
+</tbody>
+<tfoot>
+<tr class="tb_sourcenotes"><td class="tb_sourcenote" colspan="3">Read on 7 Nov 2026. The Great Tables and Great Docs pages, and planetis's verified-nim site, could not be read from the sandbox; what is said of them comes from search results.</td></tr>
+</tfoot>
+</table>
+</div>
+<p>Matt Pocock's choice is a useful warning for Operetta. He keeps skills small because
+frameworks like Spec-Kit or BMAD, in his words, <em>take away your control</em>. Operetta has to stay a
+set of parts to pick, each one small, and not become one of those.</p>
+<h3>From the phone</h3>
+<p>Pietro works with Claude Code mostly from the phone, in cloud sessions: each one starts on a
+fresh clone of the repository. That decides where skills should go:</p>
+<ul>
+<li><strong>Skills in the repository always come along.</strong> This article was written in such a session, and
+tabelline's six OpenSpec skills were there without anything installed.</li>
+<li><strong>Skills uploaded to the claude.ai account</strong> are there in the Claude apps, and Claude Code
+syncs them too; in the session that wrote it, one of Pietro's own skills was present
+next to the repository's.</li>
+<li><strong>Plugins</strong> can also be listed in the repository's <code>.claude/settings.json</code>. How that behaves in
+a session started from the phone was not tested here, so for cloud sessions the
+repository's own <code>.claude/skills/</code> is the dependable place.</li>
+</ul>
+<p>So: skills for working on a project go in its repository; personal skills, for any project, go
+in the account.</p>
+<h3>Does a skill help?</h3>
+<p>A skill can fail three ways: it does not fire, it fires and does not help, or it was true once
+and is not any more. Each needs its own test:</p>
+<div id="tabella-caad4438" class="tabella">
+<style>
+#tabella-caad4438 { overflow-x: auto; }
+#tabella-caad4438 table, #tabella-caad4438 thead, #tabella-caad4438 tbody, #tabella-caad4438 tfoot, #tabella-caad4438 tr, #tabella-caad4438 td, #tabella-caad4438 th { border-style: none; }
+#tabella-caad4438 .tb_table { display: table; border-collapse: collapse; line-height: normal;
+  margin-left: auto; margin-right: auto; width: auto;
+  color: #333333; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px;
+  background-color: #FFFFFF;
+  border-top: 2px solid #A8A8A8;
+  border-bottom: 2px solid #A8A8A8;
+  border-left: 2px none #D3D3D3;
+  border-right: 2px none #D3D3D3; }
+#tabella-caad4438 .tb_caption { caption-side: top; padding: 4px 5px; color: #333333; font-style: italic; }
+#tabella-caad4438 .tb_heading { background-color: #FFFFFF; text-align: center; color: #333333; }
+#tabella-caad4438 .tb_title { font-size: 125%; font-weight: initial;
+  padding: 4px 5px; }
+#tabella-caad4438 .tb_subtitle { font-size: 85%; font-weight: normal; padding: 0 5px 4px 5px; }
+#tabella-caad4438 .tb_heading_last { border-bottom: 2px solid #D3D3D3; }
+#tabella-caad4438 .tb_col_headings th { background-color: #FFFFFF; color: #333333;
+  font-size: 100%; font-weight: normal;
+  text-transform: inherit; vertical-align: bottom;
+  padding: 5px 5px; overflow-x: hidden; }
+#tabella-caad4438 .tb_col_headings_last th { border-bottom: 2px solid #D3D3D3; }
+#tabella-caad4438 .tb_spanner { display: inline-block; width: 100%; padding-bottom: 4px;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-caad4438 .tb_spanner_empty { border-bottom: none; }
+#tabella-caad4438 .tb_group_heading { background-color: #FFFFFF; font-weight: initial;
+  padding: 8px 5px; text-align: left; border-top: 2px solid #D3D3D3;
+  border-bottom: 2px solid #D3D3D3; }
+#tabella-caad4438 .tb_row { padding: 8px 5px; margin: 10px;
+  border-top: 1px solid #D3D3D3; vertical-align: middle; overflow-x: hidden; }
+#tabella-caad4438 .tb_stub { background-color: transparent; font-weight: initial; text-align: left;
+  border-right: 2px solid #D3D3D3; }
+#tabella-caad4438 tbody tr:first-child .tb_row { border-top: none; }
+#tabella-caad4438 .tb_striped { background-color: rgba(128,128,128,0.05); }
+#tabella-caad4438 .tb_left { text-align: left; } #tabella-caad4438 .tb_center { text-align: center; } #tabella-caad4438 .tb_right { text-align: right; font-variant-numeric: tabular-nums; }
+#tabella-caad4438 .tb_footnotes, #tabella-caad4438 .tb_sourcenotes { color: #333333; background-color: #FFFFFF; }
+#tabella-caad4438 .tb_footnote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-caad4438 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-caad4438 tfoot tr:first-child td { padding-top: 8px; }
+#tabella-caad4438 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
+#tabella-caad4438 .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
+#tabella-caad4438 .tb_bar_track { display: inline-block; height: 0.8em; }
+#tabella-caad4438 .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
+#tabella-caad4438 .tb_bar_label { min-width: 2.5em; text-align: right; }
+</style>
+<table class="tb_table" aria-labelledby="tabella-caad4438-title">
+<thead>
+<tr class="tb_heading"><th colspan="3" id="tabella-caad4438-title" class="tb_title tb_heading_last">Three tests for a skill</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_left" scope="col" id="how">how</th><th class="tb_col_heading tb_left" scope="col" id="source" width="26%">from</th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Does it fire?</strong></th><td class="tb_row tb_left">About twenty requests, half that should load the skill and half near misses that should not; run each a few times, tune the description on some, check on the rest.</td><td class="tb_row tb_left"><a href="https://github.com/anthropics/skills/tree/main/skills/skill-creator">skill-creator</a></td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Does it help?</strong></th><td class="tb_row tb_left">The same task with the skill and without it, several runs each. Grade the files the agent made with checks that cannot be argued with (it compiles, the HTML has the table), and a model as judge only for the rest.</td><td class="tb_row tb_left">skill-creator; <a href="https://arxiv.org/abs/2602.12670">SkillsBench</a>; the nimib skills, <a href="https://github.com/pietroppeter/nimib/pull/264">nimib#264</a></td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Is it still true?</strong></th><td class="tb_row tb_left">Build every example the skill teaches, on every push, against the current library.</td><td class="tb_row tb_left">the nimib skills' snippet checker; tabelline's spec examples already do this for the specs</td></tr>
+</tbody>
+</table>
+</div>
+<p>Two studies from this year say what to expect:</p>
+<ul>
+<li><a href="https://arxiv.org/abs/2602.12670">SkillsBench</a> (February 2026) ran agents on about 85 tasks in
+11 domains with and without skills. Skills written by people raised the pass rate by 16 points
+on average, from 4.5 in software engineering to 52 in healthcare, and made 16 tasks worse.
+Skills the models wrote for themselves gave nothing. Focused skills, with two or three parts,
+beat complete documentation.</li>
+<li><a href="https://vercel.com/blog/agents-md-outperforms-skills-in-our-agent-evals">Vercel</a>
+(January 2026) tested agents writing Next.js 16 code. An 8 KB index of the docs in AGENTS.md passed
+every test; skills passed at most 79%, and when the agent did not call the skill it did no
+better than with no docs at all (53%).</li>
+</ul>
+<p>The lesson for a small library: what every session needs goes in AGENTS.md, which is always
+read; procedures that only some tasks need go in skills; and a skill that is not tested for
+firing may as well not be there. The numbers come from the papers' summaries, read through
+search: both pages were blocked from the sandbox.</p>
+<h3>For tabelline and Operetta</h3>
+<p>Three small steps, in order, none of them for today:</p>
+<ol>
+<li><strong>A skill for tabelline's users</strong>, built by the docs: <code>skill.md</code> and <code>llms.txt</code> written from
+the specs while the pages are built, the way Great Docs does it for Great Tables, and served
+from the site. Every requirement already has an example that runs, so the skill would be
+checked on every push for free. Models trained before November 2026 have never seen
+tabelline, so this is where a skill helps most.</li>
+<li><strong>A small benchmark</strong> for it: five tasks (a table with a header and a spanner, formatted
+numbers, a styled column, a nimib page, a Great Tables snippet ported), each with and
+without the skill, graded by building the result.</li>
+<li><strong>One skill per Operetta part</strong>, kept in Operetta's repository when it has one and installed
+as a plugin, or copied into a project's <code>.claude/skills/</code> for cloud sessions: <em>add a devlog
+post</em>, <em>start a coverage map</em>, <em>publish a preview with deep links</em>. Picking a part would be
+adding its skill.</li>
+</ol>
+<p>The first two are in tabelline's backlog.</p>
+</main>
+<footer class="sala">Written with Claude in a <a href="https://github.com/pietroppeter/nimib">nimib</a> 🐳 notebook,
+tables by <a href="https://github.com/pietroppeter/tabelline">tabelline</a>.
+<a href="https://github.com/pietroppeter/claude-artifacts/tree/main/a-month-with-claude/src">Source</a> ·
+data from GitHub's search API, public repositories only.</footer><script>
+(function () {
+  function pick(lang) {
+    document.querySelectorAll('.lingue').forEach(function (box) {
+      box.querySelectorAll('.lingue-tab button').forEach(function (b) { b.setAttribute('aria-selected', b.dataset.lingua === lang ? 'true' : 'false'); });
+      box.querySelectorAll('.lingue-pannello').forEach(function (p) { p.hidden = p.dataset.lingua !== lang; });
+    });
+  }
+  document.querySelectorAll('.lingue-tab button').forEach(function (b) {
+    b.addEventListener('click', function () { pick(b.dataset.lingua); });
+  });
+})();
+</script>
+<!-- claude-artifacts:backlink -->
+<style>
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#ca-backlink{all:initial;position:fixed;z-index:2147483647;left:max(10px,env(safe-area-inset-left,0px));bottom:max(10px,env(safe-area-inset-bottom,0px));
+font:500 12px/1 system-ui,-apple-system,"Segoe UI",sans-serif;color:#1f1a22;background:rgba(251,250,252,.96);
+border:1px solid rgba(0,0,0,.14);border-radius:999px;padding:6px 10px;text-decoration:none;box-shadow:0 1px 3px rgba(0,0,0,.12);
+-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);cursor:pointer}
+#ca-backlink:hover,#ca-backlink:focus-visible{text-decoration:underline}
+@media (prefers-color-scheme:dark){#ca-backlink{color:#ece6ef;background:rgba(23,19,26,.94);border-color:rgba(255,255,255,.18)}}
+@media print{#ca-backlink{display:none}}
+</style>
+<a id="ca-backlink" href="https://pietroppeter.github.io/claude-artifacts/" title="All Claude artifacts">&larr; Claude artifacts</a>
+<!-- /claude-artifacts:backlink -->
+</body>
