@@ -87,36 +87,45 @@ footer hr{display:none}
 
   
   <style>
-.nb-box {
+/* nimib's own rules use :where(), so they have zero specificity:
+   any rule in a theme wins over them, wherever the theme puts it. */
+:where(html) {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+:where(.nb-box) {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.nb-small {
+:where(.nb-small) {
   font-size: 0.8rem;
 }
-button.nb-small {
+:where(button.nb-small) {
   float: right;
   padding: 2px;
   padding-right: 5px;
   padding-left: 5px;
 }
-section#source {
+:where(section#source) {
   display:none
 }
-pre > code {
+/* code scrolls sideways inside its own box instead of spilling out of it */
+:where(pre), :where(pre > code), :where(.nb-output) {
+  overflow-x: auto;
+}
+:where(pre > code) {
   font-size: 1.2em;
 }
-.nb-output {
+:where(.nb-output) {
   line-height: 1.15;
 }
-figure {
+:where(figure) {
   margin: 2rem 0;
 }
-figcaption {
+:where(figcaption) {
   text-align: center;
 }
-  
 </style>
   
     

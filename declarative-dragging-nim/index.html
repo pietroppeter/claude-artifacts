@@ -89,36 +89,45 @@ footer hr{display:none}
 
   
   <style>
-.nb-box {
+/* nimib's own rules use :where(), so they have zero specificity:
+   any rule in a theme wins over them, wherever the theme puts it. */
+:where(html) {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+:where(.nb-box) {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.nb-small {
+:where(.nb-small) {
   font-size: 0.8rem;
 }
-button.nb-small {
+:where(button.nb-small) {
   float: right;
   padding: 2px;
   padding-right: 5px;
   padding-left: 5px;
 }
-section#source {
+:where(section#source) {
   display:none
 }
-pre > code {
+/* code scrolls sideways inside its own box instead of spilling out of it */
+:where(pre), :where(pre > code), :where(.nb-output) {
+  overflow-x: auto;
+}
+:where(pre > code) {
   font-size: 1.2em;
 }
-.nb-output {
+:where(.nb-output) {
   line-height: 1.15;
 }
-figure {
+:where(figure) {
   margin: 2rem 0;
 }
-figcaption {
+:where(figcaption) {
   text-align: center;
 }
-  
 </style>
   
     
@@ -145,8 +154,7 @@ A small port of the core idea, written in a nimib notebook and compiled to JavaS
 <p>The demo above runs on its own until you grab a tile. The coral dots are the <em>machinery</em>: every place the tile <strong>could</strong> land.
 The dark panel lists every model state the drag can reach, with its distance from the tile you're holding.
 Nobody wrote code that says &quot;tiles shift right when you drag left&quot;. That behaviour comes out of one line of Nim:</p>
-<pre><code class="language-nim">closest(toSeq(<span class="hljs-number">0</span> ..&lt; word.len).mapIt(word.moveTo(key, it)))
-</code></pre>
+<pre><code class="nohighlight nim hljs">closest(toSeq(<span class="hljs-number">0</span> ..&lt; word.len).mapIt(word.moveTo(key, it)))</code></pre>
 <p>The idea comes from <strong>Declarative Dragging</strong> by Joshua Horowitz, Andrew Blinn and Jeffrey Heer,
 which won a <a href="https://uist.acm.org/2026/awards/">Best Paper award at UIST 2026</a>.
 Their library, <a href="https://github.com/declarative-dragging/dragology">Dragology</a>, is TypeScript, React and SVG.
