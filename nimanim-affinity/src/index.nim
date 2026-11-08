@@ -6,7 +6,7 @@ nb.title = "Affinity Propagation, animated with nimanim"
 nb.doc.filename = currentSourcePath().parentDir.parentDir / "index.html"
 # Output blocks are <pre class="nb-output"> with no <code> inside, so water.css doesn't make them
 # scroll; without this, long lines push the whole page sideways on a phone.
-nbRawHtml: "<style>pre.nb-output{overflow-x:auto}</style>"
+nbRawHtml: "<style>pre.nb-output{overflow-x:auto}body pre > code{font-size:13px}</style>"
 
 nbText: """
 # Affinity Propagation, animated with nimanim

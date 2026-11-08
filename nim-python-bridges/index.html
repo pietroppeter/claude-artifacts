@@ -118,6 +118,9 @@ ol.plan { padding-left: 22px; max-width: 70ch; } ol.plan li { margin: 0 0 8px; }
   h1 { font-size: 34px; }
 }
 </style>
+<!-- claude-artifacts:codeblocks -->
+<style>pre{overflow-x:auto}pre>code{overflow-x:auto}.hljs-comment,.hljs-quote{color:#7a7f87;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-meta .hljs-keyword{color:#a626a4}.hljs-string,.hljs-regexp,.hljs-addition{color:#50a14f}.hljs-number,.hljs-literal,.hljs-symbol{color:#b76b01}.hljs-built_in,.hljs-type,.hljs-class .hljs-title,.hljs-title.class_{color:#c18401}.hljs-title,.hljs-section{color:#4078f2}.hljs-meta,.hljs-attr,.hljs-attribute,.hljs-variable{color:#986801}.hljs-tag,.hljs-name{color:#e45649}.hljs-deletion{color:#e45649}</style>
+<!-- /claude-artifacts:codeblocks -->
 </head>
 <body>
 <div class="sheet">
@@ -152,13 +155,13 @@ ol.plan { padding-left: 22px; max-width: 70ch; } ol.plan li { margin: 0 0 8px; }
   <h2><span class="n">1</span> The procedure</h2>
   <p>Everything starts from one Nim procedure. It takes a JSON request with the Mermaid text, a personal layer and
   Pele's options, and answers in JSON: the SVG and the ids a layer can use, or Pele's error.</p>
-  <pre><code># capi.nim: the Nim side, before any plug
-proc draw(req: JsonNode): JsonNode
-  ## req:    {&quot;source&quot;: &quot;&lt;Mermaid text&gt;&quot;, &quot;layer&quot;: {...}, &quot;options&quot;: {...}}
-  ## answer: {&quot;ok&quot;: true, &quot;svg&quot;: &quot;&lt;svg ...&gt;&quot;, &quot;type&quot;: &quot;flowchart&quot;,
-  ##          &quot;ids&quot;: {&quot;nodes&quot;: [...], &quot;edges&quot;: [...]}}
-  ##   or:   {&quot;ok&quot;: false, &quot;code&quot;: &quot;syntax&quot;, &quot;message&quot;: &quot;...&quot;,
-  ##          &quot;line&quot;: 2, &quot;column&quot;: 9, &quot;snippet&quot;: &quot;...&quot;}</code></pre>
+  <pre><code data-lang="nim"><span class="hljs-comment"># capi.nim: the Nim side, before any plug</span>
+<span class="hljs-keyword">proc</span> <span class="hljs-title function_">draw</span>(req: JsonNode): JsonNode
+  <span class="hljs-string">## req:    {"source": "&lt;Mermaid text&gt;", "layer": {...}, "options": {...}}</span>
+  <span class="hljs-string">## answer: {"ok": true, "svg": "&lt;svg ...&gt;", "type": "flowchart",</span>
+  <span class="hljs-string">##          "ids": {"nodes": [...], "edges": [...]}}</span>
+  <span class="hljs-string">##   or:   {"ok": false, "code": "syntax", "message": "...",</span>
+  <span class="hljs-string">##          "line": 2, "column": 9, "snippet": "..."}</span></code></pre>
   <pre class="out"><code>&gt;&gt;&gt; mari.draw(&quot;flowchart LR\n  a --&gt; b&quot;)
 {&quot;ok&quot;: true, &quot;svg&quot;: &quot;&lt;svg xmlns=\&quot;http://www.w3.org/2000/svg\&quot; ...&quot;, &quot;type&quot;: &quot;flowchart&quot;,
  &quot;ids&quot;: {&quot;nodes&quot;: [&quot;a&quot;, &quot;b&quot;], &quot;edges&quot;: [&quot;L_a_b_0&quot;]}}
@@ -178,52 +181,52 @@ proc draw(req: JsonNode): JsonNode
       <p class="prose">Nim exports C functions that take and return C strings. Python loads the library with
       <code>ctypes</code> and sends the request as one JSON string. The library allocates the answer, so the
       library frees it.</p>
-      <pre><code>import mari
-mari.draw(&quot;flowchart LR\n  a --&gt; b&quot;)[&quot;svg&quot;]    # -&gt; str</code></pre>
-      <pre><code># mari/__init__.py: the Python half of plug A
-def draw(source: str, layer: dict | None = None, **options) -&gt; dict:
-    req = json.dumps({&quot;source&quot;: source, &quot;layer&quot;: layer or {}, &quot;options&quot;: options}).encode()
+      <pre><code data-lang="python"><span class="hljs-keyword">import</span> mari
+mari.draw(<span class="hljs-string">"</span><span class="hljs-string">flowchart LR</span><span class="hljs-char escape_">\n</span><span class="hljs-string">  a --&gt; b</span><span class="hljs-string">"</span>)[<span class="hljs-string">"</span><span class="hljs-string">svg</span><span class="hljs-string">"</span>]    <span class="hljs-comment"># -&gt; str</span></code></pre>
+      <pre><code data-lang="python"><span class="hljs-comment"># mari/__init__.py: the Python half of plug A</span>
+<span class="hljs-keyword">def</span> <span class="hljs-title function_">draw</span>(source: <span class="hljs-built_in">str</span>, layer: <span class="hljs-built_in">dict</span> | <span class="hljs-literal">None</span> = <span class="hljs-literal">None</span>, **options) -&gt; <span class="hljs-built_in">dict</span>:
+    req = json.dumps({<span class="hljs-string">"</span><span class="hljs-string">source</span><span class="hljs-string">"</span>: source, <span class="hljs-string">"</span><span class="hljs-string">layer</span><span class="hljs-string">"</span>: layer <span class="hljs-keyword">or</span> {}, <span class="hljs-string">"</span><span class="hljs-string">options</span><span class="hljs-string">"</span>: options}).encode()
     p = lib.mari_draw(req)
-    try:
+    <span class="hljs-keyword">try</span>:
         answer = json.loads(ctypes.string_at(p).decode())
-    finally:
-        lib.mari_free(p)                       # the library made it, the library frees it
-    if not answer.get(&quot;ok&quot;):
-        raise DiagramError(answer)             # .code .line .column .snippet
-    return answer
+    <span class="hljs-keyword">finally</span>:
+        lib.mari_free(p)                       <span class="hljs-comment"># the library made it, the library frees it</span>
+    <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> answer.get(<span class="hljs-string">"</span><span class="hljs-string">ok</span><span class="hljs-string">"</span>):
+        <span class="hljs-keyword">raise</span> DiagramError(answer)             <span class="hljs-comment"># .code .line .column .snippet</span>
+    <span class="hljs-keyword">return</span> answer
 
-lib = ctypes.CDLL(str(_here / _libname))       # loaded once, at import
+lib = ctypes.CDLL(<span class="hljs-built_in">str</span>(_here / _libname))       <span class="hljs-comment"># loaded once, at import</span>
 lib.mari_draw.argtypes = [ctypes.c_char_p]
-lib.mari_draw.restype = ctypes.c_void_p        # a pointer: c_char_p would copy and lose it
+lib.mari_draw.restype = ctypes.c_void_p        <span class="hljs-comment"># a pointer: c_char_p would copy and lose it</span>
 lib.mari_free.argtypes = [ctypes.c_void_p]</code></pre>
-      <pre><code># capi.nim: the Nim half of plug A
-proc mari_draw(request: cstring): cstring {.exportc, dynlib, cdecl.} =
-  var answer: string
-  try:
+      <pre><code data-lang="nim"><span class="hljs-comment"># capi.nim: the Nim half of plug A</span>
+<span class="hljs-keyword">proc</span> <span class="hljs-title function_">mari_draw</span>(request: cstring): cstring <span class="hljs-string">{.</span><span class="hljs-string">exportc</span>, <span class="hljs-string">dynlib</span>, <span class="hljs-string">cdecl</span><span class="hljs-string">.}</span> =
+  <span class="hljs-keyword">var</span> answer: <span class="hljs-built_in">string</span>
+  <span class="hljs-keyword">try</span>:
     answer = $draw(parseJson($request))
-  except CatchableError as e:
-    answer = $(%*{&quot;ok&quot;: false, &quot;code&quot;: &quot;error&quot;, &quot;message&quot;: e.msg})
-  result = cast[cstring](allocShared0(answer.len + 1))
+  <span class="hljs-keyword">except</span> CatchableError <span class="hljs-keyword">as</span> e:
+    answer = $(%*{<span class="hljs-string">"</span><span class="hljs-string">ok</span><span class="hljs-string">"</span>: <span class="hljs-keyword">false</span>, <span class="hljs-string">"</span><span class="hljs-string">code</span><span class="hljs-string">"</span>: <span class="hljs-string">"</span><span class="hljs-string">error</span><span class="hljs-string">"</span>, <span class="hljs-string">"</span><span class="hljs-string">message</span><span class="hljs-string">"</span>: e.msg})
+  result = <span class="hljs-keyword">cast</span>[cstring](allocShared0(answer.len + <span class="hljs-number">1</span>))
   copyMem(result, answer.cstring, answer.len)
 
-proc mari_free(p: cstring) {.exportc, dynlib, cdecl.} = deallocShared(p)</code></pre>
+<span class="hljs-keyword">proc</span> <span class="hljs-title function_">mari_free</span>(p: cstring) <span class="hljs-string">{.</span><span class="hljs-string">exportc</span>, <span class="hljs-string">dynlib</span>, <span class="hljs-string">cdecl</span><span class="hljs-string">.}</span> = deallocShared(p)</code></pre>
     </div>
     <div class="b-side">
       <h3><span class="plug b">B</span> nimpy</h3>
       <p class="prose">nimpy writes the Python module. Nim strings become Python strings, a Nim exception becomes
       a Python exception, and the memory is Nim's. It finds libpython when the module is loaded, so one build
       serves every Python 3. There is no Python side to write.</p>
-      <pre><code>import marinp
-marinp.svg(&quot;flowchart LR\n  a --&gt; b&quot;)              # -&gt; str</code></pre>
-      <pre><code># marinp.nim: all of plug B
-include capi
-import nimpy
+      <pre><code data-lang="python"><span class="hljs-keyword">import</span> marinp
+marinp.svg(<span class="hljs-string">"</span><span class="hljs-string">flowchart LR</span><span class="hljs-char escape_">\n</span><span class="hljs-string">  a --&gt; b</span><span class="hljs-string">"</span>)              <span class="hljs-comment"># -&gt; str</span></code></pre>
+      <pre><code data-lang="nim"><span class="hljs-comment"># marinp.nim: all of plug B</span>
+<span class="hljs-keyword">include</span> capi
+<span class="hljs-keyword">import</span> nimpy
 
-proc svg(source: string, layer: string = &quot;{}&quot;): string {.exportpy.} =
-  let a = draw(%*{&quot;source&quot;: source, &quot;layer&quot;: parseJson(layer), &quot;options&quot;: {}})
-  if not a[&quot;ok&quot;].getBool:
-    raise newException(ValueError, a[&quot;code&quot;].getStr &amp; &quot;: &quot; &amp; a[&quot;message&quot;].getStr)
-  a[&quot;svg&quot;].getStr</code></pre>
+<span class="hljs-keyword">proc</span> <span class="hljs-title function_">svg</span>(source: <span class="hljs-built_in">string</span>, layer: <span class="hljs-built_in">string</span> = <span class="hljs-string">"</span><span class="hljs-string">{}</span><span class="hljs-string">"</span>): <span class="hljs-built_in">string</span> <span class="hljs-string">{.</span><span class="hljs-string">exportpy</span><span class="hljs-string">.}</span> =
+  <span class="hljs-keyword">let</span> a = draw(%*{<span class="hljs-string">"</span><span class="hljs-string">source</span><span class="hljs-string">"</span>: source, <span class="hljs-string">"</span><span class="hljs-string">layer</span><span class="hljs-string">"</span>: parseJson(layer), <span class="hljs-string">"</span><span class="hljs-string">options</span><span class="hljs-string">"</span>: {}})
+  <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> a[<span class="hljs-string">"</span><span class="hljs-string">ok</span><span class="hljs-string">"</span>].getBool:
+    <span class="hljs-keyword">raise</span> newException(ValueError, a[<span class="hljs-string">"</span><span class="hljs-string">code</span><span class="hljs-string">"</span>].getStr &amp; <span class="hljs-string">"</span><span class="hljs-string">: </span><span class="hljs-string">"</span> &amp; a[<span class="hljs-string">"</span><span class="hljs-string">message</span><span class="hljs-string">"</span>].getStr)
+  a[<span class="hljs-string">"</span><span class="hljs-string">svg</span><span class="hljs-string">"</span>].getStr</code></pre>
     </div>
   </div>
   <p>The Python API in the package is plug A's: <code>mari.draw(source, layer=None, **options) -&gt; dict</code>
@@ -303,24 +306,24 @@ TypeError: Can&#x27;t convert python obj of type
     <div class="narrow"><svg xmlns="http://www.w3.org/2000/svg" class="pele pele-flowchart" viewBox="0 0 361 498" width="361" height="498" style="max-width:100%;height:auto;--_bg:var(--pele-bg,#fff);--_fg:var(--pele-fg,#1f1f1f);--_m:var(--pele-muted,#6e6e6e);--_l:var(--pele-line,#1f1f1f);--_s:var(--pele-surface,#f3f3f3);--_a:var(--pele-surface-alt,#e6e6e6);--_b:var(--pele-border,#8a8a8a);--_c:var(--pele-accent,#5b7bd5);color:var(--_fg);--_r:var(--pele-radius,4px);--_fm:var(--pele-font-mono,monospace);font:16px sans-serif;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;font-family:var(--pele-font,sans-serif)" fill="var(--_fg)" role="graphics-document document" aria-roledescription="flowchart"><g class="pele-edges" fill="none" stroke="var(--_l)" stroke-linecap="round"><g class="pele-edge" data-id="L_py_cabi_0"><path d="M173.24,56C173.24,66.25 89.47,66.25 89.47,76.5L89.47,122"/><path class="pele-marker" d="M89.47,129L86.11,121L92.83,121Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="L_py_np_0"><path d="M194.18,56C194.18,66.25 277.95,66.25 277.95,76.5L277.95,122"/><path class="pele-marker" d="M277.95,129L274.59,121L281.31,121Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="L_cabi_nim_0"><path d="M89.47,177C89.47,194.5 137.69,194.5 137.69,212L137.69,218"/><path class="pele-marker" d="M137.69,225L134.33,217L141.05,217Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="L_np_nim_0"><path d="M277.95,177C277.95,194.5 229.73,194.5 229.73,212L229.73,218"/><path class="pele-marker" d="M229.73,225L226.37,217L233.09,217Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="L_nim_qjs_0"><path d="M183.71,273L183.71,339"/><path class="pele-marker" d="M183.71,346L180.35,338L187.07,338Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="L_qjs_pele_0"><path d="M183.71,394L183.71,435"/><path class="pele-marker" d="M183.71,442L180.35,434L187.07,434Z" fill="var(--_l)" stroke="none"/></g></g><g class="pele-edge-labels" font-size="14"><g class="pele-edge-label" data-id="L_py_cabi_0"><rect x="10" y="78.5" width="158.95" height="21" rx="3" fill="var(--_bg)"/><text x="89.47" y="93.9" text-anchor="middle">ctypes: one JSON string</text></g><g class="pele-edge-label" data-id="L_py_np_0"><rect x="205.47" y="78.5" width="144.95" height="21" rx="3" fill="var(--_bg)"/><text x="277.95" y="93.9" text-anchor="middle">nimpy: Python objects</text></g><g class="pele-edge-label" data-id="L_nim_qjs_0"><rect x="112.02" y="295.5" width="143.38" height="21" rx="3" fill="var(--_bg)"/><text x="183.71" y="310.9" text-anchor="middle">C shim: four functions</text></g></g><g class="pele-nodes"><g class="pele-node pele-shape-rect" data-id="py" transform="translate(183.71,32)"><rect x="-62.47" y="-24" width="124.94" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">Python code</text></g><g class="pele-node pele-shape-rect" data-id="cabi" transform="translate(89.47,153)"><rect x="-80.68" y="-24" width="161.36" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">C ABI: mari_draw</text></g><g class="pele-node pele-shape-rect" data-id="np" transform="translate(277.95,153)"><rect x="-67.79" y="-24" width="135.58" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">nimpy module</text></g><g class="pele-node pele-shape-rect" data-id="nim" transform="translate(183.71,249)"><rect x="-98.02" y="-24" width="196.05" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">Nim: layer and themes</text></g><g class="pele-node pele-shape-rect" data-id="qjs" transform="translate(183.71,370)"><rect x="-47.78" y="-24" width="95.57" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">QuickJS</text></g><g class="pele-node pele-shape-rect" data-id="pele" transform="translate(183.71,466)"><rect x="-75.8" y="-24" width="151.6" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">Pele, JavaScript</text></g></g></svg></div>
   </div>
   <p class="cap">Drawn by the library on test: Python called mari, which ran Pele in QuickJS.</p>
-  <pre><code># qjs.nim: what Nim sees of QuickJS
-{.compile(qjsDir &amp; &quot;/quickjs.c&quot;, qjsFlags).}   # and libregexp.c, libunicode.c, dtoa.c
-{.compile(here &amp; &quot;/mari_qjs.c&quot;, qjsFlags).}
-proc mari_js_new(code: cstring, len: csize_t, err: ptr cstring): pointer {.importc, cdecl.}
-proc mari_js_call(h: pointer, fn, arg: cstring, len: csize_t, ok: ptr cint): cstring {.importc, cdecl.}
-proc mari_js_free_str(s: cstring) {.importc, cdecl.}</code></pre>
-  <pre><code>/* mari_qjs.c: QuickJS&#x27;s JSValue stays on the C side */
-void *mari_js_new(const char *code, size_t len, char **err);   /* runtime + context, script evaluated */
-char *mari_js_call(void *h, const char *fn, const char *arg, size_t len, int *ok);
-void  mari_js_free_str(char *s);
-void  mari_js_close(void *h);</code></pre>
-  <pre><code>// qjs.nim: appended to Pele&#x27;s bundle, the one function Nim calls
-globalThis.__mari = function (line) {
-  const q = JSON.parse(line);
-  const r = pele.render(q.source, q.options || {});
-  const a = { ok: true, svg: r.svg, type: r.type, ends: {} };
-  if (r.type === &#x27;flowchart&#x27;) for (const e of pele.parse(q.source).edges) a.ends[e.id] = [e.start, e.end];
-  return JSON.stringify(a);           // errors: {ok: false, code, message, line, column, snippet}
+  <pre><code data-lang="nim"><span class="hljs-comment"># qjs.nim: what Nim sees of QuickJS</span>
+<span class="hljs-string">{.</span><span class="hljs-string">compile</span><span class="hljs-string">(</span><span class="hljs-string">qjsDir</span> <span class="hljs-string">&amp; "/</span><span class="hljs-string">quickjs</span><span class="hljs-string">.</span><span class="hljs-string">c</span><span class="hljs-string">", </span><span class="hljs-string">qjsFlags</span><span class="hljs-string">).}   # </span><span class="hljs-string">and</span> <span class="hljs-string">libregexp</span><span class="hljs-string">.</span><span class="hljs-string">c</span>, <span class="hljs-string">libunicode</span><span class="hljs-string">.</span><span class="hljs-string">c</span>, <span class="hljs-string">dtoa</span><span class="hljs-string">.</span><span class="hljs-string">c</span>
+<span class="hljs-string">{.</span><span class="hljs-string">compile</span><span class="hljs-string">(</span><span class="hljs-string">here</span> <span class="hljs-string">&amp; "/</span><span class="hljs-string">mari_qjs</span><span class="hljs-string">.</span><span class="hljs-string">c</span><span class="hljs-string">", </span><span class="hljs-string">qjsFlags</span><span class="hljs-string">).}
+</span><span class="hljs-string">proc</span> <span class="hljs-string">mari_js_new</span><span class="hljs-string">(</span><span class="hljs-string">code</span>: <span class="hljs-string">cstring</span>, <span class="hljs-string">len</span>: <span class="hljs-string">csize_t</span>, <span class="hljs-string">err</span>: <span class="hljs-string">ptr</span> <span class="hljs-string">cstring</span><span class="hljs-string">): </span><span class="hljs-string">pointer</span> <span class="hljs-string">{.</span><span class="hljs-string">importc</span>, <span class="hljs-string">cdecl</span><span class="hljs-string">.}</span>
+<span class="hljs-keyword">proc</span> <span class="hljs-title function_">mari_js_call</span>(h: pointer, fn, arg: cstring, len: csize_t, ok: <span class="hljs-keyword">ptr</span> cint): cstring <span class="hljs-string">{.</span><span class="hljs-string">importc</span>, <span class="hljs-string">cdecl</span><span class="hljs-string">.}</span>
+<span class="hljs-keyword">proc</span> <span class="hljs-title function_">mari_js_free_str</span>(s: cstring) <span class="hljs-string">{.</span><span class="hljs-string">importc</span>, <span class="hljs-string">cdecl</span><span class="hljs-string">.}</span></code></pre>
+  <pre><code data-lang="c"><span class="hljs-comment">/* mari_qjs.c: QuickJS's JSValue stays on the C side */</span>
+<span class="hljs-type">void</span> *<span class="hljs-title function_">mari_js_new</span>(<span class="hljs-keyword">const</span> <span class="hljs-type">char</span> *code, <span class="hljs-type">size_t</span> len, <span class="hljs-type">char</span> **err);   <span class="hljs-comment">/* runtime + context, script evaluated */</span>
+<span class="hljs-type">char</span> *<span class="hljs-title function_">mari_js_call</span>(<span class="hljs-type">void</span> *h, <span class="hljs-keyword">const</span> <span class="hljs-type">char</span> *fn, <span class="hljs-keyword">const</span> <span class="hljs-type">char</span> *arg, <span class="hljs-type">size_t</span> len, <span class="hljs-type">int</span> *ok);
+<span class="hljs-type">void</span>  <span class="hljs-title function_">mari_js_free_str</span>(<span class="hljs-type">char</span> *s);
+<span class="hljs-type">void</span>  <span class="hljs-title function_">mari_js_close</span>(<span class="hljs-type">void</span> *h);</code></pre>
+  <pre><code class="language-javascript"><span class="hljs-comment">// qjs.nim: appended to Pele's bundle, the one function Nim calls</span>
+<span class="hljs-built_in">globalThis</span>.__mari = <span class="hljs-keyword">function</span> (line) {
+  <span class="hljs-keyword">const</span> q = <span class="hljs-built_in">JSON</span>.parse(line);
+  <span class="hljs-keyword">const</span> r = pele.render(q.source, q.options || {});
+  <span class="hljs-keyword">const</span> a = { ok: <span class="hljs-literal">true</span>, svg: r.svg, type: r.type, ends: {} };
+  <span class="hljs-keyword">if</span> (r.type === <span class="hljs-string">'flowchart'</span>) <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> e <span class="hljs-keyword">of</span> pele.parse(q.source).edges) a.ends[e.id] = [e.start, e.end];
+  <span class="hljs-keyword">return</span> <span class="hljs-built_in">JSON</span>.stringify(a);           <span class="hljs-comment">// errors: {ok: false, code, message, line, column, snippet}</span>
 };</code></pre>
 </section>
 
@@ -345,20 +348,20 @@ nimpy 8 threads: 400 of 400 right, 202 ms</code></pre></div>
   Inside the lock, the shim tells QuickJS which stack the caller is on. The JavaScript stack limit went from
   8 MB to 1 MB, because Python threads can have smaller stacks than the main thread. A 500-edge flowchart and
   30 nested subgraphs still draw, in 107 ms and 3 ms.</p>
-  <pre><code># qjs.nim: one QuickJS runtime for the process, one call at a time
-var
+  <pre><code data-lang="nim"><span class="hljs-comment"># qjs.nim: one QuickJS runtime for the process, one call at a time</span>
+<span class="hljs-keyword">var</span>
   engine: pointer
   engineLock: Lock
 initLock engineLock
 
-proc askQjs*(bundle: string, req: JsonNode): JsonNode =
+<span class="hljs-keyword">proc</span> <span class="hljs-title function_">askQjs</span>*(bundle: <span class="hljs-built_in">string</span>, req: JsonNode): JsonNode =
   ...
   withLock engineLock:
     startEngine(bundle)
-    let r = mari_js_call(engine, &quot;__mari&quot;, s.cstring, s.len.csize_t, addr ok)
+    <span class="hljs-keyword">let</span> r = mari_js_call(engine, <span class="hljs-string">"</span><span class="hljs-string">__mari</span><span class="hljs-string">"</span>, s.cstring, s.len.csize_t, <span class="hljs-keyword">addr</span> ok)
     ...</code></pre>
-  <pre><code>/* mari_qjs.c: inside the lock, tell QuickJS which stack this thread is on */
-char *mari_js_call(void *h, const char *fn, const char *arg, size_t len, int *ok) {
+  <pre><code data-lang="c"><span class="hljs-comment">/* mari_qjs.c: inside the lock, tell QuickJS which stack this thread is on */</span>
+<span class="hljs-type">char</span> *<span class="hljs-title function_">mari_js_call</span>(<span class="hljs-type">void</span> *h, <span class="hljs-keyword">const</span> <span class="hljs-type">char</span> *fn, <span class="hljs-keyword">const</span> <span class="hljs-type">char</span> *arg, <span class="hljs-type">size_t</span> len, <span class="hljs-type">int</span> *ok) {
   MariJs *m = h; JSContext *ctx = m-&gt;ctx;
   JS_UpdateStackTop(m-&gt;rt);
   ...</code></pre>
@@ -374,18 +377,18 @@ char *mari_js_call(void *h, const char *fn, const char *arg, size_t len, int *ok
   The file just has to be a Nim module that includes <code>capi.nim</code>, and the loader finds
   <code>native.so</code>, <code>.pyd</code> or <code>.dylib</code>.</p>
   <div class="two">
-    <div><pre><code>[build-system]
-requires = [&quot;hatchling&gt;=1.24&quot;, &quot;nimlang&gt;=0.0.3&quot;]
-build-backend = &quot;hatchling.build&quot;
+    <div><pre><code data-lang="toml"><span class="hljs-keyword">[</span><span class="hljs-keyword">build-system</span><span class="hljs-keyword">]</span>
+requires = [<span class="hljs-string">"</span><span class="hljs-string">hatchling&gt;=1.24</span><span class="hljs-string">"</span>, <span class="hljs-string">"</span><span class="hljs-string">nimlang&gt;=0.0.3</span><span class="hljs-string">"</span>]
+build-backend = <span class="hljs-string">"</span><span class="hljs-string">hatchling.build</span><span class="hljs-string">"</span>
 
-[tool.hatch.build.hooks.nimlang]
-extensions = [&quot;src/mari/native.nim&quot;]   # a C ABI library: ctypes loads it, nimpy is not needed</code></pre><pre><code># src/mari/native.nim (a Nim module name: no leading underscore)
-include &quot;../../nim/capi&quot;</code></pre></div>
-    <div><pre><code>$ uv build --wheel                                   # Linux x86-64, natively
-$ NIMLANG_TARGET=aarch64-linux-gnu.2.17 uv build --wheel
-$ NIMLANG_TARGET=aarch64-macos  uv build --wheel
-$ NIMLANG_TARGET=x86_64-macos   uv build --wheel
-$ NIMLANG_TARGET=x86_64-windows uv build --wheel</code></pre></div>
+<span class="hljs-keyword">[</span><span class="hljs-keyword">tool</span><span class="hljs-keyword">.</span><span class="hljs-keyword">hatch</span><span class="hljs-keyword">.</span><span class="hljs-keyword">build</span><span class="hljs-keyword">.</span><span class="hljs-keyword">hooks</span><span class="hljs-keyword">.</span><span class="hljs-keyword">nimlang</span><span class="hljs-keyword">]</span>
+extensions = [<span class="hljs-string">"</span><span class="hljs-string">src/mari/native.nim</span><span class="hljs-string">"</span>]   <span class="hljs-comment"># a C ABI library: ctypes loads it, nimpy is not needed</span></code></pre><pre><code data-lang="nim"><span class="hljs-comment"># src/mari/native.nim (a Nim module name: no leading underscore)</span>
+<span class="hljs-keyword">include</span> <span class="hljs-string">"</span><span class="hljs-string">../../nim/capi</span><span class="hljs-string">"</span></code></pre></div>
+    <div><pre><code data-lang="console"><span class="hljs-meta">$ </span>uv build --wheel                                   <span class="hljs-comment"># Linux x86-64, natively
+</span><span class="hljs-meta">$ </span><span class="hljs-variable">NIMLANG_TARGET</span>=aarch64-linux-gnu.2.17 uv build --wheel
+<span class="hljs-meta">$ </span><span class="hljs-variable">NIMLANG_TARGET</span>=aarch64-macos  uv build --wheel
+<span class="hljs-meta">$ </span><span class="hljs-variable">NIMLANG_TARGET</span>=x86_64-macos   uv build --wheel
+</code></pre></div>
   </div>
   <div class="tablewrap"><table>
     <thead><tr><th>Wheel</th><th>Size</th><th>Build time</th><th>Checked</th></tr></thead>
@@ -406,12 +409,12 @@ versions {&#x27;GLIBC_2.2.5&#x27;, &#x27;GLIBC_2.3.3&#x27;} ... constrains the p
     <p>In Nim, <code>/</code> and <code>parentDir</code> use the target's separator. Cross-compiling for Windows
     from Linux turned the compile-time path to QuickJS's C files into <code>\home\…</code>. Joining paths with
     <code>"/"</code> by hand fixed it. This is Nim's behaviour, not nimlang's.</p>
-    <pre><code># before: cross-compiling for Windows, `/` and parentDir use &quot;\&quot; on a Linux path
-qjsDir = currentSourcePath().parentDir / &quot;vendor&quot; / &quot;quickjs&quot;
-#   Error: cannot find: \home\user\diagrammari\experiments\python\nim\vendor\quickjs\quickjs.c
-# after: join with &quot;/&quot; by hand
-here = currentSourcePath().replace(&#x27;\\&#x27;, &#x27;/&#x27;).rsplit(&#x27;/&#x27;, 1)[0]
-qjsDir = here &amp; &quot;/vendor/quickjs&quot;</code></pre>
+    <pre><code class="language-nim"><span class="hljs-comment"># before: cross-compiling for Windows, `/` and parentDir use "\" on a Linux path</span>
+qjsDir = currentSourcePath().parentDir / <span class="hljs-string">"</span><span class="hljs-string">vendor</span><span class="hljs-string">"</span> / <span class="hljs-string">"</span><span class="hljs-string">quickjs</span><span class="hljs-string">"</span>
+<span class="hljs-comment">#   Error: cannot find: \home\user\diagrammari\experiments\python\nim\vendor\quickjs\quickjs.c</span>
+<span class="hljs-comment"># after: join with "/" by hand</span>
+here = currentSourcePath().replace(<span class="hljs-string">'</span><span class="hljs-char escape_">\\</span><span class="hljs-string">'</span>, <span class="hljs-string">'</span><span class="hljs-string">/</span><span class="hljs-string">'</span>).rsplit(<span class="hljs-string">'</span><span class="hljs-string">/</span><span class="hljs-string">'</span>, <span class="hljs-number">1</span>)[<span class="hljs-number">0</span>]
+qjsDir = here &amp; <span class="hljs-string">"</span><span class="hljs-string">/vendor/quickjs</span><span class="hljs-string">"</span></code></pre>
   </div>
   <h3>Notes for nimlang</h3>
   <ul>

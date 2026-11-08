@@ -240,7 +240,7 @@ ol.plan { padding-left: 22px; max-width: 70ch; } ol.plan li { margin: 0 0 8px; }
   <p class="cap">Drawn by the library on test: Python called mari, which ran Pele in QuickJS.</p>
   <pre><code>{{shim_nim}}</code></pre>
   <pre><code>{{shim_c}}</code></pre>
-  <pre><code>{{glue}}</code></pre>
+  <pre><code class="language-javascript">{{glue}}</code></pre>
 </section>
 
 <section>
@@ -284,7 +284,7 @@ ol.plan { padding-left: 22px; max-width: 70ch; } ol.plan li { margin: 0 0 8px; }
     <p>In Nim, <code>/</code> and <code>parentDir</code> use the target's separator. Cross-compiling for Windows
     from Linux turned the compile-time path to QuickJS's C files into <code>\home\…</code>. Joining paths with
     <code>"/"</code> by hand fixed it. This is Nim's behaviour, not nimlang's.</p>
-    <pre><code>{{pathfix}}</code></pre>
+    <pre><code class="language-nim">{{pathfix}}</code></pre>
   </div>
   <h3>Notes for nimlang</h3>
   <ul>
