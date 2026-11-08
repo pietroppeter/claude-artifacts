@@ -10,6 +10,8 @@ jobs:
       - uses: actions/checkout@v4
       - name: every page links back to the index
         run: python3 tools/backlink.py --check
+      - name: every code block is highlighted and scrolls inside its box
+        run: python3 tools/codeblocks.py --check
       - name: every page is listed in index.html and README.md
         run: |
           fail=0

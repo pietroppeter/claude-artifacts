@@ -27,7 +27,7 @@ p code, li code{font:14.5px "JetBrains Mono",monospace;background:#f1ead7;paddin
 .lede{font-size:20px;color:#3b372f;font-family:Fraunces,Georgia,serif;font-weight:400}
 blockquote{margin:18px 0;padding:6px 16px;border-left:4px solid var(--nim);background:var(--card);color:#3b372f}
 pre{margin:14px 0;overflow-x:auto;border-radius:10px}
-pre code{display:block;padding:14px 16px;font:13.2px/1.55 "JetBrains Mono",monospace;background:#fffdf8;border:1px solid var(--line);border-radius:10px;color:#2b2a26}
+body pre > code{display:block;padding:14px 16px;font:13.2px/1.55 "JetBrains Mono",monospace;background:#fffdf8;border:1px solid var(--line);border-radius:10px;color:#2b2a26}
 pre.nb-output, pre samp{display:block;padding:12px 16px;font:13px/1.5 "JetBrains Mono",monospace;background:#1d1b16;color:#f3eedf;border-radius:10px;white-space:pre}
 .hljs-keyword{color:#a626a4;font-weight:600}.hljs-type,.hljs-built_in{color:#b76b01}.hljs-string{color:#50a14f}
 .hljs-number,.hljs-literal{color:#986801}.hljs-comment{color:#9a9483;font-style:italic}.hljs-meta{color:#4078f2}

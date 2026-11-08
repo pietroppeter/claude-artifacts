@@ -58,6 +58,9 @@ ol.toc{columns:2;font-size:15px;padding-left:20px}
   .wide{display:none}.narrow{display:block}table{display:block;overflow-x:auto;font-size:13.5px}th,td{padding:5px 5px}.two{grid-template-columns:minmax(0,1fr)}ol.toc{columns:1}
 }
 </style>
+<!-- claude-artifacts:codeblocks -->
+<style>pre{overflow-x:auto}pre>code{overflow-x:auto}.hljs-comment,.hljs-quote{color:#7a7f87;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-meta .hljs-keyword{color:#a626a4}.hljs-string,.hljs-regexp,.hljs-addition{color:#50a14f}.hljs-number,.hljs-literal,.hljs-symbol{color:#b76b01}.hljs-built_in,.hljs-type,.hljs-class .hljs-title,.hljs-title.class_{color:#c18401}.hljs-title,.hljs-section{color:#4078f2}.hljs-meta,.hljs-attr,.hljs-attribute,.hljs-variable{color:#986801}.hljs-tag,.hljs-name{color:#e45649}.hljs-deletion{color:#e45649}</style>
+<!-- /claude-artifacts:codeblocks -->
 </head>
 <body>
 <main>
@@ -99,8 +102,8 @@ ol.toc{columns:2;font-size:15px;padding-left:20px}
   <code>mari_draw</code> takes a JSON request (Mermaid text, layer, options) and returns a JSON answer (the SVG, or Pele's error),
   <code>mari_free</code> releases the answer, and <code>mari_pele_version</code> and <code>mari_engine</code> report the Pele version and the engine. Python loads the library with <code>ctypes</code> from the standard library.
   There is no nimpy and no compiled Python extension, so one wheel works with every Python 3 on a platform.</p>
-  <pre><code>proc mari_draw(request: cstring): cstring {.exportc, dynlib, cdecl.}
-proc mari_free(p: cstring) {.exportc, dynlib, cdecl.}</code></pre>
+  <pre><code data-lang="nim"><span class="hljs-keyword">proc</span> <span class="hljs-title function_">mari_draw</span>(request: cstring): cstring <span class="hljs-string">{.</span><span class="hljs-string">exportc</span>, <span class="hljs-string">dynlib</span>, <span class="hljs-string">cdecl</span><span class="hljs-string">.}</span>
+<span class="hljs-keyword">proc</span> <span class="hljs-title function_">mari_free</span>(p: cstring) <span class="hljs-string">{.</span><span class="hljs-string">exportc</span>, <span class="hljs-string">dynlib</span>, <span class="hljs-string">cdecl</span><span class="hljs-string">.}</span></code></pre>
   <p>A small hatchling build hook runs Nim during <code>uv build</code> and tags the wheel <code>py3-none-&lt;platform&gt;</code>:</p>
   <pre><code><span class="cmd">$ uv build --wheel</span>
 Building wheel...
@@ -131,62 +134,62 @@ Archive:  /home/user/diagrammari/experiments/python/dist/diagrammari-0.0.1-py3-n
   <h2>uv add, and no Node anywhere</h2>
   <p>This is a new project. <code>uv add</code> installs one package and nothing else. Pele runs inside the library, in QuickJS, and to prove it the
   script runs with <code>node</code> taken off the <code>PATH</code>.</p>
-  <pre><code>$ uv init --bare
+  <pre><code data-lang="console"><span class="hljs-meta">$ </span>uv init --bare
 Initialized project `fresh2`
-$ uv add ./diagrammari-0.0.1-py3-none-linux_x86_64.whl
+<span class="hljs-meta">$ </span>uv add ./diagrammari-0.0.1-py3-none-linux_x86_64.whl
 Using CPython 3.13.18 interpreter at: /usr/local/bin/python3
 Creating virtual environment at: .venv
 Resolved 2 packages in 19ms
 Installed 1 package in 1ms
- + diagrammari==0.0.1 (from file://./diagrammari-0.0.1-py3-none-linux_x86_64.whl)</code></pre>
-  <details><summary>demo.py</summary><pre><code>import shutil, time, mari
+</code></pre>
+  <details><summary>demo.py</summary><pre><code data-lang="python"><span class="hljs-keyword">import</span> shutil, time, mari
 
-print(&quot;node on PATH:&quot;, shutil.which(&quot;node&quot;), &quot;| engine:&quot;, mari.engine())
-src = &quot;&quot;&quot;flowchart LR
-  idea[Idea] --&gt; draft(Draft)
-  draft --&gt; review{Review?}
-  review --&gt;|yes| ship((Ship))
-  review -.-&gt;|no| draft&quot;&quot;&quot;
+<span class="hljs-built_in">print</span>(<span class="hljs-string">"</span><span class="hljs-string">node on PATH:</span><span class="hljs-string">"</span>, shutil.which(<span class="hljs-string">"</span><span class="hljs-string">node</span><span class="hljs-string">"</span>), <span class="hljs-string">"</span><span class="hljs-string">| engine:</span><span class="hljs-string">"</span>, mari.engine())
+src = <span class="hljs-string">"""</span><span class="hljs-string">flowchart LR</span>
+<span class="hljs-string">  idea[Idea] --&gt; draft(Draft)</span>
+<span class="hljs-string">  draft --&gt; review</span><span class="hljs-string">{</span><span class="hljs-string">Review?}</span>
+<span class="hljs-string">  review --&gt;|yes| ship((Ship))</span>
+<span class="hljs-string">  review -.-&gt;|no| draft</span><span class="hljs-string">"""</span>
 d = mari.Diagram(src)
 t = time.perf_counter(); plain = d.svg; t1 = time.perf_counter() - t
-print(&quot;Pele&quot;, mari.pele_version(), &quot;drew&quot;, len(plain), &quot;bytes of SVG in&quot;, f&quot;{t1*1000:.0f} ms (first call loads Pele)&quot;)
-print(&quot;ids:&quot;, d.ids())
-d.layer = {&quot;theme&quot;: &quot;isotype&quot;, &quot;arrows&quot;: &quot;curve&quot;,
-           &quot;nodes&quot;: {&quot;ship&quot;: {&quot;dy&quot;: 120, &quot;fill&quot;: &quot;#c8402b&quot;}},
-           &quot;edges&quot;: {&quot;L_review_draft_0&quot;: {&quot;route&quot;: &quot;bezier&quot;, &quot;c1&quot;: [-30, -80], &quot;c2&quot;: [30, -80]}}}
-t = time.perf_counter(); d.save(&quot;personal.svg&quot;); t2 = time.perf_counter() - t
-open(&quot;plain.svg&quot;, &quot;w&quot;).write(plain)
-print(&quot;with the layer:&quot;, f&quot;{t2*1000:.1f} ms&quot;)
-try:
-    mari.Diagram(&quot;flowchart LR\n  a --&gt; [&quot;).svg
-except mari.DiagramError as e:
-    print(&quot;DiagramError:&quot;, e.code, &quot;at&quot;, f&quot;{e.line}:{e.column}&quot;)</code></pre></details>
-  <pre><code>$ PATH=/usr/bin:/bin uv run python demo.py
+<span class="hljs-built_in">print</span>(<span class="hljs-string">"</span><span class="hljs-string">Pele</span><span class="hljs-string">"</span>, mari.pele_version(), <span class="hljs-string">"</span><span class="hljs-string">drew</span><span class="hljs-string">"</span>, <span class="hljs-built_in">len</span>(plain), <span class="hljs-string">"</span><span class="hljs-string">bytes of SVG in</span><span class="hljs-string">"</span>, <span class="hljs-string">f</span><span class="hljs-string">"</span><span class="hljs-string">{</span>t1*<span class="hljs-number">1000</span><span class="hljs-string">:</span><span class="hljs-string">.0f</span><span class="hljs-string">}</span><span class="hljs-string"> ms (first call loads Pele)</span><span class="hljs-string">"</span>)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">"</span><span class="hljs-string">ids:</span><span class="hljs-string">"</span>, d.ids())
+d.layer = {<span class="hljs-string">"</span><span class="hljs-string">theme</span><span class="hljs-string">"</span>: <span class="hljs-string">"</span><span class="hljs-string">isotype</span><span class="hljs-string">"</span>, <span class="hljs-string">"</span><span class="hljs-string">arrows</span><span class="hljs-string">"</span>: <span class="hljs-string">"</span><span class="hljs-string">curve</span><span class="hljs-string">"</span>,
+           <span class="hljs-string">"</span><span class="hljs-string">nodes</span><span class="hljs-string">"</span>: {<span class="hljs-string">"</span><span class="hljs-string">ship</span><span class="hljs-string">"</span>: {<span class="hljs-string">"</span><span class="hljs-string">dy</span><span class="hljs-string">"</span>: <span class="hljs-number">120</span>, <span class="hljs-string">"</span><span class="hljs-string">fill</span><span class="hljs-string">"</span>: <span class="hljs-string">"</span><span class="hljs-string">#c8402b</span><span class="hljs-string">"</span>}},
+           <span class="hljs-string">"</span><span class="hljs-string">edges</span><span class="hljs-string">"</span>: {<span class="hljs-string">"</span><span class="hljs-string">L_review_draft_0</span><span class="hljs-string">"</span>: {<span class="hljs-string">"</span><span class="hljs-string">route</span><span class="hljs-string">"</span>: <span class="hljs-string">"</span><span class="hljs-string">bezier</span><span class="hljs-string">"</span>, <span class="hljs-string">"</span><span class="hljs-string">c1</span><span class="hljs-string">"</span>: [-<span class="hljs-number">30</span>, -<span class="hljs-number">80</span>], <span class="hljs-string">"</span><span class="hljs-string">c2</span><span class="hljs-string">"</span>: [<span class="hljs-number">30</span>, -<span class="hljs-number">80</span>]}}}
+t = time.perf_counter(); d.save(<span class="hljs-string">"</span><span class="hljs-string">personal.svg</span><span class="hljs-string">"</span>); t2 = time.perf_counter() - t
+<span class="hljs-built_in">open</span>(<span class="hljs-string">"</span><span class="hljs-string">plain.svg</span><span class="hljs-string">"</span>, <span class="hljs-string">"</span><span class="hljs-string">w</span><span class="hljs-string">"</span>).write(plain)
+<span class="hljs-built_in">print</span>(<span class="hljs-string">"</span><span class="hljs-string">with the layer:</span><span class="hljs-string">"</span>, <span class="hljs-string">f</span><span class="hljs-string">"</span><span class="hljs-string">{</span>t2*<span class="hljs-number">1000</span><span class="hljs-string">:</span><span class="hljs-string">.1f</span><span class="hljs-string">}</span><span class="hljs-string"> ms</span><span class="hljs-string">"</span>)
+<span class="hljs-keyword">try</span>:
+    mari.Diagram(<span class="hljs-string">"</span><span class="hljs-string">flowchart LR</span><span class="hljs-char escape_">\n</span><span class="hljs-string">  a --&gt; [</span><span class="hljs-string">"</span>).svg
+<span class="hljs-keyword">except</span> mari.DiagramError <span class="hljs-keyword">as</span> e:
+    <span class="hljs-built_in">print</span>(<span class="hljs-string">"</span><span class="hljs-string">DiagramError:</span><span class="hljs-string">"</span>, e.code, <span class="hljs-string">"</span><span class="hljs-string">at</span><span class="hljs-string">"</span>, <span class="hljs-string">f</span><span class="hljs-string">"</span><span class="hljs-string">{</span>e.line<span class="hljs-string">}</span><span class="hljs-string">:</span><span class="hljs-string">{</span>e.column<span class="hljs-string">}</span><span class="hljs-string">"</span>)</code></pre></details>
+  <pre><code data-lang="console"><span class="hljs-meta">$ </span><span class="hljs-variable">PATH</span>=/usr/bin:/bin uv run python demo.py
 node on PATH: None | engine: quickjs
 Pele 1.13.0 drew 3101 bytes of SVG in 90 ms (first call loads Pele)
-ids: {&#x27;nodes&#x27;: [&#x27;idea&#x27;, &#x27;draft&#x27;, &#x27;review&#x27;, &#x27;ship&#x27;], &#x27;edges&#x27;: [&#x27;L_review_draft_0&#x27;, &#x27;L_draft_review_0&#x27;, &#x27;L_review_ship_0&#x27;, &#x27;L_idea_draft_0&#x27;]}
+ids: {'nodes': ['idea', 'draft', 'review', 'ship'], 'edges': ['L_review_draft_0', 'L_draft_review_0', 'L_review_ship_0', 'L_idea_draft_0']}
 with the layer: 1.9 ms
-DiagramError: syntax at 2:9</code></pre>
+</code></pre>
   <p class="note">The first call loads Pele into QuickJS, which takes about 90 ms. Later diagrams take under a millisecond, and the layer is applied in
   Nim in about 2 ms. The <code>personal.svg</code> written here is identical, byte for byte, to the one from the Node run below.</p>
   <h3>Before QuickJS: Node from PyPI</h3>
   <p>The first version ran Pele in Node. The <code>[node]</code> extra brings Node as a PyPI wheel (<code>nodejs-wheel-binaries</code>), and
   <code>MARI_ENGINE=node</code> still selects it:</p>
-  <pre><code>$ uv init --bare
+  <pre><code data-lang="console"><span class="hljs-meta">$ </span>uv init --bare
 Initialized project `fresh`
-$ uv add &quot;./diagrammari-0.0.1-py3-none-linux_x86_64.whl[node]&quot;
+<span class="hljs-meta">$ </span>uv add <span class="hljs-string">"./diagrammari-0.0.1-py3-none-linux_x86_64.whl[node]"</span>
 Using CPython 3.13.18 interpreter at: /usr/local/bin/python3
 Creating virtual environment at: .venv
 Resolved 3 packages in 219ms
 Installed 2 packages in 262ms
  + diagrammari==0.0.1 (from file://./diagrammari-0.0.1-py3-none-linux_x86_64.whl)
- + nodejs-wheel-binaries==24.19.0</code></pre>
-  <pre><code>$ PATH=/usr/bin:/bin uv run python demo.py
+</code></pre>
+  <pre><code data-lang="console"><span class="hljs-meta">$ </span><span class="hljs-variable">PATH</span>=/usr/bin:/bin uv run python demo.py
 node on PATH: None
 Pele 1.13.0 drew 3101 bytes of SVG in 3898 ms (first call starts Node)
-ids: {&#x27;nodes&#x27;: [&#x27;idea&#x27;, &#x27;draft&#x27;, &#x27;review&#x27;, &#x27;ship&#x27;], &#x27;edges&#x27;: [&#x27;L_review_draft_0&#x27;, &#x27;L_draft_review_0&#x27;, &#x27;L_review_ship_0&#x27;, &#x27;L_idea_draft_0&#x27;]}
+ids: {'nodes': ['idea', 'draft', 'review', 'ship'], 'edges': ['L_review_draft_0', 'L_draft_review_0', 'L_review_ship_0', 'L_idea_draft_0']}
 with the layer: 2.3 ms
-DiagramError: syntax at 2:9</code></pre>
+</code></pre>
   <p class="note">That first call had to start Node from a cold disk and took 3.9 s. A second run took 71 ms.</p>
 </section>
 
@@ -195,9 +198,9 @@ DiagramError: syntax at 2:9</code></pre>
   <div class="stamp">seen running</div>
   <h2>The layer, exported headless</h2>
   <p>Below are the two files that run wrote: <code>plain.svg</code> is what Pele draws, and <code>personal.svg</code> is the same Mermaid text with this layer applied:</p>
-  <pre><code>{"theme": "isotype", "arrows": "curve",
- "nodes": {"ship": {"dy": 120, "fill": "#c8402b"}},
- "edges": {"L_review_draft_0": {"route": "bezier", "c1": [-30, -80], "c2": [30, -80]}}}</code></pre>
+  <pre><code data-lang="json">{<span class="hljs-tag">"theme"</span>: <span class="hljs-string">"isotype"</span>, <span class="hljs-tag">"arrows"</span>: <span class="hljs-string">"curve"</span>,
+ <span class="hljs-tag">"nodes"</span>: {<span class="hljs-tag">"ship"</span>: {<span class="hljs-tag">"dy"</span>: <span class="hljs-number">120</span>, <span class="hljs-tag">"fill"</span>: <span class="hljs-string">"#c8402b"</span>}},
+ <span class="hljs-tag">"edges"</span>: {<span class="hljs-tag">"L_review_draft_0"</span>: {<span class="hljs-tag">"route"</span>: <span class="hljs-string">"bezier"</span>, <span class="hljs-tag">"c1"</span>: [<span class="hljs-number">-30</span>, <span class="hljs-number">-80</span>], <span class="hljs-tag">"c2"</span>: [<span class="hljs-number">30</span>, <span class="hljs-number">-80</span>]}}}</code></pre>
   <div class="two">
     <figure><div class="svgbox"><svg xmlns="http://www.w3.org/2000/svg" class="pele pele-flowchart" viewBox="0 0 544 97" width="544" height="97" style="max-width:100%;height:auto;--_bg:var(--pele-bg,#fff);--_fg:var(--pele-fg,#1f1f1f);--_m:var(--pele-muted,#6e6e6e);--_l:var(--pele-line,#1f1f1f);--_s:var(--pele-surface,#f3f3f3);--_a:var(--pele-surface-alt,#e6e6e6);--_b:var(--pele-border,#8a8a8a);--_c:var(--pele-accent,#5b7bd5);color:var(--_fg);--_r:var(--pele-radius,4px);--_fm:var(--pele-font-mono,monospace);font:16px sans-serif;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;font-family:var(--pele-font,sans-serif)" fill="var(--_fg)" role="graphics-document document" aria-roledescription="flowchart"><g class="pele-edges" fill="none" stroke="var(--_l)" stroke-linecap="round"><g class="pele-edge" data-id="L_idea_draft_0"><path d="M75.14,48.17L116.14,48.17"/><path class="pele-marker" d="M123.14,48.17L115.14,51.53L115.14,44.81Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="L_draft_review_0"><path d="M193.81,40.17L275.18,40.17"/><path class="pele-marker" d="M282.18,40.17L274.18,43.53L274.18,36.81Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="L_review_ship_0"><path d="M397.92,48.17L472.7,48.17"/><path class="pele-marker" d="M479.7,48.17L471.7,51.53L471.7,44.81Z" fill="var(--_l)" stroke="none"/></g><g class="pele-edge" data-id="L_review_draft_0"><path d="M289.38,60.67L221.31,60.67C213.62,60.67 213.62,60.17 205.93,60.17L200.81,60.17" stroke-dasharray="3 4"/><path class="pele-marker" d="M193.81,60.17L201.81,56.81L201.81,63.53Z" fill="var(--_l)" stroke="none"/></g></g><g class="pele-edge-labels" font-size="14"><g class="pele-edge-label" data-id="L_review_ship_0"><rect x="420.42" y="37.67" width="29.78" height="21" rx="3" fill="var(--_bg)"/><text x="435.31" y="53.07" text-anchor="middle">yes</text></g><g class="pele-edge-label" data-id="L_review_draft_0"><rect x="223.31" y="50.17" width="23.57" height="21" rx="3" fill="var(--_bg)"/><text x="235.09" y="65.57" text-anchor="middle">no</text></g></g><g class="pele-nodes"><g class="pele-node pele-shape-rect" data-id="idea" transform="translate(41.57,48.17)"><rect x="-33.57" y="-24" width="67.14" height="48" fill="var(--_s)" stroke="var(--_b)" style="rx:var(--_r)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">Idea</text></g><g class="pele-node pele-shape-rounded" data-id="draft" transform="translate(158.47,48.17)"><rect x="-35.34" y="-24" width="70.67" height="48" rx="12" fill="var(--_s)" stroke="var(--_b)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">Draft</text></g><g class="pele-node pele-shape-diam" data-id="review" transform="translate(333.65,48.17)"><polygon points="0,-40.17 64.27,0 0,40.17 -64.27,0" fill="var(--_s)" stroke="var(--_b)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">Review?</text></g><g class="pele-node pele-shape-circle" data-id="ship" transform="translate(507.71,48.17)"><circle r="28.01" fill="var(--_s)" stroke="var(--_b)"/><text class="pele-label" x="0" y="5.6" text-anchor="middle">Ship</text></g></g></svg></div><figcaption>plain.svg: Pele's layout</figcaption></figure>
     <figure><div class="svgbox" style="background:#f1ead9"><svg height="244.01" style="--pele-bg:#f1ead9;--pele-fg:#1c1b19;--pele-surface:#e2a52a;--pele-border:#1c1b19;--pele-line:#1c1b19;--pele-accent:#c8402b;--pele-radius:0px;max-width:100%;height:auto;--_bg:var(--pele-bg,#fff);--_fg:var(--pele-fg,#1f1f1f);--_m:var(--pele-muted,#6e6e6e);--_l:var(--pele-line,#1f1f1f);--_s:var(--pele-surface,#f3f3f3);--_a:var(--pele-surface-alt,#e6e6e6);--_b:var(--pele-border,#8a8a8a);--_c:var(--pele-accent,#5b7bd5);color:var(--_fg);--_r:var(--pele-radius,4px);--_fm:var(--pele-font-mono,monospace);font:16px sans-serif;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;font-family:var(--pele-font,Jost, Futura, sans-serif)" xmlns="http://www.w3.org/2000/svg" class="pele pele-flowchart" role="graphics-document document" width="551.72" aria-roledescription="flowchart" viewBox="-4 -35.83 551.72 244.01" fill="var(--_fg)">
@@ -262,10 +265,10 @@ DiagramError: syntax at 2:9</code></pre>
   <code>source</code>, <code>layer</code> and <code>svg</code>. marimo runs any anywidget through <code>mo.ui.anywidget</code>, and a cell that reads
   <code>editor.value</code> runs again on every edit. Here Playwright dragged Ship down, clicked the dotted arrow, picked <em>bezier</em>
   and switched the theme. The second cell showed the layer and the SVG exported by Nim from it, as you went.</p>
-  <pre><code>editor = mo.ui.anywidget(mari.Diagram(src).edit())
-# next cell, reruns on each edit:
-layer = editor.value["layer"]
-mari.Diagram(src, layer).save("from_marimo.svg")</code></pre>
+  <pre><code class="language-python">editor = mo.ui.anywidget(mari.Diagram(src).edit())
+<span class="hljs-comment"># next cell, reruns on each edit:</span>
+layer = editor.value[<span class="hljs-string">"</span><span class="hljs-string">layer</span><span class="hljs-string">"</span>]
+mari.Diagram(src, layer).save(<span class="hljs-string">"</span><span class="hljs-string">from_marimo.svg</span><span class="hljs-string">"</span>)</code></pre>
   <figure><img src="img/marimo.png" alt="marimo: the editor with a moved Ship node, the layer JSON, and the SVG exported by Nim" loading="lazy">
   <figcaption>Top: the editor (browser, Pele). Middle: the layer in Python. Bottom: the export (Nim, Pele in Node). The fonts differ because
   Jost is not installed in the sandbox.</figcaption></figure>
@@ -277,10 +280,10 @@ mari.Diagram(src, layer).save("from_marimo.svg")</code></pre>
   <h2>The editor in JupyterLab</h2>
   <p>This is the same widget, unchanged. In a notebook it shows on its own (<code>w = d.edit(); w</code>), and <code>d.layer</code> follows it. Here Playwright dragged
   nblog to the right, picked <em>elbow</em> arrows, and ran the next cell:</p>
-  <pre><code>{'theme': 'pele',
- 'arrows': 'elbow',
- 'nodes': {'nblog': {'dx': 196, 'dy': -20}},
- 'edges': {}}</code></pre>
+  <pre><code data-lang="python">{<span class="hljs-string">'</span><span class="hljs-string">theme</span><span class="hljs-string">'</span>: <span class="hljs-string">'</span><span class="hljs-string">pele</span><span class="hljs-string">'</span>,
+ <span class="hljs-string">'</span><span class="hljs-string">arrows</span><span class="hljs-string">'</span>: <span class="hljs-string">'</span><span class="hljs-string">elbow</span><span class="hljs-string">'</span>,
+ <span class="hljs-string">'</span><span class="hljs-string">nodes</span><span class="hljs-string">'</span>: {<span class="hljs-string">'</span><span class="hljs-string">nblog</span><span class="hljs-string">'</span>: {<span class="hljs-string">'</span><span class="hljs-string">dx</span><span class="hljs-string">'</span>: <span class="hljs-number">196</span>, <span class="hljs-string">'</span><span class="hljs-string">dy</span><span class="hljs-string">'</span>: -<span class="hljs-number">20</span>}},
+ <span class="hljs-string">'</span><span class="hljs-string">edges</span><span class="hljs-string">'</span>: {}}</code></pre>
   <figure><img src="img/jupyterlab.png" alt="JupyterLab: the editor with nblog moved and elbow arrows, and d.layer printed below" loading="lazy">
   <figcaption>nblog is selected (red outline), the arrows are elbows, and the layer is printed below.</figcaption></figure>
 </section>
@@ -291,7 +294,7 @@ mari.Diagram(src, layer).save("from_marimo.svg")</code></pre>
   <h2>The editor in a browser tab</h2>
   <p>To work without a notebook, from a script or the REPL, <code>d.edit_in_browser()</code> serves the same module on <code>127.0.0.1</code> with a
   stand-in for the anywidget model, opens a tab, and blocks until you press Done:</p>
-  <pre><code>diagrammari editor: http://127.0.0.1:8765/
+  <pre><code class="language-text">diagrammari editor: http://127.0.0.1:8765/
 layer back in Python: {'theme': 'pele', 'arrows': 'pele', 'nodes': {'b': {'dx': 68, 'dy': 124}}, 'edges': {}}</code></pre>
   <p class="note">This uses only <code>http.server</code> and <code>webbrowser</code> from the standard library, so it adds no dependency.</p>
 </section>
@@ -316,22 +319,22 @@ layer back in Python: {'theme': 'pele', 'arrows': 'pele', 'nodes': {'b': {'dx': 
   a 61 MB download (204 MB installed) when Node isn't already there.</p>
   <p><a href="https://github.com/quickjs-ng/quickjs">QuickJS</a> is a small JavaScript engine written in C (quickjs-ng 0.18, MIT). It runs Pele unchanged. I first checked that with the
   <code>quickjs</code> package from PyPI:</p>
-  <pre><code>$ python qjs_vs_node.py
+  <pre><code data-lang="console"><span class="hljs-meta">$ </span>python qjs_vs_node.py
 same SVG as Node: [True, True, True, True]
-QuickJS: load Pele 114 ms, then 0.93 ms a diagram</code></pre>
+</code></pre>
   <p>Then, with Pietro's go, I compiled it into the Nim library. Four C files are built by Nim's <code>{.compile.}</code> pragma, with no CMake, and a
   40-line C shim gives Nim four functions: make a context, evaluate Pele, call a function with a string, and free. The sources are vendored and pinned
   to a commit. The test below draws the same four diagrams from Nim and compares them with Node's:</p>
-  <pre><code>{.compile(qjsDir / "quickjs.c", qjsFlags).}
-{.compile(qjsDir / "libregexp.c", qjsFlags).}
-{.compile(qjsDir / "libunicode.c", qjsFlags).}
-{.compile(qjsDir / "dtoa.c", qjsFlags).}
-{.compile(here / "mari_qjs.c", qjsFlags).}</code></pre>
-  <pre><code>$ nim c -d:release qtest.nim &amp;&amp; ./qtest cmp_src.json out.json
+  <pre><code data-lang="nim"><span class="hljs-string">{.</span><span class="hljs-string">compile</span><span class="hljs-string">(</span><span class="hljs-string">qjsDir</span> <span class="hljs-string">/ "</span><span class="hljs-string">quickjs</span><span class="hljs-string">.</span><span class="hljs-string">c</span><span class="hljs-string">", </span><span class="hljs-string">qjsFlags</span><span class="hljs-string">).}
+{.</span><span class="hljs-string">compile</span><span class="hljs-string">(</span><span class="hljs-string">qjsDir</span> <span class="hljs-string">/ "</span><span class="hljs-string">libregexp</span><span class="hljs-string">.</span><span class="hljs-string">c</span><span class="hljs-string">", </span><span class="hljs-string">qjsFlags</span><span class="hljs-string">).}
+{.</span><span class="hljs-string">compile</span><span class="hljs-string">(</span><span class="hljs-string">qjsDir</span> <span class="hljs-string">/ "</span><span class="hljs-string">libunicode</span><span class="hljs-string">.</span><span class="hljs-string">c</span><span class="hljs-string">", </span><span class="hljs-string">qjsFlags</span><span class="hljs-string">).}
+{.</span><span class="hljs-string">compile</span><span class="hljs-string">(</span><span class="hljs-string">qjsDir</span> <span class="hljs-string">/ "</span><span class="hljs-string">dtoa</span><span class="hljs-string">.</span><span class="hljs-string">c</span><span class="hljs-string">", </span><span class="hljs-string">qjsFlags</span><span class="hljs-string">).}
+{.</span><span class="hljs-string">compile</span><span class="hljs-string">(</span><span class="hljs-string">here</span> <span class="hljs-string">/ "</span><span class="hljs-string">mari_qjs</span><span class="hljs-string">.</span><span class="hljs-string">c</span><span class="hljs-string">", </span><span class="hljs-string">qjsFlags</span><span class="hljs-string">).}</span></code></pre>
+  <pre><code data-lang="console"><span class="hljs-meta">$ </span>nim c -d:release qtest.nim &amp;&amp; ./qtest cmp_src.json out.json
 load Pele in QuickJS: 92 ms
 per diagram: 709 µs
-$ python3 compare.py   # against Node, same sources, same options
-same SVG as Node: [True, True, True, True]</code></pre>
+<span class="hljs-meta">$ </span>python3 compare.py   <span class="hljs-comment"># against Node, same sources, same options
+</span></code></pre>
   <p class="note">The four sources were a flowchart, a sequence diagram, a pie and a class diagram. The test binary is 2.1 MB and needs only libc and libm.
   The same engine can draw nimib pages at build time too, which is a BACKLOG item for the Nim library.</p>
 </section>

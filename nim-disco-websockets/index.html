@@ -33,6 +33,9 @@ figcaption{color:var(--mute);font-size:13.5px;margin-top:6px}
 .d-hot{stroke:var(--accent)} .d-hotfill{fill:var(--accent)} .d-tint{fill:var(--accent-tint);stroke:var(--accent)}
 footer{margin-top:40px;font-size:12.5px;color:var(--mute)}
 </style>
+<!-- claude-artifacts:codeblocks -->
+<style>pre{overflow-x:auto}pre>code{overflow-x:auto}.hljs-comment,.hljs-quote{color:#7a7f87;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-meta .hljs-keyword{color:#a626a4}.hljs-string,.hljs-regexp,.hljs-addition{color:#50a14f}.hljs-number,.hljs-literal,.hljs-symbol{color:#b76b01}.hljs-built_in,.hljs-type,.hljs-class .hljs-title,.hljs-title.class_{color:#c18401}.hljs-title,.hljs-section{color:#4078f2}.hljs-meta,.hljs-attr,.hljs-attribute,.hljs-variable{color:#986801}.hljs-tag,.hljs-name{color:#e45649}.hljs-deletion{color:#e45649}</style>
+<!-- /claude-artifacts:codeblocks -->
 </head>
 <body>
 <main>
@@ -61,10 +64,10 @@ footer{margin-top:40px;font-size:12.5px;color:var(--mute)}
 <p>A WebSocket is a connection the browser keeps open, so the server can send a message whenever it wants. Plain HTTP can't do that: the server only ever answers a request.</p>
 <p><strong>Plain HTTP</strong> (how the first version worked). The browser asks, the server answers, and the exchange is over. <code>GET /</code> returns the page with the count baked in. The server has no way to tell your phone that the laptop just clicked; the phone only finds out when it asks again, which is your refresh.</p>
 <p><strong>WebSocket.</strong> The browser opens one long-lived, two-way channel. It starts as an ordinary HTTP request with a special header:</p>
-<pre><code>GET /ws HTTP/1.1
-Upgrade: websocket
-Connection: Upgrade
-Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==</code></pre>
+<pre><code data-lang="http"><span class="hljs-title function_">GET</span> /ws <span class="hljs-keyword">HTTP</span>/<span class="hljs-number">1.1</span>
+<span class="hljs-attr">Upgrade</span>: <span class="hljs-literal">websocket</span>
+<span class="hljs-attr">Connection</span>: <span class="hljs-literal">Upgrade</span>
+<span class="hljs-attr">Sec-WebSocket-Key</span>: <span class="hljs-literal">dGhlIHNhbXBsZSBub25jZQ==</span></code></pre>
 <p>The server answers <code>101 Switching Protocols</code>. From then on the same TCP connection stops speaking HTTP and carries small <em>frames</em> in both directions: text, binary, ping, pong or close. Either side can send at any moment. That is exactly what live sync needs: when anyone clicks, the server pushes the new number down every open connection.</p>
 <p><strong>The alternatives not picked:</strong></p>
 <ul>
@@ -124,57 +127,57 @@ Sec-WebSocket-Key: dGhlIHNhbXBsZSBub25jZQ==</code></pre>
 <p>The server remembers who is connected and sends the current state to all of them whenever something changes. Here are the parts that matter, in order.</p>
 
 <h3>1. A set of connected clients</h3>
-<pre><code>import std/[os, strutils, locks, sets]
+<pre><code data-lang="nim"><span class="hljs-keyword">import</span> std/[os, strutils, locks, sets]
 ...
-var
+<span class="hljs-keyword">var</span>
   db: DbConn
   dbLock: Lock
-  clients: HashSet[WebSocket] # guarded by dbLock too, so pushes stay in order</code></pre>
+  clients: HashSet[WebSocket] <span class="hljs-comment"># guarded by dbLock too, so pushes stay in order</span></code></pre>
 <p>Each open browser tab is one <code>WebSocket</code> value in this set. A connection is added when it opens and removed when it closes.</p>
 <p><strong>Why the lock matters.</strong> Mummy runs handlers on several worker threads at once, and changing a <code>HashSet</code> from two threads at the same time corrupts it. A <code>Lock</code> lets only one thread inside at a time. One lock, <code>dbLock</code>, guards both the database and the set, for the reason in step 2. The <code>{.gcsafe.}:</code> blocks tell the Nim compiler “this touches a global from a thread; the lock makes it safe”.</p>
 
 <h3>2. Pushing the state</h3>
-<pre><code>proc pushState(count: int) =
-  ## Sends the count and the number of connected browsers to all of them.
-  ## Callers must hold dbLock.
-  {.gcsafe.}:
-    let msg = """{"count":""" &amp; $count &amp; ""","clients":""" &amp; $clients.len &amp; "}"
-    for client in clients:
+<pre><code data-lang="nim"><span class="hljs-keyword">proc</span> <span class="hljs-title function_">pushState</span>(count: <span class="hljs-built_in">int</span>) =
+  <span class="hljs-string">## Sends the count and the number of connected browsers to all of them.</span>
+  <span class="hljs-string">## Callers must hold dbLock.</span>
+  <span class="hljs-string">{.</span><span class="hljs-string">gcsafe</span><span class="hljs-string">.}</span>:
+    <span class="hljs-keyword">let</span> msg = <span class="hljs-string">"""</span><span class="hljs-string">{</span><span class="hljs-string">"</span><span class="hljs-string">count</span><span class="hljs-string">"</span><span class="hljs-string">:</span><span class="hljs-string">"""</span> &amp; $count &amp; <span class="hljs-string">"""</span><span class="hljs-string">,</span><span class="hljs-string">"</span><span class="hljs-string">clients</span><span class="hljs-string">"</span><span class="hljs-string">:</span><span class="hljs-string">"""</span> &amp; $clients.len &amp; <span class="hljs-string">"</span><span class="hljs-string">}</span><span class="hljs-string">"</span>
+    <span class="hljs-keyword">for</span> client <span class="hljs-keyword">in</span> clients:
       client.send(msg)
 
-proc increment(): int =
+<span class="hljs-keyword">proc</span> <span class="hljs-title function_">increment</span>(): <span class="hljs-built_in">int</span> =
   withLock dbLock:
-    {.gcsafe.}:
-      result = db.getValue(sql"UPDATE counter SET value = value + 1 WHERE id = 1 RETURNING value").parseInt
+    <span class="hljs-string">{.</span><span class="hljs-string">gcsafe</span><span class="hljs-string">.}</span>:
+      result = db.getValue(<span class="hljs-string">sql"</span><span class="hljs-string">UPDATE counter SET value = value + 1 WHERE id = 1 RETURNING value</span><span class="hljs-string">"</span>).parseInt
       pushState(result)</code></pre>
 <p>Each message is a small JSON object, for example <code>{"count":7,"clients":2}</code>. After the database update, it goes to every client as a text frame. The button, the plain form POST and <code>/api/increment</code> all call <code>increment()</code>, so every path triggers the push.</p>
 <p>Updating and sending under the <em>same</em> lock keeps the order right. Without it, two clicks could commit 6 then 7 but send 7 then 6, and a phone would end up showing 6. <code>client.send</code> only queues the frame, so holding the lock while sending is cheap.</p>
 
 <h3>3. The /ws endpoint</h3>
-<pre><code>proc wsUpgradeHandler(request: Request) =
-  discard request.upgradeToWebSocket()
+<pre><code data-lang="nim"><span class="hljs-keyword">proc</span> <span class="hljs-title function_">wsUpgradeHandler</span>(request: Request) =
+  <span class="hljs-keyword">discard</span> request.upgradeToWebSocket()
 ...
-router.get("/ws", wsUpgradeHandler)</code></pre>
+router.get(<span class="hljs-string">"</span><span class="hljs-string">/ws</span><span class="hljs-string">"</span>, wsUpgradeHandler)</code></pre>
 <p>This is the handshake from the primer. <code>upgradeToWebSocket()</code> checks the <code>Upgrade</code> headers and replies <code>101</code>. From then on Mummy calls the WebSocket handler for that connection instead of HTTP handlers.</p>
 
 <h3>4. The WebSocket handler</h3>
-<pre><code>proc websocketHandler(websocket: WebSocket, event: WebSocketEvent, message: Message) =
-  case event
-  of OpenEvent:
+<pre><code data-lang="nim"><span class="hljs-keyword">proc</span> <span class="hljs-title function_">websocketHandler</span>(websocket: WebSocket, event: WebSocketEvent, message: Message) =
+  <span class="hljs-keyword">case</span> event
+  <span class="hljs-keyword">of</span> OpenEvent:
     withLock dbLock:
-      {.gcsafe.}:
+      <span class="hljs-string">{.</span><span class="hljs-string">gcsafe</span><span class="hljs-string">.}</span>:
         clients.incl(websocket)
-        pushState(db.getValue(sql"SELECT value FROM counter WHERE id = 1").parseInt)
-  of MessageEvent:
-    if message.kind == TextMessage and message.data == "inc":
-      discard increment()
-  of ErrorEvent:
-    discard
-  of CloseEvent:
+        pushState(db.getValue(<span class="hljs-string">sql"</span><span class="hljs-string">SELECT value FROM counter WHERE id = 1</span><span class="hljs-string">"</span>).parseInt)
+  <span class="hljs-keyword">of</span> MessageEvent:
+    <span class="hljs-keyword">if</span> message.kind == TextMessage <span class="hljs-keyword">and</span> message.data == <span class="hljs-string">"</span><span class="hljs-string">inc</span><span class="hljs-string">"</span>:
+      <span class="hljs-keyword">discard</span> increment()
+  <span class="hljs-keyword">of</span> ErrorEvent:
+    <span class="hljs-keyword">discard</span>
+  <span class="hljs-keyword">of</span> CloseEvent:
     withLock dbLock:
-      {.gcsafe.}:
+      <span class="hljs-string">{.</span><span class="hljs-string">gcsafe</span><span class="hljs-string">.}</span>:
         clients.excl(websocket)
-        pushState(db.getValue(sql"SELECT value FROM counter WHERE id = 1").parseInt)</code></pre>
+        pushState(db.getValue(<span class="hljs-string">sql"</span><span class="hljs-string">SELECT value FROM counter WHERE id = 1</span><span class="hljs-string">"</span>).parseInt)</code></pre>
 <p>Mummy calls one proc for everything that happens on any socket; <code>event</code> says what happened.</p>
 <ul>
 <li><code>OpenEvent</code>: a tab connected. Add it and push the state to everyone: the new tab catches up on the count, and the others see one more client. Both steps happen under the lock, so no increment can slip in between and be missed.</li>
@@ -184,44 +187,44 @@ router.get("/ws", wsUpgradeHandler)</code></pre>
 </ul>
 
 <h3>5. The heartbeat</h3>
-<pre><code>proc heartbeat() {.thread.} =
-  while true:
-    sleep(25_000)
+<pre><code data-lang="nim"><span class="hljs-keyword">proc</span> <span class="hljs-title function_">heartbeat</span>() <span class="hljs-string">{.</span><span class="hljs-string">thread</span><span class="hljs-string">.}</span> =
+  <span class="hljs-keyword">while</span> <span class="hljs-keyword">true</span>:
+    sleep(<span class="hljs-number">25_000</span>)
     withLock dbLock:
-      {.gcsafe.}:
-        for client in clients:
-          client.send("", Ping)</code></pre>
+      <span class="hljs-string">{.</span><span class="hljs-string">gcsafe</span><span class="hljs-string">.}</span>:
+        <span class="hljs-keyword">for</span> client <span class="hljs-keyword">in</span> clients:
+          client.send(<span class="hljs-string">"</span><span class="hljs-string">"</span>, Ping)</code></pre>
 <p>A background thread sends a WebSocket <em>ping</em> to every client every 25 seconds. Browsers answer with a pong automatically. A silent connection can look dead to proxies, routers and mobile networks, and some cut it after a minute or so; the ping keeps a little traffic flowing.</p>
 
 <h3>6. Wiring it up</h3>
-<pre><code>const clientJs = staticRead("client.js")
+<pre><code data-lang="nim"><span class="hljs-keyword">const</span> clientJs = staticRead(<span class="hljs-string">"</span><span class="hljs-string">client.js</span><span class="hljs-string">"</span>)
 ...
-var heartbeatThread: Thread[void]
+<span class="hljs-keyword">var</span> heartbeatThread: Thread[void]
 createThread(heartbeatThread, heartbeat)
 
-let server = newServer(router, websocketHandler)</code></pre>
+<span class="hljs-keyword">let</span> server = newServer(router, websocketHandler)</code></pre>
 <p>The heartbeat thread starts, and <code>newServer</code> gets the WebSocket handler as its second argument. The browser script lives in its own <code>client.js</code> for editing and syntax highlighting; <code>staticRead</code> embeds it into the binary at compile time, so the app is still a single file to deploy.</p>
 
 <h2>Browser side: client.js</h2>
 <p>About 25 lines keep a socket open, show pushed state, and send clicks up the socket.</p>
 
 <h3>Connecting</h3>
-<pre><code>const n = document.getElementById("n"), s = document.getElementById("s");
-let ws, timer, delay = 500;
-function connect() {
-  ws = new WebSocket((location.protocol === "https:" ? "wss://" : "ws://") + location.host + "/ws");</code></pre>
+<pre><code data-lang="javascript"><span class="hljs-keyword">const</span> n = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"n"</span>), s = <span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"s"</span>);
+<span class="hljs-keyword">let</span> ws, timer, delay = <span class="hljs-number">500</span>;
+<span class="hljs-keyword">function</span> connect() {
+  ws = <span class="hljs-keyword">new</span> WebSocket((location.protocol === <span class="hljs-string">"https:"</span> ? <span class="hljs-string">"wss://"</span> : <span class="hljs-string">"ws://"</span>) + location.host + <span class="hljs-string">"/ws"</span>);</code></pre>
 <p><code>new WebSocket(url)</code> starts the handshake. <code>ws://</code> and <code>wss://</code> are the WebSocket versions of <code>http://</code> and <code>https://</code>. Browsers refuse an unencrypted socket from an HTTPS page, so the script picks <code>wss://</code> on the live site and <code>ws://</code> on localhost.</p>
 
 <h3>The three callbacks</h3>
-<pre><code>  ws.onopen = () =&gt; { delay = 500; s.textContent = "live"; s.className = "s on"; };
+<pre><code data-lang="javascript">  ws.onopen = () =&gt; { delay = <span class="hljs-number">500</span>; s.textContent = <span class="hljs-string">"live"</span>; s.className = <span class="hljs-string">"s on"</span>; };
   ws.onmessage = (e) =&gt; {
-    const m = JSON.parse(e.data); // {"count": 7, "clients": 2}
+    <span class="hljs-keyword">const</span> m = <span class="hljs-built_in">JSON</span>.parse(e.data); <span class="hljs-comment">// {"count": 7, "clients": 2}</span>
     n.textContent = m.count;
-    s.textContent = "live (" + m.clients + ")";
+    s.textContent = <span class="hljs-string">"live ("</span> + m.clients + <span class="hljs-string">")"</span>;
   };
   ws.onclose = () =&gt; {
-    s.textContent = "reconnecting"; s.className = "s";
-    timer = setTimeout(connect, delay); delay = Math.min(delay * 2, 10000);
+    s.textContent = <span class="hljs-string">"reconnecting"</span>; s.className = <span class="hljs-string">"s"</span>;
+    timer = setTimeout(connect, delay); delay = <span class="hljs-built_in">Math</span>.min(delay * <span class="hljs-number">2</span>, <span class="hljs-number">10000</span>);
   };
 }</code></pre>
 <ul>
@@ -232,14 +235,14 @@ function connect() {
 <p>There is no <code>onerror</code> handler: a failed connection always fires <code>onclose</code> too, and the retry lives there.</p>
 
 <h3>Sending the click, with a fallback</h3>
-<pre><code>document.getElementById("f").onsubmit = (e) =&gt; {
-  if (ws &amp;&amp; ws.readyState === WebSocket.OPEN) { e.preventDefault(); ws.send("inc"); }
+<pre><code data-lang="javascript"><span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"f"</span>).onsubmit = (e) =&gt; {
+  <span class="hljs-keyword">if</span> (ws &amp;&amp; ws.readyState === WebSocket.OPEN) { e.preventDefault(); ws.send(<span class="hljs-string">"inc"</span>); }
 };</code></pre>
 <p>The button sits inside a plain <code>&lt;form method="post" action="/increment"&gt;</code>. When the socket is open, <code>e.preventDefault()</code> cancels the form submission (which would reload the page) and <code>ws.send("inc")</code> sends the click instead. The new count comes back through <code>onmessage</code>, the same way it reaches every other tab. Without a socket or without JavaScript, the form submits as before, so the button always works.</p>
 
 <h3>Waking up on phones</h3>
-<pre><code>document.addEventListener("visibilitychange", () =&gt; {
-  if (!document.hidden &amp;&amp; ws.readyState === WebSocket.CLOSED) { clearTimeout(timer); delay = 500; connect(); }
+<pre><code data-lang="javascript"><span class="hljs-built_in">document</span>.addEventListener(<span class="hljs-string">"visibilitychange"</span>, () =&gt; {
+  <span class="hljs-keyword">if</span> (!<span class="hljs-built_in">document</span>.hidden &amp;&amp; ws.readyState === WebSocket.CLOSED) { clearTimeout(timer); delay = <span class="hljs-number">500</span>; connect(); }
 });
 connect();</code></pre>
 <p>Mobile browsers often kill sockets of background tabs, and the backoff may have grown to 10 s. When the tab becomes visible again, the script cancels the pending retry and reconnects right away; the server pushes the state on open, so the number is fresh as soon as you look. The last line opens the first connection.</p>

@@ -155,7 +155,7 @@ proc mari_free(p: cstring) {.exportc, dynlib, cdecl.}</code></pre>
   <code>source</code>, <code>layer</code> and <code>svg</code>. marimo runs any anywidget through <code>mo.ui.anywidget</code>, and a cell that reads
   <code>editor.value</code> runs again on every edit. Here Playwright dragged Ship down, clicked the dotted arrow, picked <em>bezier</em>
   and switched the theme. The second cell showed the layer and the SVG exported by Nim from it, as you went.</p>
-  <pre><code>editor = mo.ui.anywidget(mari.Diagram(src).edit())
+  <pre><code class="language-python">editor = mo.ui.anywidget(mari.Diagram(src).edit())
 # next cell, reruns on each edit:
 layer = editor.value["layer"]
 mari.Diagram(src, layer).save("from_marimo.svg")</code></pre>
@@ -184,7 +184,7 @@ mari.Diagram(src, layer).save("from_marimo.svg")</code></pre>
   <h2>The editor in a browser tab</h2>
   <p>To work without a notebook, from a script or the REPL, <code>d.edit_in_browser()</code> serves the same module on <code>127.0.0.1</code> with a
   stand-in for the anywidget model, opens a tab, and blocks until you press Done:</p>
-  <pre><code>diagrammari editor: http://127.0.0.1:8765/
+  <pre><code class="language-text">diagrammari editor: http://127.0.0.1:8765/
 layer back in Python: {'theme': 'pele', 'arrows': 'pele', 'nodes': {'b': {'dx': 68, 'dy': 124}}, 'edges': {}}</code></pre>
   <p class="note">This uses only <code>http.server</code> and <code>webbrowser</code> from the standard library, so it adds no dependency.</p>
 </section>

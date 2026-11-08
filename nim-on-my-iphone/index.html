@@ -140,41 +140,53 @@ footer hr { display: none; }
 </style>
   
   <style>
-.nb-box {
+/* nimib's own rules use :where(), so they have zero specificity:
+   any rule in a theme wins over them, wherever the theme puts it. */
+:where(html) {
+  -webkit-text-size-adjust: 100%;
+  text-size-adjust: 100%;
+}
+:where(.nb-box) {
   display: flex;
   align-items: center;
   justify-content: space-between;
 }
-.nb-small {
+:where(.nb-small) {
   font-size: 0.8rem;
 }
-button.nb-small {
+:where(button.nb-small) {
   float: right;
   padding: 2px;
   padding-right: 5px;
   padding-left: 5px;
 }
-section#source {
+:where(section#source) {
   display:none
 }
-pre > code {
+/* code scrolls sideways inside its own box instead of spilling out of it */
+:where(pre), :where(pre > code), :where(.nb-output) {
+  overflow-x: auto;
+}
+:where(pre > code) {
   font-size: 1.2em;
 }
-.nb-output {
+:where(.nb-output) {
   line-height: 1.15;
 }
-figure {
+:where(figure) {
   margin: 2rem 0;
 }
-figcaption {
+:where(figcaption) {
   text-align: center;
 }
-  
 </style>
   
     
 <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
 <script>document.querySelectorAll('pre code:not(.nohighlight)').forEach(function(el){ if(!/language-|hljs/.test(el.className)) el.classList.add('nohighlight'); }); hljs.highlightAll();</script>
+<!-- claude-artifacts:codeblocks -->
+<style>pre{overflow-x:auto}pre>code{overflow-x:auto}</style>
+<!-- /claude-artifacts:codeblocks -->
 </head>
 <body>
 <header class="menubar" role="banner">
@@ -312,6 +324,7 @@ The Mac is only needed for the next step, turning that C into ARM machine code a
   generated digitsutils.nim.c
   generated system.nim.c
   generated dollars.nim.c
+  generated exceptions.nim.c
   generated core.nim.c
 exports NimMain: true
 exports fib:     true
@@ -470,10 +483,10 @@ Then add these four things. The Nim file is the one proven above.</p>
 <span class="hljs-keyword">proc</span> nimVersion*(): <span class="hljs-built_in">cstring</span> {.exportc, cdecl.} = <span class="hljs-type">NimVersion</span></code></pre>
 <p><strong>2. <code>NimApp/nimcore.h</code></strong>: the C signatures Swift will import. Set <em>Build Settings → Objective-C Bridging Header</em> to this path.
 <code>cint</code> becomes Swift <code>Int32</code>, <code>cstring</code> becomes <code>UnsafePointer&lt;CChar&gt;</code>.</p>
-<pre><code class="language-c">#pragma once
-void NimMain(void);
-int fib(int n);
-const char* nimVersion(void);</code></pre>
+<pre><code class="language-c"><span class="hljs-meta">#</span><span class="hljs-meta">pragma once</span>
+<span class="hljs-type">void</span> <span class="hljs-title function_">NimMain</span>(<span class="hljs-type">void</span>);
+<span class="hljs-type">int</span> <span class="hljs-title function_">fib</span>(<span class="hljs-type">int</span> n);
+<span class="hljs-keyword">const</span> <span class="hljs-type">char</span>* <span class="hljs-title function_">nimVersion</span>(<span class="hljs-type">void</span>);</code></pre>
 <p><strong>3. A Run Script build phase</strong> (<em>Target → Build Phases → + → New Run Script Phase</em>, dragged above <em>Compile Sources</em>).
 It uses the variables Xcode already sets, so the same script builds for the Simulator and the phone.</p>
 <pre><code class="nohighlight nim hljs"><span class="hljs-comment"># This block runs at page-build time: it renders the exact script for the</span>
@@ -521,21 +534,21 @@ nim c --os:ios \
 <p>Then in <em>Build Settings</em>: <strong>Library Search Paths</strong> <code>$(PROJECT_DIR)/build/$(PLATFORM_NAME)</code>, <strong>Other Linker Flags</strong> <code>-lnimcore</code>,
 and <strong>User Script Sandboxing = No</strong> (Xcode 15+ sandboxes build scripts, and this one writes outside its declared outputs).</p>
 <p><strong>4. Swift that calls Nim.</strong> Replace the template's two files with this:</p>
-<pre><code class="language-swift">import SwiftUI
+<pre><code class="language-swift"><span class="hljs-keyword">import</span> <span class="hljs-title class_">SwiftUI</span>
 
 @main
-struct NimApp: App {
-    init() { NimMain() }            // initialise Nim once, before any Nim call
-    var body: some Scene { WindowGroup { ContentView() } }
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">NimApp</span>: App {
+    <span class="hljs-keyword">init</span>() { NimMain() }            <span class="hljs-comment">//</span><span class="hljs-comment"> initialise Nim once, before any Nim call</span>
+    <span class="hljs-keyword">var</span> <span class="hljs-variable">body</span>: some Scene { WindowGroup { ContentView() } }
 }
 
-struct ContentView: View {
-    @State private var n = 20
-    var body: some View {
-        VStack(spacing: 16) {
-            Text("Hello from Nim \(String(cString: nimVersion()))")
-            Stepper("n = \(n)", value: $n, in: 0...35)
-            Text("fib(n) = \(fib(Int32(n)))").font(.largeTitle.monospacedDigit())
+<span class="hljs-keyword">struct</span> <span class="hljs-title class_">ContentView</span>: View {
+    @State <span class="hljs-keyword">private</span> <span class="hljs-keyword">var</span> <span class="hljs-variable">n</span> = <span class="hljs-number">20</span>
+    <span class="hljs-keyword">var</span> <span class="hljs-variable">body</span>: some View {
+        VStack(spacing: <span class="hljs-number">16</span>) {
+            Text(<span class="hljs-string">"</span><span class="hljs-string">Hello from Nim </span><span class="hljs-string">\(</span><span class="hljs-built_in">String</span><span class="hljs-string">(</span>cString: nimVersion<span class="hljs-string">(</span><span class="hljs-string">)</span><span class="hljs-string">)</span><span class="hljs-string">)</span><span class="hljs-string">"</span>)
+            Stepper(<span class="hljs-string">"</span><span class="hljs-string">n = </span><span class="hljs-string">\(</span>n<span class="hljs-string">)</span><span class="hljs-string">"</span>, value: $n, <span class="hljs-keyword">in</span>: <span class="hljs-number">0.</span>..<span class="hljs-number">35</span>)
+            Text(<span class="hljs-string">"</span><span class="hljs-string">fib(n) = </span><span class="hljs-string">\(</span>fib<span class="hljs-string">(</span><span class="hljs-built_in">Int32</span><span class="hljs-string">(</span>n<span class="hljs-string">)</span><span class="hljs-string">)</span><span class="hljs-string">)</span><span class="hljs-string">"</span>).font(.largeTitle.monospacedDigit())
         }
         .padding()
     }
