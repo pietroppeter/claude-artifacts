@@ -1,0 +1,13 @@
+name	kind	bytes
+openspec-apply-change	skill	11397
+openspec-archive-change	skill	16583
+openspec-explore	skill	23471
+openspec-propose	skill	16689
+openspec-sync-specs	skill	15769
+openspec-update-change	skill	11534
+/opsx:apply	command	11173
+/opsx:archive	command	17330
+/opsx:explore	command	20459
+/opsx:propose	command	16395
+/opsx:sync	command	15579
+/opsx:update	command	11186

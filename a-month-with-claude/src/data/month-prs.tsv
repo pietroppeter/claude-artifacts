@@ -1,0 +1,290 @@
+created	repo	kind	state	number	title
+2026-09-20	nim-lang/bigints	PR	closed	151	Fix quotient digit estimate in division (fixes #123)
+2026-10-04	pietroppeter/blog	PR	closed	10	Support writing posts with nimib (+ two test posts, one interactive)
+2026-10-04	pietroppeter/blog	PR	closed	11	Drafts: hide from index, list in drafts.html; nimib posts are drafts
+2026-10-04	pietroppeter/blog	PR	closed	12	Single nimib post with Nim and interactive parts, Show Source above code
+2026-10-04	pietroppeter/blog	PR	closed	13	Build the site in CI with Pages PR previews, stop committing docs/ fixes #8
+2026-10-04	pietroppeter/blog	PR	closed	9	Add table of contents to posts
+2026-10-04	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	1	Add talk proposal context
+2026-10-04	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	2	Add Compute! Paris 2026 conference context
+2026-10-04	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	3	Add context on nimib + nimiSlides talk setup
+2026-10-04	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	4	Add script to install Nim and atlas in cloud sessions
+2026-10-04	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	5	Scaffold the slides with nimib 0.4 and nimiSlides 0.4
+2026-10-04	pietroppeter/uv-add-nimlang	PR	closed	1	Scaffold nimlang: Nim toolchain for Python projects via uv
+2026-10-05	pietroppeter/blog	PR	closed	16	Add RSS feed at feed.xml, drafts excluded
+2026-10-05	pietroppeter/blog	PR	closed	17	Center the dot between navbar links
+2026-10-05	pietroppeter/blog	PR	closed	18	Use custom domain blog.pietroppeter.xyz in feed and README
+2026-10-05	pietroppeter/blog	issue	open	14	Enable GitHub PR preview when available
+2026-10-05	pietroppeter/blog	issue	open	15	Use custom domain pietroppeter.xyz/blog
+2026-10-06	nim-lang/packages	PR	closed	3560	Add package nimpy_numpy
+2026-10-06	pietroppeter/naffprop	PR	closed	1	Rewrite naffprop: affinity propagation in Nim with nimlang, R's features behind 
+2026-10-06	pietroppeter/nimpy-numpy	PR	closed	1	NumpyArray[T]: Nim procs that take and return numpy arrays
+2026-10-06	pietroppeter/nimpy-numpy	PR	closed	2	README walkthrough, benchmark.py, and a Nim-owned arrays roadmap idea
+2026-10-06	pietroppeter/nimpy-numpy	PR	closed	3	README: benchmark results are machine-specific
+2026-10-06	pietroppeter/nimpy-numpy	PR	closed	4	Contiguous fast path (toOpenArray), a vander_fast example, and install from the 
+2026-10-06	pietroppeter/nimpy-numpy	PR	closed	5	README: add AI disclosure
+2026-10-06	pietroppeter/not1d	PR	closed	1	Minimal Nim port of ot1d: 1D Wasserstein distance, shipped with nimlang
+2026-10-06	pietroppeter/not1d	PR	closed	2	Optional C++ pdqsort (ot1d's) via Nim's C++ backend, chosen at build time
+2026-10-06	pietroppeter/not1d	PR	closed	3	README: add AI disclosure
+2026-10-06	pietroppeter/not1d	PR	closed	4	Add an explainer comparing ot1d's C++ with not1d's Nim
+2026-10-06	pietroppeter/not1d	PR	closed	5	Depend on the nimpy_numpy Nim package instead of its git URL
+2026-10-06	pietroppeter/uv-add-nimlang	PR	closed	10	ROADMAP: nim-args option for the hatch hook
+2026-10-06	pietroppeter/uv-add-nimlang	PR	closed	11	README: Nim version constraints use atlas syntax
+2026-10-06	pietroppeter/uv-add-nimlang	PR	closed	12	README: link nimpy as core dependency, nimpy_numpy and experiments
+2026-10-06	pietroppeter/uv-add-nimlang	PR	closed	13	nimlang 0.0.3: find macOS system frameworks with a pinned target
+2026-10-06	pietroppeter/uv-add-nimlang	PR	closed	2	CI: publish job only downloads built files, like the PyPA guide
+2026-10-06	pietroppeter/uv-add-nimlang	PR	closed	3	README: add a try-it example comparing Nim and Python fib
+2026-10-06	pietroppeter/uv-add-nimlang	PR	closed	4	Manage Nim dependencies with atlas and a nimlang.lock; ship only nim and atlas
+2026-10-06	pietroppeter/uv-add-nimlang	PR	closed	5	Hatch hook: correct macOS wheel tags and strip shipped binaries
+2026-10-06	pietroppeter/uv-add-nimlang	PR	closed	6	Fix building from an sdist: run nimble outside the project directory
+2026-10-06	pietroppeter/uv-add-nimlang	PR	closed	7	Release 0.0.2
+2026-10-06	pietroppeter/uv-add-nimlang	PR	closed	8	Roadmap: detail the nimlang-nim proposal for per-project Nim versions
+2026-10-06	pietroppeter/uv-add-nimlang	PR	closed	9	README: point the library section to the published demo; move hello-nim to tests
+2026-10-06	pietroppeter/uv-add-nimlang-lib-demo	PR	closed	1	Minimal demo: fib in Nim (fast) and Python (slow), shipped as prebuilt wheels
+2026-10-06	pietroppeter/uv-add-nimlang-lib-demo	PR	closed	2	README: add AI disclosure
+2026-10-07	pietroppeter/naffprop	PR	closed	2	Release naffprop on PyPI: wheels for 5 platforms, publish on v* tags; roadmap fo
+2026-10-07	pietroppeter/naffprop	PR	closed	3	naffprop 0.2.0: float32 and in-place options, sparse similarities, leveraged AP
+2026-10-07	pietroppeter/naffprop	PR	closed	4	naffprop 0.3.0: ScaleAP's pruning (scaleap=True), scaling guide, experiments
+2026-10-07	pietroppeter/naffprop	PR	closed	5	Explainer: Fig. 1A animation page, per-iteration hook in ap.nim, docs CI
+2026-10-07	pietroppeter/nimib	PR	closed	257	Work without Nim compiler sources or nimble, bump 0.4.2
+2026-10-07	pietroppeter/nimib	PR	closed	258	Changelog for v0.4.2
+2026-10-07	pietroppeter/nimpy-numpy	PR	closed	6	Release 0.2.0 with the contiguous fast path
+2026-10-07	pietroppeter/nimpy-numpy	PR	closed	7	Docs: call the nimlang project nimlang-pypi
+2026-10-07	pietroppeter/not1d	PR	closed	6	Docs: call the nimlang project nimlang-pypi
+2026-10-07	pietroppeter/uv-add-nimlang	PR	closed	14	Cross-build code using std/random for macOS without a macOS SDK
+2026-10-07	pietroppeter/uv-add-nimlang	PR	closed	15	Docs: mention nimlang-pypi, link ziglang as zig-pypi on Codeberg
+2026-10-07	pietroppeter/uv-add-nimlang	PR	closed	16	Cap ziglang to >=0.15,<0.17
+2026-10-07	pietroppeter/uv-add-nimlang-lib-demo	PR	closed	3	Docs: call the nimlang project nimlang-pypi
+2026-10-08	pietroppeter/naffprop	PR	closed	6	Explainer: new intro, GitHub link, linear color bar, labelled parameters
+2026-10-08	pietroppeter/naffprop	PR	closed	7	Explainer: shorter eyebrow, no maxits, clearer code intro, explain.nim → data.ni
+2026-10-08	pietroppeter/naffprop	PR	open	8	Make naffprop a Nim package too
+2026-10-17	pietroppeter/blog	issue	open	19	Images for public sharing
+2026-10-21	mameli/Takku	issue	closed	4	Screenshot taking
+2026-10-24	pietroppeter/claude-artifacts	PR	closed	1	Add Nim counter WebSockets explainer page
+2026-10-24	pietroppeter/claude-artifacts	PR	closed	2	Add appalette page: color palettes by affinity propagation
+2026-10-24	pietroppeter/disco-nim-mummy	PR	closed	1	Sync the counter live across clients over WebSocket
+2026-10-24	pietroppeter/disco-nim-mummy	PR	closed	2	Link to the source from the page and to the live site from the README
+2026-10-24	pietroppeter/disco-nim-mummy	PR	closed	3	Show how many clients are connected next to "live"
+2026-10-24	pietroppeter/yamly	PR	closed	2	Complete parser and serializer for the yamly dialect
+2026-10-25	pietroppeter/playdate-nim-emilia	PR	open	1	Set up OKF knowledge bundle and OpenSpec
+2026-10-26	pietroppeter/nimib	PR	closed	260	nbImage: add optional width and height parameters
+2026-10-26	pietroppeter/nimib	PR	closed	261	ci: pin ubuntu-24.04 and nimja 0.10.3 to fix CI
+2026-10-26	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	10	Image-left slide layout (OpenSpec change image-left-layout)
+2026-10-26	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	11	README: add the talk abstract as submitted
+2026-10-26	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	12	Animated Thank You slide with p5nim
+2026-10-26	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	13	Thank You slide after the conclusion, built on its own too
+2026-10-26	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	14	Code explainer for the Thank You slide (nimib page)
+2026-10-26	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	15	Thank You slide alternates "Thank You!" and "Questions?"
+2026-10-26	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	16	Easter egg: emilia.nim
+2026-10-26	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	6	Publish slides on GitHub Pages, with local reveal.js and KaTeX
+2026-10-26	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	7	Prepare the talk with OpenSpec: talk schema, specs, and a draft-outline proposal
+2026-10-26	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	8	draft-outline: key messages, skeleton deck, archived
+2026-10-26	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	9	Sections as vertical slide stacks; outline deltas
+2026-10-27	pietroppeter/nanuq	PR	closed	1	First proof of concept: Polars DataFrames in Nim via a Rust C ABI
+2026-10-27	pietroppeter/nanuq	PR	closed	10	Dev log: Shipping the Rust half
+2026-10-27	pietroppeter/nanuq	PR	closed	11	Proposal: ship prebuilt binaries
+2026-10-27	pietroppeter/nanuq	PR	closed	12	Ship prebuilt Rust binaries (ship-prebuilt-binaries)
+2026-10-27	pietroppeter/nanuq	PR	closed	2	CI: build the Polars wrapper once per change of rust/ and reuse it
+2026-10-27	pietroppeter/nanuq	PR	closed	3	CI: skip runs for README / LICENSE / .gitignore-only commits
+2026-10-27	pietroppeter/nanuq	PR	closed	4	Adopt OpenSpec for planning and add BACKLOG.md
+2026-10-27	pietroppeter/nanuq	PR	closed	5	Missing values and bulk column reads; specview; datasets backlog
+2026-10-27	pietroppeter/nanuq	PR	closed	6	Workflow: proposal and implementation in separate PRs
+2026-10-27	pietroppeter/nanuq	PR	closed	7	Propose sample datasets (penguins)
+2026-10-27	pietroppeter/nanuq	PR	closed	8	Add penguins sample dataset
+2026-10-27	pietroppeter/nanuq	PR	closed	9	Backlog: plan for prebuilt binaries
+2026-10-27	pietroppeter/nimib	PR	closed	262	Bump 0.4.3 and changelog
+2026-10-27	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	17	Island 4: custom operators and macros (unchained)
+2026-10-27	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	18	Light code theme (OpenSpec change light-code-theme)
+2026-10-27	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	19	Island 2: success stories (Brent Pedersen, Sebastian Schmidt)
+2026-10-27	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	20	Island 3: data stack with the penguins
+2026-10-27	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	21	Archive the Island 3 OpenSpec change
+2026-10-27	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	22	CI: cache dependencies and Nim's build folder
+2026-10-27	pietroppeter/talk-sailing-seas-scientific-nim	PR	closed	23	Rename Island 1, put Interoperability before An Expressive Language
+2026-10-27	pietroppeter/tomd	PR	closed	1	Make Convert button full width on phones
+2026-10-27	pietroppeter/tomd	PR	closed	3	YAML front matter for thread and posts; 404 for missing threads
+2026-10-27	pietroppeter/tomd	PR	open	2	Google Scholar profile converter; README note on asynchttpserver vs Mummy
+2026-10-28	pietroppeter/claude-artifacts	PR	closed	3	Add State of NimibLand report page
+2026-10-28	pietroppeter/nanuq	PR	closed	13	Publish lib releases from the Actions tab
+2026-10-28	pietroppeter/nanuq	PR	closed	14	Backlog: findings on generating ffi.nim with nbindgen
+2026-10-28	pietroppeter/nanuq	PR	closed	15	Propose dev-log index, HTML tables and Datamancer interop
+2026-10-28	pietroppeter/nanuq	PR	closed	17	Archive ship-prebuilt-binaries, changelog for 0.1.0
+2026-10-28	pietroppeter/nanuq	PR	closed	18	nimble test/example/docs use the prebuilt library
+2026-10-28	pietroppeter/nanuq	PR	closed	19	Drop the Rust build time estimate
+2026-10-28	pietroppeter/nanuq	PR	closed	20	Add dev-log index, toHtml and Datamancer interop
+2026-10-28	pietroppeter/nanuq	PR	closed	21	Lib 0.1.1: drop -dev to release toHtml
+2026-10-28	pietroppeter/nanuq	PR	closed	22	Backlog: bump GitHub Actions to Node 24 (low priority)
+2026-10-28	pietroppeter/nimib	PR	closed	263	ci: fix docs deploy (pin ubuntu-24.04, install libpcre3)
+2026-10-28	pietroppeter/nimib	PR	closed	264	Add agent skills for nimib, nimibook and maintainers
+2026-10-28	pietroppeter/talk-sailing-seas-scientific-nim	PR	open	24	Island 3: Arraymancer first and honest about its scope, nim-plotly in the explai
+2026-10-28	pietroppeter/talk-sailing-seas-scientific-nim	PR	open	25	Island 2: add QEX as a third success story
+2026-10-29	pietroppeter/claude-artifacts	PR	closed	4	State of NimibLand: link every issue, PR, discussion and forum reference
+2026-10-30	pietroppeter/nanuq	PR	closed	24	Backlog: discuss whether to use Atlas
+2026-10-31	himanshm/nimanim	PR	open	1	Fix write(): walk cairo_path_data_t with a 16-byte stride
+2026-10-31	nim-lang/packages	PR	closed	3594	Add package nanuq
+2026-10-31	nim-lang/packages	PR	closed	3596	CI: pin runner to ubuntu-24.04
+2026-10-31	pietroppeter/cicak	PR	closed	1	Project setup: atlas, Nim 2.4, OpenSpec, nimib dev log, HCR proof of concept
+2026-10-31	pietroppeter/claude-artifacts	PR	closed	5	Add nimanim-affinity: affinity propagation animated with nimanim
+2026-10-31	pietroppeter/nanuq	PR	closed	25	Proposal: add-datatype-and-cast (DataType, schemas, cast)
+2026-10-31	pietroppeter/nanuq	PR	closed	26	DataType, schemas and cast (implements add-datatype-and-cast)
+2026-10-31	pietroppeter/nanuq	PR	closed	27	Proposal: add-joins-and-concat (and the option-value convention)
+2026-10-31	pietroppeter/nanuq	PR	closed	28	Add joins and concatenation
+2026-10-31	pietroppeter/nanuq	PR	closed	29	Propose add-frame-verbs
+2026-10-31	pietroppeter/nanuq	PR	closed	30	Add frame verbs
+2026-10-31	pietroppeter/nanuq	PR	closed	31	Add setRandomSeed and plain int seed for sample
+2026-10-31	pietroppeter/nanuq	PR	closed	32	Propose add-expr-essentials
+2026-10-31	pietroppeter/nanuq	PR	closed	33	Add expression essentials
+2026-10-31	pietroppeter/nanuq	PR	closed	34	Propose add-column-selectors
+2026-10-31	pietroppeter/nanuq	PR	closed	35	Add column selectors
+2026-10-31	pietroppeter/nanuq	PR	closed	36	Propose add-csv-options-and-scan
+2026-10-31	pietroppeter/nanuq	PR	closed	37	Implement add-csv-options-and-scan
+2026-10-31	pietroppeter/nanuq	PR	closed	38	Add the 0.2 explainer post: the great polar bear census
+2026-10-31	pietroppeter/nanuq	PR	closed	39	Prepare the 0.2.0 release
+2026-10-31	pietroppeter/nanuq	PR	closed	40	README: link the Nanuq Book
+2026-10-31	pietroppeter/nanuq	PR	closed	41	Propose add-spec-examples (OpenSpec change)
+2026-10-31	pietroppeter/nanuq	PR	closed	43	Implement add-spec-examples: runnable examples in the specs
+2026-10-31	pietroppeter/nanuq	PR	closed	44	BACKLOG: integer `/` design question, block syntax for newDataFrame
+2026-10-31	pietroppeter/nanuq	PR	closed	45	Dev log: Designing Nanuq 0.3 and 0.2
+2026-10-31	pietroppeter/nanuq	PR	closed	46	Backlog: Performance area (nightly Rust + polars/nightly + jemalloc closes the g
+2026-10-31	pietroppeter/nanuq	PR	closed	47	Nanuq 0.3
+2026-10-31	pietroppeter/nanuq-book	PR	closed	1	Set up the Nanuq book with the first user guide chapters
+2026-10-31	pietroppeter/nanuq-book	PR	closed	2	Three new chapters, original text kept with Nanuq callouts, Nim vs Python table 
+2026-10-31	pietroppeter/nanuq-book	PR	closed	3	More 0.2 chapters: three user guide pages, 1BRC and PDS-H benchmarks with local 
+2026-10-31	pietroppeter/nanuq-book	PR	closed	4	Book content for Nanuq 0.3: chapters from the O'Reilly and Packt Polars books, n
+2026-10-31	pietroppeter/nanuq-book	PR	closed	5	Incremental book CI: rerun only changed chapters, render the book from nimib JSO
+2026-10-31	pietroppeter/nimib	PR	open	265	ci: drop nimja 0.10.3 workaround
+2026-11-01	pietroppeter/cicak	PR	closed	10	Experiment hcr-ic: why hot code reloading with nim ic does not link
+2026-11-01	pietroppeter/cicak	PR	closed	11	Benchmark: cells in every mode and build mode, with a results page
+2026-11-01	pietroppeter/cicak	PR	closed	12	Publish the benchmark pages with the dev log
+2026-11-01	pietroppeter/cicak	PR	closed	2	Rename to cicak, and a dev log post about the name
+2026-11-01	pietroppeter/cicak	PR	closed	3	HCR post: show both run.sh scripts
+2026-11-01	pietroppeter/cicak	PR	closed	4	README: how to say cicak, with the children's song
+2026-11-01	pietroppeter/cicak	PR	closed	5	Dev log: links back to the repo, and the index as a table
+2026-11-01	pietroppeter/cicak	PR	closed	6	Retitle the PoC post, run experiments with Nim, speed up CI
+2026-11-01	pietroppeter/cicak	PR	closed	7	Add cloud-setup.sh: Nim 2.4 for Claude Code cloud sessions
+2026-11-01	pietroppeter/cicak	PR	closed	8	cloud-setup.sh: install musl for nifler and nifmake
+2026-11-01	pietroppeter/cicak	PR	closed	9	README: link the cicak-app playground
+2026-11-01	pietroppeter/cicak-app	PR	closed	1	Scaffold the cicak playground: predefined notebook cells in a live Nim process
+2026-11-01	pietroppeter/cicak-app	PR	closed	2	Run on macOS natively and in Docker on Apple Silicon
+2026-11-01	pietroppeter/cicak-app	PR	closed	3	Refuse hot reload with nim ic up front, with the reason
+2026-11-01	pietroppeter/nanuq	PR	closed	48	Prepare the 0.3.0 release
+2026-11-01	pietroppeter/nanuq	PR	closed	50	Dev log: Aged 19, the Nanuq 0.3 explainer
+2026-11-01	pietroppeter/nanuq	PR	closed	51	Nanuq 0.4: a real Series, and shaping
+2026-11-01	pietroppeter/nanuq	PR	closed	52	Prepare the 0.4.0 release
+2026-11-01	pietroppeter/nanuq	PR	closed	53	Nanuq 0.5: nested data and user code
+2026-11-01	pietroppeter/nanuq	PR	closed	55	Dev log: Counting El Niños, the Nanuq 0.4 explainer
+2026-11-01	pietroppeter/nanuq	PR	closed	56	Prepare the 0.5.0 release
+2026-11-01	pietroppeter/nanuq	PR	closed	57	Above 4000: the Nanuq 0.5 explainer (mountains and treks)
+2026-11-01	pietroppeter/nanuq	PR	closed	59	Nanuq 0.6: streaming, plans, Binary/Decimal, Arrow, Excel, SQLite, cloud, Polars
+2026-11-01	pietroppeter/nanuq	PR	closed	60	Polars coverage map as a page on the Nanuq site
+2026-11-01	pietroppeter/nanuq	PR	closed	61	README: link the Above 4000 explainer
+2026-11-01	pietroppeter/nanuq-book	PR	closed	6	Chapters for Nanuq 0.4
+2026-11-01	pietroppeter/nanuq-book	PR	closed	7	Ports for Nanuq 0.5
+2026-11-01	pietroppeter/nanuq-book	PR	closed	8	Chapters for Nanuq 0.6
+2026-11-02	pietroppeter/cadero	PR	closed	1	Parete con nicchia letto: tavola, 3D e documento nimib
+2026-11-02	pietroppeter/cadero	PR	closed	2	Tema dei documenti come gli artefatti e visore 3D su Pages
+2026-11-02	pietroppeter/cadero	PR	closed	3	Indice dei documenti e link per tornarci da ogni pagina
+2026-11-02	pietroppeter/cadero	PR	closed	4	Risega, testata-comodino e scatole dei gradini
+2026-11-02	pietroppeter/cadero	PR	closed	5	Variante: tavolino estraibile con i primi tre gradini
+2026-11-02	pietroppeter/cadero	PR	closed	6	Tavolino a cassetti-gradino, niente schienale, scatole, gavone; visore apribile,
+2026-11-02	pietroppeter/nanuq	PR	closed	62	Dev log: unify the posts and cross-link them
+2026-11-02	pietroppeter/nanuq	PR	closed	64	Move 37: the Nanuq 0.6 explainer (go)
+2026-11-02	pietroppeter/nanuq	PR	closed	65	README for 0.6: status, coverage summary, how development works; tidy BACKLOG
+2026-11-02	pietroppeter/nanuq	PR	closed	66	Publish the OpenSpec page (specview) on the site
+2026-11-02	pietroppeter/nanuq	PR	closed	67	CI 6x faster: one program for tests (incl. spec examples) and the site; link wit
+2026-11-02	pietroppeter/nanuq	PR	closed	68	Experiment: Polars expressions as NIF, evaluated by generated Nim kernels
+2026-11-02	pietroppeter/nanuq-book	PR	closed	10	CI: link chapters with lld
+2026-11-02	pietroppeter/nanuq-book	PR	closed	11	Benchmark chapters: readable result tables first, built from the Polars frames
+2026-11-02	pietroppeter/nanuq-book	PR	closed	12	More sources: 10 user guide pages, Modern Polars, Real Python, Rust cookbook, db
+2026-11-02	pietroppeter/nanuq-book	PR	closed	13	Build the stale chapters as one program
+2026-11-02	pietroppeter/nanuq-book	PR	closed	9	Benchmarks: both Nanuq engines, M3 Pro results, and results first as a Polars qu
+2026-11-02	pietroppeter/nanuqy	PR	open	1	nanuqy: NIF kernel experiments (moved from nanuq, and growing)
+2026-11-02	pietroppeter/nimib	PR	open	266	docs: drop nimja 0.10.3 workaround, fixed in nimja 0.11.0
+2026-11-03	pietroppeter/cadero	PR	closed	10	Visore: materasso, scatola delle prese, via Cammina
+2026-11-03	pietroppeter/cadero	PR	closed	11	Visore 3D in Nim compilato in JavaScript (nbJsFromCode)
+2026-11-03	pietroppeter/cadero	PR	closed	12	Testata 58, ripiani della libreria quotati e profondi 26.5
+2026-11-03	pietroppeter/cadero	PR	closed	13	Documento dei parametri della parete, con il visore 3D e i cursori
+2026-11-03	pietroppeter/cadero	PR	closed	14	Parametri della parete in gruppi (revisione)
+2026-11-03	pietroppeter/cadero	PR	closed	15	Modello dei falegnami come alternativa alla nostra parete
+2026-11-03	pietroppeter/cadero	PR	closed	7	Visore: Cammina senza rotazione e mobile con i vincoli costruttivi
+2026-11-03	pietroppeter/cadero	PR	closed	8	CI più veloce, documenti in un solo binario e tavola nel visore
+2026-11-03	pietroppeter/cadero	PR	closed	9	Variante: antina ribaltabile sotto il tavolino
+2026-11-04	pietroppeter/cadero	PR	closed	16	Visore 3D con il modello dei falegnami, le sette tavole nel documento
+2026-11-04	pietroppeter/cadero	PR	closed	17	Modello rivisto: testata 58, pannello risega 10, proposta vani alti
+2026-11-04	pietroppeter/cadero	PR	closed	18	Visore: quattro modifiche indipendenti
+2026-11-04	pietroppeter/claude-artifacts	PR	closed	6	Add cartographer-nim: Cartographer studied and rebuilt in Nim
+2026-11-04	pietroppeter/nanuq	PR	closed	69	Explainers: tidy the Python setup cells, steady tab switching
+2026-11-04	pietroppeter/parloku	PR	closed	1	Draggable Parloku wordoku as a nimib notebook
+2026-11-04	pietroppeter/parloku	PR	closed	2	Mobile-first gameplay, splash screen, skins, tutorial and devlogs
+2026-11-04	pietroppeter/puzzlepaw	PR	closed	5	Add Parloku solver, problem code and solver CLI
+2026-11-04	pietroppeter/zogyn	PR	closed	1	Add zogyn: declarative dragging library for Nim and nimib
+2026-11-05	pietroppeter/nanuq	PR	closed	70	Nanuq 0.6.1: expression plugins (registerPluginFunction)
+2026-11-05	pietroppeter/nanuq-more	PR	closed	1	Polars plugins in Nim: isoweek type and all of polars-stats
+2026-11-05	pietroppeter/nanuq-more	PR	closed	2	README: link the explainer
+2026-11-05	pietroppeter/parloku	PR	closed	10	Double tap on a snake letter sends the whole snake back below
+2026-11-05	pietroppeter/parloku	PR	closed	11	Adopt OpenSpec: specs for Parloku, with drag scenarios that run and animate
+2026-11-05	pietroppeter/parloku	PR	closed	12	Builder: list-style letter reorder, board untouched, no dashes, faster solver
+2026-11-05	pietroppeter/parloku	PR	closed	13	Player menu, classic grid, rolling conflicts and animated puzzle switch
+2026-11-05	pietroppeter/parloku	PR	closed	14	Builder: player look, solutions as numbered circles, no ambiguous words
+2026-11-05	pietroppeter/parloku	PR	closed	3	Daily splash screen and animated first lesson
+2026-11-05	pietroppeter/parloku	PR	closed	4	Devlog: tiles that divide like cells (the cell-division animation)
+2026-11-05	pietroppeter/parloku	PR	closed	5	Devlog: thirty artist-inspired styles
+2026-11-05	pietroppeter/parloku	PR	closed	6	Add the Parloku builder page
+2026-11-05	pietroppeter/parloku	PR	closed	7	Gameplay tweaks: long press to move, clue wiggle, double tap on start rings
+2026-11-05	pietroppeter/parloku	PR	closed	8	Draw word snakes by hand, and fix the snake bugs from play-testing
+2026-11-05	pietroppeter/parloku	PR	closed	9	README: link the builder; builder: list-style letter reorder, no dashes, faster 
+2026-11-06	pietroppeter/cadero	PR	closed	19	Multistrato di betulla, venatura per pannello e due nuovi tagli del fronte
+2026-11-06	pietroppeter/cicak	PR	closed	13	Highlight all Nim code at build time; no CDN on the pages
+2026-11-06	pietroppeter/cicak	PR	closed	14	Faster CI: Nim from the release tarball, the whole site in one program
+2026-11-06	pietroppeter/cicak	PR	closed	15	Dev log: living documents table, and a post on the first benchmark runs
+2026-11-06	pietroppeter/claude-artifacts	PR	closed	7	Move agent instructions to AGENTS.md, add sharing, style and blocked-source rule
+2026-11-06	pietroppeter/nanuq	PR	open	71	Cleanup: src/rust/ in the specs, BACKLOG.md pointers
+2026-11-06	pietroppeter/nanuq-more	PR	closed	3	Explainer: appendix "round two" (polars-stats#119); Pages on Nanuq 0.6.1
+2026-11-06	pietroppeter/parloku	PR	closed	15	Game: only the Niki skin and only the classic grid
+2026-11-06	pietroppeter/parloku	PR	closed	16	Builder: only the classic grid
+2026-11-06	pietroppeter/parloku	PR	closed	17	Builder: word triples in data/terne.txt, 10 new ones, hide triples already made
+2026-11-06	pietroppeter/parloku	PR	closed	18	Build the pages in CI and deploy to Pages (no more committed HTML)
+2026-11-06	pietroppeter/parloku	PR	closed	19	Move the solver into parloku (src/solver.nim), drop the puzzlepaw dependency
+2026-11-06	pietroppeter/parloku	PR	closed	20	Italian game, notebook and devlog index, a tutorial that teaches the gestures, p
+2026-11-06	pietroppeter/parloku	PR	closed	21	Specs: double tap takes back a word from the tapped letter; sure cells are only 
+2026-11-06	pietroppeter/parloku	PR	closed	22	Builder: mark the word starts of the solution shown
+2026-11-06	pietroppeter/parloku	PR	closed	24	Puzzles 3 to 10, who made them and when, and a step-by-step explainer (spiega pa
+2026-11-06	pietroppeter/parloku	PR	closed	25	Undo and redo with the menu; moving a snake's head across its letter; splash dat
+2026-11-06	pietroppeter/parloku	PR	closed	26	Devlog index: living documents first, then the dated posts
+2026-11-06	pietroppeter/parloku	PR	closed	27	Archive move-head-past-its-letter
+2026-11-06	pietroppeter/parloku	PR	closed	28	Evviva! 🥳 instead of Bravo!, and a random dance when a puzzle is solved
+2026-11-06	pietroppeter/parloku	PR	closed	29	A double tap never zooms the page
+2026-11-06	pietroppeter/parloku	PR	closed	30	Show where a word starts and where it has got to
+2026-11-06	pietroppeter/parloku	PR	closed	31	Spiega: tinted word starts and eyes on the head, as in the game
+2026-11-06	pietroppeter/parloku	PR	closed	32	Share a solved game with emoji, like Wordle; ?p=N; istruzioni with contents, a g
+2026-11-06	pietroppeter/parloku	PR	closed	33	Ancora!: a numbered list of puzzles rises from below
+2026-11-06	pietroppeter/parloku	PR	closed	34	Ready for parloku.pietroppeter.xyz: links follow the site, Plausible analytics o
+2026-11-06	pietroppeter/parloku	PR	closed	35	Snakes: lay a word from its empty start; a quick drag of the head copies it
+2026-11-06	pietroppeter/parloku	PR	closed	36	Spec viewer: show only chosen changes and specs by link
+2026-11-06	pietroppeter/parloku	PR	closed	37	Splash: greet only the day's first visit
+2026-11-06	pietroppeter/parloku	PR	open	23	Notes with small letters (letterine): double tap below the board to take notes
+2026-11-06	pietroppeter/parloku	PR	open	38	A little snake shows new players where the menu is
+2026-11-06	pietroppeter/puzzlepaw	PR	closed	6	README: Parloku now lives in pietroppeter/parloku; TUI kept as a record
+2026-11-07	pietroppeter/all-systems-nim	PR	open	1	All Systems Nim: proposal and nimib explainer
+2026-11-07	pietroppeter/cadero	PR	open	20	Visore: misure al tocco e trascinate, presa dietro la libreria; L sul comodino, 
+2026-11-07	pietroppeter/cicak	PR	open	16	Bench: Mac results, and a killed run keeps its complete repetitions
+2026-11-07	pietroppeter/cicak	PR	open	17	Benchmark post: what changes on a Mac
+2026-11-07	pietroppeter/claude-artifacts	PR	closed	10	diagrammari in Python, Jupyter and marimo: the evidence
+2026-11-07	pietroppeter/claude-artifacts	PR	closed	9	Add nim-on-my-iphone: Nim on your own iPhone, nimib explainer
+2026-11-07	pietroppeter/claude-artifacts	PR	open	11	Add nim-python-bridges: C ABI + ctypes vs nimpy, built with nimlang
+2026-11-07	pietroppeter/claude-artifacts	PR	open	8	Add three diagram explainers: history, everyday diagrams, personal-layer POC
+2026-11-07	pietroppeter/diagrammari	PR	closed	1	First diagrammari: Pele-drawn diagrams for Nim, imported as mari
+2026-11-07	pietroppeter/diagrammari	PR	closed	2	Diagrams, a series in five parts
+2026-11-07	pietroppeter/diagrammari	PR	closed	3	Plan diagrammari for Python, Jupyter and marimo
+2026-11-07	pietroppeter/diagrammari	PR	closed	4	Series: link back to the diagrammari site
+2026-11-07	pietroppeter/diagrammari	PR	open	5	Python plan: build wheels with nimlang; QuickJS from threads
+2026-11-07	pietroppeter/parloku	PR	open	39	Tiles on the board move; a long press pins, copies come from pins and finished w
+2026-11-07	pietroppeter/tabelline	PR	closed	1	First tabelline: research, explainer, POC and repo setup
+2026-11-07	pietroppeter/tabelline	PR	closed	2	Dependencies with atlas, one setup script; explainer: R or Python?, sink, × stub
+2026-11-07	pietroppeter/tabelline	PR	closed	3	Devlog: Tabellone, when a table becomes a grid
+2026-11-07	pietroppeter/tabelline	PR	closed	4	Backlog: ideas from using tabelline in diagrammari
+2026-11-07	pietroppeter/tabelline	PR	closed	5	Release 0.1.0, with the Munari look as the default
+2026-11-07	pietroppeter/tabelline	PR	closed	6	Munari look: softer Japanese palette, nothing that looks pressable; devlog lette
+2026-11-07	pietroppeter/tabelline	PR	closed	7	Palettes post, compact; Haru is the default palette
+2026-11-07	pietroppeter/tabelline	PR	open	8	Coverage map, roadmap with three threads per release, parts in Haru colours, Nim
+2026-11-07	pietroppeter/talk-sailing-seas-scientific-nim	PR	open	26	Talk log, and three slide themes with a map per theme
+2026-11-07	pietroppeter/talk-sailing-seas-scientific-nim	PR	open	27	Redo the tables with tabelline
