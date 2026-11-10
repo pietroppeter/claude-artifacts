@@ -32,7 +32,7 @@ const postCss = """
 .forum .f-meta span { font-weight: 400; }
 .forum a { color: var(--f-link); text-decoration: none; }
 .forum p { margin: 0 0 1rem; }
-.forum img { display: block; max-width: 100%; height: auto; margin: 0 0 1rem; }
+.forum img { display: block; width: 640px; max-width: 100%; height: auto; margin: 0 0 1rem; }
 .paste pre > code { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 28rem; overflow-y: auto; }
 .paste button { font: inherit; font-weight: 700; color: var(--paper); background: var(--ink); border: 0; min-height: 44px; padding: 0 1rem; cursor: pointer; }
 """
