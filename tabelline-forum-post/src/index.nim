@@ -10,16 +10,16 @@ const srcDir = currentSourcePath().parentDir
 nbInit
 nb.doc.filename = srcDir.parentDir / "index.html"
 nb.usePage("tabelline on the Nim forum", "A draft of the post that announces tabelline 0.1 on the Nim forum.")
-nbReview(tversion = 4, tpage = "tabelline-forum-post", tsource = "tabelline-forum-post/src/post.md")
+nbReview(tversion = 5, tpage = "tabelline-forum-post", tsource = "tabelline-forum-post/src/post.md")
 
 nbTitle "Draft · 10 November 2026", "tabelline on the Nim forum", """
 The post that announces [tabelline](https://pietroppeter.github.io/tabelline/) 0.1 on the Nim
 forum: first as it will look, then the text to paste. Comment on it with **✎ Review**.
 """
-nbVersion 4, "10 November 2026, after the third review"
+nbVersion 5, "10 November 2026, with your edits"
 
 nbNote """
-**Title:** tabelline: beautiful display tables for Nim · **Category:** Project Showcase. The two images are
+**Title:** tabelline: beautiful display tables for Nim · **Category:** Project Showcase. The three images are
 in this page's branch, linked by commit, so their addresses keep working after the merge.
 """
 
@@ -35,7 +35,6 @@ nbText """
 - **Images**: the forum takes `.. image:: url` (reStructuredText). If it shows the line instead
   of the image, use a plain link.
 - **FOSDEM**: its story is merged but not on the site yet (stories/ lists only Milano Cortina for now): check before posting.
-- **"it was pretty clear"**: my guess for the end of your sentence ("it was pretty ..."): change it if you meant something else.
 - **Links**: gt and Great Tables are Markdown links. If the forum shows the brackets, use bare URLs.
 """
 
@@ -48,5 +47,6 @@ nbRound "process/review-v1.md", "Review of version 1: four comments. Version 2 i
 
 nbRound "process/review-v2.md", "Review of version 2: two comments. Version 3 drops the line on Francesco and shows tabelline at desktop width with *Show the parts* on, its legend included."
 nbRound "process/review-v3.md", "Review of version 3: two comments. Version 4 links the docs at the top (GitHub is linked from there), lists the stories, the devlog and the design guide, ends with your paragraph on why you enjoyed it, and says the review mode will move to nimib."
+nbText "Version 5 is Pietro's own edit of version 4 (what display tables are, the plans, the looks, the name), with a third image: the Guide's first table in the quaderno look."
 
 nbSave
