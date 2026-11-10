@@ -34,7 +34,6 @@ nbText """
 
 - **Images**: the forum takes `.. image:: url` (reStructuredText). If it shows the line instead
   of the image, use a plain link.
-- **FOSDEM**: its story is merged but not on the site yet (stories/ lists only Milano Cortina for now): check before posting.
 - **Links**: gt and Great Tables are Markdown links. If the forum shows the brackets, use bare URLs.
 """
 
