@@ -14,8 +14,25 @@ func esc(s: string): string = s.multiReplace(("&", "&amp;"), ("<", "&lt;"), (">"
 func inline(md: string): string = markdownToHtml(md).strip.replace("<p>", "").replace("</p>", "")
 
 const postCss = """
-.post { margin: 1rem 0 1.6rem; padding: .2rem 1rem .6rem; background: var(--surface); border-top: 3px solid var(--secondary); overflow-wrap: anywhere; }
-.post img { display: block; max-width: 100%; height: auto; margin: 1rem 0; border: 1px solid var(--line); }
+/* the post as the Nim forum shows it: its white page, dark bar, system font, orange links */
+.forum { --f-ink: #292929; --f-muted: #5c5c5c; --f-bar: #17181f; --f-link: #f99c19; --f-tag: #6e3f8c; --f-line: #e5e5e5;
+  margin: 1rem 0 1.6rem; background: #fff; color: var(--f-ink); border: 1px solid var(--f-line);
+  font: 16px/24px -apple-system, system-ui, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", sans-serif; overflow-wrap: anywhere; }
+.forum .f-bar { background: var(--f-bar); color: #fff; padding: .55rem .8rem; font-weight: 700; font-size: 14px; }
+.forum .f-bar span { color: #ffe953; }
+.forum .f-body { padding: .6rem .8rem 1rem; }
+.forum h1.f-title { font: 700 26px/1.25 inherit; font-family: inherit; margin: .4rem 0 .2rem; color: var(--f-ink); }
+.forum .f-tag { font-size: 13px; font-weight: 700; padding-bottom: .6rem; border-bottom: 1px solid var(--f-line); }
+.forum .f-tag::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 5px; background: var(--f-tag); }
+.forum .f-post { display: flex; gap: .6rem; padding-top: .6rem; }
+.forum .f-avatar { flex: none; width: 40px; height: 40px; border-radius: 50%; background: #c9c9c9; color: #fff; font-weight: 700;
+  display: flex; align-items: center; justify-content: center; }
+.forum .f-main { flex: 1; min-width: 0; }
+.forum .f-meta { display: flex; justify-content: space-between; color: var(--f-muted); font-weight: 700; }
+.forum .f-meta span { font-weight: 400; }
+.forum a { color: var(--f-link); text-decoration: none; }
+.forum p { margin: 0 0 1rem; }
+.forum img { display: block; max-width: 100%; height: auto; margin: 0 0 1rem; }
 .paste pre > code { white-space: pre-wrap; overflow-wrap: anywhere; max-height: 28rem; overflow-y: auto; }
 .paste button { font: inherit; font-weight: 700; color: var(--paper); background: var(--ink); border: 0; min-height: 44px; padding: 0 1rem; cursor: pointer; }
 """
@@ -41,6 +58,19 @@ template nbNote*(ttext: string) =
   ## A sheet set apart, with its straight top edge.
   nb.add newNbNote(text = ttext)
 
+func autolink(line: string): string =
+  ## Bare URLs become links, as the forum does.
+  var i = 0
+  while i < line.len:
+    let j = line.find("https://", i)
+    if j < 0 or (j > 0 and line[j - 1] in {'(', '<', '['}):
+      result.add line[i .. ^1]; break
+    var k = j
+    while k < line.len and line[k] notin {' ', ')', '\n'}: inc k
+    while k > j and line[k - 1] in {'.', ',', ':'}: dec k
+    result.add line[i ..< j] & "<" & line[j ..< k] & ">"
+    i = k
+
 proc forPreview(post, dir: string): string =
   ## The forum's text as Markdown nimib renders: RST images become Markdown images, and a fence
   ## with no language is text (the output of `echo t`). An image of `shots/` is inlined, so the
@@ -57,19 +87,28 @@ proc forPreview(post, dir: string): string =
     elif line.startsWith("```"):
       lines.add(if not inFence and line == "```": "```text" else: line)
       inFence = not inFence
-    else: lines.add line
+    elif line.startsWith("   :"): discard        # an option of the image above (its width)
+    elif inFence: lines.add line
+    else: lines.add autolink(line)
   lines.join("\n")
 
 newNbBlock(NbPost):
   text: string
+  title: string
+  category: string
+  author: string
   toHtml:
     # the Markdown renderer escapes the `;` of a data URL
-    &"""<article class="post">{markdownToHtml(blk.text).replace("data:image/png%3Bbase64", "data:image/png;base64")}</article>"""
+    let body = markdownToHtml(blk.text).replace("data:image/png%3Bbase64", "data:image/png;base64")
+    &"""<article class="forum"><div class="f-bar"><span>Nim</span> forum</div><div class="f-body">""" &
+      &"""<h1 class="f-title">{esc(blk.title)}</h1><div class="f-tag">{esc(blk.category)}</div>""" &
+      &"""<div class="f-post"><div class="f-avatar">{esc(blk.author[0 .. 0].toUpperAscii)}</div><div class="f-main">""" &
+      &"""<div class="f-meta">{esc(blk.author)}<span>now</span></div>{body}</div></div></div></article>"""
 
-template nbPost*(tfile: string) =
-  ## The post as the forum shows it (near enough: the forum has its own theme).
+template nbPost*(tfile, ttitle, tcategory, tauthor: string) =
+  ## The post as the forum shows it: its title, category and author, and the text of `tfile`.
   let dir = nb.doc.thisFile.string.parentDir
-  nb.add newNbPost(text = forPreview(readFile(dir / tfile), dir))
+  nb.add newNbPost(text = forPreview(readFile(dir / tfile), dir), title = ttitle, category = tcategory, author = tauthor)
 
 newNbBlock(NbPaste):
   text: string

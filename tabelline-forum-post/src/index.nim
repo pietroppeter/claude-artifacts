@@ -24,7 +24,7 @@ in this page's branch, linked by commit, so their addresses keep working after t
 """
 
 nbText "## The post"
-nbPost "post.md"
+nbPost "post.md", "tabelline: beautiful display tables for Nim", "Project Showcase", "pietroppeter"
 
 nbText "## The text to paste"
 nbPaste "post.md"

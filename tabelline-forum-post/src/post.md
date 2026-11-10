@@ -9,14 +9,17 @@ Tabelline follows R's [gt](https://gt.rstudio.com/) and Python's [Great Tables](
 On the site you find a Guide, a Book that ports the gt and Great Tables guides, stories told with tables (Milano Cortina 2026 and FOSDEM), the roadmap, a devlog and a design guide.
 
 .. image:: https://raw.githubusercontent.com/pietroppeter/claude-artifacts/7141f2a1bc354e9230287fbc35c9772bfbabc0b2/tabelline-forum-post/src/shots/tabelline-parts.png
+   :width: 640px
 
 .. image:: https://raw.githubusercontent.com/pietroppeter/claude-artifacts/a5fc85240f1b0b94b5da28748900996511dc990a/tabelline-forum-post/src/shots/guide-quaderno.png
+   :width: 640px
 
 As a small celebration I put every NimConf schedule, 2020 to 2026, in tabelline tables:
 
 https://pietroppeter.github.io/claude-artifacts/nimconf-schedules/
 
 .. image:: https://raw.githubusercontent.com/pietroppeter/claude-artifacts/21b7dbded2ad7fea642453c413ac0e8a837ce9ab/tabelline-forum-post/src/shots/nimconf-2026.png
+   :width: 640px
 
 That page also has a review mode for nimib pages: press ✎ Review, select some text, comment, and export all the comments to paste to a coding agent. It will move to nimib, so every nimib notebook can have it.
 
