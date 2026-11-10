@@ -63,7 +63,8 @@ proc forPreview(post, dir: string): string =
 newNbBlock(NbPost):
   text: string
   toHtml:
-    &"""<article class="post">{markdownToHtml(blk.text)}</article>"""
+    # the Markdown renderer escapes the `;` of a data URL
+    &"""<article class="post">{markdownToHtml(blk.text).replace("data:image/png%3Bbase64", "data:image/png;base64")}</article>"""
 
 template nbPost*(tfile: string) =
   ## The post as the forum shows it (near enough: the forum has its own theme).
@@ -100,3 +101,15 @@ proc usePage*(nb: var Nb, title, description: string) =
 <a href="https://github.com/pietroppeter/claude-artifacts/tree/main/tabelline-forum-post/src">Source</a>.</footer>"""
   nb.backend.partials["left"] = proc (blk: JsonNode, nb: Nb): string = ""
   nb.backend.partials["right"] = proc (blk: JsonNode, nb: Nb): string = ""
+
+newNbBlock(NbRound):
+  title: string
+  text: string
+  toHtml:
+    let lines = blk.text.splitLines.len
+    &"""<details class="foldcode"><summary>{inline(blk.title)} <span>{lines} lines</span></summary>""" &
+      """<pre><code class="language-text">""" & esc(blk.text) & "</code></pre></details>"
+
+template nbRound*(tfile, ttitle: string) =
+  ## A review round, as exported, folded under `ttitle` (Markdown).
+  nb.add newNbRound(title = ttitle, text = readFile(nb.doc.thisFile.string.parentDir / tfile).strip)

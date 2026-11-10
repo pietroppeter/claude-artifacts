@@ -10,16 +10,16 @@ const srcDir = currentSourcePath().parentDir
 nbInit
 nb.doc.filename = srcDir.parentDir / "index.html"
 nb.usePage("tabelline on the Nim forum", "A draft of the post that announces tabelline 0.1 on the Nim forum.")
-nbReview(tversion = 1, tpage = "tabelline-forum-post", tsource = "tabelline-forum-post/src/post.md")
+nbReview(tversion = 2, tpage = "tabelline-forum-post", tsource = "tabelline-forum-post/src/post.md")
 
 nbTitle "Draft · 10 November 2026", "tabelline on the Nim forum", """
 The post that announces [tabelline](https://pietroppeter.github.io/tabelline/) 0.1 on the Nim
 forum: first as it will look, then the text to paste. Comment on it with **✎ Review**.
 """
-nbVersion 1
+nbVersion 2, "10 November 2026, after the first review"
 
 nbNote """
-**Title:** tabelline: great tables for Nim · **Category:** Project Showcase. The two images are
+**Title:** tabelline: beautiful display tables for Nim · **Category:** Project Showcase. The two images are
 in this page's branch, linked by commit, so their addresses keep working after the merge.
 """
 
@@ -35,8 +35,14 @@ nbText """
 - **Francesco**: the post names him by first name only. Add his GitHub handle if he is happy to be tagged.
 - **Images**: the forum takes `.. image:: url` (reStructuredText). If it shows the line instead
   of the image, use a plain link.
-- **How it was made**: the nanuq post gave tokens, hours and days. Add them here too, if you
-  have them for tabelline.
+- **Links**: gt and Great Tables are Markdown links. If the forum shows the brackets, use bare URLs.
 """
+
+nbText """
+## The reviews
+
+Each review round, as exported, and what it changed.
+"""
+nbRound "process/review-v1.md", "Review of version 1: four comments. Version 2 is much shorter (the details stay in the pages), says *beautiful display tables*, and links gt and Great Tables."
 
 nbSave
