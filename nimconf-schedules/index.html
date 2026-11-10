@@ -278,7 +278,7 @@ dialog.rv-sheet[open] { animation: rv-down .2s ease-out; }
 <div class="looks" role="group" aria-label="Look of the page"><button type="button" data-look="munari" aria-pressed="true">Munari</button><button type="button" data-look="nimconf" aria-pressed="false">NimConf</button></div>
 </header>
 <main>
-<div id="review" hidden data-page="nimconf-schedules/src/index.nim" data-version="2" data-title="Every NimConf, in tables" data-source="nimconf-schedules/src/index.nim" data-versions=""></div><script>
+<div id="review" hidden data-page="nimconf-schedules/src/index.nim" data-version="4" data-title="Every NimConf, in tables" data-source="nimconf-schedules/src/index.nim" data-versions=""></div><script>
 document.addEventListener('DOMContentLoaded', function () {
 // Review mode for a nimib page: open it with the Review button, select text, comment on it, keep
 // the comments in this browser, export them as Markdown with a YAML block for a coding agent.
@@ -878,12 +878,7 @@ and each published its schedule as a table. Here they all are again, made with
 reached 0.1: from the simplest table to the two tracks of 2026, then where the data comes
 from, and the Nim code that downloaded it.</p>
 </div>
-<p class="rv-enter"><span class="rv-version">Version 2 · updated 10 November 2026, after the first review</span></p>
-<div class="rv-only"><div class="note plain"><p><strong>New in version 2</strong>, after the first review: NimConf is the look you see first; striped rows
-come from tabelline (<code>optRowStriping</code>), so the plain first table is readable in the dark; the
-notes about code are blue and the note on missing data is warm in the NimConf look; <em>How this
-page is built</em> ends with the prompt, the review, and every source file, folded.</p>
-</div></div>
+<p class="rv-enter"><span class="rv-version">Version 4 · updated 10 November 2026, after the third review</span></p>
 <ul class="editions"><li><b>2020</b><span>20 June</span></li><li><b>2021</b><span>26 June</span></li><li><b>2022</b><span>22 October</span></li><li><b>2024</b><span>26 October</span></li><li><b>2026</b><span>20 June</span></li></ul>
 <p>Five editions, from June 2020 to June 2026: three in June, two in October, and none in 2023
 or 2025. Every one of them starts on a Saturday morning, UTC. The switch at the top of the
@@ -893,7 +888,19 @@ follows it.</p>
 <h2>The first schedule</h2>
 <p>The data of this page is a list of <em>slots</em>: a talk, a break, or the end of a track, each with
 the edition, the track, its starting time in UTC, a title, the speakers and the id of its
-video on YouTube. It is a Nim object, and a sequence of objects is already a table:</p>
+video on YouTube. It is a Nim object, and the data is a plain <code>seq[Slot]</code>, read from
+<code>data/slots.tsv</code>:</p>
+<div class="note plain"><p>This part is about tabelline's code. What it uses from the data (the types <code>Slot</code> and
+<code>Edition</code>, the list <code>editions</code>, the table <code>length</code> of the videos) comes from <code>nimconf.nim</code>,
+explained in <em>How the data was downloaded</em>; every file of the page is folded at the end, in
+<em>The source files</em>, for reference.</p>
+</div>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">for</span> s <span class="hljs-keyword">in</span> slots[<span class="hljs-number">0</span> ..&lt; <span class="hljs-number">3</span>]: <span class="hljs-keyword">echo</span> s</code></pre>
+<pre class="nb-output">(year: 2020, track: "", start: "11:00", kind: "talk", title: "NimConf 2020 introduction", speakers: "Andreas Rumpf", video: "xqHdUjCXizI")
+(year: 2020, track: "", start: "11:15", kind: "talk", title: "An intro to Nim for the uninitiated", speakers: "Dominik Picheta", video: "lxLL3km21Aw")
+(year: 2020, track: "", start: "12:00", kind: "talk", title: "Making games quickly in Nim with Nico", speakers: "Jez Impbox", video: "czLI5XJFxYA")
+</pre>
+<p>A sequence of objects is already a table:</p>
 <pre><code class="nohighlight nim hljs"><span class="hljs-keyword">let</span> first = slots.filterIt(it.year == <span class="hljs-number">2020</span>)[<span class="hljs-number">0</span> ..&lt; <span class="hljs-number">4</span>]
 nbTable tabella(first)</code></pre>
 <div id="tabella-57ccfbe0" class="tabella">
@@ -953,7 +960,9 @@ nbTable tabella(first)</code></pre>
 <p>That is all it takes: <code>tabella</code> turns any sequence of objects (or named tuples) into a table,
 one column per field, and <code>nbTable</code> puts it in the page. It is honest and plain. A schedule
 wants a bit more: a title, only the columns a reader needs, the talk linked to its video, the
-length of each video, and the breaks set apart. Each of those is one verb, the same verbs as
+length of each video (read from each edition's YouTube playlist, see step 6 of <em>How the data was
+downloaded</em>: <code>length</code> maps a video's id to its seconds), and the breaks set apart. Each of
+those is one verb, the same verbs as
 R's <a href="https://gt.rstudio.com/">gt</a> and Python's <a href="https://posit-dev.github.io/great-tables/">Great Tables</a>,
 in camelCase:</p>
 <pre><code class="nohighlight nim hljs"><span class="hljs-keyword">type</span> <span class="hljs-type">Talk</span> = <span class="hljs-keyword">object</span>
@@ -1067,9 +1076,11 @@ here the breaks, which <code>colsHide</code> keeps in the data but out of sight.
 <p>Sixteen talks, the first at 11:00 UTC and the last at 20:45, with two coffee breaks and a
 lunch break between them: the first NimConf was a long day. The breaks have no starting time
 because the page gave them none.</p>
-<h2>Every schedule</h2>
+<h2>Every one-track schedule</h2>
 <p>The table for 2020 is a few lines; the same lines in a proc make the table of any edition with
-one track. One tab for each:</p>
+one track, the four from 2020 to 2024. The buttons above the table are tabs, one per edition:
+<code>nbTabs</code> is one of this page's own blocks, in <code>blocks.nim</code> (folded at the end with the other
+files). 2026 had two tracks at once and needs another table: it comes next.</p>
 <pre><code class="nohighlight nim hljs"><span class="hljs-keyword">proc</span> schedule(e: <span class="hljs-type">Edition</span>): <span class="hljs-type">Tabella</span> =
   tabella(talks(e.year)):
     optCssTheme()
@@ -2008,7 +2019,8 @@ the page is loaded from elsewhere: it is one file, and it works offline.</p>
 <p>This page was asked for in three short messages, written on a phone to Claude Code in a project
 that has Pietro's skills and rules (those are not copied here). Claude found the data, wrote the
 code and the page, and published it; Pietro read it on his phone and commented with the review
-mode, and each export is pasted back as it was. One more file for every round:</p>
+mode. Each export is kept as it was pasted, followed by what changed in the next version (a
+review can also end with no changes). In order:</p>
 <details class="foldcode"><summary>The prompt, 10 November 2026 <span>10 lines</span></summary><pre><code class="language-text"># The prompt
 
 Pietro's messages that started this page, 10 November 2026, written on a phone in a Claude Code
@@ -2080,9 +2092,128 @@ Can you add also the original prompt? This document is made by a prompt on Claud
 Around it: “…small modules sit beside it: ⟦nimconf.nim⟧, the data: the editions and the…”
 
 Add also below the sources of files with nbCodeFold of tabelline</code></pre></details>
+<details class="foldcode"><summary>Version 2: what changed <span>12 lines</span></summary><pre><code class="language-text"># Changes in version 2, after the review of version 1
+
+Published 10 November 2026, PR #15 (merged with it).
+
+1. Dark mode: the page's own CSS striped every other row of every table, which made the plain
+   first table dark text on dark rows. Stripes now come from tabelline (`optRowStriping()` in
+   each themed table); the plain table stays white in both looks.
+2. NimConf is the look a reader sees first; Munari is one tap away.
+3. The notes about code are the site's blue in the NimConf look (green is not of its palette).
+4. The note on missing data has a warm yellow tint and a yellow heading in the NimConf look.
+5. *How this page is built* ends with the prompt and each review, as they were pasted.
+6. Every source file of the page is folded below them (`nbFoldCode`, after tabelline's).</code></pre></details>
+<details class="foldcode"><summary>Review of version 2: three comments <span>35 lines</span></summary><pre><code class="language-text"># Review of “Every NimConf, in tables”, version 2
+
+```yaml
+format: nimib-review/3
+title: &quot;Every NimConf, in tables&quot;
+page: &quot;https://pietroppeter.github.io/claude-artifacts/nimconf-schedules/&quot;
+source: &quot;nimconf-schedules/src/index.nim&quot;
+version: 2
+exported: &quot;2026-11-10T08:24:47.535Z&quot;
+comments: 3
+```
+
+## 1. In “Every NimConf, in tables”
+
+&gt; New in version 2, after the first review: NimConf is the look you see first; striped rows come from tabelline (optRowStriping), so the plain first table is readable in the dark; the notes about code are blue and the note on missing data is warm in the NimConf look; How this page is built ends with the prompt, the review, and every source file, folded.
+
+Around it: “… the first reviewClose review ⟦New in version 2, after the first review: NimConf is the look you see first; striped rows come from tabelline (optRowStriping), so the plain first table is readable in the dark; the notes about code are blue and the note on missing data is warm in the NimConf look; How this page is built ends with the prompt, the review, and every source file, folded.⟧ 202020 June 202126 June 202…”
+
+We can skip this part changes are at the end
+
+## 2. In “Every schedule”
+
+&gt; Every schedule
+
+Around it: “…ause the page gave them none. ⟦Every schedule⟧ The table for 2020 is a few l…”
+
+Not really 2026 is dealt with later (because of two tracks but here it is unclear)
+
+## 3. In “The prompt and the reviews”
+
+&gt; The prompt and the reviews
+
+Around it: “…e file, and it works offline. ⟦The prompt and the reviews⟧ This page was asked for in th…”
+
+Here let’s keep it updated. Between review lets summaries also changes implemented (not necessarily a review will result in changes)</code></pre></details>
+<details class="foldcode"><summary>Version 3: what changed <span>9 lines</span></summary><pre><code class="language-text"># Changes in version 3, after the review of version 2
+
+Published 10 November 2026.
+
+1. The note &quot;New in version 2&quot; under the title is gone: what changed is here, at the end.
+2. *Every schedule* is now *Every one-track schedule*, and its text says that 2026, with its
+   two tracks, comes in the next section.
+3. *The prompt and the reviews* keeps the whole story in order: the prompt, then each review
+   and the changes that followed it (a review may also end with no changes).</code></pre></details>
+<details class="foldcode"><summary>Review of version 3: five comments <span>47 lines</span></summary><pre><code class="language-text"># Review of “Every NimConf, in tables”, version 3
+
+```yaml
+format: nimib-review/3
+title: &quot;Every NimConf, in tables&quot;
+page: &quot;https://7f492dfc-8377-4ba2-b612-474ab97fba3a.frame.claudeusercontent.com/_f/1794299176-026a/&quot;
+source: &quot;nimconf-schedules/src/index.nim&quot;
+version: 3
+exported: &quot;2026-11-10T11:05:21.794Z&quot;
+comments: 5
+```
+
+## 1. On the whole page
+
+It seems I cannot add a not to the footer. It is customary in nimib documents to show source of code, here we link to GitHub because we already embed index.nim but some way to communicate this to the user that knows about it should happen (or we just add a common show source as usual)
+
+## 2. In “The first schedule”
+
+&gt; slots
+
+Around it: “… already a table: let first = ⟦slots⟧.filterIt(it.year == 2020)[0 ..&lt;…”
+
+Let’s echo the slots too (first 3) so it is clear that is an object and not a dataframe or something
+
+## 3. In “The first schedule”
+
+&gt; length of each video
+
+Around it: “…e talk linked to its video, the ⟦length of each video⟧, and the breaks set apart. Each…”
+
+Unclear how video length has been obtained
+
+## 4. In “Every one-track schedule”
+
+&gt; any edition with one track
+
+Around it: “…nes in a proc make the table of ⟦any edition with one track⟧, the four from 2020 to 2024, on…”
+
+Let’s also mention that the buttons for editions are tabs and that all custom nimib blocks are also available at the end
+
+## 5. In “Every one-track schedule”
+
+&gt; Edition
+
+Around it: “… comes next. proc schedule(e: ⟦Edition⟧): Tabella = tabella(talks(e.y…”
+
+Object Edition? I see it is in NimConf. Maybe early on we anticipate that all the code is below for reference and in the first part we focus only on tabelline related code</code></pre></details>
+<details class="foldcode"><summary>Version 4: what changed <span>16 lines</span></summary><pre><code class="language-text"># Changes in version 4, after the review of version 3
+
+Published 10 November 2026.
+
+1. The footer says where the source is, as nimib pages do: *Show source* opens `index.nim`,
+   folded at the end with the other files, and GitHub has them all with the data. (The review
+   mode reads only the page's `&lt;main&gt;`, so a comment cannot be put on the footer.)
+2. The first code block prints the first three slots before making a table of them: each is a
+   Nim object (`Slot`), and `slots` is a plain `seq[Slot]`, not a data frame.
+3. The text says where the length of each video comes from: the YouTube playlist of each
+   edition, read by `fetch.nim` into `data/videos.tsv` (step 6 of *How the data was downloaded*).
+4. *Every one-track schedule* says that the buttons above the table are tabs, a block of this
+   page (`nbTabs`), and that the page's blocks are in `blocks.nim`, folded at the end.
+5. A note at the start of *The first schedule* says that this part is about tabelline's code:
+   the data's types and procs (`Slot`, `Edition`, `editions`, ...) come from `nimconf.nim`, and
+   every file is folded at the end for reference.</code></pre></details>
 <h3>The source files</h3>
 <p>Every file the page is made of, as it is:</p>
-<details class="foldcode"><summary><code>index.nim</code> <span>492 lines</span></summary><pre><code class="nohighlight nim hljs"><span class="hljs-comment">## Every NimConf schedule, in tables: a nimib page with tabelline. Writes ../index.html.</span>
+<details class="foldcode" id="source"><summary><code>index.nim</code> <span>510 lines</span></summary><pre><code class="nohighlight nim hljs"><span class="hljs-comment">## Every NimConf schedule, in tables: a nimib page with tabelline. Writes ../index.html.</span>
 <span class="hljs-comment">## The data is in data/ (written by fetch.nim); the procs that read the pages are in nimconf.nim,</span>
 <span class="hljs-comment">## and the page shows them. See README.md for how to build it.</span>
 <span class="hljs-keyword">import</span> std/[os, strutils, strformat, sequtils, algorithm, options, tables, sets]
@@ -2096,7 +2227,7 @@ nbInit
 nb.doc.filename = srcDir.parentDir / <span class="hljs-string">&quot;index.html&quot;</span>
 nb.usePage(<span class="hljs-string">&quot;Every NimConf, in tables&quot;</span>,
            <span class="hljs-string">&quot;Every schedule of NimConf, the online Nim conference, 2020 to 2026, as tables made with tabelline.&quot;</span>)
-nbReview(tversion = <span class="hljs-number">2</span>, tsource = <span class="hljs-string">&quot;nimconf-schedules/src/index.nim&quot;</span>)
+nbReview(tversion = <span class="hljs-number">4</span>, tsource = <span class="hljs-string">&quot;nimconf-schedules/src/index.nim&quot;</span>)
 
 <span class="hljs-keyword">let</span> slots = readSlots(srcDir / <span class="hljs-string">&quot;data&quot;</span> / <span class="hljs-string">&quot;slots.tsv&quot;</span>)
 <span class="hljs-keyword">let</span> videos = readVideos(srcDir / <span class="hljs-string">&quot;data&quot;</span> / <span class="hljs-string">&quot;videos.tsv&quot;</span>)
@@ -2119,14 +2250,7 @@ reached 0.1: from the simplest table to the two tracks of 2026, then where the d
 from, and the Nim code that downloaded it.
 &quot;&quot;&quot;</span>
 
-nbVersion <span class="hljs-number">2</span>, <span class="hljs-string">&quot;10 November 2026, after the first review&quot;</span>
-nbInReview:
-  nbNote(<span class="hljs-string">&quot;&quot;&quot;
-**New in version 2**, after the first review: NimConf is the look you see first; striped rows
-come from tabelline (`optRowStriping`), so the plain first table is readable in the dark; the
-notes about code are blue and the note on missing data is warm in the NimConf look; *How this
-page is built* ends with the prompt, the review, and every source file, folded.
-&quot;&quot;&quot;</span>)
+nbVersion <span class="hljs-number">4</span>, <span class="hljs-string">&quot;10 November 2026, after the third review&quot;</span>
 nbEditions editions.mapIt(($it.year, it.day.rsplit(' <span class="hljs-string">', 1)[0]))</span>
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
@@ -2140,7 +2264,22 @@ follows it.
 
 The data of this page is a list of *slots*: a talk, a break, or the end of a track, each with
 the edition, the track, its starting time in UTC, a title, the speakers and the id of its
-video on YouTube. It is a Nim object, and a sequence of objects is already a table:
+video on YouTube. It is a Nim object, and the data is a plain `seq[Slot]`, read from
+`data/slots.tsv`:
+&quot;&quot;&quot;</span>
+
+nbNote(<span class="hljs-string">&quot;&quot;&quot;
+This part is about tabelline's code. What it uses from the data (the types `Slot` and
+`Edition`, the list `editions`, the table `length` of the videos) comes from `nimconf.nim`,
+explained in *How the data was downloaded*; every file of the page is folded at the end, in
+*The source files*, for reference.
+&quot;&quot;&quot;</span>)
+
+nbCode:
+  <span class="hljs-keyword">for</span> s <span class="hljs-keyword">in</span> slots[<span class="hljs-number">0</span> ..&lt; <span class="hljs-number">3</span>]: <span class="hljs-keyword">echo</span> s
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+A sequence of objects is already a table:
 &quot;&quot;&quot;</span>
 
 nbCode:
@@ -2151,7 +2290,9 @@ nbText: <span class="hljs-string">&quot;&quot;&quot;
 That is all it takes: `tabella` turns any sequence of objects (or named tuples) into a table,
 one column per field, and `nbTable` puts it in the page. It is honest and plain. A schedule
 wants a bit more: a title, only the columns a reader needs, the talk linked to its video, the
-length of each video, and the breaks set apart. Each of those is one verb, the same verbs as
+length of each video (read from each edition's YouTube playlist, see step 6 of *How the data was
+downloaded*: `length` maps a video's id to its seconds), and the breaks set apart. Each of
+those is one verb, the same verbs as
 R's [gt](https://gt.rstudio.com/) and Python's [Great Tables](https://posit-dev.github.io/great-tables/),
 in camelCase:
 &quot;&quot;&quot;</span>
@@ -2199,10 +2340,12 @@ Sixteen talks, the first at 11:00 UTC and the last at 20:45, with two coffee bre
 lunch break between them: the first NimConf was a long day. The breaks have no starting time
 because the page gave them none.
 
-## Every schedule
+## Every one-track schedule
 
 The table for 2020 is a few lines; the same lines in a proc make the table of any edition with
-one track. One tab for each:
+one track, the four from 2020 to 2024. The buttons above the table are tabs, one per edition:
+`nbTabs` is one of this page's own blocks, in `blocks.nim` (folded at the end with the other
+files). 2026 had two tracks at once and needs another table: it comes next.
 &quot;&quot;&quot;</span>
 
 nbCode:
@@ -2553,11 +2696,17 @@ the page is loaded from elsewhere: it is one file, and it works offline.
 This page was asked for in three short messages, written on a phone to Claude Code in a project
 that has Pietro's skills and rules (those are not copied here). Claude found the data, wrote the
 code and the page, and published it; Pietro read it on his phone and commented with the review
-mode, and each export is pasted back as it was. One more file for every round:
+mode. Each export is kept as it was pasted, followed by what changed in the next version (a
+review can also end with no changes). In order:
 &quot;&quot;&quot;</span>
 
 nbFoldCode <span class="hljs-string">&quot;process/prompt.md&quot;</span>, <span class="hljs-string">&quot;The prompt, 10 November 2026&quot;</span>
 nbFoldCode <span class="hljs-string">&quot;process/review-v1.md&quot;</span>, <span class="hljs-string">&quot;Review of version 1: six comments&quot;</span>
+nbFoldCode <span class="hljs-string">&quot;process/changes-v2.md&quot;</span>, <span class="hljs-string">&quot;Version 2: what changed&quot;</span>
+nbFoldCode <span class="hljs-string">&quot;process/review-v2.md&quot;</span>, <span class="hljs-string">&quot;Review of version 2: three comments&quot;</span>
+nbFoldCode <span class="hljs-string">&quot;process/changes-v3.md&quot;</span>, <span class="hljs-string">&quot;Version 3: what changed&quot;</span>
+nbFoldCode <span class="hljs-string">&quot;process/review-v3.md&quot;</span>, <span class="hljs-string">&quot;Review of version 3: five comments&quot;</span>
+nbFoldCode <span class="hljs-string">&quot;process/changes-v4.md&quot;</span>, <span class="hljs-string">&quot;Version 4: what changed&quot;</span>
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 ### The source files
@@ -2565,8 +2714,8 @@ nbText: <span class="hljs-string">&quot;&quot;&quot;
 Every file the page is made of, as it is:
 &quot;&quot;&quot;</span>
 
-<span class="hljs-keyword">for</span> file <span class="hljs-keyword">in</span> [<span class="hljs-string">&quot;index.nim&quot;</span>, <span class="hljs-string">&quot;nimconf.nim&quot;</span>, <span class="hljs-string">&quot;fetch.nim&quot;</span>, <span class="hljs-string">&quot;blocks.nim&quot;</span>, <span class="hljs-string">&quot;style.nim&quot;</span>, <span class="hljs-string">&quot;deps.sh&quot;</span>,
-             <span class="hljs-string">&quot;config.nims&quot;</span>]:
+nbFoldCode <span class="hljs-string">&quot;index.nim&quot;</span>, tid = <span class="hljs-string">&quot;source&quot;</span>
+<span class="hljs-keyword">for</span> file <span class="hljs-keyword">in</span> [<span class="hljs-string">&quot;nimconf.nim&quot;</span>, <span class="hljs-string">&quot;fetch.nim&quot;</span>, <span class="hljs-string">&quot;blocks.nim&quot;</span>, <span class="hljs-string">&quot;style.nim&quot;</span>, <span class="hljs-string">&quot;deps.sh&quot;</span>, <span class="hljs-string">&quot;config.nims&quot;</span>]:
   nbFoldCode file
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
@@ -2835,7 +2984,7 @@ nbSave</code></pre></details>
 writeFile(dataDir / <span class="hljs-string">&quot;slots.tsv&quot;</span>, slots)
 writeFile(dataDir / <span class="hljs-string">&quot;videos.tsv&quot;</span>, videos)
 <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;wrote &quot;</span>, dataDir / <span class="hljs-string">&quot;slots.tsv&quot;</span>, <span class="hljs-string">&quot; and &quot;</span>, dataDir / <span class="hljs-string">&quot;videos.tsv&quot;</span></code></pre></details>
-<details class="foldcode"><summary><code>blocks.nim</code> <span>232 lines</span></summary><pre><code class="nohighlight nim hljs"><span class="hljs-comment">## The blocks of the page: what it says more than once, or what plain Markdown can't say. The</span>
+<details class="foldcode"><summary><code>blocks.nim</code> <span>245 lines</span></summary><pre><code class="nohighlight nim hljs"><span class="hljs-comment">## The blocks of the page: what it says more than once, or what plain Markdown can't say. The</span>
 <span class="hljs-comment">## page (`index.nim`) is Markdown, nimib's blocks, tabelline's `nbTable` and these; their CSS is in</span>
 <span class="hljs-comment">## `style.nim`.</span>
 <span class="hljs-comment">##</span>
@@ -2970,6 +3119,7 @@ newNbBlock(<span class="hljs-type">NbSource</span>):
 
 newNbBlock(<span class="hljs-type">NbFoldCode</span>):
   title: <span class="hljs-built_in">string</span>
+  anchor: <span class="hljs-built_in">string</span>
   path: <span class="hljs-built_in">string</span>
   lang: <span class="hljs-built_in">string</span>
   code: <span class="hljs-built_in">string</span>
@@ -2980,9 +3130,10 @@ newNbBlock(<span class="hljs-type">NbFoldCode</span>):
       <span class="hljs-keyword">of</span> <span class="hljs-string">&quot;nim&quot;</span>: <span class="hljs-string">&quot;&lt;pre&gt;&lt;code class=</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">nohighlight nim hljs</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&gt;&quot;</span> &amp; highlightNim(blk.code) &amp; <span class="hljs-string">&quot;&lt;/code&gt;&lt;/pre&gt;&quot;</span>
       <span class="hljs-keyword">of</span> <span class="hljs-string">&quot;md&quot;</span>, <span class="hljs-string">&quot;text&quot;</span>: <span class="hljs-string">&quot;&lt;pre&gt;&lt;code class=</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">language-text</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&gt;&quot;</span> &amp; esc(blk.code) &amp; <span class="hljs-string">&quot;&lt;/code&gt;&lt;/pre&gt;&quot;</span>
       <span class="hljs-keyword">else</span>: &amp;<span class="hljs-string">&quot;&quot;&quot;&lt;pre&gt;&lt;code class=&quot;language-{blk.lang}&quot;&gt;&quot;&quot;&quot;</span> &amp; esc(blk.code) &amp; <span class="hljs-string">&quot;&lt;/code&gt;&lt;/pre&gt;&quot;</span>
-    &amp;<span class="hljs-string">&quot;&quot;&quot;&lt;details class=&quot;foldcode&quot;&gt;&lt;summary&gt;{name} &lt;span&gt;{lines} lines&lt;/span&gt;&lt;/summary&gt;{body}&lt;/details&gt;&quot;&quot;&quot;</span>
+    <span class="hljs-keyword">let</span> id = <span class="hljs-keyword">if</span> blk.anchor.len &gt; <span class="hljs-number">0</span>: &amp;<span class="hljs-string">&quot; id=</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">{blk.anchor}</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&quot;</span> <span class="hljs-keyword">else</span>: <span class="hljs-string">&quot;&quot;</span>
+    &amp;<span class="hljs-string">&quot;&quot;&quot;&lt;details class=&quot;foldcode&quot;{id}&gt;&lt;summary&gt;{name} &lt;span&gt;{lines} lines&lt;/span&gt;&lt;/summary&gt;{body}&lt;/details&gt;&quot;&quot;&quot;</span>
 
-<span class="hljs-keyword">proc</span> foldCode*(nb: <span class="hljs-keyword">var</span> <span class="hljs-type">Nb</span>, file, title, lang: <span class="hljs-built_in">string</span>) =
+<span class="hljs-keyword">proc</span> foldCode*(nb: <span class="hljs-keyword">var</span> <span class="hljs-type">Nb</span>, file, title, lang, anchor: <span class="hljs-built_in">string</span>) =
   <span class="hljs-keyword">let</span> path = nb.doc.thisFile.<span class="hljs-built_in">string</span>.parentDir / file
   <span class="hljs-keyword">let</span> lang = <span class="hljs-keyword">if</span> lang.len &gt; <span class="hljs-number">0</span>: lang
              <span class="hljs-keyword">else</span>: (<span class="hljs-keyword">case</span> file.splitFile.ext
@@ -2990,12 +3141,12 @@ newNbBlock(<span class="hljs-type">NbFoldCode</span>):
                     <span class="hljs-keyword">of</span> <span class="hljs-string">&quot;.md&quot;</span>: <span class="hljs-string">&quot;md&quot;</span>
                     <span class="hljs-keyword">of</span> <span class="hljs-string">&quot;.tsv&quot;</span>, <span class="hljs-string">&quot;.txt&quot;</span>: <span class="hljs-string">&quot;text&quot;</span>
                     <span class="hljs-keyword">else</span>: <span class="hljs-string">&quot;sh&quot;</span>)
-  nb.add newNbFoldCode(title = title, path = file, lang = lang, code = readFile(path).strip(chars = {'\n<span class="hljs-string">'}))</span>
+  nb.add newNbFoldCode(title = title, anchor = anchor, path = file, lang = lang, code = readFile(path).strip(chars = {'\n<span class="hljs-string">'}))</span>
 
-<span class="hljs-keyword">template</span> nbFoldCode*(tfile: <span class="hljs-built_in">string</span>, ttitle = <span class="hljs-string">&quot;&quot;</span>, tlang = <span class="hljs-string">&quot;&quot;</span>) =
+<span class="hljs-keyword">template</span> nbFoldCode*(tfile: <span class="hljs-built_in">string</span>, ttitle = <span class="hljs-string">&quot;&quot;</span>, tlang = <span class="hljs-string">&quot;&quot;</span>, tid = <span class="hljs-string">&quot;&quot;</span>) =
   <span class="hljs-comment">## The file `tfile` (beside the page's source), folded under its name (or `ttitle`, in</span>
-  <span class="hljs-comment">## Markdown) and its number of lines: *+* opens it.</span>
-  nb.foldCode(tfile, ttitle, tlang)
+  <span class="hljs-comment">## Markdown) and its number of lines: *+* opens it. `tid` lets a link open it (`#source`).</span>
+  nb.foldCode(tfile, ttitle, tlang, tid)
 
 <span class="hljs-comment"># -------------------------------------------------------------------------------------- the page</span>
 
@@ -3028,6 +3179,16 @@ newNbBlock(<span class="hljs-type">NbFoldCode</span>):
     });
   });
   show();
+  // &quot;Show source&quot; in the footer opens the folded index.nim and goes to it
+  function openSource() {
+    var d = document.getElementById('source');
+    if (d &amp;&amp; location.hash === '#source') { d.open = true; d.scrollIntoView(); }
+  }
+  window.addEventListener('hashchange', openSource);
+  document.querySelectorAll('a.show-source').forEach(function (a) {
+    a.addEventListener('click', function () { setTimeout(openSource, 0); });
+  });
+  openSource();
   // tabs: with JavaScript, one panel at a time
   document.querySelectorAll('.tabs').forEach(function (tabs) {
     var buttons = tabs.querySelectorAll('.tabs-bar button');
@@ -3050,7 +3211,8 @@ newNbBlock(<span class="hljs-type">NbFoldCode</span>):
 <span class="hljs-keyword">func</span> pageFooter(blk: <span class="hljs-type">JsonNode</span>, nb: <span class="hljs-type">Nb</span>): <span class="hljs-built_in">string</span> =
   <span class="hljs-string">&quot;&quot;&quot;&lt;footer class=&quot;page&quot;&gt;Written in Nim with Claude, in a &lt;a href=&quot;https://github.com/pietroppeter/nimib&quot;&gt;nimib&lt;/a&gt; 🐳 page,
 tables by &lt;a href=&quot;https://pietroppeter.github.io/tabelline/&quot;&gt;tabelline&lt;/a&gt;; the code on this page ran when it was built.
-&lt;a href=&quot;https://github.com/pietroppeter/claude-artifacts/tree/main/nimconf-schedules/src&quot;&gt;Source and data&lt;/a&gt;.&lt;/footer&gt;&quot;&quot;&quot;</span> &amp; bodyScript
+&lt;a href=&quot;#source&quot; class=&quot;show-source&quot;&gt;Show source&lt;/a&gt; (&lt;code&gt;index.nim&lt;/code&gt;, folded at the end with the other files) ·
+&lt;a href=&quot;https://github.com/pietroppeter/claude-artifacts/tree/main/nimconf-schedules/src&quot;&gt;all the files and the data on GitHub&lt;/a&gt;.&lt;/footer&gt;&quot;&quot;&quot;</span> &amp; bodyScript
 
 <span class="hljs-keyword">func</span> emptyPartial(blk: <span class="hljs-type">JsonNode</span>, nb: <span class="hljs-type">Nb</span>): <span class="hljs-built_in">string</span> = <span class="hljs-string">&quot;&quot;</span>
 
@@ -3305,7 +3467,8 @@ switch(<span class="hljs-string">&quot;hints&quot;</span>, <span class="hljs-str
 </main>
 <footer class="page">Written in Nim with Claude, in a <a href="https://github.com/pietroppeter/nimib">nimib</a> 🐳 page,
 tables by <a href="https://pietroppeter.github.io/tabelline/">tabelline</a>; the code on this page ran when it was built.
-<a href="https://github.com/pietroppeter/claude-artifacts/tree/main/nimconf-schedules/src">Source and data</a>.</footer><script>
+<a href="#source" class="show-source">Show source</a> (<code>index.nim</code>, folded at the end with the other files) ·
+<a href="https://github.com/pietroppeter/claude-artifacts/tree/main/nimconf-schedules/src">all the files and the data on GitHub</a>.</footer><script>
 (function () {
   var root = document.documentElement;
   function show() {
@@ -3321,6 +3484,16 @@ tables by <a href="https://pietroppeter.github.io/tabelline/">tabelline</a>; the
     });
   });
   show();
+  // "Show source" in the footer opens the folded index.nim and goes to it
+  function openSource() {
+    var d = document.getElementById('source');
+    if (d && location.hash === '#source') { d.open = true; d.scrollIntoView(); }
+  }
+  window.addEventListener('hashchange', openSource);
+  document.querySelectorAll('a.show-source').forEach(function (a) {
+    a.addEventListener('click', function () { setTimeout(openSource, 0); });
+  });
+  openSource();
   // tabs: with JavaScript, one panel at a time
   document.querySelectorAll('.tabs').forEach(function (tabs) {
     var buttons = tabs.querySelectorAll('.tabs-bar button');

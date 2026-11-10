@@ -12,7 +12,7 @@ nbInit
 nb.doc.filename = srcDir.parentDir / "index.html"
 nb.usePage("Every NimConf, in tables",
            "Every schedule of NimConf, the online Nim conference, 2020 to 2026, as tables made with tabelline.")
-nbReview(tversion = 2, tsource = "nimconf-schedules/src/index.nim")
+nbReview(tversion = 4, tsource = "nimconf-schedules/src/index.nim")
 
 let slots = readSlots(srcDir / "data" / "slots.tsv")
 let videos = readVideos(srcDir / "data" / "videos.tsv")
@@ -35,14 +35,7 @@ reached 0.1: from the simplest table to the two tracks of 2026, then where the d
 from, and the Nim code that downloaded it.
 """
 
-nbVersion 2, "10 November 2026, after the first review"
-nbInReview:
-  nbNote("""
-**New in version 2**, after the first review: NimConf is the look you see first; striped rows
-come from tabelline (`optRowStriping`), so the plain first table is readable in the dark; the
-notes about code are blue and the note on missing data is warm in the NimConf look; *How this
-page is built* ends with the prompt, the review, and every source file, folded.
-""")
+nbVersion 4, "10 November 2026, after the third review"
 nbEditions editions.mapIt(($it.year, it.day.rsplit(' ', 1)[0]))
 
 nbText: """
@@ -56,7 +49,22 @@ follows it.
 
 The data of this page is a list of *slots*: a talk, a break, or the end of a track, each with
 the edition, the track, its starting time in UTC, a title, the speakers and the id of its
-video on YouTube. It is a Nim object, and a sequence of objects is already a table:
+video on YouTube. It is a Nim object, and the data is a plain `seq[Slot]`, read from
+`data/slots.tsv`:
+"""
+
+nbNote("""
+This part is about tabelline's code. What it uses from the data (the types `Slot` and
+`Edition`, the list `editions`, the table `length` of the videos) comes from `nimconf.nim`,
+explained in *How the data was downloaded*; every file of the page is folded at the end, in
+*The source files*, for reference.
+""")
+
+nbCode:
+  for s in slots[0 ..< 3]: echo s
+
+nbText: """
+A sequence of objects is already a table:
 """
 
 nbCode:
@@ -67,7 +75,9 @@ nbText: """
 That is all it takes: `tabella` turns any sequence of objects (or named tuples) into a table,
 one column per field, and `nbTable` puts it in the page. It is honest and plain. A schedule
 wants a bit more: a title, only the columns a reader needs, the talk linked to its video, the
-length of each video, and the breaks set apart. Each of those is one verb, the same verbs as
+length of each video (read from each edition's YouTube playlist, see step 6 of *How the data was
+downloaded*: `length` maps a video's id to its seconds), and the breaks set apart. Each of
+those is one verb, the same verbs as
 R's [gt](https://gt.rstudio.com/) and Python's [Great Tables](https://posit-dev.github.io/great-tables/),
 in camelCase:
 """
@@ -115,10 +125,12 @@ Sixteen talks, the first at 11:00 UTC and the last at 20:45, with two coffee bre
 lunch break between them: the first NimConf was a long day. The breaks have no starting time
 because the page gave them none.
 
-## Every schedule
+## Every one-track schedule
 
 The table for 2020 is a few lines; the same lines in a proc make the table of any edition with
-one track. One tab for each:
+one track, the four from 2020 to 2024. The buttons above the table are tabs, one per edition:
+`nbTabs` is one of this page's own blocks, in `blocks.nim` (folded at the end with the other
+files). 2026 had two tracks at once and needs another table: it comes next.
 """
 
 nbCode:
@@ -469,11 +481,17 @@ the page is loaded from elsewhere: it is one file, and it works offline.
 This page was asked for in three short messages, written on a phone to Claude Code in a project
 that has Pietro's skills and rules (those are not copied here). Claude found the data, wrote the
 code and the page, and published it; Pietro read it on his phone and commented with the review
-mode, and each export is pasted back as it was. One more file for every round:
+mode. Each export is kept as it was pasted, followed by what changed in the next version (a
+review can also end with no changes). In order:
 """
 
 nbFoldCode "process/prompt.md", "The prompt, 10 November 2026"
 nbFoldCode "process/review-v1.md", "Review of version 1: six comments"
+nbFoldCode "process/changes-v2.md", "Version 2: what changed"
+nbFoldCode "process/review-v2.md", "Review of version 2: three comments"
+nbFoldCode "process/changes-v3.md", "Version 3: what changed"
+nbFoldCode "process/review-v3.md", "Review of version 3: five comments"
+nbFoldCode "process/changes-v4.md", "Version 4: what changed"
 
 nbText: """
 ### The source files
@@ -481,8 +499,8 @@ nbText: """
 Every file the page is made of, as it is:
 """
 
-for file in ["index.nim", "nimconf.nim", "fetch.nim", "blocks.nim", "style.nim", "deps.sh",
-             "config.nims"]:
+nbFoldCode "index.nim", tid = "source"
+for file in ["nimconf.nim", "fetch.nim", "blocks.nim", "style.nim", "deps.sh", "config.nims"]:
   nbFoldCode file
 
 nbText: """
