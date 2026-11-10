@@ -49,15 +49,17 @@ echo t.toMarkdown
 | [Design guide](https://pietroppeter.github.io/tabelline/design/) | the two looks, the shapes, the palette |
 | [For coding agents](https://pietroppeter.github.io/tabelline/agents/) | setup and working rules, for agents and people |
 
+Here is what it looks the styled documentation, with a main theme inspired by Bruno Munari and Japanese colors, you can see parts of the table which are the names used in the api.
+
 .. image:: https://raw.githubusercontent.com/pietroppeter/claude-artifacts/7141f2a1bc354e9230287fbc35c9772bfbabc0b2/tabelline-forum-post/src/shots/tabelline-parts.png
    :width: 640px
 
-The theme above is inspired by Bruno Munari and Japanese colors, the theme below is a playful theme on school (Quaderno). Theme styling is one of the new addition of tabelline which is not a direct port of gt/great tables (you can see also we have Nim sugar to create tables as we should).
+There is also a playful theme on school (Quaderno). Theme styling is one of the new addition of tabelline which is not a direct port of gt/great tables (you can see also we have Nim sugar to create tables as we should).
 
 .. image:: https://raw.githubusercontent.com/pietroppeter/claude-artifacts/a5fc85240f1b0b94b5da28748900996511dc990a/tabelline-forum-post/src/shots/guide-quaderno.png
    :width: 640px
 
-As a small celebration I put every NimConf schedule, 2020 to 2026, in tabelline tables:
+As a small celebration I put every NimConf schedule, 2020 to 2026, in tabelline tables (and with a NimConf style):
 
 https://pietroppeter.github.io/claude-artifacts/nimconf-schedules/
 
@@ -68,4 +70,4 @@ That page also has a review mode for nimib pages: press ✎ Review, select some 
 
 Made with Claude and Opus 5.5, mostly from my phone, mostly over the weekend.
 
-I really enjoyed working on this: the reference API is beautiful and I think every language deserves a port of it! The moment I had the idea of the review mode (yesterday morning) it was pretty clear, and it was so much fun iterating on it while using it (see the devlog post: https://pietroppeter.github.io/tabelline/devlog/review-mode/).
+I really enjoyed working on this: the reference API is beautiful and I think every language deserves a port of it! The moment I had the idea of the review mode (yesterday morning) it was exciting and it was so much fun iterating on it while using it (see the devlog post: https://pietroppeter.github.io/tabelline/devlog/review-mode/).

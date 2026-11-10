@@ -1,6 +1,6 @@
 # tabelline-forum-post page sources
 
-A draft of the Nim forum post that announces tabelline 0.1, with the review mode.
+The Nim forum post that announces tabelline 0.1, with the review mode.
 
 - `post.md`: the post, as it is pasted in the forum (Markdown fences, `.. image::` for images).
 - `index.nim`: the nimib page that shows it and writes `../index.html`; `page.nim`: its blocks.

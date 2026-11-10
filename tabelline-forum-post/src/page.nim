@@ -113,7 +113,7 @@ template nbPost*(tfile, ttitle, tcategory, tauthor: string) =
 newNbBlock(NbPaste):
   text: string
   toHtml:
-    """<div class="paste"><p><button type="button" id="copy-post">Copy the post</button></p>""" &
+    """<div class="paste"><p><button type="button" id="copy-post">Copy the source</button></p>""" &
       """<pre><code class="language-text" id="post-text">""" & esc(blk.text.strip) & "</code></pre></div>" &
       """<script>document.getElementById('copy-post').addEventListener('click', function (e) {
   navigator.clipboard.writeText(document.getElementById('post-text').textContent)
@@ -134,7 +134,7 @@ proc usePage*(nb: var Nb, title, description: string) =
   nb.doc.context["nb_style"] = %""
   nb.doc.context["disableHighlightJs"] = %true
   nb.backend.partials["header"] = proc (blk: JsonNode, nb: Nb): string =
-    """<header class="page"><span>A draft for the Nim forum</span></header>"""
+    """<header class="page"><span>A post on the Nim forum</span></header>"""
   nb.backend.partials["footer"] = proc (blk: JsonNode, nb: Nb): string =
     """<footer class="page">Written with Claude, in a <a href="https://github.com/pietroppeter/nimib">nimib</a> 🐳 page.
 <a href="https://github.com/pietroppeter/claude-artifacts/tree/main/tabelline-forum-post/src">Source</a>.</footer>"""
