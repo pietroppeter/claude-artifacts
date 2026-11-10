@@ -8,6 +8,7 @@
 ##   nbNote text, nkCode                # a sheet set apart: plain, about the code, or a gap
 ##   nbTabs labels: body                # one tab per label, one block of `body` per tab
 ##   nbSource "nimconf.nim", "plain"    # a proc of a file, shown and not run
+##   nbFoldCode "nimconf.nim"            # a whole file, folded under its name
 import std/[json, os, strutils, strformat]
 import nimib except md
 import nimib/highlight
@@ -127,6 +128,38 @@ template nbSource*(tfile: string, tnames: varargs[string]) =
   ## that the page explains is the code that downloaded the data.
   nb.source(tfile, tnames)
 
+# ------------------------------------------------------------------------------ files, folded
+# After tabelline's `nbFoldCode` (its docs, PR #34): a file folded under its path and its length.
+
+newNbBlock(NbFoldCode):
+  title: string
+  path: string
+  lang: string
+  code: string
+  toHtml:
+    let lines = blk.code.splitLines.len
+    let name = if blk.title.len > 0: inline(blk.title) else: "<code>" & esc(blk.path) & "</code>"
+    let body = case blk.lang
+      of "nim": "<pre><code class=\"nohighlight nim hljs\">" & highlightNim(blk.code) & "</code></pre>"
+      of "md", "text": "<pre><code class=\"language-text\">" & esc(blk.code) & "</code></pre>"
+      else: &"""<pre><code class="language-{blk.lang}">""" & esc(blk.code) & "</code></pre>"
+    &"""<details class="foldcode"><summary>{name} <span>{lines} lines</span></summary>{body}</details>"""
+
+proc foldCode*(nb: var Nb, file, title, lang: string) =
+  let path = nb.doc.thisFile.string.parentDir / file
+  let lang = if lang.len > 0: lang
+             else: (case file.splitFile.ext
+                    of ".nim", ".nims": "nim"
+                    of ".md": "md"
+                    of ".tsv", ".txt": "text"
+                    else: "sh")
+  nb.add newNbFoldCode(title = title, path = file, lang = lang, code = readFile(path).strip(chars = {'\n'}))
+
+template nbFoldCode*(tfile: string, ttitle = "", tlang = "") =
+  ## The file `tfile` (beside the page's source), folded under its name (or `ttitle`, in
+  ## Markdown) and its number of lines: *+* opens it.
+  nb.foldCode(tfile, ttitle, tlang)
+
 # -------------------------------------------------------------------------------------- the page
 
 const lookHead = """<script>
@@ -137,8 +170,8 @@ const lookHead = """<script>
     var q = new URLSearchParams(location.search).get('look');
     if (q === 'munari' || q === 'nimconf') localStorage.setItem('nimconf-look', q);
     var l = q || localStorage.getItem('nimconf-look');
-    root.dataset.look = (l === 'nimconf') ? 'nimconf' : 'munari';
-  } catch (e) { root.dataset.look = 'munari'; }
+    root.dataset.look = (l === 'munari') ? 'munari' : 'nimconf';   // NimConf is the default
+  } catch (e) { root.dataset.look = 'nimconf'; }
 })();
 </script>"""
 

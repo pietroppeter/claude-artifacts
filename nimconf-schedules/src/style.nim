@@ -1,10 +1,10 @@
 ## Every styling decision of the page, in one place: its two looks, its fonts, and the CSS of
 ## the blocks of `blocks.nim`. No other file of the page writes CSS or a colour.
 ##
-## - **Munari**, the default (a page without JavaScript is Munari): tabelline's own look, after
+## - **Munari** (the base rules: a page without JavaScript is Munari): tabelline's own look, after
 ##   Bruno Munari, flat paper, one geometric sans (Jost), the Haru palette, the red circle for a
 ##   place (headings), the square edge for a sheet set apart, the triangle for a warning.
-## - **NimConf**: dark, after conf.nim-lang.org as it is in 2026: its background `#1e202a`, its
+## - **NimConf**, the look a reader sees first (`blocks.nim` sets it): dark, after conf.nim-lang.org as it is in 2026: its background `#1e202a`, its
 ##   yellow `#ffe953` for headings and links, `#2b2e3b` for every other row, Open Sans and
 ##   Titillium Web, and its `»` before every item of a list. Every rule of it is scoped by
 ##   `html[data-look="nimconf"]` and changes only what differs from Munari.
@@ -143,6 +143,19 @@ html:not(.js) .tabs-bar { display: none; }
 .source .file { margin: 0 0 -.1rem; font: 12px var(--mono); color: var(--muted); }
 .source pre { margin-top: .2rem; }
 
+/* files folded under their name (nbFoldCode) */
+details.foldcode { margin: 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+details.foldcode + details.foldcode { border-top: 0; }
+details.foldcode:not(:has(+ details.foldcode)) { margin-bottom: 1.6rem; }
+details.foldcode > summary { list-style: none; cursor: pointer; padding: .45rem 0; display: flex; gap: .6rem; align-items: baseline; min-height: 44px; box-sizing: border-box; }
+details.foldcode > summary::-webkit-details-marker { display: none; }
+details.foldcode > summary::before { content: "+"; font-weight: 700; width: .8rem; color: var(--secondary-text); }
+details.foldcode[open] > summary::before { content: "−"; }
+details.foldcode > summary > span { margin-left: auto; font-size: .8rem; color: var(--muted); white-space: nowrap; }
+details.foldcode pre { margin: .2rem 0 .8rem; }
+body details.foldcode pre > code { font-size: 12.5px; }
+details.foldcode pre > code.language-text { white-space: pre-wrap; overflow-wrap: anywhere; }   /* prose: wrap it */
+
 /* the editions as cards: a square edge each */
 .editions { display: grid; grid-template-columns: repeat(auto-fill, minmax(8.5rem, 1fr)); gap: .5rem; margin: 1rem 0; padding: 0; list-style: none; }
 .editions li { padding: .5rem .7rem; background: var(--surface); border-top: 3px solid var(--secondary); }
@@ -173,8 +186,11 @@ pre.nb-output { border-radius: 4px; }
 .tabs-bar button { border-radius: 4px; }
 .tabs-bar button[aria-selected="true"] { border-color: var(--primary); box-shadow: none; background: var(--primary); color: var(--paper); }
 .note { border-radius: 2px; }
+.note.code { border-top-color: var(--secondary); }     /* the site's blue: green is not of its palette */
+.note.gap { background: color-mix(in oklab, var(--warning) 16%, var(--paper)); }
+.note.gap strong { color: var(--primary); }
+details.foldcode > summary::before { color: var(--primary); }
 .editions li { border-top-color: var(--primary); border-radius: 2px; }
-main .tb_table tbody tr:nth-child(even) > td, main .tb_table tbody tr:nth-child(even) > th { background-color: var(--shade) !important; }
 """
 
 func scoped(rules, scope: string): string =

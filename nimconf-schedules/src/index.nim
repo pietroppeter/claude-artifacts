@@ -12,7 +12,7 @@ nbInit
 nb.doc.filename = srcDir.parentDir / "index.html"
 nb.usePage("Every NimConf, in tables",
            "Every schedule of NimConf, the online Nim conference, 2020 to 2026, as tables made with tabelline.")
-nbReview(tsource = "nimconf-schedules/src/index.nim")
+nbReview(tversion = 2, tsource = "nimconf-schedules/src/index.nim")
 
 let slots = readSlots(srcDir / "data" / "slots.tsv")
 let videos = readVideos(srcDir / "data" / "videos.tsv")
@@ -35,13 +35,22 @@ reached 0.1: from the simplest table to the two tracks of 2026, then where the d
 from, and the Nim code that downloaded it.
 """
 
+nbVersion 2, "10 November 2026, after the first review"
+nbInReview:
+  nbNote("""
+**New in version 2**, after the first review: NimConf is the look you see first; striped rows
+come from tabelline (`optRowStriping`), so the plain first table is readable in the dark; the
+notes about code are blue and the note on missing data is warm in the NimConf look; *How this
+page is built* ends with the prompt, the review, and every source file, folded.
+""")
 nbEditions editions.mapIt(($it.year, it.day.rsplit(' ', 1)[0]))
 
 nbText: """
 Five editions, from June 2020 to June 2026: three in June, two in October, and none in 2023
 or 2025. Every one of them starts on a Saturday morning, UTC. The switch at the top of the
-page changes the look: **Munari** is tabelline's own, **NimConf** is the one of
-[conf.nim-lang.org](https://conf.nim-lang.org/). Every table follows it.
+page changes the look: **NimConf**, the one you see first, is the look of
+[conf.nim-lang.org](https://conf.nim-lang.org/); **Munari** is tabelline's own. Every table
+follows it.
 
 ## The first schedule
 
@@ -81,6 +90,7 @@ nbCode:
 
   let t2020 = tabella(talks(2020)):
     optCssTheme()
+    optRowStriping()
     tabHeader "NimConf 2020", editions[0].day
     colsHide "kind"
     colsLabel {"start": "UTC", "talk": "Talk", "speakers": "Speaker", "length": "Video"}
@@ -93,7 +103,9 @@ nbCode:
 
 nbNote("""
 `optCssTheme()` makes the table read its colours and font from the page (`--ink`, `--paper`,
-`--line`, `--primary`, `--font`), so it changes with the look. `fmtMarkdown` renders the talk's
+`--line`, `--primary`, `--font`), so it changes with the look, and `optRowStriping()` shades
+every other row, as conf.nim-lang.org does. The plain table above has neither, so it stays
+white whatever the look. `fmtMarkdown` renders the talk's
 `[title](link)`; `fmtDuration` writes seconds as minutes; `where` picks rows by their values,
 here the breaks, which `colsHide` keeps in the data but out of sight.
 """, nkCode)
@@ -113,6 +125,7 @@ nbCode:
   proc schedule(e: Edition): Tabella =
     tabella(talks(e.year)):
       optCssTheme()
+      optRowStriping()
       tabHeader &"NimConf {e.year}", e.day
       colsHide "kind"
       colsLabel {"start": "UTC", "talk": "Talk", "speakers": "Speaker", "length": "Video"}
@@ -155,6 +168,7 @@ nbCode:
 
   let t2026 = tabella(rows):
     optCssTheme()
+    optRowStriping()
     tabHeader "NimConf 2026", year.day & " · two tracks"
     colsLabel {"start": "UTC", "projects": "Projects", "social": "Social and Workflow"}
     tabSpanner "Tracks", cols("projects", "social")
@@ -201,6 +215,7 @@ nbCode:
 
   let editionsTable = tabella(summary, rownameCol = "edition"):
     optCssTheme()
+    optRowStriping()
     tabHeader "Five NimConfs", "2020 to 2026"
     fmtDuration "video", outputUnits = ["hours", "minutes"]
     colsHide "day"
@@ -238,6 +253,7 @@ nbCode:
 
   let speakersTable = tabella(returning, rownameCol = "speaker"):
     optCssTheme()
+    optRowStriping()
     tabHeader "Who came back", "speakers at two editions or more, in bold at all five"
     colsLabelWith(proc (s: string): string = s.replace("y", ""))
     tabSpanner "Talks at", startsWith("y")
@@ -291,6 +307,7 @@ nbCode:
 
   let sourcesTable = tabella(sources, rownameCol = "edition"):
     optCssTheme()
+    optRowStriping()
     tabHeader "Sources", "read on 10 November 2026"
     colsLabel {"schedule": "Schedule", "playlists": "YouTube", "announced": "Announced"}
     fmtMarkdown ["schedule", "playlists", "announced"]
@@ -447,6 +464,28 @@ The review mode (**✎ Review** under the lede) is tabelline's, copied into `ven
 some text, comment on it, and export the comments for the next round of this page. Nothing on
 the page is loaded from elsewhere: it is one file, and it works offline.
 
+### The prompt and the reviews
+
+This page was asked for in three short messages, written on a phone to Claude Code in a project
+that has Pietro's skills and rules (those are not copied here). Claude found the data, wrote the
+code and the page, and published it; Pietro read it on his phone and commented with the review
+mode, and each export is pasted back as it was. One more file for every round:
+"""
+
+nbFoldCode "process/prompt.md", "The prompt, 10 November 2026"
+nbFoldCode "process/review-v1.md", "Review of version 1: six comments"
+
+nbText: """
+### The source files
+
+Every file the page is made of, as it is:
+"""
+
+for file in ["index.nim", "nimconf.nim", "fetch.nim", "blocks.nim", "style.nim", "deps.sh",
+             "config.nims"]:
+  nbFoldCode file
+
+nbText: """
 Congratulations to tabelline on its 0.1, and thanks to everyone who gave a talk at NimConf. 👑
 """
 
