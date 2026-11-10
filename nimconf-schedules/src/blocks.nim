@@ -133,6 +133,7 @@ template nbSource*(tfile: string, tnames: varargs[string]) =
 
 newNbBlock(NbFoldCode):
   title: string
+  anchor: string
   path: string
   lang: string
   code: string
@@ -143,9 +144,10 @@ newNbBlock(NbFoldCode):
       of "nim": "<pre><code class=\"nohighlight nim hljs\">" & highlightNim(blk.code) & "</code></pre>"
       of "md", "text": "<pre><code class=\"language-text\">" & esc(blk.code) & "</code></pre>"
       else: &"""<pre><code class="language-{blk.lang}">""" & esc(blk.code) & "</code></pre>"
-    &"""<details class="foldcode"><summary>{name} <span>{lines} lines</span></summary>{body}</details>"""
+    let id = if blk.anchor.len > 0: &" id=\"{blk.anchor}\"" else: ""
+    &"""<details class="foldcode"{id}><summary>{name} <span>{lines} lines</span></summary>{body}</details>"""
 
-proc foldCode*(nb: var Nb, file, title, lang: string) =
+proc foldCode*(nb: var Nb, file, title, lang, anchor: string) =
   let path = nb.doc.thisFile.string.parentDir / file
   let lang = if lang.len > 0: lang
              else: (case file.splitFile.ext
@@ -153,12 +155,12 @@ proc foldCode*(nb: var Nb, file, title, lang: string) =
                     of ".md": "md"
                     of ".tsv", ".txt": "text"
                     else: "sh")
-  nb.add newNbFoldCode(title = title, path = file, lang = lang, code = readFile(path).strip(chars = {'\n'}))
+  nb.add newNbFoldCode(title = title, anchor = anchor, path = file, lang = lang, code = readFile(path).strip(chars = {'\n'}))
 
-template nbFoldCode*(tfile: string, ttitle = "", tlang = "") =
+template nbFoldCode*(tfile: string, ttitle = "", tlang = "", tid = "") =
   ## The file `tfile` (beside the page's source), folded under its name (or `ttitle`, in
-  ## Markdown) and its number of lines: *+* opens it.
-  nb.foldCode(tfile, ttitle, tlang)
+  ## Markdown) and its number of lines: *+* opens it. `tid` lets a link open it (`#source`).
+  nb.foldCode(tfile, ttitle, tlang, tid)
 
 # -------------------------------------------------------------------------------------- the page
 
@@ -191,6 +193,16 @@ const bodyScript = """<script>
     });
   });
   show();
+  // "Show source" in the footer opens the folded index.nim and goes to it
+  function openSource() {
+    var d = document.getElementById('source');
+    if (d && location.hash === '#source') { d.open = true; d.scrollIntoView(); }
+  }
+  window.addEventListener('hashchange', openSource);
+  document.querySelectorAll('a.show-source').forEach(function (a) {
+    a.addEventListener('click', function () { setTimeout(openSource, 0); });
+  });
+  openSource();
   // tabs: with JavaScript, one panel at a time
   document.querySelectorAll('.tabs').forEach(function (tabs) {
     var buttons = tabs.querySelectorAll('.tabs-bar button');
@@ -213,7 +225,8 @@ func pageHeader(blk: JsonNode, nb: Nb): string =
 func pageFooter(blk: JsonNode, nb: Nb): string =
   """<footer class="page">Written in Nim with Claude, in a <a href="https://github.com/pietroppeter/nimib">nimib</a> 🐳 page,
 tables by <a href="https://pietroppeter.github.io/tabelline/">tabelline</a>; the code on this page ran when it was built.
-<a href="https://github.com/pietroppeter/claude-artifacts/tree/main/nimconf-schedules/src">Source and data</a>.</footer>""" & bodyScript
+<a href="#source" class="show-source">Show source</a> (<code>index.nim</code>, folded at the end with the other files) ·
+<a href="https://github.com/pietroppeter/claude-artifacts/tree/main/nimconf-schedules/src">all the files and the data on GitHub</a>.</footer>""" & bodyScript
 
 func emptyPartial(blk: JsonNode, nb: Nb): string = ""
 
