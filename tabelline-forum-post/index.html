@@ -1059,7 +1059,7 @@ I really enjoyed working on this: the reference API is beautiful and I think eve
 <ul>
 <li><strong>Images</strong>: the forum takes <code>.. image:: url</code> (reStructuredText). If it shows the line instead
 of the image, use a plain link.</li>
-<li><strong>Colours</strong>: Markdown has no colours, so <code>toMarkdown</code> drops every style (a <code>tabStyle</code> with a colour gives the same table). The coloured circles are emoji, which do pass. To see whether the forum keeps any HTML colour, try <code>&lt;span style=&quot;color:red&quot;&gt;red&lt;/span&gt;</code> in its Preview.</li>
+<li><strong>Colours</strong>: Markdown has no colours, so <code>toMarkdown</code> drops every style; the coloured circles are emoji, which do pass. HTML does not pass either: an inline <code>span</code> with a colour and the <code>raw</code> directive were both tested in the forum's Preview and show no colour.</li>
 <li><strong>Links</strong>: gt and Great Tables are Markdown links. If the forum shows the brackets, use bare URLs.</li>
 </ul>
 <h2>The reviews</h2>

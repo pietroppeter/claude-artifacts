@@ -34,7 +34,7 @@ nbText """
 
 - **Images**: the forum takes `.. image:: url` (reStructuredText). If it shows the line instead
   of the image, use a plain link.
-- **Colours**: Markdown has no colours, so `toMarkdown` drops every style (a `tabStyle` with a colour gives the same table). The coloured circles are emoji, which do pass. To see whether the forum keeps any HTML colour, try `<span style="color:red">red</span>` in its Preview.
+- **Colours**: Markdown has no colours, so `toMarkdown` drops every style; the coloured circles are emoji, which do pass. HTML does not pass either: an inline `span` with a colour and the `raw` directive were both tested in the forum's Preview and show no colour.
 - **Links**: gt and Great Tables are Markdown links. If the forum shows the brackets, use bare URLs.
 """
 
