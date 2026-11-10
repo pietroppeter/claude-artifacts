@@ -47,6 +47,6 @@ Each review round, as exported, and what it changed.
 nbRound "process/review-v1.md", "Review of version 1: four comments. Version 2 is much shorter (the details stay in the pages), says *beautiful display tables*, and links gt and Great Tables."
 
 nbRound "process/review-v2.md", "Review of version 2: two comments. Version 3 drops the line on Francesco and shows tabelline at desktop width with *Show the parts* on, its legend included."
-nbRound "process/review-v3.md", "Review of version 3: two comments. Version 4 links the docs at the top (GitHub is linked from there), lists the stories, the devlog and the design guide, and ends with your paragraph on why you enjoyed it."
+nbRound "process/review-v3.md", "Review of version 3: two comments. Version 4 links the docs at the top (GitHub is linked from there), lists the stories, the devlog and the design guide, ends with your paragraph on why you enjoyed it, and says the review mode will move to nimib."
 
 nbSave

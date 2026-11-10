@@ -14,7 +14,7 @@ https://pietroppeter.github.io/claude-artifacts/nimconf-schedules/
 
 .. image:: https://raw.githubusercontent.com/pietroppeter/claude-artifacts/21b7dbded2ad7fea642453c413ac0e8a837ce9ab/tabelline-forum-post/src/shots/nimconf-2026.png
 
-That page also has a review mode for nimib pages: press ✎ Review, select some text, comment, and export all the comments to paste to a coding agent.
+That page also has a review mode for nimib pages: press ✎ Review, select some text, comment, and export all the comments to paste to a coding agent. It will move to nimib, so every nimib notebook can have it.
 
 Made with Claude, mostly from my phone.
 
