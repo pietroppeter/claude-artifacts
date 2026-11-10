@@ -21,7 +21,7 @@ const postCss = """
 .forum .f-bar { background: var(--f-bar); color: #fff; padding: .55rem .8rem; font-weight: 700; font-size: 14px; }
 .forum .f-bar span { color: #ffe953; }
 .forum .f-body { padding: .6rem .8rem 1rem; }
-.forum h1.f-title { font: 700 26px/1.25 inherit; font-family: inherit; margin: .4rem 0 .2rem; color: var(--f-ink); }
+.forum h1.f-title { font-size: 24px; font-weight: 700; line-height: 1.25; font-family: inherit; margin: .4rem 0 .2rem; color: var(--f-ink); }
 .forum .f-tag { font-size: 13px; font-weight: 700; padding-bottom: .6rem; border-bottom: 1px solid var(--f-line); }
 .forum .f-tag::before { content: ""; display: inline-block; width: 10px; height: 10px; margin-right: 5px; background: var(--f-tag); }
 .forum .f-post { display: flex; gap: .6rem; padding-top: .6rem; }
