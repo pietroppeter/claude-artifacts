@@ -1,0 +1,89 @@
+# NimConf schedules, from conf.nim-lang.org, read 2026-11-10
+year	track	start	kind	title	speakers	video
+2020		11:00	talk	NimConf 2020 introduction	Andreas Rumpf	xqHdUjCXizI
+2020		11:15	talk	An intro to Nim for the uninitiated	Dominik Picheta	lxLL3km21Aw
+2020		12:00	talk	Making games quickly in Nim with Nico	Jez Impbox	czLI5XJFxYA
+2020		12:30	talk	INim is back!	Tristram Oaten	Qa_9vut4TzQ
+2020		12:45	talk	Embedding NimScript	Peter Munch-Ellingsen	BdQkU_HepIg
+2020			break	Coffee break		
+2020		13:30	talk	Omni - DSL for low level audio programming	Francesco Cameli	ruT7sbs5O-Q
+2020		14:15	talk	Nim in a light switch - Programming the ESP8266	Christian Jacobsen	eCCrkZI0rVU
+2020		14:45	talk	Game Boy Advance Development in Nim	Jeremy Clarke	sZUM7MhWr88
+2020			break	Lunch break		
+2020		16:00	talk	Nim ARC/ORC	Andreas Rumpf	aUJcYTnPWCg
+2020		16:45	talk	Dali: Assembling Android .apk files with Nim	Mateusz Czapliński	wr9X5NCwPlI
+2020		17:30	talk	Multithreaded programs - the good, the bad and the buggy	Mamy André-Ratsimbazafy	NOAI2wH9Cf0
+2020			break	Coffee break		
+2020		18:30	talk	Decimal128: When/How To Use	John Dupuy	pfIXlXeneDE
+2020		19:00	talk	Gerbil: A "Dynamic Site Generator" in Nim	Jason Jones	ncBGuizQqMI
+2020		19:30	talk	Plugins for Jester	John Dupuy	BYv1QfJOQjs
+2020		20:00	talk	Fidget: Let's rethink UI development with Nim	Andre von Houck	IB8Yt2dqZbo
+2020		20:45	talk	Introducing Enu, 3D live-coding in Nim	Scott Wadden	3l6tsKM1cY8
+2021		11:00	talk	Zen of Nim	Andreas Rumpf	D_G9h7DcIqM
+2021		12:00	talk	Making a Platformer in NICO with Nim	Jez Impbox	dlDLulUrNvE
+2021		12:30	talk	Share your Nim adventures with Nimib	Pietro Peterlongo	sWA58Wtk6L8
+2021		13:00	talk	Nicoru - Development Container Runtime in Nim	Shuhei Nogawa	mUWOe2NUWm4
+2021			break	Coffee break (15 min)		
+2021		13:30	talk	Why I wrote my own keyboard firmware in Nim	Peter Munch-Ellingsen	dcHEhO4J29U
+2021		14:15	talk	Torrentinim - Building a torrent crawler with Nim	Sergio Tapia	GTD4kfGFA94
+2021		14:30	talk	Nim in production	Mamy Ratsimbazafy	5wljNaPkU7M
+2021			break	Lunch break (1 hour)		
+2021		16:00	talk	Dimscord - Interact with the Discord API using Nim	krisppurg	pVTZ8CUEnZE
+2021		16:30	talk	Nim in an RTOS World	Jaremy Creechley	rlZ4ALGAU1M
+2021		17:15	talk	Norm: Where we at, where are we going	Constantine Molchanov	PYa4PIhuOgc
+2021			break	Coffee break (15 min)		
+2021		18:00	talk	Min - implementing a programming language with Nim	Fabio Cevasco	vyHuh_kGR28
+2021		18:45	talk	Making music with paraMIDI and ANSIWAVE	Zach Oakes	cBqBfPRWla8
+2021		19:15	talk	Creating a 3D game in Enu 0.2	Scott Wadden	ECJsq7BeZ8w
+2021		19:45	talk	Pixie - A full-featured 2D graphics library for Nim	Andre von Houck	8acDfUIwLnk
+2022		10:00	talk	Nim 2	Andreas Rumpf	aDi50K_Id_k
+2022		10:45	talk	moe	Shuhei Nogawa	ZXo4-xaLNiE
+2022		11:00	talk	Libp2p in Nim & other languages	Tanguy	r54k9QI-r_A
+2022		11:30	talk	Fuzzing with drchaos	Antonis Geralis	6gsgg1zpTTQ
+2022			break	Break (1 hour)		
+2022		13:00	talk	Nimib goes interactive	Pietro Peterlongo and Hugo Granstrom	hZ7wX1kgnuc
+2022		14:15	talk	Make beautiful presentations in Nim using NimiSlides	Hugo Granstrom	Sf1TndCcIlU
+2022		15:00	talk	Exprgrad	Can Lehmann	YXD8ZODahts
+2022		15:30	talk	Polymorph	Ryan Lipscombe	zCHZ0l7nLA0
+2022			break	Break (1 hour)		
+2022		17:00	talk	State of NimForUE	Juan Gomez	0b3ixaz2uOg
+2022		17:45	talk	Nim-SOS and Nim-HPX	Chris Taylor	iWm1u1geJmo
+2022		18:45	talk	Scratch Built Games	Andre von Houck	aKg5PxUi_eA
+2024		11:00	talk	Welcome to NimConf 2024	Andreas Rumpf	e9sal7pcLuk
+2024		11:15	talk	Karax Kraut Karkas	Constantine Molchanov	Qr2f9Si-T7o
+2024		11:30	talk	The Ferus Web Engine	Trayambak Ray	u5sk2oGq1Gk
+2024		11:45	talk	NimForUE: Overview, Bindings and MVVM	Juan M. Gomez	2uWnsu57b-U
+2024			break	Break (30 minutes)		
+2024		13:00	talk	Futhark - Automatic C imports in Nim	Peter Munch-Ellingsen	Pv5WVzmgnbM
+2024		13:45	talk	avr_io, bare-metal embedded development in Nim	Gianmarco Marcello	V9ranijNu40
+2024		14:30	talk	NIF / NIFC	Andreas Rumpf	oWX_GbZYc2c
+2024			break	Break (40 minutes)		
+2024		15:30	talk	Updates from NimibLand	Pietro Peterlongo & Hugo Granström	yUb6Vjl2ovw
+2024		16:15	talk	FrameOS - an operating system for single function smart frames	Marius Andra	lHAXPtCswC0
+2024		16:45	talk	GPU Programming with Nim	Andrew Brower	j_J4yxntMe0
+2024		17:00	talk	Libraries Libraries Libraries	Andre von Houck	47oDSfrttSE
+2026	Social and Workflow	11:00	talk	Welcome to NimConf 2026		zhRdCHobWXE
+2026	Social and Workflow	11:10	talk	NIF, Nimony, Nim 3	Andreas Rumpf	ZYIW8YgH49w
+2026	Projects	11:30	talk	intops - Optimized integer operations for your project	Constantine Molchanov	rMaAMsTbAX0
+2026	Social and Workflow	11:40	talk	Nim for the Modern Linux Desktop	Trayambak Rai	FijhQJRTmC0
+2026	Projects	12:00	talk	Nimib v0.4 - internals ref-actoring	Hugo Granström	XJwWLKPQ7ds
+2026	Social and Workflow	12:15	talk	Why I Nim - a love letter to a technology that changed my life	Constantine Molchanov	3KF508hD9Hw
+2026	Projects	12:30	talk	Brutanks - Multiplayer Shooter Game in Nim	Alex	oYDTL4j54EI
+2026	Projects	12:45	talk	Rover - Building a Lean Web Engine in Nim	Ryan Bramantya	tvFH7QiZE2s
+2026	Social and Workflow	12:45	talk	MCP Mode for nimlangserver	Constantine Molchanov	Poefw5v4iaY
+2026	Projects	13:00	talk	Gene - Building a Homoiconic Language on Nim's Superpowers	Guoliang Cao	tWcia7EXGws
+2026	Social and Workflow	13:00	talk	Nim for embedded software development	Gianmarco Marcello	T5R-tp9yoe8
+2026	Projects	13:30	break	Break (30 min)		
+2026	Social and Workflow	13:30	break	Break (30 min)		
+2026	Projects	14:00	talk	Redesign and rewrite moe	Shuhei Nogawa	2zeVirEEcuw
+2026	Social and Workflow	14:00	talk	3code, the economical coding agent	Carlo Capocasa	PykujHEliP8
+2026	Projects	14:30	talk	Frag - A game engine written in Nim	Zac C	XSfXLq5m59U
+2026	Social and Workflow	14:40	talk	Nimetic - Building Zero-JS SPAs with Nim, Datastar, and YottaDB	Lothar Joeckel	JxR0GbW5Dd0
+2026	Projects	15:00	talk	Jazzy, the Batteries-Included Web Framework for Nim	Caner Mastan	Ag84yw2v3F0
+2026	Social and Workflow	15:00	talk	Nim*AI	treeform	l--1YU1AOco
+2026	Projects	15:30	talk	Extending Enu, and building worlds with Claude	Scott Wadden	kjOUEDfuzQI
+2026	Social and Workflow	15:45	talk	The Virtues of Values	Chris Collazo	Ki4-kbSCnXs
+2026	Projects	16:00	talk	Henka - Bind anything	Row	jvDiHbaA1oQ
+2026	Projects	16:10	end	Track end		
+2026	Social and Workflow	16:20	talk	Teaching Nim - onboarding new users into existing codebases	Peter Munch-Ellingsen	Vfrc2-UFKIk
+2026	Social and Workflow	16:50	end	Track end		
