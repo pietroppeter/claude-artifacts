@@ -13,6 +13,8 @@ devlog (7 Nov 2026) and moved here on 8 Nov 2026.
 - `data/openspec.tsv`, `data/openspec-propose-head.yaml`: sizes of the OpenSpec skills and commands in
   tabelline's `.claude/`, and the top of one skill, as they were on 7 Nov 2026.
 - `style.nim`: the page CSS (a theatre programme), inlined in place of nimib's theme; no remote fonts.
+- The review mode (**✎ Review** under the programme) is the shared one in `shared/review/` at the
+  root of the repository (`config.nims` puts it on the path).
 - `deps.sh`: fetches tabelline, nimib and their dependencies at pinned commits into `deps/` (not
   committed); `config.nims` puts them on the path.
 

@@ -4,7 +4,7 @@
 import std/[os, strutils, strformat, sequtils, algorithm, options, tables, sets]
 import nimib except md
 import tabelline, tabelline/nimib
-import nimconf, blocks, vendor/review
+import nimconf, blocks, review
 
 const srcDir = currentSourcePath().parentDir
 
@@ -472,7 +472,7 @@ own scoped style. Three small modules sit beside it:
   NimConf look is the same rules under `html[data-look="nimconf"]`: the site's `#1e202a`
   background, its yellow `#ffe953`, its `#2b2e3b` rows and its `»` before every item.
 
-The review mode (**✎ Review** under the lede) is tabelline's, copied into `vendor/`: select
+The review mode (**✎ Review** under the lede) is tabelline's, from `shared/review/`: select
 some text, comment on it, and export the comments for the next round of this page. Nothing on
 the page is loaded from elsewhere: it is one file, and it works offline.
 

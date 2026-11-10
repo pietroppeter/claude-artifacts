@@ -26,6 +26,11 @@ Static pages made with Claude, served by GitHub Pages from `main` (root). No bui
   or is missing from `index.html` or `README.md`. Run `python3 tools/backlink.py --check && python3 tools/codeblocks.py --check` before pushing.
 - Pages here are public: check with Pietro before adding anything with personal or private data.
 
+## Review mode
+- A page with a **✎ Review** button uses the one copy in `shared/review/` (tabelline's review mode, copied unchanged;
+  `shared/review/README.md` says how a page imports it). Don't copy it into a page or edit it here: change it in
+  tabelline, run `sh shared/review/sync.sh`, then rebuild every page listed in that README and republish them.
+
 ## Sharing a page with Pietro
 - Every reply that delivers or updates a page links to it, rendered. Don't send only the PR.
 - Publish the built `<slug>/index.html` as a claude.ai Artifact, and republish to the same artifact whenever the page changes.

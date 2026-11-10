@@ -12,6 +12,9 @@
   --grigio: #6E625A; --filetto: #D9CDB8; --velluto: #F1E3DA;
   --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* the names the review mode (shared/review) reads, from the programme's own */
+  --paper: var(--carta); --ink: var(--inchiostro); --line: var(--filetto); --shade: var(--velluto);
+  --surface: #FFFDF8; --muted: var(--grigio); --primary-text: var(--rosso); --font: var(--serif);
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 html { -webkit-text-size-adjust: 100%; }
@@ -82,6 +85,110 @@ pre { margin: 1rem 0; }
 footer.sala { max-width: 46rem; margin: 0 auto; padding: 1.4rem 1.1rem 3rem; border-top: 3px double var(--inchiostro);
   font-size: .85rem; color: var(--grigio); text-align: center; }
 </style>
+<style>
+/* the colours and fonts the review mode uses, for a page that has none of its own (a plain nimib
+   page): `:where` weighs nothing, so a page's own tokens (tabelline's, on :root) win */
+:where(html) { --paper: #fffdf8; --ink: #1f1f1f; --surface: #f6f3ec; --line: #c9c4ba; --shade: #e7e2d8;
+  --muted: #6b675f; --secondary: #6aa9d6; --secondary-soft: #d6e8f5; --primary-text: #8a3550;
+  --neutral-1: #ece8df; --font: system-ui, sans-serif; --mono: ui-monospace, monospace; }
+/* the review mode (review.nim, nbReview): a Review button, then marks on the text, a bar at
+   the bottom, the comment's sheet at the top, export and history */
+.rv-only { display: none; }
+body.rv-on .rv-only { display: block; }
+.rv-bar[hidden], .rv-panel[hidden] { display: none; }
+.rv-enter { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .8rem; margin: .8rem 0 1.4rem; color: var(--muted); font-size: .92rem; }
+.rv-enter .rv-version { font-weight: 700; color: var(--ink); }
+.rv-toggle { font: inherit; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 0;
+  min-height: 44px; padding: 0 .8rem; cursor: pointer; }
+.rv-toggle[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 -3px 0 var(--secondary); }
+body.rv-on { padding-bottom: calc(4.6rem + env(safe-area-inset-bottom, 0px)); }
+mark.rv-mark { background: var(--secondary-soft); color: inherit; box-shadow: 0 2px 0 var(--secondary); cursor: pointer; }
+mark.rv-mark.rv-current { background: var(--secondary); }
+.rv-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; display: flex; align-items: center; gap: .3rem;
+  justify-content: center; padding: .45rem max(.5rem, env(safe-area-inset-right, 0px)) calc(.45rem + env(safe-area-inset-bottom, 0px)) max(.5rem, env(safe-area-inset-left, 0px));
+  background: var(--surface); border-top: 3px solid var(--ink); font: 400 15px/1.2 var(--font); }
+.rv-bar button, .rv-sheet button { font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line);
+  border-radius: 0; min-height: 44px; min-width: 44px; padding: 0 .7rem; cursor: pointer; white-space: nowrap; }
+.rv-bar button { padding: 0 .55rem; }
+.rv-bar button[data-do="delete"] { color: var(--primary-text); }
+.rv-bar button:disabled { color: var(--muted); border-color: var(--shade); cursor: default; }
+.rv-bar button[data-do="prev"], .rv-bar button[data-do="next"] { font-size: 1.4rem; padding: 0; }
+.rv-bar .rv-count { min-width: 3.2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+.rv-bar .rv-add, .rv-sheet .rv-save { background: var(--ink); color: var(--paper); border-color: var(--ink); font-weight: 700; }
+.rv-bar .rv-add.rv-selected { background: var(--secondary); color: var(--ink); border-color: var(--ink); }
+dialog.rv-sheet { width: 100%; max-width: 40rem; margin: 0 auto auto; padding: 1rem max(1rem, env(safe-area-inset-right, 0px)) 1rem max(1rem, env(safe-area-inset-left, 0px));
+  border: 0; border-bottom: 3px solid var(--ink); background: var(--surface); color: var(--ink); font: 400 16px/1.45 var(--font);
+  max-height: 90vh; overflow-y: auto; }
+dialog.rv-sheet::backdrop { background: color-mix(in oklab, var(--ink) 30%, transparent); }
+.rv-sheet .rv-where { margin: 0 0 .4rem; font-weight: 700; }
+.rv-sheet textarea { display: block; width: 100%; margin-top: .2rem; font: 16px/1.4 var(--font); color: var(--ink);
+  background: var(--paper); border: 1px solid var(--line); border-radius: 0; padding: .5rem; }
+.rv-export textarea { font: 16px/1.45 var(--mono); white-space: pre-wrap; }   /* 16px: a phone zooms on smaller fields */
+.rv-sheet .rv-actions { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: flex-end; }
+.rv-sheet .rv-left { margin-right: auto; }
+.rv-sheet .rv-danger { color: var(--primary-text); }
+/* the comment's sheet: at the top, small, not modal: the bar and the page stay in reach */
+.rv-panel { position: fixed; top: 0; left: 0; right: 0; z-index: 60; max-width: 40rem; margin: 0 auto;
+  padding: .5rem max(.6rem, env(safe-area-inset-right, 0px)) .6rem max(.6rem, env(safe-area-inset-left, 0px));
+  background: var(--surface); border-bottom: 3px solid var(--ink); color: var(--ink); font: 400 16px/1.45 var(--font);
+  animation: rv-down .2s ease-out; }
+.rv-panel .rv-whole { margin: 0 0 .3rem; color: var(--muted); font-size: .85rem; }
+.rv-panel .rv-note { margin: 0; }
+.rv-panel .rv-thumbs { margin-top: .45rem; }
+.rv-panel button { font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 0; cursor: pointer; }
+/* history: one line per version */
+.rv-versions { list-style: none; margin: 0 0 .8rem; padding: 0; }
+.rv-versions li { display: flex; align-items: center; gap: .5rem; min-height: 48px; border-bottom: 1px solid var(--shade); }
+.rv-versions a { color: var(--ink); }
+.rv-versions .rv-date { flex: 1; color: var(--muted); font-size: .9rem; }
+.rv-versions .rv-n { font-size: .85rem; }
+/* a screenshot, as large as the screen allows */
+dialog.rv-zoom { width: 100vw; height: 100vh; max-width: 100vw; max-height: 100vh; margin: 0; padding: 0; border: 0; background: transparent; }
+dialog.rv-zoom[open] { display: flex; align-items: center; justify-content: center; }
+dialog.rv-zoom::backdrop { background: color-mix(in oklab, var(--ink) 88%, transparent); }
+dialog.rv-zoom img { max-width: 100%; max-height: 100%; object-fit: contain; }
+dialog.rv-zoom button { position: fixed; top: max(.5rem, env(safe-area-inset-top, 0px)); right: .5rem; min-width: 44px; min-height: 44px;
+  font-size: 1.5rem; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 0; }
+.rv-thumb img, .rv-shot img { cursor: zoom-in; }
+dialog.rv-sheet[open] { animation: rv-down .2s ease-out; }
+@keyframes rv-down { from { transform: translateY(-100%); } }
+/* the note: an editable box, so a phone offers to paste a screenshot in it */
+.rv-note { min-height: 3.2rem; max-height: 9rem; overflow-y: auto; padding: .5rem; font: 16px/1.4 var(--font);
+  background: var(--paper); border: 1px solid var(--line); white-space: pre-wrap; overflow-wrap: anywhere; }
+.rv-note:empty::before { content: attr(data-placeholder); color: var(--muted); }
+.rv-note:focus { outline: 2px solid var(--secondary); outline-offset: -1px; }
+.rv-thumbs { display: flex; flex-wrap: wrap; gap: .5rem; }
+.rv-thumb { position: relative; }
+.rv-thumb img { display: block; height: 4.5rem; width: auto; border: 1px solid var(--line); }
+.rv-thumb button { position: absolute; top: 0; right: 0; min-height: 32px; min-width: 32px; padding: 0; font-size: 1.1rem; }
+/* the export: each screenshot with its own Copy */
+.rv-shotlist { display: flex; flex-direction: column; gap: .35rem; margin: 0 0 .6rem; }
+.rv-shot { display: flex; align-items: center; gap: .5rem; font-size: .85rem; color: var(--muted); }
+.rv-shot img { height: 2.75rem; width: auto; border: 1px solid var(--line); }
+.rv-shot span { flex: 1; overflow-wrap: anywhere; }
+/* the strip of versions of the older versions of the post Review mode (nbVersions) */
+.versioni { margin: 1rem 0 1.4rem; font-size: .92rem; }
+.versioni ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .4rem; }
+.versioni li { border: 1px solid var(--line); background: var(--surface); }
+.versioni li > a, .versioni li > .voce { display: flex; align-items: center; min-height: 44px; padding: 0 .7rem; color: var(--ink); text-decoration: none; }
+.versioni li > a:hover b { text-decoration: underline; }
+.versioni li[aria-current] { border-color: var(--ink); box-shadow: inset 0 -3px 0 var(--ink); }
+.versioni .titolo { font-weight: 700; margin-right: .5rem; }
+.versioni li span span, .versioni li a span { color: var(--muted); margin-left: .35rem; }
+/* moving between versions: a short slide, the bar stays where it is */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: versione-out .22s ease-in both; }
+::view-transition-new(root) { animation: versione-in .26s ease-out both; }
+@keyframes versione-out { to { opacity: 0; transform: translateX(-1.5rem); } }
+@keyframes versione-in { from { opacity: 0; transform: translateX(1.5rem); } }
+.rv-bar { view-transition-name: rv-bar; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+}
+html[data-tema="quaderno"] mark.rv-mark { background: var(--highlight); box-shadow: 0 2px 0 var(--red-pen); }
+html[data-tema="quaderno"] mark.rv-mark.rv-current { background: var(--postit); box-shadow: 0 2px 0 var(--red-pen), 0 0 0 2px var(--red-pen); }
+html[data-tema="quaderno"] .rv-bar { font-family: var(--font); }
+</style>
   
   
   
@@ -93,6 +200,597 @@ footer.sala { max-width: 46rem; margin: 0 auto; padding: 1.4rem 1.1rem 3rem; bor
 <body>
 <header class="sala"><a href="../">claude-artifacts</a><span>programma di sala</span></header>
 <main>
+<div id="review" hidden data-page="a-month-with-claude" data-version="2" data-title="A month of building with Claude, as an operetta" data-source="a-month-with-claude/src/index.nim" data-versions=""></div><script>
+document.addEventListener('DOMContentLoaded', function () {
+// Review mode for a nimib page: open it with the Review button, select text, comment on it, keep
+// the comments in this browser, export them as Markdown with a YAML block for a coding agent.
+// No dependencies. The page gives its settings on
+// <div id="review" data-page data-version data-title data-source data-versions>.
+// Each part is between `// part:` lines, which the devlog post "Review mode" shows one by one.
+(function () {
+  var cfg = document.getElementById('review');
+  var root = document.querySelector('main');
+  if (!cfg || !root) return;
+  var page = cfg.dataset;
+
+  // part: anchor
+  // A comment points at the text it quotes, with a few words around it (as a W3C text quote
+  // selector does), and the heading it is under. Not at an element: the page is rebuilt from its
+  // source, and the text is what stays. The text of the page is its text nodes, in order.
+  var CONTEXT = 32;
+  var BLOCKS = 'p, li, h1, h2, h3, h4, pre, td, th, caption, blockquote, summary, dt, dd, div, nav';
+  function textIndex() {
+    // a line break between blocks, so the words around a quote read "page Select", not "pageSelect"
+    var nodes = [], text = '', last = null;
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) {
+        var p = n.parentNode.closest('script, style, #review');
+        return p ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    for (var n = walker.nextNode(); n; n = walker.nextNode()) {
+      var block = n.parentNode.closest(BLOCKS);
+      if (nodes.length && block !== last) text += '\n';
+      last = block;
+      nodes.push({ node: n, start: text.length });
+      text += n.data;
+    }
+    return { nodes: nodes, text: text };
+  }
+  function pointToIndex(idx, container, offset) {
+    if (container.nodeType === 3) {
+      for (var i = 0; i < idx.nodes.length; i++)
+        if (idx.nodes[i].node === container) return idx.nodes[i].start + offset;
+    }
+    var at = document.createRange();
+    at.setStart(container, offset);
+    for (var j = 0; j < idx.nodes.length; j++)   // the first text node after the point
+      if (at.comparePoint(idx.nodes[j].node, 0) >= 0) return idx.nodes[j].start;
+    return idx.text.length;
+  }
+  function sectionOf(node) {
+    var found = { title: '', id: '' };
+    root.querySelectorAll('h1, h2, h3').forEach(function (h) {
+      if (h.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING)
+        found = { title: h.textContent.trim(), id: h.id || '' };
+    });
+    return found;
+  }
+  function describe(range) {
+    var idx = textIndex();
+    var s = pointToIndex(idx, range.startContainer, range.startOffset);
+    var e = pointToIndex(idx, range.endContainer, range.endOffset);
+    var quote = idx.text.slice(s, e);
+    if (!quote.trim()) return null;
+    return { quote: quote, prefix: idx.text.slice(Math.max(0, s - CONTEXT), s),
+             suffix: idx.text.slice(e, e + CONTEXT), section: sectionOf(range.startContainer) };
+  }
+  function locate(note, idx) {
+    // every place the quote is, scored by how much of its context matches; the best wins
+    var best = null, bestScore = -1;
+    for (var at = idx.text.indexOf(note.quote); at >= 0; at = idx.text.indexOf(note.quote, at + 1)) {
+      var before = idx.text.slice(Math.max(0, at - note.prefix.length), at);
+      var after = idx.text.slice(at + note.quote.length, at + note.quote.length + note.suffix.length);
+      var score = common(before, note.prefix, true) + common(after, note.suffix, false);
+      if (score > bestScore) { best = at; bestScore = score; }
+    }
+    return best === null ? null : { start: best, end: best + note.quote.length };
+  }
+  function common(a, b, fromEnd) {
+    var n = 0;
+    while (n < a.length && n < b.length &&
+           (fromEnd ? a[a.length - 1 - n] === b[b.length - 1 - n] : a[n] === b[n])) n++;
+    return n;
+  }
+
+  // part: mark
+  // A located comment is drawn with <mark> around each piece of text it covers (a quote can
+  // cross a link or a paragraph). Marks only wrap text, so the text of the page stays the same.
+  function mark(note) {
+    if (!note.quote) return;   // a comment on the whole page has nothing to mark
+    var idx = textIndex(), at = locate(note, idx);
+    note.found = !!at;
+    if (!at) return;
+    idx.nodes.forEach(function (n) {
+      var a = Math.max(at.start, n.start) - n.start;
+      var b = Math.min(at.end, n.start + n.node.data.length) - n.start;
+      if (b <= a || !n.node.data.slice(a, b).trim()) return;
+      if (n.node.parentNode.closest('table') && !n.node.parentNode.closest('td, th, caption')) return;
+      var t = n.node;
+      if (b < t.data.length) t.splitText(b);
+      if (a > 0) t = t.splitText(a);
+      var m = document.createElement('mark');
+      m.className = 'rv-mark';
+      m.dataset.id = note.id;
+      t.parentNode.replaceChild(m, t);
+      m.appendChild(t);
+    });
+  }
+  function unmarkAll() {
+    root.querySelectorAll('mark.rv-mark').forEach(function (m) {
+      var p = m.parentNode;
+      while (m.firstChild) p.insertBefore(m.firstChild, m);
+      p.removeChild(m);
+      p.normalize();
+    });
+  }
+  function drawAll() {
+    unmarkAll();
+    notes.forEach(mark);
+    var idx = textIndex();
+    function place(note) {   // the page's order: a comment on the whole page first, one not found last
+      if (!note.quote) return -1;
+      var m = root.querySelector('mark.rv-mark[data-id="' + note.id + '"]');
+      return m ? pointToIndex(idx, m.firstChild, 0) : Infinity;
+    }
+    notes.sort(function (a, b) { return place(a) - place(b); });
+  }
+
+  // part: store
+  // The comments of a page live in this browser's localStorage, one key per page and version,
+  // so a new version starts with no comments and the old ones stay with the version they are on.
+  // Whether the review mode is open is kept too, so a page opens the way it was left.
+  var PREFIX = 'nimib-review:', KEY = PREFIX + page.page + '@v' + page.version;
+  var MODE = 'nimib-review-mode:' + page.page;
+  function read(key) {
+    try { return JSON.parse(localStorage.getItem(key)) || []; } catch (e) { return []; }
+  }
+  function save() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(notes.map(function (n) {
+        return { id: n.id, kind: n.kind, quote: n.quote, prefix: n.prefix, suffix: n.suffix,
+                 section: n.section, text: n.text, replacement: n.replacement, at: n.at, images: n.images };
+      })));
+      full = false;
+    } catch (e) { full = true; }   // the browser's storage is full: screenshots take the most
+  }
+  function remember(on) {
+    try { if (on) localStorage.setItem(MODE, '1'); else localStorage.removeItem(MODE); } catch (e) {}
+  }
+  var notes = read(KEY);
+  var current = -1, full = false, on = false;
+
+  // part: mode
+  // Reading is the default: no bar, no marks, nothing of the review mode but one button, Review,
+  // beside the version (in `.rv-enter`, or under the title). It opens the review mode, and closes
+  // it. Blocks that only matter while reviewing (`.rv-only`) show only then.
+  var slot = document.querySelector('.rv-enter');
+  if (!slot) {
+    slot = document.createElement('p');
+    slot.className = 'rv-enter';
+    var after = root.querySelector('.lede') || root.querySelector('h1');
+    if (after) after.insertAdjacentElement('afterend', slot); else root.prepend(slot);
+  }
+  var toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'rv-toggle';
+  slot.appendChild(toggle);
+  toggle.addEventListener('click', function () { setMode(!on); });
+  function setMode(open) {
+    on = open;
+    remember(on);
+    document.body.classList.toggle('rv-on', on);
+    toggle.textContent = on ? 'Close review' : '✎ Review';
+    toggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+    bar.hidden = !on;
+    if (on) drawAll(); else { leave(); unmarkAll(); pending = null; }
+    show();
+  }
+
+  // part: bar
+  // While reviewing, a bar stays at the bottom of the screen, where a thumb reaches on a phone:
+  // the previous and next comment and which one this is, delete it, a new one (*Page note* when
+  // nothing is selected, a note on the whole page; *Comment ✓* on the words selected), and
+  // export. A selection is kept as soon as it is made, because tapping a button can clear it.
+  var bar = document.createElement('div');
+  bar.className = 'rv-bar';
+  bar.hidden = true;
+  bar.setAttribute('role', 'toolbar');
+  bar.setAttribute('aria-label', 'Review mode');
+  bar.innerHTML =
+    '<button type="button" data-do="prev" aria-label="Previous comment">‹</button>' +
+    '<span class="rv-count" aria-live="polite"></span>' +
+    '<button type="button" data-do="next" aria-label="Next comment">›</button>' +
+    '<button type="button" data-do="delete" aria-label="Delete this comment">Delete</button>' +
+    '<button type="button" data-do="add" class="rv-add">Page note</button>' +
+    '<button type="button" data-do="export">Export</button>';
+  document.body.appendChild(bar);
+  var pending = null;
+  document.addEventListener('selectionchange', function () {
+    if (!on) return;
+    var sel = document.getSelection();
+    if (sel.rangeCount && !sel.isCollapsed && root.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+      pending = describe(sel.getRangeAt(0));
+    } else {
+      setTimeout(function () { if (document.getSelection().isCollapsed) { pending = null; show(); } }, 400);
+    }
+    show();
+  });
+  bar.addEventListener('pointerdown', function (e) { e.preventDefault(); });   // keep the selection
+  bar.addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    var act = b.dataset.do;
+    if (act === 'prev' || act === 'next') step(act === 'next' ? 1 : -1);
+    if (act === 'delete' && notes[current]) remove(notes[current]);
+    if (act === 'add') add();
+    if (act === 'export') openExport();
+  });
+  root.addEventListener('click', function (e) {   // a tap on marked words opens them, anywhere else closes
+    if (!on || !document.getSelection().isCollapsed) return;
+    var m = e.target.closest('mark.rv-mark');
+    if (m) {
+      var n = notes.find(function (x) { return x.id === m.dataset.id; });
+      if (n) select(n);
+    } else if (current >= 0 && !e.target.closest('a, button')) leave();
+  });
+  function show() {
+    var c = bar.querySelector('.rv-count');
+    c.textContent = full ? 'storage full: export'
+                  : notes.length ? (current >= 0 ? (current + 1) + '/' : '') + notes.length : 'none';
+    bar.querySelector('[data-do="prev"]').disabled = !notes.length;
+    bar.querySelector('[data-do="next"]').disabled = !notes.length;
+    bar.querySelector('[data-do="delete"]').disabled = current < 0;
+    var add = bar.querySelector('.rv-add');
+    add.textContent = pending ? 'Comment ✓' : 'Page note';   // says what it will do: on the words, or on the page
+    add.classList.toggle('rv-selected', !!pending);
+    add.setAttribute('aria-label', pending ? 'Comment on the selected text' : 'Comment on the whole page');
+  }
+
+  // part: sheet
+  // The comment that ‹ and › stop on is open in a sheet at the top of the screen: there is no
+  // Edit, no Save and no Cancel. What is typed is kept as it is typed; ‹ and › keep working and
+  // take the sheet to the next comment; a tap on the page closes it. A comment left empty is
+  // dropped. The sheet is small, so the words it is about stay in view under it, marked. There
+  // are no kinds: to replace the words, the note says so ("Replace with: ..."), or "Remove". A
+  // screenshot is pasted in the note, like text: the note is an editable box, so a phone offers
+  // to paste an image there. While the sheet is open the page may not zoom.
+  var viewport = document.querySelector('meta[name="viewport"]');
+  var looseViewport = viewport ? viewport.content : '';
+  function noZoom(yes) {
+    if (viewport) viewport.content = yes ? looseViewport + ', maximum-scale=1' : looseViewport;
+  }
+  var sheet = document.createElement('div');
+  sheet.className = 'rv-panel';
+  sheet.hidden = true;
+  sheet.innerHTML =
+    '<p class="rv-whole">On the whole page</p>' +
+    '<div class="rv-note" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Comment"' +
+    ' data-placeholder="What should change, and why. To replace the words: Replace with: and the new text; ' +
+    'to drop them: Remove. Paste a screenshot here too."></div>' +
+    '<div class="rv-thumbs"></div>';
+  document.body.appendChild(sheet);
+  var noteBox = sheet.querySelector('.rv-note');
+  function add() {
+    var n = Object.assign({ text: '', quote: '', prefix: '', suffix: '', section: { title: '', id: '' } }, pending || {});
+    n.id = 'c' + Date.now().toString(36);
+    n.at = new Date().toISOString();
+    notes.push(n);
+    document.getSelection().removeAllRanges();
+    pending = null;
+    select(n);
+    noteBox.focus();
+  }
+  function select(n) {
+    var was = notes[current];
+    if (was && was !== n) drop(was);
+    drawAll();
+    current = notes.indexOf(n);
+    root.querySelectorAll('mark.rv-current').forEach(function (m) { m.classList.remove('rv-current'); });
+    var ms = root.querySelectorAll('mark.rv-mark[data-id="' + n.id + '"]');
+    ms.forEach(function (m) { m.classList.add('rv-current'); });
+    sheet.querySelector('.rv-whole').hidden = !!n.quote;
+    noteBox.textContent = n.text || '';
+    thumbs();
+    sheet.hidden = false;
+    noZoom(true);
+    keepInView();
+    show();
+  }
+  function step(d) {
+    if (!notes.length) return;
+    var target = notes[((current < 0 ? (d > 0 ? -1 : 0) : current) + d + notes.length) % notes.length];
+    if (target !== notes[current]) select(target);
+  }
+  function leave() {   // close the sheet; an empty comment goes
+    var n = notes[current];
+    current = -1;
+    sheet.hidden = true;
+    noZoom(false);
+    if (n) drop(n);
+    root.querySelectorAll('mark.rv-current').forEach(function (m) { m.classList.remove('rv-current'); });
+    show();
+  }
+  function empty(n) { return !(n.text || '').trim() && !(n.images || []).length && n.replacement == null; }
+  function drop(n) { if (empty(n)) { notes = notes.filter(function (x) { return x !== n; }); save(); drawAll(); } }
+  function remove(n) {
+    notes = notes.filter(function (x) { return x !== n; });
+    save();
+    current = -1;
+    sheet.hidden = true;
+    noZoom(false);
+    drawAll();
+    show();
+  }
+  function keepInView() {   // the marked words, just under the sheet
+    var m = root.querySelector('mark.rv-current');
+    if (!m) return;
+    var under = sheet.offsetHeight + 24;
+    window.scrollBy({ top: m.getBoundingClientRect().top - under, behavior: 'smooth' });
+  }
+  noteBox.addEventListener('input', function () {
+    var n = notes[current];
+    if (!n) return;
+    n.text = noteBox.innerText.trim();
+    save();
+    show();
+  });
+  function thumbs() {
+    var n = notes[current], shots = (n && n.images) || [];
+    var box = sheet.querySelector('.rv-thumbs');
+    box.innerHTML = '';
+    box.hidden = !shots.length;
+    shots.forEach(function (src, i) {
+      var t = document.createElement('div');
+      t.className = 'rv-thumb';
+      t.innerHTML = '<img alt="screenshot ' + (i + 1) + '"><button type="button" aria-label="Remove screenshot ' + (i + 1) + '">×</button>';
+      t.querySelector('img').src = src;
+      t.querySelector('img').addEventListener('click', function () { zoom(src); });
+      t.querySelector('button').addEventListener('click', function () {
+        shots.splice(i, 1);
+        n.images = shots.length ? shots : undefined;
+        save(); thumbs();
+      });
+      box.appendChild(t);
+    });
+  }
+  function shrink(blob, width, quality) {   // an image as a JPEG at most `width` pixels wide
+    return new Promise(function (ok, ko) {
+      var img = new Image(), url = URL.createObjectURL(blob);
+      img.onload = function () {
+        var k = Math.min(1, width / img.naturalWidth), c = document.createElement('canvas');
+        c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        ok(c.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = ko;
+      img.src = url;
+    });
+  }
+  noteBox.addEventListener('paste', function (e) {   // an image goes to the screenshots, text stays plain text
+    e.preventDefault();
+    var n = notes[current];
+    var files = [].filter.call(e.clipboardData.files || [], function (f) { return /^image\//.test(f.type); });
+    Promise.all(files.map(function (b) { return shrink(b, 900, 0.72); })).then(function (srcs) {
+      if (!srcs.length || !n) return;
+      n.images = (n.images || []).concat(srcs);
+      save(); thumbs(); keepInView(); show();
+    });
+    var text = e.clipboardData.getData('text/plain');
+    if (text) document.execCommand('insertText', false, text);
+  });
+  noteBox.addEventListener('drop', function (e) { e.preventDefault(); });   // no images inside the text
+
+  // part: zoom
+  // A tap on a screenshot, in the sheet or in the export, shows it as large as the screen allows.
+  var lens = document.createElement('dialog');
+  lens.className = 'rv-zoom';
+  lens.innerHTML = '<button type="button" aria-label="Close">×</button><img alt="screenshot">';
+  document.body.appendChild(lens);
+  lens.addEventListener('click', function () { lens.close(); });
+  function zoom(src) { lens.querySelector('img').src = src; lens.showModal(); }
+
+  // part: export
+  // The comments as one text, for a person and for an agent: a title, a YAML block that says which
+  // page, version and source they are on, then one Markdown section per comment, in page order.
+  // The text can be edited before it is copied. Copy copies the text only, short enough for a
+  // chat message; each screenshot has a Copy of its own, to paste after it. Close review ends the
+  // review here too, so a long page need not be scrolled back to its top.
+  function yaml(s) { return JSON.stringify(String(s)); }   // a JSON string is a YAML string
+  function flat(s) { return s.replace(/\s+/g, ' '); }
+  function quoted(s) { return flat(s).trim(); }
+  function fence(s) {
+    var f = '~~~';
+    while (s.indexOf(f) >= 0) f += '~';
+    return f + 'text\n' + s.trim() + '\n' + f;
+  }
+  function shotName(i, k) { return 'review-v' + page.version + '-' + (i + 1) + '-' + (k + 1) + '.jpg'; }
+  function exportText() {
+    // a chat shows a pasted text as Markdown: a yaml fence is a tidy box under the title
+    var out = ['# Review of “' + page.title + '”, version ' + page.version, '',
+      '```yaml',
+      'format: nimib-review/3',
+      'title: ' + yaml(page.title),
+      'page: ' + yaml(location.origin + location.pathname),
+      'source: ' + yaml(page.source),
+      'version: ' + page.version,
+      'exported: ' + yaml(new Date().toISOString()),
+      'comments: ' + notes.length,
+      '```', ''];
+    notes.forEach(function (n, i) {
+      var where = !n.quote ? 'On the whole page'
+                : n.section && n.section.title ? 'In “' + n.section.title + '”' + (n.section.id ? ' (#' + n.section.id + ')' : '')
+                : 'At the top';
+      out.push('## ' + (i + 1) + '. ' + where, '');
+      if (n.quote) {
+        out.push('> ' + quoted(n.quote), '');
+        out.push('Around it: “…' + flat(n.prefix) + '⟦' + flat(n.quote) + '⟧' + flat(n.suffix) + '…”', '');
+        if (n.found === false) out.push('(Not found on the page any more.)', '');
+      }
+      // a comment kept from version 6 or before may still have a kind of its own
+      if (n.kind === 'cut' || (n.kind === 'replace' && !(n.replacement || '').trim())) out.push('Remove these words.', '');
+      else if (n.kind === 'replace') out.push('Replace with:', '', fence(n.replacement), '');
+      if (n.text) out.push(n.text, '');
+      if (n.images) out.push('Screenshots: ' + n.images.map(function (src, k) { return shotName(i, k); }).join(', '), '');
+    });
+    return out.join('\n');
+  }
+  var box = document.createElement('dialog');
+  box.className = 'rv-sheet rv-export';
+  box.innerHTML =
+    '<form method="dialog"><p class="rv-where">Export: edit it if you like, then copy it</p>' +
+    '<textarea rows="12" spellcheck="false"></textarea><div class="rv-shotlist"></div>' +
+    '<div class="rv-actions"><button value="history" class="rv-left">History</button>' +
+    '<button value="leave">Close review</button><button value="close">Close</button>' +
+    '<button value="copy" class="rv-save" autofocus>Copy</button></div></form>';
+  document.body.appendChild(box);
+  var area = box.querySelector('textarea');
+  function openExport() {
+    if (current >= 0) leave();
+    area.value = exportText();
+    shotList();
+    noZoom(true);
+    box.showModal();
+  }
+  box.addEventListener('close', function () { noZoom(false); });
+  function allShots() {
+    var all = [];
+    notes.forEach(function (n, i) { (n.images || []).forEach(function (src, k) { all.push({ name: shotName(i, k), src: src }); }); });
+    return all;
+  }
+  function shotList() {   // each screenshot, with its own Copy: paste it in the chat after the text
+    var list = box.querySelector('.rv-shotlist');
+    var canCopy = !!(navigator.clipboard && window.ClipboardItem);
+    list.innerHTML = '';
+    var all = allShots();
+    list.hidden = !all.length;
+    all.forEach(function (shot) {
+      var row = document.createElement('div');
+      row.className = 'rv-shot';
+      row.innerHTML = '<img alt=""><span></span><button type="button">Copy image</button>';
+      row.querySelector('img').src = shot.src;
+      row.querySelector('img').addEventListener('click', function () { zoom(shot.src); });
+      row.querySelector('span').textContent = shot.name;
+      var b = row.querySelector('button');
+      b.hidden = !canCopy;
+      b.addEventListener('click', function () {
+        copied(b, navigator.clipboard.write([new ClipboardItem({ 'image/png': png(shot.src) })]));
+      });
+      list.appendChild(row);
+    });
+  }
+  function png(src) {   // the clipboard takes PNG images everywhere, JPEG not always
+    return new Promise(function (ok, ko) {
+      var img = new Image();
+      img.onload = function () {
+        var c = document.createElement('canvas');
+        c.width = img.naturalWidth; c.height = img.naturalHeight;
+        c.getContext('2d').drawImage(img, 0, 0);
+        c.toBlob(ok, 'image/png');
+      };
+      img.onerror = ko;
+      img.src = src;
+    });
+  }
+  function copied(button, promise) {
+    var label = button.textContent;
+    return promise.then(function () {
+      button.textContent = 'Copied ✓';
+      setTimeout(function () { button.textContent = label; }, 1500);
+    }, function () { button.textContent = 'Blocked'; });
+  }
+  box.querySelector('form').addEventListener('submit', function (e) {
+    var act = e.submitter && e.submitter.value;
+    if (act === 'copy') {
+      e.preventDefault();
+      var button = e.submitter;
+      var fallback = function () { area.select(); document.execCommand('copy'); };
+      copied(button, navigator.clipboard ? navigator.clipboard.writeText(area.value).catch(fallback)
+                                         : Promise.resolve().then(fallback));
+    } else if (act === 'history') {
+      e.preventDefault();
+      box.close();
+      openHistory();
+    } else if (act === 'leave') {   // the end of a review: back to reading, from the bottom of the page too
+      setMode(false);
+    }
+  });
+
+  // part: history
+  // The versions of the page, each with the comments this browser keeps on it: open one, clear
+  // its comments, or clear every comment of the review mode in this browser. Back to Export from
+  // here. Clearing asks twice, with a second tap (confirm() is blocked inside an artifact).
+  var versions = [];
+  try { versions = JSON.parse(page.versions || '[]'); } catch (e) {}
+  var hist = document.createElement('dialog');
+  hist.className = 'rv-sheet rv-history';
+  hist.innerHTML =
+    '<form method="dialog"><p class="rv-where">History: the versions of this page</p>' +
+    '<ol class="rv-versions"></ol>' +
+    '<div class="rv-actions"><button value="wipe" class="rv-left rv-danger">Clear everything</button>' +
+    '<button value="export">Export</button><button value="close" class="rv-save" autofocus>Close</button></div></form>';
+  document.body.appendChild(hist);
+  function stored() {   // the versions of this page that have comments in this browser
+    var found = {};
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i), m = k.match(/@v(\d+)$/);
+        if (m && k.indexOf(PREFIX + page.page + '@v') === 0) found[m[1]] = read(k).length;
+      }
+    } catch (e) {}
+    return found;
+  }
+  function twice(button, label, act) {   // the first tap asks, the second does
+    if (button.dataset.sure === 'yes') { act(); return; }
+    button.dataset.sure = 'yes';
+    button.textContent = label;
+  }
+  function openHistory() {
+    var list = hist.querySelector('.rv-versions'), counts = stored();
+    var all = versions.slice();
+    if (!all.some(function (v) { return v.n == page.version; })) all.push({ n: +page.version, date: '', href: '' });
+    Object.keys(counts).forEach(function (n) {
+      if (!all.some(function (v) { return v.n == n; })) all.push({ n: +n, date: '', href: '' });
+    });
+    all.sort(function (a, b) { return b.n - a.n; });   // the newest first
+    list.innerHTML = '';
+    all.forEach(function (v) {
+      var li = document.createElement('li'), n = counts[v.n] || 0, here = v.n == page.version;
+      var name = here || !v.href ? '<b>v' + v.n + '</b>' : '<a href="' + v.href + '"><b>v' + v.n + '</b></a>';
+      li.innerHTML = name + ' <span class="rv-date"></span> <span class="rv-n"></span>' +
+        '<button type="button" class="rv-danger">Clear</button>';
+      li.querySelector('.rv-date').textContent = (v.date || '') + (here ? ' · this one' : '');
+      li.querySelector('.rv-n').textContent = n ? n + (n === 1 ? ' comment' : ' comments') : '';
+      var b = li.querySelector('button');
+      b.hidden = !n;
+      b.addEventListener('click', function () {
+        twice(b, 'Delete ' + n + '?', function () {
+          try { localStorage.removeItem(PREFIX + page.page + '@v' + v.n); } catch (e) {}
+          if (here) { notes = []; leave(); drawAll(); show(); }
+          openHistory();
+        });
+      });
+      list.appendChild(li);
+    });
+    var wipe = hist.querySelector('[value="wipe"]');
+    wipe.dataset.sure = ''; wipe.textContent = 'Clear everything';
+    if (!hist.open) hist.showModal();
+  }
+  hist.querySelector('form').addEventListener('submit', function (e) {
+    var act = e.submitter && e.submitter.value;
+    if (act === 'wipe') {
+      e.preventDefault();
+      twice(e.submitter, 'Delete every comment?', function () {
+        try {
+          Object.keys(localStorage).forEach(function (k) { if (k.indexOf(PREFIX) === 0) localStorage.removeItem(k); });
+        } catch (err) {}
+        notes = []; leave(); drawAll(); show();
+        openHistory();
+      });
+    } else if (act === 'export') {
+      e.preventDefault();
+      hist.close();
+      openExport();
+    }
+  });
+
+  var wasOn = false;
+  try { wasOn = localStorage.getItem(MODE) === '1'; } catch (e) {}
+  setMode(wasOn);
+})();
+});
+</script>
 <div class="copertina">
 <p class="sopra">An operetta in three parts</p>
 <h1>A month of building<br>with <em>Claude</em></h1>
@@ -108,6 +806,7 @@ way of working that grew out of it, and the next part of that way of working, sk
 <li><span class="atto">Parte terza</span><div><a href="#part-three">Skills, from the beginning</a>
 <p>What an agent skill is, where skills live in an open source project, who does them well, and how to tell whether one helps.</p></div></li>
 </ol>
+<p class="rv-enter"><span class="rv-version">Version 2 · updated 10 November 2026</span></p>
 <p>The three parts were first written on 7 November 2026 as posts in the devlog of
 <a href="https://github.com/pietroppeter/tabelline">tabelline</a>, great tables for Nim, by the thread that
 uses each tabelline release on real data. They are about the way of working rather than about
@@ -126,11 +825,11 @@ missing is at the end.</p>
 <h3>Seven acts</h3>
 <p>An operetta is a light opera: an overture, a few acts, an interlude, a finale, songs between
 spoken parts. The month had that shape.</p>
-<div id="tabella-fe27228c" class="tabella">
+<div id="tabella-d4d9036d" class="tabella">
 <style>
-#tabella-fe27228c { overflow-x: auto; }
-#tabella-fe27228c table, #tabella-fe27228c thead, #tabella-fe27228c tbody, #tabella-fe27228c tfoot, #tabella-fe27228c tr, #tabella-fe27228c td, #tabella-fe27228c th { border-style: none; }
-#tabella-fe27228c .tb_table { display: table; border-collapse: collapse; line-height: normal;
+#tabella-d4d9036d { overflow-x: auto; }
+#tabella-d4d9036d table, #tabella-d4d9036d thead, #tabella-d4d9036d tbody, #tabella-d4d9036d tfoot, #tabella-d4d9036d tr, #tabella-d4d9036d td, #tabella-d4d9036d th { border-style: none; }
+#tabella-d4d9036d .tb_table { display: table; border-collapse: collapse; line-height: normal;
   margin-left: auto; margin-right: auto; width: auto;
   color: #333333; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px;
   background-color: #FFFFFF;
@@ -138,54 +837,50 @@ spoken parts. The month had that shape.</p>
   border-bottom: 2px solid #A8A8A8;
   border-left: 2px none #D3D3D3;
   border-right: 2px none #D3D3D3; }
-#tabella-fe27228c .tb_caption { caption-side: top; padding: 4px 5px; color: #333333; font-style: italic; }
-#tabella-fe27228c .tb_heading { background-color: #FFFFFF; text-align: center; color: #333333; }
-#tabella-fe27228c .tb_title { font-size: 125%; font-weight: initial;
+#tabella-d4d9036d .tb_caption { caption-side: top; padding: 4px 5px; color: #333333; font-style: italic; }
+#tabella-d4d9036d .tb_heading { background-color: #FFFFFF; text-align: center; color: #333333; }
+#tabella-d4d9036d .tb_title { font-size: 125%; font-weight: initial;
   padding: 4px 5px; }
-#tabella-fe27228c .tb_subtitle { font-size: 85%; font-weight: normal; padding: 0 5px 4px 5px; }
-#tabella-fe27228c .tb_heading_last { border-bottom: 2px solid #D3D3D3; }
-#tabella-fe27228c .tb_col_headings th { background-color: #FFFFFF; color: #333333;
+#tabella-d4d9036d .tb_subtitle { font-size: 85%; font-weight: normal; padding: 0 5px 4px 5px; }
+#tabella-d4d9036d .tb_heading_last { border-bottom: 2px solid #D3D3D3; }
+#tabella-d4d9036d .tb_col_headings th { background-color: #FFFFFF; color: #333333;
   font-size: 100%; font-weight: normal;
   text-transform: inherit; vertical-align: bottom;
   padding: 5px 5px; overflow-x: hidden; }
-#tabella-fe27228c .tb_col_headings_last th { border-bottom: 2px solid #D3D3D3; }
-#tabella-fe27228c .tb_spanner { display: inline-block; width: 100%; padding-bottom: 4px;
+#tabella-d4d9036d .tb_col_headings_last th { border-bottom: 2px solid #D3D3D3; }
+#tabella-d4d9036d .tb_spanner { display: inline-block; width: 100%; padding-bottom: 4px;
   border-bottom: 2px solid #D3D3D3; }
-#tabella-fe27228c .tb_spanner_empty { border-bottom: none; }
-#tabella-fe27228c .tb_group_heading { background-color: #FFFFFF; font-weight: initial;
+#tabella-d4d9036d .tb_spanner_empty { border-bottom: none; }
+#tabella-d4d9036d .tb_group_heading { background-color: #FFFFFF; font-weight: initial;
   padding: 8px 5px; text-align: left; border-top: 2px solid #D3D3D3;
   border-bottom: 2px solid #D3D3D3; }
-#tabella-fe27228c .tb_row { padding: 8px 5px; margin: 10px;
+#tabella-d4d9036d .tb_row { padding: 8px 5px; margin: 10px;
   border-top: 1px solid #D3D3D3; vertical-align: middle; overflow-x: hidden; }
-#tabella-fe27228c .tb_stub { background-color: transparent; font-weight: initial; text-align: left;
+#tabella-d4d9036d .tb_stub { background-color: transparent; font-weight: initial; text-align: left;
   border-right: 2px solid #D3D3D3; }
-#tabella-fe27228c tbody tr:first-child .tb_row { border-top: none; }
-#tabella-fe27228c .tb_striped { background-color: rgba(128,128,128,0.05); }
-#tabella-fe27228c .tb_left { text-align: left; } #tabella-fe27228c .tb_center { text-align: center; } #tabella-fe27228c .tb_right { text-align: right; font-variant-numeric: tabular-nums; }
-#tabella-fe27228c .tb_footnotes, #tabella-fe27228c .tb_sourcenotes { color: #333333; background-color: #FFFFFF; }
-#tabella-fe27228c .tb_footnote { font-size: 90%; padding: 4px 5px; text-align: left; }
-#tabella-fe27228c .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
-#tabella-fe27228c tfoot tr:first-child td { padding-top: 8px; }
-#tabella-fe27228c .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
-#tabella-fe27228c .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
-#tabella-fe27228c .tb_bar_track { display: inline-block; height: 0.8em; }
-#tabella-fe27228c .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
-#tabella-fe27228c .tb_bar_label { min-width: 2.5em; text-align: right; }
+#tabella-d4d9036d tbody tr:first-child .tb_row { border-top: none; }
+#tabella-d4d9036d .tb_striped { background-color: rgba(128,128,128,0.05); }
+#tabella-d4d9036d .tb_left { text-align: left; } #tabella-d4d9036d .tb_center { text-align: center; } #tabella-d4d9036d .tb_right { text-align: right; font-variant-numeric: tabular-nums; }
+#tabella-d4d9036d .tb_footnotes, #tabella-d4d9036d .tb_sourcenotes { color: #333333; background-color: #FFFFFF; }
+#tabella-d4d9036d .tb_footnote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-d4d9036d .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-d4d9036d tfoot tr:first-child td { padding-top: 8px; }
+#tabella-d4d9036d .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
 </style>
-<table class="tb_table" aria-labelledby="tabella-fe27228c-title">
+<table class="tb_table" aria-labelledby="tabella-d4d9036d-title">
 <thead>
-<tr class="tb_heading"><th colspan="3" id="tabella-fe27228c-title" class="tb_title">The month in seven acts</th></tr>
+<tr class="tb_heading"><th colspan="3" id="tabella-d4d9036d-title" class="tb_title">The month in seven acts</th></tr>
 <tr class="tb_heading"><th colspan="3" class="tb_subtitle tb_heading_last">20 September to 7 November 2026</th></tr>
 <tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_left" scope="col" id="story">what happened</th><th class="tb_col_heading tb_right" scope="col" id="prs">PRs<span class="tb_footnote_marks">1</span></th></tr>
 </thead>
 <tbody class="tb_table_body">
-<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Ouverture</strong><br>overture<br>20–22 Sep</th><td class="tb_row tb_left">A bug in Knuth's long division in nim-lang/bigints, fixed by Claude and checked by Pietro.<br><strong>One moment:</strong> <a href="https://github.com/nim-lang/bigints/pull/151"><em>&quot;Fix was produced by Claude… My effort was to review, understand and validate.&quot;</em></a></td><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:2.5em"><span class="tb_bar_fill" style="width:1.1%;background:var(--rosso)"></span></span><span class="tb_bar_label">1</span></span></td></tr>
-<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Atto primo</strong><br>act one: Toulouse<br>4–8 Oct</th><td class="tb_row tb_left">At the Agile Lab Nomads in Toulouse, Nim meets Python: <code>uv add nimlang</code> puts a Nim compiler in any Python project, and libraries ship as wheels.<br><strong>One moment:</strong> <a href="https://github.com/pietroppeter/naffprop">naffprop</a>: affinity propagation in Nim, on PyPI, with an animated explainer</td><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:2.5em"><span class="tb_bar_fill" style="width:57.4%;background:var(--rosso)"></span></span><span class="tb_bar_label">54</span></span></td></tr>
-<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Intermezzo</strong><br>interlude: the talk<br>24–28 Oct</th><td class="tb_row tb_left">Slides for <em>Sailing Seas of Scientific Nim</em>, planned with OpenSpec; the first pages in claude-artifacts; the State of NimibLand.<br><strong>One moment:</strong> <a href="https://github.com/pietroppeter/talk-sailing-seas-scientific-nim/pull/7">a talk planned as specs</a>: OpenSpec with a schema of its own</td><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:2.5em"><span class="tb_bar_fill" style="width:39.4%;background:var(--rosso)"></span></span><span class="tb_bar_label">37</span></span></td></tr>
-<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Atto secondo</strong><br>act two: nanuq<br>27 Oct – 2 Nov</th><td class="tb_row tb_left">The talk paused for Polars in Nim: six releases in six days, each with a design post, an explainer on real data and chapters of a book of ports.<br><strong>One moment:</strong> <a href="https://github.com/pietroppeter/nanuq/pull/60">a coverage map of Polars</a>: what is there and what is not, as a page</td><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:2.5em"><span class="tb_bar_fill" style="width:100.0%;background:var(--rosso)"></span></span><span class="tb_bar_label">94</span></span></td></tr>
-<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Atto terzo</strong><br>act three: the workshop<br>31 Oct – 7 Nov</th><td class="tb_row tb_left">From nanuq came cicak, a REPL for Nim, with benchmarks; then cadero, a small CAD in Nim, to plan the furniture of a room, in Italian.<br><strong>One moment:</strong> <a href="https://github.com/pietroppeter/cadero/pull/11">a 3D viewer written in Nim</a>, compiled to JavaScript in a nimib page</td><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:2.5em"><span class="tb_bar_fill" style="width:43.6%;background:var(--rosso)"></span></span><span class="tb_bar_label">41</span></span></td></tr>
-<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Atto quarto</strong><br>act four: games<br>4–6 Nov</th><td class="tb_row tb_left">Parloku, a word puzzle to play with the fingers, and zogyn, the declarative dragging it is made with, both first tried as artifacts.<br><strong>One moment:</strong> <a href="https://github.com/pietroppeter/parloku/pull/11">specs whose drag scenarios run and animate</a></td><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:2.5em"><span class="tb_bar_fill" style="width:46.8%;background:var(--rosso)"></span></span><span class="tb_bar_label">44</span></span></td></tr>
-<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Finale</strong><br>finale<br>7 Nov</th><td class="tb_row tb_left">tabelline, great tables for Nim, and diagrammari, diagrams that Mermaid reads; a FOSDEM proposal. And a name for the way of working: Operetta.<br><strong>One moment:</strong> <a href="https://github.com/pietroppeter/talk-sailing-seas-scientific-nim/pull/27">the talk's tables, redone with tabelline</a></td><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:2.5em"><span class="tb_bar_fill" style="width:19.1%;background:var(--rosso)"></span></span><span class="tb_bar_label">18</span></span></td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Ouverture</strong><br>overture<br>20–22 Sep</th><td class="tb_row tb_left">A bug in Knuth's long division in nim-lang/bigints, fixed by Claude and checked by Pietro.<br><strong>One moment:</strong> <a href="https://github.com/nim-lang/bigints/pull/151"><em>&quot;Fix was produced by Claude… My effort was to review, understand and validate.&quot;</em></a></td><td class="tb_row tb_right" style="background-color: #F1E3DA; color: #1a1a1a">1</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Atto primo</strong><br>act one: Toulouse<br>4–8 Oct</th><td class="tb_row tb_left">At the Agile Lab Nomads in Toulouse, Nim meets Python: <code>uv add nimlang</code> puts a Nim compiler in any Python project, and libraries ship as wheels.<br><strong>One moment:</strong> <a href="https://github.com/pietroppeter/naffprop">naffprop</a>: affinity propagation in Nim, on PyPI, with an animated explainer</td><td class="tb_row tb_right" style="background-color: #B97172; color: #1a1a1a">54</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Intermezzo</strong><br>interlude: the talk<br>24–28 Oct</th><td class="tb_row tb_left">Slides for <em>Sailing Seas of Scientific Nim</em>, planned with OpenSpec; the first pages in claude-artifacts; the State of NimibLand.<br><strong>One moment:</strong> <a href="https://github.com/pietroppeter/talk-sailing-seas-scientific-nim/pull/7">a talk planned as specs</a>: OpenSpec with a schema of its own</td><td class="tb_row tb_right" style="background-color: #CB9694; color: #1a1a1a">37</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Atto secondo</strong><br>act two: nanuq<br>27 Oct – 2 Nov</th><td class="tb_row tb_left">The talk paused for Polars in Nim: six releases in six days, each with a design post, an explainer on real data and chapters of a book of ports.<br><strong>One moment:</strong> <a href="https://github.com/pietroppeter/nanuq/pull/60">a coverage map of Polars</a>: what is there and what is not, as a page</td><td class="tb_row tb_right" style="background-color: #8E1B24; color: #FFFFFF">94</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Atto terzo</strong><br>act three: the workshop<br>31 Oct – 7 Nov</th><td class="tb_row tb_left">From nanuq came cicak, a REPL for Nim, with benchmarks; then cadero, a small CAD in Nim, to plan the furniture of a room, in Italian.<br><strong>One moment:</strong> <a href="https://github.com/pietroppeter/cadero/pull/11">a 3D viewer written in Nim</a>, compiled to JavaScript in a nimib page</td><td class="tb_row tb_right" style="background-color: #C68D8C; color: #1a1a1a">41</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Atto quarto</strong><br>act four: games<br>4–6 Nov</th><td class="tb_row tb_left">Parloku, a word puzzle to play with the fingers, and zogyn, the declarative dragging it is made with, both first tried as artifacts.<br><strong>One moment:</strong> <a href="https://github.com/pietroppeter/parloku/pull/11">specs whose drag scenarios run and animate</a></td><td class="tb_row tb_right" style="background-color: #C38786; color: #1a1a1a">44</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><strong>Finale</strong><br>finale<br>7 Nov</th><td class="tb_row tb_left">tabelline, great tables for Nim, and diagrammari, diagrams that Mermaid reads; a FOSDEM proposal. And a name for the way of working: Operetta.<br><strong>One moment:</strong> <a href="https://github.com/pietroppeter/talk-sailing-seas-scientific-nim/pull/27">the talk's tables, redone with tabelline</a></td><td class="tb_row tb_right" style="background-color: #DFBEB9; color: #1a1a1a">18</td></tr>
 </tbody>
 <tfoot>
 <tr class="tb_footnotes"><td class="tb_footnote" colspan="3"><span class="tb_footnote_marks">1</span> Pull requests and issues opened in the act, public repositories only.</td></tr>
@@ -211,11 +906,11 @@ counts.sort()
 <span class="hljs-keyword">let</span> t = tabella(top, rownameCol = <span class="hljs-string">&quot;repo&quot;</span>):
   tabHeader <span class="hljs-string">&quot;Where the work went&quot;</span>, <span class="hljs-string">&quot;the seven busiest of 30 repositories&quot;</span>
   colsLabel {<span class="hljs-string">&quot;prs&quot;</span>: <span class="hljs-string">&quot;PRs and issues&quot;</span>}
-  fmtBar <span class="hljs-string">&quot;prs&quot;</span>, color = <span class="hljs-string">&quot;var(--rosso)&quot;</span>, width = <span class="hljs-string">&quot;9em&quot;</span></code></pre><div id="tabella-9eb162a0" class="tabella">
+  dataColor <span class="hljs-string">&quot;prs&quot;</span>, palette = @[<span class="hljs-string">&quot;#F1E3DA&quot;</span>, <span class="hljs-string">&quot;#8E1B24&quot;</span>]</code></pre><div id="tabella-9fd7a802" class="tabella">
 <style>
-#tabella-9eb162a0 { overflow-x: auto; }
-#tabella-9eb162a0 table, #tabella-9eb162a0 thead, #tabella-9eb162a0 tbody, #tabella-9eb162a0 tfoot, #tabella-9eb162a0 tr, #tabella-9eb162a0 td, #tabella-9eb162a0 th { border-style: none; }
-#tabella-9eb162a0 .tb_table { display: table; border-collapse: collapse; line-height: normal;
+#tabella-9fd7a802 { overflow-x: auto; }
+#tabella-9fd7a802 table, #tabella-9fd7a802 thead, #tabella-9fd7a802 tbody, #tabella-9fd7a802 tfoot, #tabella-9fd7a802 tr, #tabella-9fd7a802 td, #tabella-9fd7a802 th { border-style: none; }
+#tabella-9fd7a802 .tb_table { display: table; border-collapse: collapse; line-height: normal;
   margin-left: auto; margin-right: auto; width: auto;
   color: #333333; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px;
   background-color: #FFFFFF;
@@ -223,54 +918,50 @@ counts.sort()
   border-bottom: 2px solid #A8A8A8;
   border-left: 2px none #D3D3D3;
   border-right: 2px none #D3D3D3; }
-#tabella-9eb162a0 .tb_caption { caption-side: top; padding: 4px 5px; color: #333333; font-style: italic; }
-#tabella-9eb162a0 .tb_heading { background-color: #FFFFFF; text-align: center; color: #333333; }
-#tabella-9eb162a0 .tb_title { font-size: 125%; font-weight: initial;
+#tabella-9fd7a802 .tb_caption { caption-side: top; padding: 4px 5px; color: #333333; font-style: italic; }
+#tabella-9fd7a802 .tb_heading { background-color: #FFFFFF; text-align: center; color: #333333; }
+#tabella-9fd7a802 .tb_title { font-size: 125%; font-weight: initial;
   padding: 4px 5px; }
-#tabella-9eb162a0 .tb_subtitle { font-size: 85%; font-weight: normal; padding: 0 5px 4px 5px; }
-#tabella-9eb162a0 .tb_heading_last { border-bottom: 2px solid #D3D3D3; }
-#tabella-9eb162a0 .tb_col_headings th { background-color: #FFFFFF; color: #333333;
+#tabella-9fd7a802 .tb_subtitle { font-size: 85%; font-weight: normal; padding: 0 5px 4px 5px; }
+#tabella-9fd7a802 .tb_heading_last { border-bottom: 2px solid #D3D3D3; }
+#tabella-9fd7a802 .tb_col_headings th { background-color: #FFFFFF; color: #333333;
   font-size: 100%; font-weight: normal;
   text-transform: inherit; vertical-align: bottom;
   padding: 5px 5px; overflow-x: hidden; }
-#tabella-9eb162a0 .tb_col_headings_last th { border-bottom: 2px solid #D3D3D3; }
-#tabella-9eb162a0 .tb_spanner { display: inline-block; width: 100%; padding-bottom: 4px;
+#tabella-9fd7a802 .tb_col_headings_last th { border-bottom: 2px solid #D3D3D3; }
+#tabella-9fd7a802 .tb_spanner { display: inline-block; width: 100%; padding-bottom: 4px;
   border-bottom: 2px solid #D3D3D3; }
-#tabella-9eb162a0 .tb_spanner_empty { border-bottom: none; }
-#tabella-9eb162a0 .tb_group_heading { background-color: #FFFFFF; font-weight: initial;
+#tabella-9fd7a802 .tb_spanner_empty { border-bottom: none; }
+#tabella-9fd7a802 .tb_group_heading { background-color: #FFFFFF; font-weight: initial;
   padding: 8px 5px; text-align: left; border-top: 2px solid #D3D3D3;
   border-bottom: 2px solid #D3D3D3; }
-#tabella-9eb162a0 .tb_row { padding: 8px 5px; margin: 10px;
+#tabella-9fd7a802 .tb_row { padding: 8px 5px; margin: 10px;
   border-top: 1px solid #D3D3D3; vertical-align: middle; overflow-x: hidden; }
-#tabella-9eb162a0 .tb_stub { background-color: transparent; font-weight: initial; text-align: left;
+#tabella-9fd7a802 .tb_stub { background-color: transparent; font-weight: initial; text-align: left;
   border-right: 2px solid #D3D3D3; }
-#tabella-9eb162a0 tbody tr:first-child .tb_row { border-top: none; }
-#tabella-9eb162a0 .tb_striped { background-color: rgba(128,128,128,0.05); }
-#tabella-9eb162a0 .tb_left { text-align: left; } #tabella-9eb162a0 .tb_center { text-align: center; } #tabella-9eb162a0 .tb_right { text-align: right; font-variant-numeric: tabular-nums; }
-#tabella-9eb162a0 .tb_footnotes, #tabella-9eb162a0 .tb_sourcenotes { color: #333333; background-color: #FFFFFF; }
-#tabella-9eb162a0 .tb_footnote { font-size: 90%; padding: 4px 5px; text-align: left; }
-#tabella-9eb162a0 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
-#tabella-9eb162a0 tfoot tr:first-child td { padding-top: 8px; }
-#tabella-9eb162a0 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
-#tabella-9eb162a0 .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
-#tabella-9eb162a0 .tb_bar_track { display: inline-block; height: 0.8em; }
-#tabella-9eb162a0 .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
-#tabella-9eb162a0 .tb_bar_label { min-width: 2.5em; text-align: right; }
+#tabella-9fd7a802 tbody tr:first-child .tb_row { border-top: none; }
+#tabella-9fd7a802 .tb_striped { background-color: rgba(128,128,128,0.05); }
+#tabella-9fd7a802 .tb_left { text-align: left; } #tabella-9fd7a802 .tb_center { text-align: center; } #tabella-9fd7a802 .tb_right { text-align: right; font-variant-numeric: tabular-nums; }
+#tabella-9fd7a802 .tb_footnotes, #tabella-9fd7a802 .tb_sourcenotes { color: #333333; background-color: #FFFFFF; }
+#tabella-9fd7a802 .tb_footnote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-9fd7a802 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-9fd7a802 tfoot tr:first-child td { padding-top: 8px; }
+#tabella-9fd7a802 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
 </style>
-<table class="tb_table" aria-labelledby="tabella-9eb162a0-title">
+<table class="tb_table" aria-labelledby="tabella-9fd7a802-title">
 <thead>
-<tr class="tb_heading"><th colspan="2" id="tabella-9eb162a0-title" class="tb_title">Where the work went</th></tr>
+<tr class="tb_heading"><th colspan="2" id="tabella-9fd7a802-title" class="tb_title">Where the work went</th></tr>
 <tr class="tb_heading"><th colspan="2" class="tb_subtitle tb_heading_last">the seven busiest of 30 repositories</th></tr>
 <tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_right" scope="col" id="prs">PRs and issues</th></tr>
 </thead>
 <tbody class="tb_table_body">
-<tr><th scope="row" class="tb_row tb_left tb_stub">nanuq</th><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:9em"><span class="tb_bar_fill" style="width:100.0%;background:var(--rosso)"></span></span><span class="tb_bar_label">64</span></span></td></tr>
-<tr><th scope="row" class="tb_row tb_left tb_stub">parloku</th><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:9em"><span class="tb_bar_fill" style="width:60.9%;background:var(--rosso)"></span></span><span class="tb_bar_label">39</span></span></td></tr>
-<tr><th scope="row" class="tb_row tb_left tb_stub">talk-sailing-seas-scientific-nim</th><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:9em"><span class="tb_bar_fill" style="width:42.2%;background:var(--rosso)"></span></span><span class="tb_bar_label">27</span></span></td></tr>
-<tr><th scope="row" class="tb_row tb_left tb_stub">cadero</th><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:9em"><span class="tb_bar_fill" style="width:31.2%;background:var(--rosso)"></span></span><span class="tb_bar_label">20</span></span></td></tr>
-<tr><th scope="row" class="tb_row tb_left tb_stub">cicak</th><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:9em"><span class="tb_bar_fill" style="width:26.6%;background:var(--rosso)"></span></span><span class="tb_bar_label">17</span></span></td></tr>
-<tr><th scope="row" class="tb_row tb_left tb_stub">uv-add-nimlang</th><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:9em"><span class="tb_bar_fill" style="width:25.0%;background:var(--rosso)"></span></span><span class="tb_bar_label">16</span></span></td></tr>
-<tr><th scope="row" class="tb_row tb_left tb_stub">nanuq-book</th><td class="tb_row tb_right"><span class="tb_bar"><span class="tb_bar_track" style="width:9em"><span class="tb_bar_fill" style="width:20.3%;background:var(--rosso)"></span></span><span class="tb_bar_label">13</span></span></td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">nanuq</th><td class="tb_row tb_right" style="background-color: #8E1B24; color: #FFFFFF">64</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">parloku</th><td class="tb_row tb_right" style="background-color: #BF7D7D; color: #1a1a1a">39</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">talk-sailing-seas-scientific-nim</th><td class="tb_row tb_right" style="background-color: #D6ACA8; color: #1a1a1a">27</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">cadero</th><td class="tb_row tb_right" style="background-color: #E3C8C1; color: #1a1a1a">20</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">cicak</th><td class="tb_row tb_right" style="background-color: #E9D3CC; color: #1a1a1a">17</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">uv-add-nimlang</th><td class="tb_row tb_right" style="background-color: #EBD7CF; color: #1a1a1a">16</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">nanuq-book</th><td class="tb_row tb_right" style="background-color: #F1E3DA; color: #1a1a1a">13</td></tr>
 </tbody>
 </table>
 </div></div><div class="lingue-pannello" role="tabpanel" data-lingua="python" hidden><pre><code class="language-python"><span class="hljs-keyword">import</span> polars <span class="hljs-keyword">as</span> pl
@@ -283,7 +974,7 @@ top = (prs.with_columns(pl.col(<span class="hljs-string">"</span><span class="hl
 (GT(top, rowname_col=<span class="hljs-string">"</span><span class="hljs-string">repo</span><span class="hljs-string">"</span>)
     .tab_header(<span class="hljs-string">"</span><span class="hljs-string">Where the work went</span><span class="hljs-string">"</span>, <span class="hljs-string">"</span><span class="hljs-string">the seven busiest of 30 repositories</span><span class="hljs-string">"</span>)
     .cols_label(prs=<span class="hljs-string">"</span><span class="hljs-string">PRs and issues</span><span class="hljs-string">"</span>)
-    .fmt_nanoplot(<span class="hljs-string">"</span><span class="hljs-string">prs</span><span class="hljs-string">"</span>, plot_type=<span class="hljs-string">"</span><span class="hljs-string">bar</span><span class="hljs-string">"</span>))</code></pre></div><div class="lingue-pannello" role="tabpanel" data-lingua="r" hidden><pre><code class="language-r"><span class="hljs-title function_">library</span>(gt)
+    .data_color(<span class="hljs-string">"</span><span class="hljs-string">prs</span><span class="hljs-string">"</span>, palette=[<span class="hljs-string">"</span><span class="hljs-string">#F1E3DA</span><span class="hljs-string">"</span>, <span class="hljs-string">"</span><span class="hljs-string">#8E1B24</span><span class="hljs-string">"</span>]))</code></pre></div><div class="lingue-pannello" role="tabpanel" data-lingua="r" hidden><pre><code class="language-r"><span class="hljs-title function_">library</span>(gt)
 <span class="hljs-title function_">library</span>(dplyr)
 
 prs &lt;- <span class="hljs-title function_">read.delim</span>(<span class="hljs-string">"</span><span class="hljs-string">data/month-prs.tsv"</span>, quote = <span class="hljs-string">"</span><span class="hljs-string">"</span>)
@@ -294,7 +985,7 @@ top &lt;- prs |&gt;
 <span class="hljs-title function_">gt</span>(top, rowname_col = <span class="hljs-string">"</span><span class="hljs-string">repo"</span>) |&gt;
   <span class="hljs-title function_">tab_header</span>(<span class="hljs-string">"</span><span class="hljs-string">Where the work went"</span>, <span class="hljs-string">"</span><span class="hljs-string">the seven busiest of 30 repositories"</span>) |&gt;
   <span class="hljs-title function_">cols_label</span>(prs = <span class="hljs-string">"</span><span class="hljs-string">PRs and issues"</span>) |&gt;
-  <span class="hljs-title function_">fmt_nanoplot</span>(prs, plot_type = <span class="hljs-string">"</span><span class="hljs-string">bar"</span>)</code></pre></div></div>
+  <span class="hljs-title function_">data_color</span>(prs, palette = <span class="hljs-title function_">c</span>(<span class="hljs-string">"</span><span class="hljs-string">#F1E3DA"</span>, <span class="hljs-string">"</span><span class="hljs-string">#8E1B24"</span>))</code></pre></div></div>
 <p>Six of the seven were started in these seven weeks. The talk is the exception: started in
 August, it is the one piece of work that runs through the whole month.</p>
 <h3>What grew</h3>
@@ -342,10 +1033,6 @@ first shows up, in a pull request title:</p>
 #tabella-b9586b80 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
 #tabella-b9586b80 tfoot tr:first-child td { padding-top: 8px; }
 #tabella-b9586b80 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
-#tabella-b9586b80 .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
-#tabella-b9586b80 .tb_bar_track { display: inline-block; height: 0.8em; }
-#tabella-b9586b80 .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
-#tabella-b9586b80 .tb_bar_label { min-width: 2.5em; text-align: right; }
 </style>
 <table class="tb_table" aria-labelledby="tabella-b9586b80-title">
 <thead>
@@ -419,11 +1106,11 @@ Operetta could do with them.</li>
 </ul>
 <h3>What tabelline was missing</h3>
 <p>This part used tabelline as a user would, and sent what it found to the thread that builds 0.1:</p>
-<div id="tabella-b1b4d218" class="tabella">
+<div id="tabella-cd9d5782" class="tabella">
 <style>
-#tabella-b1b4d218 { overflow-x: auto; }
-#tabella-b1b4d218 table, #tabella-b1b4d218 thead, #tabella-b1b4d218 tbody, #tabella-b1b4d218 tfoot, #tabella-b1b4d218 tr, #tabella-b1b4d218 td, #tabella-b1b4d218 th { border-style: none; }
-#tabella-b1b4d218 .tb_table { display: table; border-collapse: collapse; line-height: normal;
+#tabella-cd9d5782 { overflow-x: auto; }
+#tabella-cd9d5782 table, #tabella-cd9d5782 thead, #tabella-cd9d5782 tbody, #tabella-cd9d5782 tfoot, #tabella-cd9d5782 tr, #tabella-cd9d5782 td, #tabella-cd9d5782 th { border-style: none; }
+#tabella-cd9d5782 .tb_table { display: table; border-collapse: collapse; line-height: normal;
   margin-left: auto; margin-right: auto; width: auto;
   color: #333333; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif; font-size: 16px;
   background-color: #FFFFFF;
@@ -431,43 +1118,39 @@ Operetta could do with them.</li>
   border-bottom: 2px solid #A8A8A8;
   border-left: 2px none #D3D3D3;
   border-right: 2px none #D3D3D3; }
-#tabella-b1b4d218 .tb_caption { caption-side: top; padding: 4px 5px; color: #333333; font-style: italic; }
-#tabella-b1b4d218 .tb_heading { background-color: #FFFFFF; text-align: center; color: #333333; }
-#tabella-b1b4d218 .tb_title { font-size: 125%; font-weight: initial;
+#tabella-cd9d5782 .tb_caption { caption-side: top; padding: 4px 5px; color: #333333; font-style: italic; }
+#tabella-cd9d5782 .tb_heading { background-color: #FFFFFF; text-align: center; color: #333333; }
+#tabella-cd9d5782 .tb_title { font-size: 125%; font-weight: initial;
   padding: 4px 5px; }
-#tabella-b1b4d218 .tb_subtitle { font-size: 85%; font-weight: normal; padding: 0 5px 4px 5px; }
-#tabella-b1b4d218 .tb_heading_last { border-bottom: 2px solid #D3D3D3; }
-#tabella-b1b4d218 .tb_col_headings th { background-color: #FFFFFF; color: #333333;
+#tabella-cd9d5782 .tb_subtitle { font-size: 85%; font-weight: normal; padding: 0 5px 4px 5px; }
+#tabella-cd9d5782 .tb_heading_last { border-bottom: 2px solid #D3D3D3; }
+#tabella-cd9d5782 .tb_col_headings th { background-color: #FFFFFF; color: #333333;
   font-size: 100%; font-weight: normal;
   text-transform: inherit; vertical-align: bottom;
   padding: 5px 5px; overflow-x: hidden; }
-#tabella-b1b4d218 .tb_col_headings_last th { border-bottom: 2px solid #D3D3D3; }
-#tabella-b1b4d218 .tb_spanner { display: inline-block; width: 100%; padding-bottom: 4px;
+#tabella-cd9d5782 .tb_col_headings_last th { border-bottom: 2px solid #D3D3D3; }
+#tabella-cd9d5782 .tb_spanner { display: inline-block; width: 100%; padding-bottom: 4px;
   border-bottom: 2px solid #D3D3D3; }
-#tabella-b1b4d218 .tb_spanner_empty { border-bottom: none; }
-#tabella-b1b4d218 .tb_group_heading { background-color: #FFFFFF; font-weight: initial;
+#tabella-cd9d5782 .tb_spanner_empty { border-bottom: none; }
+#tabella-cd9d5782 .tb_group_heading { background-color: #FFFFFF; font-weight: initial;
   padding: 8px 5px; text-align: left; border-top: 2px solid #D3D3D3;
   border-bottom: 2px solid #D3D3D3; }
-#tabella-b1b4d218 .tb_row { padding: 8px 5px; margin: 10px;
+#tabella-cd9d5782 .tb_row { padding: 8px 5px; margin: 10px;
   border-top: 1px solid #D3D3D3; vertical-align: middle; overflow-x: hidden; }
-#tabella-b1b4d218 .tb_stub { background-color: transparent; font-weight: initial; text-align: left;
+#tabella-cd9d5782 .tb_stub { background-color: transparent; font-weight: initial; text-align: left;
   border-right: 2px solid #D3D3D3; }
-#tabella-b1b4d218 tbody tr:first-child .tb_row { border-top: none; }
-#tabella-b1b4d218 .tb_striped { background-color: rgba(128,128,128,0.05); }
-#tabella-b1b4d218 .tb_left { text-align: left; } #tabella-b1b4d218 .tb_center { text-align: center; } #tabella-b1b4d218 .tb_right { text-align: right; font-variant-numeric: tabular-nums; }
-#tabella-b1b4d218 .tb_footnotes, #tabella-b1b4d218 .tb_sourcenotes { color: #333333; background-color: #FFFFFF; }
-#tabella-b1b4d218 .tb_footnote { font-size: 90%; padding: 4px 5px; text-align: left; }
-#tabella-b1b4d218 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
-#tabella-b1b4d218 tfoot tr:first-child td { padding-top: 8px; }
-#tabella-b1b4d218 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
-#tabella-b1b4d218 .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
-#tabella-b1b4d218 .tb_bar_track { display: inline-block; height: 0.8em; }
-#tabella-b1b4d218 .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
-#tabella-b1b4d218 .tb_bar_label { min-width: 2.5em; text-align: right; }
+#tabella-cd9d5782 tbody tr:first-child .tb_row { border-top: none; }
+#tabella-cd9d5782 .tb_striped { background-color: rgba(128,128,128,0.05); }
+#tabella-cd9d5782 .tb_left { text-align: left; } #tabella-cd9d5782 .tb_center { text-align: center; } #tabella-cd9d5782 .tb_right { text-align: right; font-variant-numeric: tabular-nums; }
+#tabella-cd9d5782 .tb_footnotes, #tabella-cd9d5782 .tb_sourcenotes { color: #333333; background-color: #FFFFFF; }
+#tabella-cd9d5782 .tb_footnote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-cd9d5782 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
+#tabella-cd9d5782 tfoot tr:first-child td { padding-top: 8px; }
+#tabella-cd9d5782 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
 </style>
-<table class="tb_table" aria-labelledby="tabella-b1b4d218-title">
+<table class="tb_table" aria-labelledby="tabella-cd9d5782-title">
 <thead>
-<tr class="tb_heading"><th colspan="2" id="tabella-b1b4d218-title" class="tb_title tb_heading_last">Gaps found by this part</th></tr>
+<tr class="tb_heading"><th colspan="2" id="tabella-cd9d5782-title" class="tb_title tb_heading_last">Gaps found by this part</th></tr>
 <tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_left" scope="col" id="how"></th></tr>
 </thead>
 <tbody class="tb_table_body">
@@ -475,8 +1158,8 @@ Operetta could do with them.</li>
 <tr><th scope="row" class="tb_row tb_left tb_stub">No count or group-by</th><td class="tb_row tb_left">Expected: tabelline is not a data frame library. A <code>CountTable</code> did the job; with nanuq it would be one line.</td></tr>
 <tr><th scope="row" class="tb_row tb_left tb_stub">Small Markdown, no HTML</th><td class="tb_row tb_left"><code>fmtMarkdown</code> knows <code>&lt;br&gt;</code> but escapes any other tag (a <code>&lt;small&gt;</code> showed as text); an <code>html()</code> cell format would help. It also turned <code>~</code> and <code>^</code> into sub- and superscripts even with a space inside: fixed in 0.1 (#10).</td></tr>
 <tr><th scope="row" class="tb_row tb_left tb_stub">Markdown in a group label</th><td class="tb_row tb_left">Row group labels come from the data as plain text; <code>fmtMarkdown</code> reaches cells, not groups, so act names stay plain.</td></tr>
-<tr><th scope="row" class="tb_row tb_left tb_stub">No nanoplot for single values</th><td class="tb_row tb_left"><code>fmtBar</code> covers it here. Great Tables and gt draw a single value as a bar with <code>fmt_nanoplot(plot_type=&quot;bar&quot;)</code>, planned for 0.4.</td></tr>
-<tr><th scope="row" class="tb_row tb_left tb_stub">A colour from the page</th><td class="tb_row tb_left"><code>fmtBar(color = &quot;var(--blu, var(--pen))&quot;)</code> works because the colour goes into a style attribute, so a page's CSS variables reach it. Worth saying so in the docs.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">No nanoplot for single values</th><td class="tb_row tb_left">Great Tables and gt draw a single value as a bar with <code>fmt_nanoplot(plot_type=&quot;bar&quot;)</code>, planned for 0.4. The first version of this page used tabelline's own <code>fmtBar</code>, removed before 0.1 because neither gt nor Great Tables has it; the counts are shaded with <code>dataColor</code> now, as gt's <code>data_color</code> does.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">A colour from the page</th><td class="tb_row tb_left"><code>dataColor</code> mixes its palette in Nim, so it takes colours as values (<code>#8E1B24</code>), not a page's CSS variables (<code>var(--rosso)</code>): the page keeps its two colours as constants beside its CSS. The same holds in gt and Great Tables.</td></tr>
 </tbody>
 </table>
 </div>
@@ -495,8 +1178,8 @@ pull request where it first appears). <code>actOf</code> puts every pull request
 repository when that belongs to one act, by its date otherwise.</li>
 <li><strong>The tables</strong> are tabelline: each <code>tabella(rows, ...)</code> call takes a <code>seq</code> of Nim objects or
 tuples, one field per column. <code>rownameCol</code> makes the stub, <code>groupnameCol</code> the row groups,
-and <code>fmtMarkdown</code> turns <code>**bold**</code>, links and <code>&lt;br&gt;</code> in the cells into HTML. The bars are
-<code>fmtBar</code>, coloured with the page's own CSS variables. <code>tabella</code> is a macro: it makes the table
+and <code>fmtMarkdown</code> turns <code>**bold**</code>, links and <code>&lt;br&gt;</code> in the cells into HTML. The counts are
+shaded by <code>dataColor</code>, from the velvet to the curtain red of the page. <code>tabella</code> is a macro: it makes the table
 with <code>initTabella</code>, then reads its indented body one line at a time, so that <code>tabHeader &quot;Title&quot;</code> becomes <code>t = t.tabHeader(&quot;Title&quot;)</code>. The rest is plain Nim: the verbs are procs.</li>
 </ul>
 <p>Nothing is fetched while the page is built: the TSV is in the repository, so the page builds
@@ -563,10 +1246,6 @@ one, so they are easy to understand.</p>
 #tabella-01e50145 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
 #tabella-01e50145 tfoot tr:first-child td { padding-top: 8px; }
 #tabella-01e50145 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
-#tabella-01e50145 .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
-#tabella-01e50145 .tb_bar_track { display: inline-block; height: 0.8em; }
-#tabella-01e50145 .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
-#tabella-01e50145 .tb_bar_label { min-width: 2.5em; text-align: right; }
 </style>
 <table class="tb_table" aria-labelledby="tabella-01e50145-title">
 <thead>
@@ -653,10 +1332,6 @@ and what it could skip, from the one that needs least to the one that needs most
 #tabella-61c52752 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
 #tabella-61c52752 tfoot tr:first-child td { padding-top: 8px; }
 #tabella-61c52752 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
-#tabella-61c52752 .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
-#tabella-61c52752 .tb_bar_track { display: inline-block; height: 0.8em; }
-#tabella-61c52752 .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
-#tabella-61c52752 .tb_bar_label { min-width: 2.5em; text-align: right; }
 </style>
 <table class="tb_table" aria-labelledby="tabella-61c52752-title">
 <thead>
@@ -719,10 +1394,6 @@ needs it. Each stage has a sign that says it is time:</p>
 #tabella-b95a654a .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
 #tabella-b95a654a tfoot tr:first-child td { padding-top: 8px; }
 #tabella-b95a654a .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
-#tabella-b95a654a .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
-#tabella-b95a654a .tb_bar_track { display: inline-block; height: 0.8em; }
-#tabella-b95a654a .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
-#tabella-b95a654a .tb_bar_label { min-width: 2.5em; text-align: right; }
 </style>
 <table class="tb_table" aria-labelledby="tabella-b95a654a-title">
 <thead>
@@ -842,10 +1513,6 @@ when:</p>
 #tabella-53474526 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
 #tabella-53474526 tfoot tr:first-child td { padding-top: 8px; }
 #tabella-53474526 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
-#tabella-53474526 .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
-#tabella-53474526 .tb_bar_track { display: inline-block; height: 0.8em; }
-#tabella-53474526 .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
-#tabella-53474526 .tb_bar_label { min-width: 2.5em; text-align: right; }
 </style>
 <table class="tb_table" aria-labelledby="tabella-53474526-title">
 <thead>
@@ -908,10 +1575,6 @@ twice.</p>
 #tabella-2741bba0 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
 #tabella-2741bba0 tfoot tr:first-child td { padding-top: 8px; }
 #tabella-2741bba0 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
-#tabella-2741bba0 .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
-#tabella-2741bba0 .tb_bar_track { display: inline-block; height: 0.8em; }
-#tabella-2741bba0 .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
-#tabella-2741bba0 .tb_bar_label { min-width: 2.5em; text-align: right; }
 </style>
 <table class="tb_table" aria-labelledby="tabella-2741bba0-title">
 <thead>
@@ -989,10 +1652,6 @@ version they have.</li>
 #tabella-9896dbf3 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
 #tabella-9896dbf3 tfoot tr:first-child td { padding-top: 8px; }
 #tabella-9896dbf3 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
-#tabella-9896dbf3 .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
-#tabella-9896dbf3 .tb_bar_track { display: inline-block; height: 0.8em; }
-#tabella-9896dbf3 .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
-#tabella-9896dbf3 .tb_bar_label { min-width: 2.5em; text-align: right; }
 </style>
 <table class="tb_table" aria-labelledby="tabella-9896dbf3-title">
 <thead>
@@ -1057,10 +1716,6 @@ README warns not to use both for the same skills, or the agent sees every skill 
 #tabella-0835c5e4 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
 #tabella-0835c5e4 tfoot tr:first-child td { padding-top: 8px; }
 #tabella-0835c5e4 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
-#tabella-0835c5e4 .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
-#tabella-0835c5e4 .tb_bar_track { display: inline-block; height: 0.8em; }
-#tabella-0835c5e4 .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
-#tabella-0835c5e4 .tb_bar_label { min-width: 2.5em; text-align: right; }
 </style>
 <table class="tb_table" aria-labelledby="tabella-0835c5e4-title">
 <thead>
@@ -1140,10 +1795,6 @@ and is not any more. Each needs its own test:</p>
 #tabella-caad4438 .tb_sourcenote { font-size: 90%; padding: 4px 5px; text-align: left; }
 #tabella-caad4438 tfoot tr:first-child td { padding-top: 8px; }
 #tabella-caad4438 .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
-#tabella-caad4438 .tb_bar { display: inline-flex; align-items: center; gap: 6px; }
-#tabella-caad4438 .tb_bar_track { display: inline-block; height: 0.8em; }
-#tabella-caad4438 .tb_bar_fill { display: block; height: 100%; border-radius: 2px; }
-#tabella-caad4438 .tb_bar_label { min-width: 2.5em; text-align: right; }
 </style>
 <table class="tb_table" aria-labelledby="tabella-caad4438-title">
 <thead>
@@ -1217,6 +1868,7 @@ border:1px solid rgba(0,0,0,.14);border-radius:999px;padding:6px 10px;text-decor
 #ca-backlink:hover,#ca-backlink:focus-visible{text-decoration:underline}
 @media (prefers-color-scheme:dark){#ca-backlink{color:#ece6ef;background:rgba(23,19,26,.94);border-color:rgba(255,255,255,.18)}}
 @media print{#ca-backlink{display:none}}
+body.rv-on #ca-backlink{display:none}
 </style>
 <a id="ca-backlink" href="https://pietroppeter.github.io/claude-artifacts/" title="All Claude artifacts">&larr; Claude artifacts</a>
 <!-- /claude-artifacts:backlink -->

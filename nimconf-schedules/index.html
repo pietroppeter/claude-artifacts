@@ -264,6 +264,9 @@ dialog.rv-sheet[open] { animation: rv-down .2s ease-out; }
 @media (prefers-reduced-motion: reduce) {
   ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
 }
+html[data-tema="quaderno"] mark.rv-mark { background: var(--highlight); box-shadow: 0 2px 0 var(--red-pen); }
+html[data-tema="quaderno"] mark.rv-mark.rv-current { background: var(--postit); box-shadow: 0 2px 0 var(--red-pen), 0 0 0 2px var(--red-pen); }
+html[data-tema="quaderno"] .rv-bar { font-family: var(--font); }
 </style>
   
   
@@ -2012,7 +2015,7 @@ Munari; Open Sans and Titillium Web, the fonts of conf.nim-lang.org, for NimConf
 NimConf look is the same rules under <code>html[data-look=&quot;nimconf&quot;]</code>: the site's <code>#1e202a</code>
 background, its yellow <code>#ffe953</code>, its <code>#2b2e3b</code> rows and its <code>»</code> before every item.</li>
 </ul>
-<p>The review mode (<strong>✎ Review</strong> under the lede) is tabelline's, copied into <code>vendor/</code>: select
+<p>The review mode (<strong>✎ Review</strong> under the lede) is tabelline's, from <code>shared/review/</code>: select
 some text, comment on it, and export the comments for the next round of this page. Nothing on
 the page is loaded from elsewhere: it is one file, and it works offline.</p>
 <h3>The prompt and the reviews</h3>
@@ -2219,7 +2222,7 @@ Published 10 November 2026.
 <span class="hljs-keyword">import</span> std/[os, strutils, strformat, sequtils, algorithm, options, tables, sets]
 <span class="hljs-keyword">import</span> nimib <span class="hljs-keyword">except</span> md
 <span class="hljs-keyword">import</span> tabelline, tabelline/nimib
-<span class="hljs-keyword">import</span> nimconf, blocks, vendor/review
+<span class="hljs-keyword">import</span> nimconf, blocks, review
 
 <span class="hljs-keyword">const</span> srcDir = currentSourcePath().parentDir
 
@@ -2687,7 +2690,7 @@ own scoped style. Three small modules sit beside it:
   NimConf look is the same rules under `html[data-look=&quot;nimconf&quot;]`: the site's `#1e202a`
   background, its yellow `#ffe953`, its `#2b2e3b` rows and its `»` before every item.
 
-The review mode (**✎ Review** under the lede) is tabelline's, copied into `vendor/`: select
+The review mode (**✎ Review** under the lede) is tabelline's, from `shared/review/`: select
 some text, comment on it, and export the comments for the next round of this page. Nothing on
 the page is loaded from elsewhere: it is one file, and it works offline.
 
@@ -3457,12 +3460,14 @@ markdown soasme/nim-markdown 5a7a7bafd1da23b25332316a7b888e6586f4177a
 parsetoml NimParsers/parsetoml d297f5a81be2472905d367aa675dcbbca6e7a5d2
 jsony treeform/jsony bb647e1ca21af25ffdc423bcb96feeeeae963ca2
 DEPS</span></code></pre></details>
-<details class="foldcode"><summary><code>config.nims</code> <span>6 lines</span></summary><pre><code class="nohighlight nim hljs"><span class="hljs-comment"># Dependencies from deps.sh (NIMCONF_DEPS, default ./deps).</span>
+<details class="foldcode"><summary><code>config.nims</code> <span>8 lines</span></summary><pre><code class="nohighlight nim hljs"><span class="hljs-comment"># Dependencies from deps.sh (NIMCONF_DEPS, default ./deps).</span>
 <span class="hljs-keyword">import</span> std/os
 <span class="hljs-keyword">let</span> deps = getEnv(<span class="hljs-string">&quot;NIMCONF_DEPS&quot;</span>, thisDir() / <span class="hljs-string">&quot;deps&quot;</span>)
 <span class="hljs-keyword">for</span> d <span class="hljs-keyword">in</span> [<span class="hljs-string">&quot;tabelline&quot;</span>, <span class="hljs-string">&quot;nimib&quot;</span>, <span class="hljs-string">&quot;fusion&quot;</span>, <span class="hljs-string">&quot;markdown&quot;</span>, <span class="hljs-string">&quot;parsetoml&quot;</span>, <span class="hljs-string">&quot;jsony&quot;</span>]:
   switch(<span class="hljs-string">&quot;path&quot;</span>, deps / d / <span class="hljs-string">&quot;src&quot;</span>)
-switch(<span class="hljs-string">&quot;hints&quot;</span>, <span class="hljs-string">&quot;off&quot;</span>)</code></pre></details>
+switch(<span class="hljs-string">&quot;hints&quot;</span>, <span class="hljs-string">&quot;off&quot;</span>)
+<span class="hljs-comment"># The review mode, shared by the pages of this repository (shared/review/README.md).</span>
+switch(<span class="hljs-string">&quot;path&quot;</span>, thisDir() / <span class="hljs-string">&quot;..&quot;</span> / <span class="hljs-string">&quot;..&quot;</span> / <span class="hljs-string">&quot;shared&quot;</span> / <span class="hljs-string">&quot;review&quot;</span>)</code></pre></details>
 <p>Congratulations to tabelline on its 0.1, and thanks to everyone who gave a talk at NimConf. 👑</p>
 </main>
 <footer class="page">Written in Nim with Claude, in a <a href="https://github.com/pietroppeter/nimib">nimib</a> 🐳 page,
@@ -3517,6 +3522,7 @@ border:1px solid rgba(0,0,0,.14);border-radius:999px;padding:6px 10px;text-decor
 #ca-backlink:hover,#ca-backlink:focus-visible{text-decoration:underline}
 @media (prefers-color-scheme:dark){#ca-backlink{color:#ece6ef;background:rgba(23,19,26,.94);border-color:rgba(255,255,255,.18)}}
 @media print{#ca-backlink{display:none}}
+body.rv-on #ca-backlink{display:none}
 </style>
 <a id="ca-backlink" href="https://pietroppeter.github.io/claude-artifacts/" title="All Claude artifacts">&larr; Claude artifacts</a>
 <!-- /claude-artifacts:backlink -->

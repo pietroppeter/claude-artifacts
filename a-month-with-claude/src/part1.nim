@@ -1,5 +1,5 @@
 ## Part one: the month in seven acts (from tabelline's devlog, 7 Nov 2026).
-const bar = "var(--rosso)"   # the curtain red of the page
+const shades = @[velluto, rosso]   # from the velvet of the seats to the curtain red
 let d = monthData()
 var repos: CountTable[string]
 for i in 0 ..< d.nrows: repos.inc $d["repo", i]
@@ -37,7 +37,7 @@ block:
     tabHeader "The month in seven acts", "20 September to 7 November 2026"
     colsLabel {"story": "what happened", "prs": "PRs"}
     fmtMarkdown ["act", "story"]
-    fmtBar "prs", color = bar, width = "2.5em", showValue = true
+    dataColor "prs", palette = shades
     colsWidth {"act": "24%"}
     tabFootnote "Pull requests and issues opened in the act, public repositories only.", loc.columnLabels("prs")
     tabSourceNote md("From GitHub's search API; the selection of acts and moments is by hand.")
@@ -65,7 +65,7 @@ top = (prs.with_columns(pl.col("repo").str.replace("pietroppeter/", ""))
 (GT(top, rowname_col="repo")
     .tab_header("Where the work went", "the seven busiest of 30 repositories")
     .cols_label(prs="PRs and issues")
-    .fmt_nanoplot("prs", plot_type="bar"))
+    .data_color("prs", palette=["#F1E3DA", "#8E1B24"]))
 """, r = """
 library(gt)
 library(dplyr)
@@ -78,7 +78,7 @@ top <- prs |>
 gt(top, rowname_col = "repo") |>
   tab_header("Where the work went", "the seven busiest of 30 repositories") |>
   cols_label(prs = "PRs and issues") |>
-  fmt_nanoplot(prs, plot_type = "bar")
+  data_color(prs, palette = c("#F1E3DA", "#8E1B24"))
 """):
   nbCode:
     let prs = readCsv(monthTsv, sep = '\t')
@@ -92,7 +92,7 @@ gt(top, rowname_col = "repo") |>
     let t = tabella(top, rownameCol = "repo"):
       tabHeader "Where the work went", "the seven busiest of 30 repositories"
       colsLabel {"prs": "PRs and issues"}
-      fmtBar "prs", color = "var(--rosso)", width = "9em"
+      dataColor "prs", palette = @["#F1E3DA", "#8E1B24"]
   nbTable t
 
 nbText: """
@@ -178,9 +178,9 @@ block:
     Gap(what: "Markdown in a group label",
         how: "Row group labels come from the data as plain text; `fmtMarkdown` reaches cells, not groups, so act names stay plain."),
     Gap(what: "No nanoplot for single values",
-        how: "`fmtBar` covers it here. Great Tables and gt draw a single value as a bar with `fmt_nanoplot(plot_type=\"bar\")`, planned for 0.4."),
+        how: "Great Tables and gt draw a single value as a bar with `fmt_nanoplot(plot_type=\"bar\")`, planned for 0.4. The first version of this page used tabelline's own `fmtBar`, removed before 0.1 because neither gt nor Great Tables has it; the counts are shaded with `dataColor` now, as gt's `data_color` does."),
     Gap(what: "A colour from the page",
-        how: "`fmtBar(color = \"var(--blu, var(--pen))\")` works because the colour goes into a style attribute, so a page's CSS variables reach it. Worth saying so in the docs."),
+        how: "`dataColor` mixes its palette in Nim, so it takes colours as values (`#8E1B24`), not a page's CSS variables (`var(--rosso)`): the page keeps its two colours as constants beside its CSS. The same holds in gt and Great Tables."),
   ]
   let t = tabella(rows, rownameCol = "what"):
     tabHeader "Gaps found by this part"
@@ -206,8 +206,8 @@ The page is a nimib notebook, `docs/devlog/month_of_building.nim`, built with th
   repository when that belongs to one act, by its date otherwise.
 - **The tables** are tabelline: each `tabella(rows, ...)` call takes a `seq` of Nim objects or
   tuples, one field per column. `rownameCol` makes the stub, `groupnameCol` the row groups,
-  and `fmtMarkdown` turns `**bold**`, links and `<br>` in the cells into HTML. The bars are
-  `fmtBar`, coloured with the page's own CSS variables. `tabella` is a macro: it makes the table
+  and `fmtMarkdown` turns `**bold**`, links and `<br>` in the cells into HTML. The counts are
+  shaded by `dataColor`, from the velvet to the curtain red of the page. `tabella` is a macro: it makes the table
   with `initTabella`, then reads its indented body one line at a time, so that `tabHeader
   "Title"` becomes `t = t.tabHeader("Title")`. The rest is plain Nim: the verbs are procs.
 

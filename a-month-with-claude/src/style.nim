@@ -2,14 +2,22 @@
 ## curtain and a little gold; one serif from the system for everything, small capitals for the
 ## labels. No remote fonts, nothing loaded.
 
+const
+  rosso* = "#8E1B24"     # the curtain red
+  velluto* = "#F1E3DA"   # the velvet of the seats
+  ## the two ends of `dataColor`'s palette: it mixes colours in Nim, so it needs them as values
+
 const pageStyle* = """
 <link rel="icon" href="data:image/svg+xml,<svg xmlns=%22http://www.w3.org/2000/svg%22 viewBox=%220 0 100 100%22><text y=%22.9em%22 font-size=%2280%22>🎭</text></svg>">
 <style>
 :root {
-  --carta: #F7F2E8; --inchiostro: #221C1A; --rosso: #8E1B24; --oro: #A9843A;
-  --grigio: #6E625A; --filetto: #D9CDB8; --velluto: #F1E3DA;
+  --carta: #F7F2E8; --inchiostro: #221C1A; --rosso: """ & rosso & """; --oro: #A9843A;
+  --grigio: #6E625A; --filetto: #D9CDB8; --velluto: """ & velluto & """;
   --serif: "Iowan Old Style", "Palatino Linotype", Palatino, "Book Antiqua", Georgia, serif;
   --mono: ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  /* the names the review mode (shared/review) reads, from the programme's own */
+  --paper: var(--carta); --ink: var(--inchiostro); --line: var(--filetto); --shade: var(--velluto);
+  --surface: #FFFDF8; --muted: var(--grigio); --primary-text: var(--rosso); --font: var(--serif);
   padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
 }
 html { -webkit-text-size-adjust: 100%; }
