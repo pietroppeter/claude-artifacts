@@ -278,7 +278,7 @@ dialog.rv-sheet[open] { animation: rv-down .2s ease-out; }
 <div class="looks" role="group" aria-label="Look of the page"><button type="button" data-look="munari" aria-pressed="true">Munari</button><button type="button" data-look="nimconf" aria-pressed="false">NimConf</button></div>
 </header>
 <main>
-<div id="review" hidden data-page="nimconf-schedules/src/index.nim" data-version="2" data-title="Every NimConf, in tables" data-source="nimconf-schedules/src/index.nim" data-versions=""></div><script>
+<div id="review" hidden data-page="nimconf-schedules/src/index.nim" data-version="3" data-title="Every NimConf, in tables" data-source="nimconf-schedules/src/index.nim" data-versions=""></div><script>
 document.addEventListener('DOMContentLoaded', function () {
 // Review mode for a nimib page: open it with the Review button, select text, comment on it, keep
 // the comments in this browser, export them as Markdown with a YAML block for a coding agent.
@@ -878,12 +878,7 @@ and each published its schedule as a table. Here they all are again, made with
 reached 0.1: from the simplest table to the two tracks of 2026, then where the data comes
 from, and the Nim code that downloaded it.</p>
 </div>
-<p class="rv-enter"><span class="rv-version">Version 2 · updated 10 November 2026, after the first review</span></p>
-<div class="rv-only"><div class="note plain"><p><strong>New in version 2</strong>, after the first review: NimConf is the look you see first; striped rows
-come from tabelline (<code>optRowStriping</code>), so the plain first table is readable in the dark; the
-notes about code are blue and the note on missing data is warm in the NimConf look; <em>How this
-page is built</em> ends with the prompt, the review, and every source file, folded.</p>
-</div></div>
+<p class="rv-enter"><span class="rv-version">Version 3 · updated 10 November 2026, after the second review</span></p>
 <ul class="editions"><li><b>2020</b><span>20 June</span></li><li><b>2021</b><span>26 June</span></li><li><b>2022</b><span>22 October</span></li><li><b>2024</b><span>26 October</span></li><li><b>2026</b><span>20 June</span></li></ul>
 <p>Five editions, from June 2020 to June 2026: three in June, two in October, and none in 2023
 or 2025. Every one of them starts on a Saturday morning, UTC. The switch at the top of the
@@ -1067,9 +1062,10 @@ here the breaks, which <code>colsHide</code> keeps in the data but out of sight.
 <p>Sixteen talks, the first at 11:00 UTC and the last at 20:45, with two coffee breaks and a
 lunch break between them: the first NimConf was a long day. The breaks have no starting time
 because the page gave them none.</p>
-<h2>Every schedule</h2>
+<h2>Every one-track schedule</h2>
 <p>The table for 2020 is a few lines; the same lines in a proc make the table of any edition with
-one track. One tab for each:</p>
+one track, the four from 2020 to 2024, one tab for each. 2026 had two tracks at once and needs
+another table: it comes next.</p>
 <pre><code class="nohighlight nim hljs"><span class="hljs-keyword">proc</span> schedule(e: <span class="hljs-type">Edition</span>): <span class="hljs-type">Tabella</span> =
   tabella(talks(e.year)):
     optCssTheme()
@@ -2008,7 +2004,8 @@ the page is loaded from elsewhere: it is one file, and it works offline.</p>
 <p>This page was asked for in three short messages, written on a phone to Claude Code in a project
 that has Pietro's skills and rules (those are not copied here). Claude found the data, wrote the
 code and the page, and published it; Pietro read it on his phone and commented with the review
-mode, and each export is pasted back as it was. One more file for every round:</p>
+mode. Each export is kept as it was pasted, followed by what changed in the next version (a
+review can also end with no changes). In order:</p>
 <details class="foldcode"><summary>The prompt, 10 November 2026 <span>10 lines</span></summary><pre><code class="language-text"># The prompt
 
 Pietro's messages that started this page, 10 November 2026, written on a phone in a Claude Code
@@ -2080,9 +2077,65 @@ Can you add also the original prompt? This document is made by a prompt on Claud
 Around it: “…small modules sit beside it: ⟦nimconf.nim⟧, the data: the editions and the…”
 
 Add also below the sources of files with nbCodeFold of tabelline</code></pre></details>
+<details class="foldcode"><summary>Version 2: what changed <span>12 lines</span></summary><pre><code class="language-text"># Changes in version 2, after the review of version 1
+
+Published 10 November 2026, PR #15 (merged with it).
+
+1. Dark mode: the page's own CSS striped every other row of every table, which made the plain
+   first table dark text on dark rows. Stripes now come from tabelline (`optRowStriping()` in
+   each themed table); the plain table stays white in both looks.
+2. NimConf is the look a reader sees first; Munari is one tap away.
+3. The notes about code are the site's blue in the NimConf look (green is not of its palette).
+4. The note on missing data has a warm yellow tint and a yellow heading in the NimConf look.
+5. *How this page is built* ends with the prompt and each review, as they were pasted.
+6. Every source file of the page is folded below them (`nbFoldCode`, after tabelline's).</code></pre></details>
+<details class="foldcode"><summary>Review of version 2: three comments <span>35 lines</span></summary><pre><code class="language-text"># Review of “Every NimConf, in tables”, version 2
+
+```yaml
+format: nimib-review/3
+title: &quot;Every NimConf, in tables&quot;
+page: &quot;https://pietroppeter.github.io/claude-artifacts/nimconf-schedules/&quot;
+source: &quot;nimconf-schedules/src/index.nim&quot;
+version: 2
+exported: &quot;2026-11-10T08:24:47.535Z&quot;
+comments: 3
+```
+
+## 1. In “Every NimConf, in tables”
+
+&gt; New in version 2, after the first review: NimConf is the look you see first; striped rows come from tabelline (optRowStriping), so the plain first table is readable in the dark; the notes about code are blue and the note on missing data is warm in the NimConf look; How this page is built ends with the prompt, the review, and every source file, folded.
+
+Around it: “… the first reviewClose review ⟦New in version 2, after the first review: NimConf is the look you see first; striped rows come from tabelline (optRowStriping), so the plain first table is readable in the dark; the notes about code are blue and the note on missing data is warm in the NimConf look; How this page is built ends with the prompt, the review, and every source file, folded.⟧ 202020 June 202126 June 202…”
+
+We can skip this part changes are at the end
+
+## 2. In “Every schedule”
+
+&gt; Every schedule
+
+Around it: “…ause the page gave them none. ⟦Every schedule⟧ The table for 2020 is a few l…”
+
+Not really 2026 is dealt with later (because of two tracks but here it is unclear)
+
+## 3. In “The prompt and the reviews”
+
+&gt; The prompt and the reviews
+
+Around it: “…e file, and it works offline. ⟦The prompt and the reviews⟧ This page was asked for in th…”
+
+Here let’s keep it updated. Between review lets summaries also changes implemented (not necessarily a review will result in changes)</code></pre></details>
+<details class="foldcode"><summary>Version 3: what changed <span>9 lines</span></summary><pre><code class="language-text"># Changes in version 3, after the review of version 2
+
+Published 10 November 2026.
+
+1. The note &quot;New in version 2&quot; under the title is gone: what changed is here, at the end.
+2. *Every schedule* is now *Every one-track schedule*, and its text says that 2026, with its
+   two tracks, comes in the next section.
+3. *The prompt and the reviews* keeps the whole story in order: the prompt, then each review
+   and the changes that followed it (a review may also end with no changes).</code></pre></details>
 <h3>The source files</h3>
 <p>Every file the page is made of, as it is:</p>
-<details class="foldcode"><summary><code>index.nim</code> <span>492 lines</span></summary><pre><code class="nohighlight nim hljs"><span class="hljs-comment">## Every NimConf schedule, in tables: a nimib page with tabelline. Writes ../index.html.</span>
+<details class="foldcode"><summary><code>index.nim</code> <span>490 lines</span></summary><pre><code class="nohighlight nim hljs"><span class="hljs-comment">## Every NimConf schedule, in tables: a nimib page with tabelline. Writes ../index.html.</span>
 <span class="hljs-comment">## The data is in data/ (written by fetch.nim); the procs that read the pages are in nimconf.nim,</span>
 <span class="hljs-comment">## and the page shows them. See README.md for how to build it.</span>
 <span class="hljs-keyword">import</span> std/[os, strutils, strformat, sequtils, algorithm, options, tables, sets]
@@ -2096,7 +2149,7 @@ nbInit
 nb.doc.filename = srcDir.parentDir / <span class="hljs-string">&quot;index.html&quot;</span>
 nb.usePage(<span class="hljs-string">&quot;Every NimConf, in tables&quot;</span>,
            <span class="hljs-string">&quot;Every schedule of NimConf, the online Nim conference, 2020 to 2026, as tables made with tabelline.&quot;</span>)
-nbReview(tversion = <span class="hljs-number">2</span>, tsource = <span class="hljs-string">&quot;nimconf-schedules/src/index.nim&quot;</span>)
+nbReview(tversion = <span class="hljs-number">3</span>, tsource = <span class="hljs-string">&quot;nimconf-schedules/src/index.nim&quot;</span>)
 
 <span class="hljs-keyword">let</span> slots = readSlots(srcDir / <span class="hljs-string">&quot;data&quot;</span> / <span class="hljs-string">&quot;slots.tsv&quot;</span>)
 <span class="hljs-keyword">let</span> videos = readVideos(srcDir / <span class="hljs-string">&quot;data&quot;</span> / <span class="hljs-string">&quot;videos.tsv&quot;</span>)
@@ -2119,14 +2172,7 @@ reached 0.1: from the simplest table to the two tracks of 2026, then where the d
 from, and the Nim code that downloaded it.
 &quot;&quot;&quot;</span>
 
-nbVersion <span class="hljs-number">2</span>, <span class="hljs-string">&quot;10 November 2026, after the first review&quot;</span>
-nbInReview:
-  nbNote(<span class="hljs-string">&quot;&quot;&quot;
-**New in version 2**, after the first review: NimConf is the look you see first; striped rows
-come from tabelline (`optRowStriping`), so the plain first table is readable in the dark; the
-notes about code are blue and the note on missing data is warm in the NimConf look; *How this
-page is built* ends with the prompt, the review, and every source file, folded.
-&quot;&quot;&quot;</span>)
+nbVersion <span class="hljs-number">3</span>, <span class="hljs-string">&quot;10 November 2026, after the second review&quot;</span>
 nbEditions editions.mapIt(($it.year, it.day.rsplit(' <span class="hljs-string">', 1)[0]))</span>
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
@@ -2199,10 +2245,11 @@ Sixteen talks, the first at 11:00 UTC and the last at 20:45, with two coffee bre
 lunch break between them: the first NimConf was a long day. The breaks have no starting time
 because the page gave them none.
 
-## Every schedule
+## Every one-track schedule
 
 The table for 2020 is a few lines; the same lines in a proc make the table of any edition with
-one track. One tab for each:
+one track, the four from 2020 to 2024, one tab for each. 2026 had two tracks at once and needs
+another table: it comes next.
 &quot;&quot;&quot;</span>
 
 nbCode:
@@ -2553,11 +2600,15 @@ the page is loaded from elsewhere: it is one file, and it works offline.
 This page was asked for in three short messages, written on a phone to Claude Code in a project
 that has Pietro's skills and rules (those are not copied here). Claude found the data, wrote the
 code and the page, and published it; Pietro read it on his phone and commented with the review
-mode, and each export is pasted back as it was. One more file for every round:
+mode. Each export is kept as it was pasted, followed by what changed in the next version (a
+review can also end with no changes). In order:
 &quot;&quot;&quot;</span>
 
 nbFoldCode <span class="hljs-string">&quot;process/prompt.md&quot;</span>, <span class="hljs-string">&quot;The prompt, 10 November 2026&quot;</span>
 nbFoldCode <span class="hljs-string">&quot;process/review-v1.md&quot;</span>, <span class="hljs-string">&quot;Review of version 1: six comments&quot;</span>
+nbFoldCode <span class="hljs-string">&quot;process/changes-v2.md&quot;</span>, <span class="hljs-string">&quot;Version 2: what changed&quot;</span>
+nbFoldCode <span class="hljs-string">&quot;process/review-v2.md&quot;</span>, <span class="hljs-string">&quot;Review of version 2: three comments&quot;</span>
+nbFoldCode <span class="hljs-string">&quot;process/changes-v3.md&quot;</span>, <span class="hljs-string">&quot;Version 3: what changed&quot;</span>
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 ### The source files

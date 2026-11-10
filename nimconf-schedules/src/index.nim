@@ -12,7 +12,7 @@ nbInit
 nb.doc.filename = srcDir.parentDir / "index.html"
 nb.usePage("Every NimConf, in tables",
            "Every schedule of NimConf, the online Nim conference, 2020 to 2026, as tables made with tabelline.")
-nbReview(tversion = 2, tsource = "nimconf-schedules/src/index.nim")
+nbReview(tversion = 3, tsource = "nimconf-schedules/src/index.nim")
 
 let slots = readSlots(srcDir / "data" / "slots.tsv")
 let videos = readVideos(srcDir / "data" / "videos.tsv")
@@ -35,14 +35,7 @@ reached 0.1: from the simplest table to the two tracks of 2026, then where the d
 from, and the Nim code that downloaded it.
 """
 
-nbVersion 2, "10 November 2026, after the first review"
-nbInReview:
-  nbNote("""
-**New in version 2**, after the first review: NimConf is the look you see first; striped rows
-come from tabelline (`optRowStriping`), so the plain first table is readable in the dark; the
-notes about code are blue and the note on missing data is warm in the NimConf look; *How this
-page is built* ends with the prompt, the review, and every source file, folded.
-""")
+nbVersion 3, "10 November 2026, after the second review"
 nbEditions editions.mapIt(($it.year, it.day.rsplit(' ', 1)[0]))
 
 nbText: """
@@ -115,10 +108,11 @@ Sixteen talks, the first at 11:00 UTC and the last at 20:45, with two coffee bre
 lunch break between them: the first NimConf was a long day. The breaks have no starting time
 because the page gave them none.
 
-## Every schedule
+## Every one-track schedule
 
 The table for 2020 is a few lines; the same lines in a proc make the table of any edition with
-one track. One tab for each:
+one track, the four from 2020 to 2024, one tab for each. 2026 had two tracks at once and needs
+another table: it comes next.
 """
 
 nbCode:
@@ -469,11 +463,15 @@ the page is loaded from elsewhere: it is one file, and it works offline.
 This page was asked for in three short messages, written on a phone to Claude Code in a project
 that has Pietro's skills and rules (those are not copied here). Claude found the data, wrote the
 code and the page, and published it; Pietro read it on his phone and commented with the review
-mode, and each export is pasted back as it was. One more file for every round:
+mode. Each export is kept as it was pasted, followed by what changed in the next version (a
+review can also end with no changes). In order:
 """
 
 nbFoldCode "process/prompt.md", "The prompt, 10 November 2026"
 nbFoldCode "process/review-v1.md", "Review of version 1: six comments"
+nbFoldCode "process/changes-v2.md", "Version 2: what changed"
+nbFoldCode "process/review-v2.md", "Review of version 2: three comments"
+nbFoldCode "process/changes-v3.md", "Version 3: what changed"
 
 nbText: """
 ### The source files
