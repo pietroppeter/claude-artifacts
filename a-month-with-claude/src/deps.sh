@@ -13,8 +13,8 @@ while read -r name repo commit; do
     git -C "$d" checkout -q FETCH_HEAD
   fi
 done <<DEPS
-tabelline pietroppeter/tabelline 0d859b15d4913146e5f20b319445f88bba0204b8
-nimib pietroppeter/nimib 7cfe29cefd76b5110a0c7798f540b8c693b065cf
+tabelline pietroppeter/tabelline 306abd33ddf17a3d086e623d035b2bae3d3f489d
+nimib pietroppeter/nimib 7118b3a8fa112757b7d76ffcb5251a6478cbfcfd
 fusion nim-lang/fusion 0b0a0273b8df860cd54e3fcca7bb4c617244ac77
 markdown soasme/nim-markdown 5a7a7bafd1da23b25332316a7b888e6586f4177a
 parsetoml NimParsers/parsetoml d297f5a81be2472905d367aa675dcbbca6e7a5d2

@@ -26,6 +26,7 @@ border:1px solid rgba(0,0,0,.14);border-radius:999px;padding:6px 10px;text-decor
 #ca-backlink:hover,#ca-backlink:focus-visible{{text-decoration:underline}}
 @media (prefers-color-scheme:dark){{#ca-backlink{{color:#ece6ef;background:rgba(23,19,26,.94);border-color:rgba(255,255,255,.18)}}}}
 @media print{{#ca-backlink{{display:none}}}}
+body.rv-on #ca-backlink{{display:none}}
 </style>
 <a id="ca-backlink" href="{INDEX_URL}" title="All Claude artifacts">&larr; Claude artifacts</a>
 {END}"""

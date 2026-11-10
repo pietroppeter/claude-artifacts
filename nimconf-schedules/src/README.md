@@ -15,7 +15,7 @@ Every NimConf schedule as tables, made with [nimib](https://github.com/pietroppe
 - Where the data is missing or does not agree is written in the page, *Where the data comes from*.
 - `blocks.nim`: the page's custom blocks; `style.nim`: every colour and font, the two looks
   (Munari and NimConf); `fonts/`: Jost, Open Sans, Titillium Web (OFL, licenses beside them).
-- `vendor/review.nim`, `vendor/review.js`: tabelline's review mode, copied at 4657f10.
+- The review mode is tabelline's, from `shared/review/` at the root of the repository (`config.nims`).
 - `deps.sh`: fetches tabelline, nimib and their dependencies at pinned commits into `deps/` (not
   committed); `config.nims` puts them on the path.
 

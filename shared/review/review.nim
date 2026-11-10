@@ -1,12 +1,9 @@
 ## The review mode of a page: open it with **✎ Review**, select text, comment on it, and export
 ## the comments for a coding agent. One module for now, with its blocks, its styles and its
 ## script (`assets/review.js`), so it can move to nimib as it is.
-##
-## Vendored from pietroppeter/tabelline `docs/review.nim` at 4657f10 (review mode v8, PR #47),
-## with its two local changes marked `vendored:` (no `stile` import, no quaderno rules; the
-## script sits beside this file).
 import std/[json, os, strutils, strformat]
-import nimib except md
+import nimib
+import stile
 
 func esc(s: string): string = s.multiReplace(("&", "&amp;"), ("<", "&lt;"), (">", "&gt;"), ("\"", "&quot;"))
 func inline(md: string): string = markdownToHtml(md).strip.replace("<p>", "").replace("</p>", "")
@@ -115,12 +112,18 @@ dialog.rv-sheet[open] { animation: rv-down .2s ease-out; }
 }
 """
 
-const reviewCss* = reviewRules   # vendored: tabelline adds its quaderno rules here
+const reviewQuaderno = """
+mark.rv-mark { background: var(--highlight); box-shadow: 0 2px 0 var(--red-pen); }
+mark.rv-mark.rv-current { background: var(--postit); box-shadow: 0 2px 0 var(--red-pen), 0 0 0 2px var(--red-pen); }
+.rv-bar { font-family: var(--font); }
+"""
+
+const reviewCss* = reviewRules & scoped(reviewQuaderno, "html[data-tema=\"quaderno\"]")
   ## The styles of the review mode, added only to the pages that use it.
 
 # ---------------------------------------------------------------------------------------- blocks
 
-const reviewJs* = staticRead(currentSourcePath().parentDir / "review.js")   # vendored: beside this file
+const reviewJs* = staticRead(currentSourcePath().parentDir / "assets" / "review.js")
   ## The script, kept as a file of its own (`assets/review.js`) so it can be read and shown.
 
 func versionHref*(n, this, latest: int): string =

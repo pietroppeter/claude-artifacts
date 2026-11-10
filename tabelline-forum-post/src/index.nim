@@ -3,7 +3,7 @@
 ## ../index.html. Build: see README.md.
 import std/os
 import nimib except md
-import page, vendor/review
+import page, review
 
 const srcDir = currentSourcePath().parentDir
 

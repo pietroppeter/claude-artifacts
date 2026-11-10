@@ -4,3 +4,5 @@ let deps = getEnv("NIMCONF_DEPS", thisDir() / "deps")
 for d in ["tabelline", "nimib", "fusion", "markdown", "parsetoml", "jsony"]:
   switch("path", deps / d / "src")
 switch("hints", "off")
+# The review mode, shared by the pages of this repository (shared/review/README.md).
+switch("path", thisDir() / ".." / ".." / "shared" / "review")
