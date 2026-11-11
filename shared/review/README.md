@@ -22,7 +22,7 @@ nbInit
 nbReview(tversion = 1, tpage = "my-page", tsource = "my-page/src/index.nim")
 ```
 
-Pages that use it: `a-month-with-claude`, `nimconf-schedules`, `tabelline-forum-post`.
+Pages that use it: `a-month-with-claude`, `animating-in-nim`, `explainers-and-review`, `nimconf-schedules`, `tabelline-forum-post`.
 
 ## Updating it
 

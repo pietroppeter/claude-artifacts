@@ -1,0 +1,1051 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <title>Explainers, review mode and the playful repos</title>
+  <meta content="text/html; charset=utf-8" http-equiv="content-type">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <meta content="nimib 0.4.3" name="generator">
+  <style>:root{
+  --paper:#f6efe2; --ink:#22191a; --curtain:#8e1b23; --gold:#b8892d; --muted:#6d5f57;
+  --line:#d8c9b0; --shade:#e9dfcc; --surface:#efe5d2; --card:#fbf6ec;
+  --secondary:#c9a24a; --secondary-soft:#f1e2b8; --primary-text:#8e1b23;
+  --font:"Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif; --mono:ui-monospace,"SF Mono",Menlo,Consolas,monospace;
+  padding:env(safe-area-inset-top,0) env(safe-area-inset-right,0) env(safe-area-inset-bottom,0) env(safe-area-inset-left,0);
+}
+*{box-sizing:border-box}
+[hidden]{display:none!important}
+html{background:var(--paper)}
+body{margin:0 auto;max-width:720px;padding:0 18px 70px;color:var(--ink);font:17px/1.62 var(--font);background:var(--paper)}
+header,footer .nb-box{display:flex;justify-content:space-between;gap:8px;flex-wrap:wrap;font:12px var(--mono);letter-spacing:.06em;
+  text-transform:uppercase;color:var(--muted);padding:14px 0}
+header{border-bottom:3px double var(--ink)} footer .nb-box{border-top:3px double var(--ink);margin-top:48px}
+header a,footer a{color:var(--muted)}
+.playbill{text-align:center;margin:34px 0 10px}
+.playbill .kicker{font:12px var(--mono);letter-spacing:.18em;text-transform:uppercase;color:var(--curtain)}
+.playbill h1{font-size:clamp(34px,8vw,54px);line-height:1.05;margin:10px 0 12px;font-weight:700;letter-spacing:-.01em}
+.playbill .lede{font-size:19px;font-style:italic;color:#3b2e2a;max-width:34em;margin:0 auto}
+.playbill::after{content:"✦ ✦ ✦";display:block;margin-top:18px;color:var(--gold);letter-spacing:.6em}
+h2{font-size:27px;line-height:1.15;margin:48px 0 8px;padding-top:12px;border-top:1px solid var(--ink)}
+h2 + p{margin-top:6px}
+h3{font-size:20px;margin:28px 0 6px;color:var(--curtain)}
+a{color:var(--curtain);text-underline-offset:3px;text-decoration-thickness:1px}
+p code,li code,td code{font:14px var(--mono);background:var(--shade);padding:1px 5px;border-radius:3px}
+blockquote{margin:16px 0;padding:4px 18px;border-left:4px solid var(--gold);font-style:italic;color:#3b2e2a}
+table{border-collapse:collapse;width:100%;margin:14px 0;font-size:15px;line-height:1.4;display:block;overflow-x:auto}
+th{text-align:left;font:12px var(--mono);letter-spacing:.06em;text-transform:uppercase;color:var(--muted);
+  border-bottom:2px solid var(--ink);padding:6px 8px;vertical-align:bottom}
+td{border-bottom:1px solid var(--line);padding:7px 8px;vertical-align:top}
+td:first-child{font-weight:700;white-space:nowrap}
+.note{margin:18px 0;padding:12px 16px;background:var(--card);border:1px solid var(--line);border-top:4px solid var(--curtain)}
+.note p{margin:.3em 0}
+pre{overflow-x:auto;margin:14px 0}
+body pre > code{display:block;overflow-x:auto;padding:12px 14px;font:12.8px/1.55 var(--mono);background:var(--card);border:1px solid var(--line)}
+</style>
+<style>
+/* the colours and fonts the review mode uses, for a page that has none of its own (a plain nimib
+   page): `:where` weighs nothing, so a page's own tokens (tabelline's, on :root) win */
+:where(html) { --paper: #fffdf8; --ink: #1f1f1f; --surface: #f6f3ec; --line: #c9c4ba; --shade: #e7e2d8;
+  --muted: #6b675f; --secondary: #6aa9d6; --secondary-soft: #d6e8f5; --primary-text: #8a3550;
+  --neutral-1: #ece8df; --font: system-ui, sans-serif; --mono: ui-monospace, monospace; }
+/* the review mode (review.nim, nbReview): a Review button, then marks on the text, a bar at
+   the bottom, the comment's sheet at the top, export and history */
+.rv-only { display: none; }
+body.rv-on .rv-only { display: block; }
+.rv-bar[hidden], .rv-panel[hidden] { display: none; }
+.rv-enter { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .8rem; margin: .8rem 0 1.4rem; color: var(--muted); font-size: .92rem; }
+.rv-enter .rv-version { font-weight: 700; color: var(--ink); }
+.rv-toggle { font: inherit; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 0;
+  min-height: 44px; padding: 0 .8rem; cursor: pointer; }
+.rv-toggle[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 -3px 0 var(--secondary); }
+body.rv-on { padding-bottom: calc(4.6rem + env(safe-area-inset-bottom, 0px)); }
+mark.rv-mark { background: var(--secondary-soft); color: inherit; box-shadow: 0 2px 0 var(--secondary); cursor: pointer; }
+mark.rv-mark.rv-current { background: var(--secondary); }
+.rv-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; display: flex; align-items: center; gap: .3rem;
+  justify-content: center; padding: .45rem max(.5rem, env(safe-area-inset-right, 0px)) calc(.45rem + env(safe-area-inset-bottom, 0px)) max(.5rem, env(safe-area-inset-left, 0px));
+  background: var(--surface); border-top: 3px solid var(--ink); font: 400 15px/1.2 var(--font); }
+.rv-bar button, .rv-sheet button { font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line);
+  border-radius: 0; min-height: 44px; min-width: 44px; padding: 0 .7rem; cursor: pointer; white-space: nowrap; }
+.rv-bar button { padding: 0 .55rem; }
+.rv-bar button[data-do="delete"] { color: var(--primary-text); }
+.rv-bar button:disabled { color: var(--muted); border-color: var(--shade); cursor: default; }
+.rv-bar button[data-do="prev"], .rv-bar button[data-do="next"] { font-size: 1.4rem; padding: 0; }
+.rv-bar .rv-count { min-width: 3.2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+.rv-bar .rv-add, .rv-sheet .rv-save { background: var(--ink); color: var(--paper); border-color: var(--ink); font-weight: 700; }
+.rv-bar .rv-add.rv-selected { background: var(--secondary); color: var(--ink); border-color: var(--ink); }
+dialog.rv-sheet { width: 100%; max-width: 40rem; margin: 0 auto auto; padding: 1rem max(1rem, env(safe-area-inset-right, 0px)) 1rem max(1rem, env(safe-area-inset-left, 0px));
+  border: 0; border-bottom: 3px solid var(--ink); background: var(--surface); color: var(--ink); font: 400 16px/1.45 var(--font);
+  max-height: 90vh; overflow-y: auto; }
+dialog.rv-sheet::backdrop { background: color-mix(in oklab, var(--ink) 30%, transparent); }
+.rv-sheet .rv-where { margin: 0 0 .4rem; font-weight: 700; }
+.rv-sheet textarea { display: block; width: 100%; margin-top: .2rem; font: 16px/1.4 var(--font); color: var(--ink);
+  background: var(--paper); border: 1px solid var(--line); border-radius: 0; padding: .5rem; }
+.rv-export textarea { font: 16px/1.45 var(--mono); white-space: pre-wrap; }   /* 16px: a phone zooms on smaller fields */
+.rv-sheet .rv-actions { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: flex-end; }
+.rv-sheet .rv-left { margin-right: auto; }
+.rv-sheet .rv-danger { color: var(--primary-text); }
+/* the comment's sheet: at the top, small, not modal: the bar and the page stay in reach */
+.rv-panel { position: fixed; top: 0; left: 0; right: 0; z-index: 60; max-width: 40rem; margin: 0 auto;
+  padding: .5rem max(.6rem, env(safe-area-inset-right, 0px)) .6rem max(.6rem, env(safe-area-inset-left, 0px));
+  background: var(--surface); border-bottom: 3px solid var(--ink); color: var(--ink); font: 400 16px/1.45 var(--font);
+  animation: rv-down .2s ease-out; }
+.rv-panel .rv-whole { margin: 0 0 .3rem; color: var(--muted); font-size: .85rem; }
+.rv-panel .rv-note { margin: 0; }
+.rv-panel .rv-thumbs { margin-top: .45rem; }
+.rv-panel button { font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 0; cursor: pointer; }
+/* history: one line per version */
+.rv-versions { list-style: none; margin: 0 0 .8rem; padding: 0; }
+.rv-versions li { display: flex; align-items: center; gap: .5rem; min-height: 48px; border-bottom: 1px solid var(--shade); }
+.rv-versions a { color: var(--ink); }
+.rv-versions .rv-date { flex: 1; color: var(--muted); font-size: .9rem; }
+.rv-versions .rv-n { font-size: .85rem; }
+/* a screenshot, as large as the screen allows */
+dialog.rv-zoom { width: 100vw; height: 100vh; max-width: 100vw; max-height: 100vh; margin: 0; padding: 0; border: 0; background: transparent; }
+dialog.rv-zoom[open] { display: flex; align-items: center; justify-content: center; }
+dialog.rv-zoom::backdrop { background: color-mix(in oklab, var(--ink) 88%, transparent); }
+dialog.rv-zoom img { max-width: 100%; max-height: 100%; object-fit: contain; }
+dialog.rv-zoom button { position: fixed; top: max(.5rem, env(safe-area-inset-top, 0px)); right: .5rem; min-width: 44px; min-height: 44px;
+  font-size: 1.5rem; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 0; }
+.rv-thumb img, .rv-shot img { cursor: zoom-in; }
+dialog.rv-sheet[open] { animation: rv-down .2s ease-out; }
+@keyframes rv-down { from { transform: translateY(-100%); } }
+/* the note: an editable box, so a phone offers to paste a screenshot in it */
+.rv-note { min-height: 3.2rem; max-height: 9rem; overflow-y: auto; padding: .5rem; font: 16px/1.4 var(--font);
+  background: var(--paper); border: 1px solid var(--line); white-space: pre-wrap; overflow-wrap: anywhere; }
+.rv-note:empty::before { content: attr(data-placeholder); color: var(--muted); }
+.rv-note:focus { outline: 2px solid var(--secondary); outline-offset: -1px; }
+.rv-thumbs { display: flex; flex-wrap: wrap; gap: .5rem; }
+.rv-thumb { position: relative; }
+.rv-thumb img { display: block; height: 4.5rem; width: auto; border: 1px solid var(--line); }
+.rv-thumb button { position: absolute; top: 0; right: 0; min-height: 32px; min-width: 32px; padding: 0; font-size: 1.1rem; }
+/* the export: each screenshot with its own Copy */
+.rv-shotlist { display: flex; flex-direction: column; gap: .35rem; margin: 0 0 .6rem; }
+.rv-shot { display: flex; align-items: center; gap: .5rem; font-size: .85rem; color: var(--muted); }
+.rv-shot img { height: 2.75rem; width: auto; border: 1px solid var(--line); }
+.rv-shot span { flex: 1; overflow-wrap: anywhere; }
+/* the strip of versions of the older versions of the post Review mode (nbVersions) */
+.versioni { margin: 1rem 0 1.4rem; font-size: .92rem; }
+.versioni ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .4rem; }
+.versioni li { border: 1px solid var(--line); background: var(--surface); }
+.versioni li > a, .versioni li > .voce { display: flex; align-items: center; min-height: 44px; padding: 0 .7rem; color: var(--ink); text-decoration: none; }
+.versioni li > a:hover b { text-decoration: underline; }
+.versioni li[aria-current] { border-color: var(--ink); box-shadow: inset 0 -3px 0 var(--ink); }
+.versioni .titolo { font-weight: 700; margin-right: .5rem; }
+.versioni li span span, .versioni li a span { color: var(--muted); margin-left: .35rem; }
+/* moving between versions: a short slide, the bar stays where it is */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: versione-out .22s ease-in both; }
+::view-transition-new(root) { animation: versione-in .26s ease-out both; }
+@keyframes versione-out { to { opacity: 0; transform: translateX(-1.5rem); } }
+@keyframes versione-in { from { opacity: 0; transform: translateX(1.5rem); } }
+.rv-bar { view-transition-name: rv-bar; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+}
+html[data-tema="quaderno"] mark.rv-mark { background: var(--highlight); box-shadow: 0 2px 0 var(--red-pen); }
+html[data-tema="quaderno"] mark.rv-mark.rv-current { background: var(--postit); box-shadow: 0 2px 0 var(--red-pen), 0 0 0 2px var(--red-pen); }
+html[data-tema="quaderno"] .rv-bar { font-family: var(--font); }
+</style>
+  
+  <style>
+.nb-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nb-small {
+  font-size: 0.8rem;
+}
+button.nb-small {
+  float: right;
+  padding: 2px;
+  padding-right: 5px;
+  padding-left: 5px;
+}
+section#source {
+  display:none
+}
+pre > code {
+  font-size: 1.2em;
+}
+.nb-output {
+  line-height: 1.15;
+}
+figure {
+  margin: 2rem 0;
+}
+figcaption {
+  text-align: center;
+}
+  
+</style>
+  
+    
+<!-- claude-artifacts:codeblocks -->
+<style>pre{overflow-x:auto}pre>code{overflow-x:auto}.hljs-comment,.hljs-quote{color:#7a7f87;font-style:italic}.hljs-keyword,.hljs-selector-tag,.hljs-meta .hljs-keyword{color:#a626a4}.hljs-string,.hljs-regexp,.hljs-addition{color:#50a14f}.hljs-number,.hljs-literal,.hljs-symbol{color:#b76b01}.hljs-built_in,.hljs-type,.hljs-class .hljs-title,.hljs-title.class_{color:#c18401}.hljs-title,.hljs-section{color:#4078f2}.hljs-meta,.hljs-attr,.hljs-attribute,.hljs-variable{color:#986801}.hljs-tag,.hljs-name{color:#e45649}.hljs-deletion{color:#e45649}</style>
+<!-- /claude-artifacts:codeblocks -->
+</head>
+<body>
+<header><span>Il programma di sala</span><span>a nimib page</span></header>
+<main>
+<div id="review" hidden data-page="explainers-and-review" data-version="1" data-title="Explainers, review mode and the playful repos" data-source="explainers-and-review/src/index.nim" data-versions=""></div><script>
+document.addEventListener('DOMContentLoaded', function () {
+// Review mode for a nimib page: open it with the Review button, select text, comment on it, keep
+// the comments in this browser, export them as Markdown with a YAML block for a coding agent.
+// No dependencies. The page gives its settings on
+// <div id="review" data-page data-version data-title data-source data-versions>.
+// Each part is between `// part:` lines, which the devlog post "Review mode" shows one by one.
+(function () {
+  var cfg = document.getElementById('review');
+  var root = document.querySelector('main');
+  if (!cfg || !root) return;
+  var page = cfg.dataset;
+
+  // part: anchor
+  // A comment points at the text it quotes, with a few words around it (as a W3C text quote
+  // selector does), and the heading it is under. Not at an element: the page is rebuilt from its
+  // source, and the text is what stays. The text of the page is its text nodes, in order.
+  var CONTEXT = 32;
+  var BLOCKS = 'p, li, h1, h2, h3, h4, pre, td, th, caption, blockquote, summary, dt, dd, div, nav';
+  function textIndex() {
+    // a line break between blocks, so the words around a quote read "page Select", not "pageSelect"
+    var nodes = [], text = '', last = null;
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) {
+        var p = n.parentNode.closest('script, style, #review');
+        return p ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    for (var n = walker.nextNode(); n; n = walker.nextNode()) {
+      var block = n.parentNode.closest(BLOCKS);
+      if (nodes.length && block !== last) text += '\n';
+      last = block;
+      nodes.push({ node: n, start: text.length });
+      text += n.data;
+    }
+    return { nodes: nodes, text: text };
+  }
+  function pointToIndex(idx, container, offset) {
+    if (container.nodeType === 3) {
+      for (var i = 0; i < idx.nodes.length; i++)
+        if (idx.nodes[i].node === container) return idx.nodes[i].start + offset;
+    }
+    var at = document.createRange();
+    at.setStart(container, offset);
+    for (var j = 0; j < idx.nodes.length; j++)   // the first text node after the point
+      if (at.comparePoint(idx.nodes[j].node, 0) >= 0) return idx.nodes[j].start;
+    return idx.text.length;
+  }
+  function sectionOf(node) {
+    var found = { title: '', id: '' };
+    root.querySelectorAll('h1, h2, h3').forEach(function (h) {
+      if (h.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING)
+        found = { title: h.textContent.trim(), id: h.id || '' };
+    });
+    return found;
+  }
+  function describe(range) {
+    var idx = textIndex();
+    var s = pointToIndex(idx, range.startContainer, range.startOffset);
+    var e = pointToIndex(idx, range.endContainer, range.endOffset);
+    var quote = idx.text.slice(s, e);
+    if (!quote.trim()) return null;
+    return { quote: quote, prefix: idx.text.slice(Math.max(0, s - CONTEXT), s),
+             suffix: idx.text.slice(e, e + CONTEXT), section: sectionOf(range.startContainer) };
+  }
+  function locate(note, idx) {
+    // every place the quote is, scored by how much of its context matches; the best wins
+    var best = null, bestScore = -1;
+    for (var at = idx.text.indexOf(note.quote); at >= 0; at = idx.text.indexOf(note.quote, at + 1)) {
+      var before = idx.text.slice(Math.max(0, at - note.prefix.length), at);
+      var after = idx.text.slice(at + note.quote.length, at + note.quote.length + note.suffix.length);
+      var score = common(before, note.prefix, true) + common(after, note.suffix, false);
+      if (score > bestScore) { best = at; bestScore = score; }
+    }
+    return best === null ? null : { start: best, end: best + note.quote.length };
+  }
+  function common(a, b, fromEnd) {
+    var n = 0;
+    while (n < a.length && n < b.length &&
+           (fromEnd ? a[a.length - 1 - n] === b[b.length - 1 - n] : a[n] === b[n])) n++;
+    return n;
+  }
+
+  // part: mark
+  // A located comment is drawn with <mark> around each piece of text it covers (a quote can
+  // cross a link or a paragraph). Marks only wrap text, so the text of the page stays the same.
+  function mark(note) {
+    if (!note.quote) return;   // a comment on the whole page has nothing to mark
+    var idx = textIndex(), at = locate(note, idx);
+    note.found = !!at;
+    if (!at) return;
+    idx.nodes.forEach(function (n) {
+      var a = Math.max(at.start, n.start) - n.start;
+      var b = Math.min(at.end, n.start + n.node.data.length) - n.start;
+      if (b <= a || !n.node.data.slice(a, b).trim()) return;
+      if (n.node.parentNode.closest('table') && !n.node.parentNode.closest('td, th, caption')) return;
+      var t = n.node;
+      if (b < t.data.length) t.splitText(b);
+      if (a > 0) t = t.splitText(a);
+      var m = document.createElement('mark');
+      m.className = 'rv-mark';
+      m.dataset.id = note.id;
+      t.parentNode.replaceChild(m, t);
+      m.appendChild(t);
+    });
+  }
+  function unmarkAll() {
+    root.querySelectorAll('mark.rv-mark').forEach(function (m) {
+      var p = m.parentNode;
+      while (m.firstChild) p.insertBefore(m.firstChild, m);
+      p.removeChild(m);
+      p.normalize();
+    });
+  }
+  function drawAll() {
+    unmarkAll();
+    notes.forEach(mark);
+    var idx = textIndex();
+    function place(note) {   // the page's order: a comment on the whole page first, one not found last
+      if (!note.quote) return -1;
+      var m = root.querySelector('mark.rv-mark[data-id="' + note.id + '"]');
+      return m ? pointToIndex(idx, m.firstChild, 0) : Infinity;
+    }
+    notes.sort(function (a, b) { return place(a) - place(b); });
+  }
+
+  // part: store
+  // The comments of a page live in this browser's localStorage, one key per page and version,
+  // so a new version starts with no comments and the old ones stay with the version they are on.
+  // Whether the review mode is open is kept too, so a page opens the way it was left.
+  var PREFIX = 'nimib-review:', KEY = PREFIX + page.page + '@v' + page.version;
+  var MODE = 'nimib-review-mode:' + page.page;
+  function read(key) {
+    try { return JSON.parse(localStorage.getItem(key)) || []; } catch (e) { return []; }
+  }
+  function save() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(notes.map(function (n) {
+        return { id: n.id, kind: n.kind, quote: n.quote, prefix: n.prefix, suffix: n.suffix,
+                 section: n.section, text: n.text, replacement: n.replacement, at: n.at, images: n.images };
+      })));
+      full = false;
+    } catch (e) { full = true; }   // the browser's storage is full: screenshots take the most
+  }
+  function remember(on) {
+    try { if (on) localStorage.setItem(MODE, '1'); else localStorage.removeItem(MODE); } catch (e) {}
+  }
+  var notes = read(KEY);
+  var current = -1, full = false, on = false;
+
+  // part: mode
+  // Reading is the default: no bar, no marks, nothing of the review mode but one button, Review,
+  // beside the version (in `.rv-enter`, or under the title). It opens the review mode, and closes
+  // it. Blocks that only matter while reviewing (`.rv-only`) show only then.
+  var slot = document.querySelector('.rv-enter');
+  if (!slot) {
+    slot = document.createElement('p');
+    slot.className = 'rv-enter';
+    var after = root.querySelector('.lede') || root.querySelector('h1');
+    if (after) after.insertAdjacentElement('afterend', slot); else root.prepend(slot);
+  }
+  var toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'rv-toggle';
+  slot.appendChild(toggle);
+  toggle.addEventListener('click', function () { setMode(!on); });
+  function setMode(open) {
+    on = open;
+    remember(on);
+    document.body.classList.toggle('rv-on', on);
+    toggle.textContent = on ? 'Close review' : '✎ Review';
+    toggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+    bar.hidden = !on;
+    if (on) drawAll(); else { leave(); unmarkAll(); pending = null; }
+    show();
+  }
+
+  // part: bar
+  // While reviewing, a bar stays at the bottom of the screen, where a thumb reaches on a phone:
+  // the previous and next comment and which one this is, delete it, a new one (*Page note* when
+  // nothing is selected, a note on the whole page; *Comment ✓* on the words selected), and
+  // export. A selection is kept as soon as it is made, because tapping a button can clear it.
+  var bar = document.createElement('div');
+  bar.className = 'rv-bar';
+  bar.hidden = true;
+  bar.setAttribute('role', 'toolbar');
+  bar.setAttribute('aria-label', 'Review mode');
+  bar.innerHTML =
+    '<button type="button" data-do="prev" aria-label="Previous comment">‹</button>' +
+    '<span class="rv-count" aria-live="polite"></span>' +
+    '<button type="button" data-do="next" aria-label="Next comment">›</button>' +
+    '<button type="button" data-do="delete" aria-label="Delete this comment">Delete</button>' +
+    '<button type="button" data-do="add" class="rv-add">Page note</button>' +
+    '<button type="button" data-do="export">Export</button>';
+  document.body.appendChild(bar);
+  var pending = null;
+  document.addEventListener('selectionchange', function () {
+    if (!on) return;
+    var sel = document.getSelection();
+    if (sel.rangeCount && !sel.isCollapsed && root.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+      pending = describe(sel.getRangeAt(0));
+    } else {
+      setTimeout(function () { if (document.getSelection().isCollapsed) { pending = null; show(); } }, 400);
+    }
+    show();
+  });
+  bar.addEventListener('pointerdown', function (e) { e.preventDefault(); });   // keep the selection
+  bar.addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    var act = b.dataset.do;
+    if (act === 'prev' || act === 'next') step(act === 'next' ? 1 : -1);
+    if (act === 'delete' && notes[current]) remove(notes[current]);
+    if (act === 'add') add();
+    if (act === 'export') openExport();
+  });
+  root.addEventListener('click', function (e) {   // a tap on marked words opens them, anywhere else closes
+    if (!on || !document.getSelection().isCollapsed) return;
+    var m = e.target.closest('mark.rv-mark');
+    if (m) {
+      var n = notes.find(function (x) { return x.id === m.dataset.id; });
+      if (n) select(n);
+    } else if (current >= 0 && !e.target.closest('a, button')) leave();
+  });
+  function show() {
+    var c = bar.querySelector('.rv-count');
+    c.textContent = full ? 'storage full: export'
+                  : notes.length ? (current >= 0 ? (current + 1) + '/' : '') + notes.length : 'none';
+    bar.querySelector('[data-do="prev"]').disabled = !notes.length;
+    bar.querySelector('[data-do="next"]').disabled = !notes.length;
+    bar.querySelector('[data-do="delete"]').disabled = current < 0;
+    var add = bar.querySelector('.rv-add');
+    add.textContent = pending ? 'Comment ✓' : 'Page note';   // says what it will do: on the words, or on the page
+    add.classList.toggle('rv-selected', !!pending);
+    add.setAttribute('aria-label', pending ? 'Comment on the selected text' : 'Comment on the whole page');
+  }
+
+  // part: sheet
+  // The comment that ‹ and › stop on is open in a sheet at the top of the screen: there is no
+  // Edit, no Save and no Cancel. What is typed is kept as it is typed; ‹ and › keep working and
+  // take the sheet to the next comment; a tap on the page closes it. A comment left empty is
+  // dropped. The sheet is small, so the words it is about stay in view under it, marked. There
+  // are no kinds: to replace the words, the note says so ("Replace with: ..."), or "Remove". A
+  // screenshot is pasted in the note, like text: the note is an editable box, so a phone offers
+  // to paste an image there. While the sheet is open the page may not zoom.
+  var viewport = document.querySelector('meta[name="viewport"]');
+  var looseViewport = viewport ? viewport.content : '';
+  function noZoom(yes) {
+    if (viewport) viewport.content = yes ? looseViewport + ', maximum-scale=1' : looseViewport;
+  }
+  var sheet = document.createElement('div');
+  sheet.className = 'rv-panel';
+  sheet.hidden = true;
+  sheet.innerHTML =
+    '<p class="rv-whole">On the whole page</p>' +
+    '<div class="rv-note" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Comment"' +
+    ' data-placeholder="What should change, and why. To replace the words: Replace with: and the new text; ' +
+    'to drop them: Remove. Paste a screenshot here too."></div>' +
+    '<div class="rv-thumbs"></div>';
+  document.body.appendChild(sheet);
+  var noteBox = sheet.querySelector('.rv-note');
+  function add() {
+    var n = Object.assign({ text: '', quote: '', prefix: '', suffix: '', section: { title: '', id: '' } }, pending || {});
+    n.id = 'c' + Date.now().toString(36);
+    n.at = new Date().toISOString();
+    notes.push(n);
+    document.getSelection().removeAllRanges();
+    pending = null;
+    select(n);
+    noteBox.focus();
+  }
+  function select(n) {
+    var was = notes[current];
+    if (was && was !== n) drop(was);
+    drawAll();
+    current = notes.indexOf(n);
+    root.querySelectorAll('mark.rv-current').forEach(function (m) { m.classList.remove('rv-current'); });
+    var ms = root.querySelectorAll('mark.rv-mark[data-id="' + n.id + '"]');
+    ms.forEach(function (m) { m.classList.add('rv-current'); });
+    sheet.querySelector('.rv-whole').hidden = !!n.quote;
+    noteBox.textContent = n.text || '';
+    thumbs();
+    sheet.hidden = false;
+    noZoom(true);
+    keepInView();
+    show();
+  }
+  function step(d) {
+    if (!notes.length) return;
+    var target = notes[((current < 0 ? (d > 0 ? -1 : 0) : current) + d + notes.length) % notes.length];
+    if (target !== notes[current]) select(target);
+  }
+  function leave() {   // close the sheet; an empty comment goes
+    var n = notes[current];
+    current = -1;
+    sheet.hidden = true;
+    noZoom(false);
+    if (n) drop(n);
+    root.querySelectorAll('mark.rv-current').forEach(function (m) { m.classList.remove('rv-current'); });
+    show();
+  }
+  function empty(n) { return !(n.text || '').trim() && !(n.images || []).length && n.replacement == null; }
+  function drop(n) { if (empty(n)) { notes = notes.filter(function (x) { return x !== n; }); save(); drawAll(); } }
+  function remove(n) {
+    notes = notes.filter(function (x) { return x !== n; });
+    save();
+    current = -1;
+    sheet.hidden = true;
+    noZoom(false);
+    drawAll();
+    show();
+  }
+  function keepInView() {   // the marked words, just under the sheet
+    var m = root.querySelector('mark.rv-current');
+    if (!m) return;
+    var under = sheet.offsetHeight + 24;
+    window.scrollBy({ top: m.getBoundingClientRect().top - under, behavior: 'smooth' });
+  }
+  noteBox.addEventListener('input', function () {
+    var n = notes[current];
+    if (!n) return;
+    n.text = noteBox.innerText.trim();
+    save();
+    show();
+  });
+  function thumbs() {
+    var n = notes[current], shots = (n && n.images) || [];
+    var box = sheet.querySelector('.rv-thumbs');
+    box.innerHTML = '';
+    box.hidden = !shots.length;
+    shots.forEach(function (src, i) {
+      var t = document.createElement('div');
+      t.className = 'rv-thumb';
+      t.innerHTML = '<img alt="screenshot ' + (i + 1) + '"><button type="button" aria-label="Remove screenshot ' + (i + 1) + '">×</button>';
+      t.querySelector('img').src = src;
+      t.querySelector('img').addEventListener('click', function () { zoom(src); });
+      t.querySelector('button').addEventListener('click', function () {
+        shots.splice(i, 1);
+        n.images = shots.length ? shots : undefined;
+        save(); thumbs();
+      });
+      box.appendChild(t);
+    });
+  }
+  function shrink(blob, width, quality) {   // an image as a JPEG at most `width` pixels wide
+    return new Promise(function (ok, ko) {
+      var img = new Image(), url = URL.createObjectURL(blob);
+      img.onload = function () {
+        var k = Math.min(1, width / img.naturalWidth), c = document.createElement('canvas');
+        c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        ok(c.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = ko;
+      img.src = url;
+    });
+  }
+  noteBox.addEventListener('paste', function (e) {   // an image goes to the screenshots, text stays plain text
+    e.preventDefault();
+    var n = notes[current];
+    var files = [].filter.call(e.clipboardData.files || [], function (f) { return /^image\//.test(f.type); });
+    Promise.all(files.map(function (b) { return shrink(b, 900, 0.72); })).then(function (srcs) {
+      if (!srcs.length || !n) return;
+      n.images = (n.images || []).concat(srcs);
+      save(); thumbs(); keepInView(); show();
+    });
+    var text = e.clipboardData.getData('text/plain');
+    if (text) document.execCommand('insertText', false, text);
+  });
+  noteBox.addEventListener('drop', function (e) { e.preventDefault(); });   // no images inside the text
+
+  // part: zoom
+  // A tap on a screenshot, in the sheet or in the export, shows it as large as the screen allows.
+  var lens = document.createElement('dialog');
+  lens.className = 'rv-zoom';
+  lens.innerHTML = '<button type="button" aria-label="Close">×</button><img alt="screenshot">';
+  document.body.appendChild(lens);
+  lens.addEventListener('click', function () { lens.close(); });
+  function zoom(src) { lens.querySelector('img').src = src; lens.showModal(); }
+
+  // part: export
+  // The comments as one text, for a person and for an agent: a title, a YAML block that says which
+  // page, version and source they are on, then one Markdown section per comment, in page order.
+  // The text can be edited before it is copied. Copy copies the text only, short enough for a
+  // chat message; each screenshot has a Copy of its own, to paste after it. Close review ends the
+  // review here too, so a long page need not be scrolled back to its top.
+  function yaml(s) { return JSON.stringify(String(s)); }   // a JSON string is a YAML string
+  function flat(s) { return s.replace(/\s+/g, ' '); }
+  function quoted(s) { return flat(s).trim(); }
+  function fence(s) {
+    var f = '~~~';
+    while (s.indexOf(f) >= 0) f += '~';
+    return f + 'text\n' + s.trim() + '\n' + f;
+  }
+  function shotName(i, k) { return 'review-v' + page.version + '-' + (i + 1) + '-' + (k + 1) + '.jpg'; }
+  function exportText() {
+    // a chat shows a pasted text as Markdown: a yaml fence is a tidy box under the title
+    var out = ['# Review of “' + page.title + '”, version ' + page.version, '',
+      '```yaml',
+      'format: nimib-review/3',
+      'title: ' + yaml(page.title),
+      'page: ' + yaml(location.origin + location.pathname),
+      'source: ' + yaml(page.source),
+      'version: ' + page.version,
+      'exported: ' + yaml(new Date().toISOString()),
+      'comments: ' + notes.length,
+      '```', ''];
+    notes.forEach(function (n, i) {
+      var where = !n.quote ? 'On the whole page'
+                : n.section && n.section.title ? 'In “' + n.section.title + '”' + (n.section.id ? ' (#' + n.section.id + ')' : '')
+                : 'At the top';
+      out.push('## ' + (i + 1) + '. ' + where, '');
+      if (n.quote) {
+        out.push('> ' + quoted(n.quote), '');
+        out.push('Around it: “…' + flat(n.prefix) + '⟦' + flat(n.quote) + '⟧' + flat(n.suffix) + '…”', '');
+        if (n.found === false) out.push('(Not found on the page any more.)', '');
+      }
+      // a comment kept from version 6 or before may still have a kind of its own
+      if (n.kind === 'cut' || (n.kind === 'replace' && !(n.replacement || '').trim())) out.push('Remove these words.', '');
+      else if (n.kind === 'replace') out.push('Replace with:', '', fence(n.replacement), '');
+      if (n.text) out.push(n.text, '');
+      if (n.images) out.push('Screenshots: ' + n.images.map(function (src, k) { return shotName(i, k); }).join(', '), '');
+    });
+    return out.join('\n');
+  }
+  var box = document.createElement('dialog');
+  box.className = 'rv-sheet rv-export';
+  box.innerHTML =
+    '<form method="dialog"><p class="rv-where">Export: edit it if you like, then copy it</p>' +
+    '<textarea rows="12" spellcheck="false"></textarea><div class="rv-shotlist"></div>' +
+    '<div class="rv-actions"><button value="history" class="rv-left">History</button>' +
+    '<button value="leave">Close review</button><button value="close">Close</button>' +
+    '<button value="copy" class="rv-save" autofocus>Copy</button></div></form>';
+  document.body.appendChild(box);
+  var area = box.querySelector('textarea');
+  function openExport() {
+    if (current >= 0) leave();
+    area.value = exportText();
+    shotList();
+    noZoom(true);
+    box.showModal();
+  }
+  box.addEventListener('close', function () { noZoom(false); });
+  function allShots() {
+    var all = [];
+    notes.forEach(function (n, i) { (n.images || []).forEach(function (src, k) { all.push({ name: shotName(i, k), src: src }); }); });
+    return all;
+  }
+  function shotList() {   // each screenshot, with its own Copy: paste it in the chat after the text
+    var list = box.querySelector('.rv-shotlist');
+    var canCopy = !!(navigator.clipboard && window.ClipboardItem);
+    list.innerHTML = '';
+    var all = allShots();
+    list.hidden = !all.length;
+    all.forEach(function (shot) {
+      var row = document.createElement('div');
+      row.className = 'rv-shot';
+      row.innerHTML = '<img alt=""><span></span><button type="button">Copy image</button>';
+      row.querySelector('img').src = shot.src;
+      row.querySelector('img').addEventListener('click', function () { zoom(shot.src); });
+      row.querySelector('span').textContent = shot.name;
+      var b = row.querySelector('button');
+      b.hidden = !canCopy;
+      b.addEventListener('click', function () {
+        copied(b, navigator.clipboard.write([new ClipboardItem({ 'image/png': png(shot.src) })]));
+      });
+      list.appendChild(row);
+    });
+  }
+  function png(src) {   // the clipboard takes PNG images everywhere, JPEG not always
+    return new Promise(function (ok, ko) {
+      var img = new Image();
+      img.onload = function () {
+        var c = document.createElement('canvas');
+        c.width = img.naturalWidth; c.height = img.naturalHeight;
+        c.getContext('2d').drawImage(img, 0, 0);
+        c.toBlob(ok, 'image/png');
+      };
+      img.onerror = ko;
+      img.src = src;
+    });
+  }
+  function copied(button, promise) {
+    var label = button.textContent;
+    return promise.then(function () {
+      button.textContent = 'Copied ✓';
+      setTimeout(function () { button.textContent = label; }, 1500);
+    }, function () { button.textContent = 'Blocked'; });
+  }
+  box.querySelector('form').addEventListener('submit', function (e) {
+    var act = e.submitter && e.submitter.value;
+    if (act === 'copy') {
+      e.preventDefault();
+      var button = e.submitter;
+      var fallback = function () { area.select(); document.execCommand('copy'); };
+      copied(button, navigator.clipboard ? navigator.clipboard.writeText(area.value).catch(fallback)
+                                         : Promise.resolve().then(fallback));
+    } else if (act === 'history') {
+      e.preventDefault();
+      box.close();
+      openHistory();
+    } else if (act === 'leave') {   // the end of a review: back to reading, from the bottom of the page too
+      setMode(false);
+    }
+  });
+
+  // part: history
+  // The versions of the page, each with the comments this browser keeps on it: open one, clear
+  // its comments, or clear every comment of the review mode in this browser. Back to Export from
+  // here. Clearing asks twice, with a second tap (confirm() is blocked inside an artifact).
+  var versions = [];
+  try { versions = JSON.parse(page.versions || '[]'); } catch (e) {}
+  var hist = document.createElement('dialog');
+  hist.className = 'rv-sheet rv-history';
+  hist.innerHTML =
+    '<form method="dialog"><p class="rv-where">History: the versions of this page</p>' +
+    '<ol class="rv-versions"></ol>' +
+    '<div class="rv-actions"><button value="wipe" class="rv-left rv-danger">Clear everything</button>' +
+    '<button value="export">Export</button><button value="close" class="rv-save" autofocus>Close</button></div></form>';
+  document.body.appendChild(hist);
+  function stored() {   // the versions of this page that have comments in this browser
+    var found = {};
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i), m = k.match(/@v(\d+)$/);
+        if (m && k.indexOf(PREFIX + page.page + '@v') === 0) found[m[1]] = read(k).length;
+      }
+    } catch (e) {}
+    return found;
+  }
+  function twice(button, label, act) {   // the first tap asks, the second does
+    if (button.dataset.sure === 'yes') { act(); return; }
+    button.dataset.sure = 'yes';
+    button.textContent = label;
+  }
+  function openHistory() {
+    var list = hist.querySelector('.rv-versions'), counts = stored();
+    var all = versions.slice();
+    if (!all.some(function (v) { return v.n == page.version; })) all.push({ n: +page.version, date: '', href: '' });
+    Object.keys(counts).forEach(function (n) {
+      if (!all.some(function (v) { return v.n == n; })) all.push({ n: +n, date: '', href: '' });
+    });
+    all.sort(function (a, b) { return b.n - a.n; });   // the newest first
+    list.innerHTML = '';
+    all.forEach(function (v) {
+      var li = document.createElement('li'), n = counts[v.n] || 0, here = v.n == page.version;
+      var name = here || !v.href ? '<b>v' + v.n + '</b>' : '<a href="' + v.href + '"><b>v' + v.n + '</b></a>';
+      li.innerHTML = name + ' <span class="rv-date"></span> <span class="rv-n"></span>' +
+        '<button type="button" class="rv-danger">Clear</button>';
+      li.querySelector('.rv-date').textContent = (v.date || '') + (here ? ' · this one' : '');
+      li.querySelector('.rv-n').textContent = n ? n + (n === 1 ? ' comment' : ' comments') : '';
+      var b = li.querySelector('button');
+      b.hidden = !n;
+      b.addEventListener('click', function () {
+        twice(b, 'Delete ' + n + '?', function () {
+          try { localStorage.removeItem(PREFIX + page.page + '@v' + v.n); } catch (e) {}
+          if (here) { notes = []; leave(); drawAll(); show(); }
+          openHistory();
+        });
+      });
+      list.appendChild(li);
+    });
+    var wipe = hist.querySelector('[value="wipe"]');
+    wipe.dataset.sure = ''; wipe.textContent = 'Clear everything';
+    if (!hist.open) hist.showModal();
+  }
+  hist.querySelector('form').addEventListener('submit', function (e) {
+    var act = e.submitter && e.submitter.value;
+    if (act === 'wipe') {
+      e.preventDefault();
+      twice(e.submitter, 'Delete every comment?', function () {
+        try {
+          Object.keys(localStorage).forEach(function (k) { if (k.indexOf(PREFIX) === 0) localStorage.removeItem(k); });
+        } catch (err) {}
+        notes = []; leave(); drawAll(); show();
+        openHistory();
+      });
+    } else if (act === 'export') {
+      e.preventDefault();
+      hist.close();
+      openExport();
+    }
+  });
+
+  var wasOn = false;
+  try { wasOn = localStorage.getItem(MODE) === '1'; } catch (e) {}
+  setMode(wasOn);
+})();
+});
+</script>
+<div class="playbill"><div class="kicker">11 November 2026 · overture</div><h1>Explainers, review mode, and the playful repos</h1><p class="lede">What I read in tabelline before starting the animation research: every piece of work gets a
+page that explains it, the page is reviewed on the phone with <strong>✎ Review</strong>, and the rest of
+the repo keeps the page true. Then what that means for zogyn and parloku.</p></div>
+<p class="rv-enter"><span class="rv-version">Version 1</span></p>
+<div class="note"><p><strong>In one line.</strong> <em>The explainer is where the thinking happens; every other part keeps it true</em>
+(from <a href="../a-month-with-claude/index.html#part-two">Operetta, a first sketch</a>). This page is itself
+an explainer for one task, and it has the review mode: tap <strong>✎ Review</strong>, select words, comment,
+<strong>Export</strong>, paste in the thread.</p>
+</div>
+<h2>What I saw in tabelline</h2>
+<p><a href="https://pietroppeter.github.io/tabelline/">tabelline</a> (great tables for Nim) is the most
+complete example of the way of working, and the place where it is changing fastest.</p>
+<ul>
+<li><strong>An explainer before the code.</strong> <em>The Great Explainer</em> (<code>docs/explainer.nim</code>) says what gt
+and Great Tables are, how they work inside, who uses them, and builds a first tabelline step
+by step. It is the site's Guide and is <em>kept up to date</em>: a living page.</li>
+<li><strong>Three threads for every release.</strong> One builds it, one <em>uses it</em> on real data (a story told
+in tables), one ports reference code. The two documents find what the code misses: calls users
+write all the time, names that read badly, a bug in a corner.</li>
+<li><strong>Living pages and dated posts.</strong> The guide, the specs, the feature map and the roadmap are
+kept up to date; a devlog post is dated and never rewritten. A big design change starts as a
+devlog post.</li>
+<li><strong>Specs with examples that run.</strong> Every requirement about the API has a <code>```nim</code> block
+and the <code>```text</code> it prints, checked by <code>tools/specexamples.nim</code>. A spec that lies
+breaks the build.</li>
+<li><strong>Blocks, not HTML.</strong> A page is Markdown, nimib's blocks and the project's own blocks; CSS and
+colours live in one style module, and <code>tools/drift.nim</code> fails a page that grows HTML.</li>
+</ul>
+<p>These are the parts of <strong>Operetta</strong> (<a href="../a-month-with-claude/index.html#part-two">part two of A month with Claude</a>):
+not a template, a list of small parts (Scena, Prove, Partitura, ...) a project picks from.
+claude-artifacts is the <em>Prove</em> part, <em>Artifact first</em>: a quick page on the phone before there
+is a repo.</p>
+<h2>The review mode, the new piece</h2>
+<p>Reviewing a page on a phone used to mean screenshot, chat, back to the page, wait for the
+artifact to load, again for every comment. The review mode puts the comments on the page:</p>
+<ol>
+<li><strong>✎ Review</strong> opens it. The page shows its <em>Version N</em> (the number of commits that changed
+its source).</li>
+<li>Select a few words and tap <strong>Comment ✓</strong>, or write a <strong>Page note</strong> with nothing selected.
+Notes are kept in the browser as you type, and can hold a pasted screenshot.</li>
+<li><strong>‹</strong> and <strong>›</strong> go through the comments; <strong>Export</strong> gives one text: a YAML block
+(<code>format: nimib-review/5</code>, the page, its source file, version and commit) and one Markdown
+section per comment, with the quoted words and the words around them.</li>
+<li>That text is pasted in the chat, and the agent follows the skill <code>nimib-review</code>: find each
+quote in the notebook, check what changed since that commit, make the change, close the round.</li>
+</ol>
+<p>Today it lives in tabelline (<code>docs/review.nim</code>, <code>docs/assets/review.js</code>). claude-artifacts uses
+one shared copy of it in <code>shared/review/</code>, synced from tabelline, never edited here. It is written
+as one module in English so it can move to nimib as it is, with a release; then every nimib page,
+zogyn's and parloku's included, gets it with one line, <code>nbReview()</code>.</p>
+<h2>How it applies to the playful repos</h2>
+<table>
+<thead>
+<tr>
+<th>Part</th>
+<th>parloku today</th>
+<th>zogyn today</th>
+<th>Next step</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Artifact first</td>
+<td>yes: previews as artifacts before every merge</td>
+<td>the port began as <code>declarative-dragging-nim</code> here</td>
+<td>keep: research and POCs start here</td>
+</tr>
+<tr>
+<td>Explainer</td>
+<td><code>spiega</code>, the builder how-to, the devlog posts</td>
+<td>the docs page (<code>docs/src/index.nim</code>)</td>
+<td>zogyn gets an explainer of animation; each POC gets one</td>
+</tr>
+<tr>
+<td>Living pages and devlog</td>
+<td>garden pages (living) and dated devlog posts</td>
+<td>none</td>
+<td>zogyn: a devlog, starting with the animation POCs</td>
+</tr>
+<tr>
+<td>Specs that run</td>
+<td>OpenSpec, with <code>```drag</code> scenarios played by <code>specdrag.nim</code></td>
+<td>tests only</td>
+<td>zogyn: runnable examples, as tabelline's spec examples, when the API settles</td>
+</tr>
+<tr>
+<td>Blocks, not HTML</td>
+<td>partly: <code>style.nim</code> holds the look</td>
+<td>the docs style module</td>
+<td>follow nimib-blocks in new pages</td>
+</tr>
+<tr>
+<td>Review mode</td>
+<td>none yet</td>
+<td>none yet</td>
+<td>on every new page now (shared copy); on all pages once it is in nimib</td>
+</tr></tbody></table>
+<p>Three things follow for this thread and the ones after it:</p>
+<ul>
+<li><strong>Every task gets its explainer, with the review mode on.</strong> The animation research is a nimib
+page with things that move, written in Nim compiled to JavaScript, and so is each proof of
+concept. Each page shows its version, so a review round is easy to follow.</li>
+<li><strong>Research first, then a shortlist, then one thread per approach.</strong> As tabelline's three
+threads, each POC thread owns one page and reports what it found back to the research page,
+which is the living one. The POC pages are dated, like devlog posts.</li>
+<li><strong>zogyn stays a library.</strong> Animation, if it lands, is a zogyn module (draggable things that
+also move well); parloku's snakes and dances are its first users, not part of it.</li>
+</ul>
+<h2>Where to read more</h2>
+<ul>
+<li><a href="https://pietroppeter.github.io/tabelline/explainer/">The Great Explainer</a>, tabelline's guide.</li>
+<li><a href="https://pietroppeter.github.io/tabelline/devlog/review-mode/">Review mode</a>, the devlog post
+reviewed with itself, round by round.</li>
+<li><a href="https://pietroppeter.github.io/tabelline/devlog/three-threads/">Three threads for every release</a>.</li>
+<li><a href="../a-month-with-claude/index.html">A month with Claude</a>, with Operetta in part two.</li>
+<li>Next: <a href="../animating-in-nim/index.html">Animating things in Nim</a>, the research explainer this
+page leads to.</li>
+</ul>
+</main>
+<footer>
+<div class="nb-box">
+ <span><span class="nb-small">made with <a href="https://pietroppeter.github.io/nimib/">nimib 🐳</a></span></span>
+ <span></span>
+ <span><button class="nb-small" id="show" onclick="toggleSourceDisplay()">Show Source</button></span>
+</div>
+</footer>
+<section id="source">
+<pre><code class="nohighlight nim hljs"><span class="hljs-comment">## A short explainer: tabelline's way of working (explainers in nimib, Operetta's parts, the review</span>
+<span class="hljs-comment">## mode) and how it applies to the playful repos, zogyn and parloku. Writes ../index.html.</span>
+<span class="hljs-keyword">import</span> std/os
+<span class="hljs-keyword">import</span> nimib
+<span class="hljs-keyword">import</span> style, review
+
+nbInit
+nb.doc.filename = currentSourcePath().parentDir.parentDir / <span class="hljs-string">&quot;index.html&quot;</span>
+nb.usePage(<span class="hljs-string">&quot;Explainers, review mode and the playful repos&quot;</span>,
+           <span class="hljs-string">&quot;How tabelline works (an explainer for every task, Operetta's parts, the review mode) and what it means for zogyn and parloku.&quot;</span>)
+nbReview(tversion = <span class="hljs-number">1</span>, tpage = <span class="hljs-string">&quot;explainers-and-review&quot;</span>, tsource = <span class="hljs-string">&quot;explainers-and-review/src/index.nim&quot;</span>)
+
+nbTitle <span class="hljs-string">&quot;11 November 2026 · overture&quot;</span>, <span class="hljs-string">&quot;Explainers, review mode, and the playful repos&quot;</span>, <span class="hljs-string">&quot;&quot;&quot;
+What I read in tabelline before starting the animation research: every piece of work gets a
+page that explains it, the page is reviewed on the phone with **✎ Review**, and the rest of
+the repo keeps the page true. Then what that means for zogyn and parloku.
+&quot;&quot;&quot;</span>
+nbVersion <span class="hljs-number">1</span>
+
+nbNote <span class="hljs-string">&quot;&quot;&quot;
+**In one line.** *The explainer is where the thinking happens; every other part keeps it true*
+(from [Operetta, a first sketch](../a-month-with-claude/index.html#part-two)). This page is itself
+an explainer for one task, and it has the review mode: tap **✎ Review**, select words, comment,
+**Export**, paste in the thread.
+&quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+## What I saw in tabelline
+
+[tabelline](https://pietroppeter.github.io/tabelline/) (great tables for Nim) is the most
+complete example of the way of working, and the place where it is changing fastest.
+
+- **An explainer before the code.** *The Great Explainer* (`docs/explainer.nim`) says what gt
+  and Great Tables are, how they work inside, who uses them, and builds a first tabelline step
+  by step. It is the site's Guide and is *kept up to date*: a living page.
+- **Three threads for every release.** One builds it, one *uses it* on real data (a story told
+  in tables), one ports reference code. The two documents find what the code misses: calls users
+  write all the time, names that read badly, a bug in a corner.
+- **Living pages and dated posts.** The guide, the specs, the feature map and the roadmap are
+  kept up to date; a devlog post is dated and never rewritten. A big design change starts as a
+  devlog post.
+- **Specs with examples that run.** Every requirement about the API has a ```` ```nim ```` block
+  and the ```` ```text ```` it prints, checked by `tools/specexamples.nim`. A spec that lies
+  breaks the build.
+- **Blocks, not HTML.** A page is Markdown, nimib's blocks and the project's own blocks; CSS and
+  colours live in one style module, and `tools/drift.nim` fails a page that grows HTML.
+
+These are the parts of **Operetta** ([part two of A month with Claude](../a-month-with-claude/index.html#part-two)):
+not a template, a list of small parts (Scena, Prove, Partitura, ...) a project picks from.
+claude-artifacts is the *Prove* part, *Artifact first*: a quick page on the phone before there
+is a repo.
+
+## The review mode, the new piece
+
+Reviewing a page on a phone used to mean screenshot, chat, back to the page, wait for the
+artifact to load, again for every comment. The review mode puts the comments on the page:
+
+1. **✎ Review** opens it. The page shows its *Version N* (the number of commits that changed
+   its source).
+2. Select a few words and tap **Comment ✓**, or write a **Page note** with nothing selected.
+   Notes are kept in the browser as you type, and can hold a pasted screenshot.
+3. **‹** and **›** go through the comments; **Export** gives one text: a YAML block
+   (`format: nimib-review/5`, the page, its source file, version and commit) and one Markdown
+   section per comment, with the quoted words and the words around them.
+4. That text is pasted in the chat, and the agent follows the skill `nimib-review`: find each
+   quote in the notebook, check what changed since that commit, make the change, close the round.
+
+Today it lives in tabelline (`docs/review.nim`, `docs/assets/review.js`). claude-artifacts uses
+one shared copy of it in `shared/review/`, synced from tabelline, never edited here. It is written
+as one module in English so it can move to nimib as it is, with a release; then every nimib page,
+zogyn's and parloku's included, gets it with one line, `nbReview()`.
+
+## How it applies to the playful repos
+&quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+| Part | parloku today | zogyn today | Next step |
+|---|---|---|---|
+| Artifact first | yes: previews as artifacts before every merge | the port began as `declarative-dragging-nim` here | keep: research and POCs start here |
+| Explainer | `spiega`, the builder how-to, the devlog posts | the docs page (`docs/src/index.nim`) | zogyn gets an explainer of animation; each POC gets one |
+| Living pages and devlog | garden pages (living) and dated devlog posts | none | zogyn: a devlog, starting with the animation POCs |
+| Specs that run | OpenSpec, with ```` ```drag ```` scenarios played by `specdrag.nim` | tests only | zogyn: runnable examples, as tabelline's spec examples, when the API settles |
+| Blocks, not HTML | partly: `style.nim` holds the look | the docs style module | follow nimib-blocks in new pages |
+| Review mode | none yet | none yet | on every new page now (shared copy); on all pages once it is in nimib |
+&quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+Three things follow for this thread and the ones after it:
+
+- **Every task gets its explainer, with the review mode on.** The animation research is a nimib
+  page with things that move, written in Nim compiled to JavaScript, and so is each proof of
+  concept. Each page shows its version, so a review round is easy to follow.
+- **Research first, then a shortlist, then one thread per approach.** As tabelline's three
+  threads, each POC thread owns one page and reports what it found back to the research page,
+  which is the living one. The POC pages are dated, like devlog posts.
+- **zogyn stays a library.** Animation, if it lands, is a zogyn module (draggable things that
+  also move well); parloku's snakes and dances are its first users, not part of it.
+&quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+## Where to read more
+
+- [The Great Explainer](https://pietroppeter.github.io/tabelline/explainer/), tabelline's guide.
+- [Review mode](https://pietroppeter.github.io/tabelline/devlog/review-mode/), the devlog post
+  reviewed with itself, round by round.
+- [Three threads for every release](https://pietroppeter.github.io/tabelline/devlog/three-threads/).
+- [A month with Claude](../a-month-with-claude/index.html), with Operetta in part two.
+- Next: [Animating things in Nim](../animating-in-nim/index.html), the research explainer this
+  page leads to.
+&quot;&quot;&quot;</span>
+
+nbSave
+</code></pre>
+</section>
+  
+<script>
+  function toggleSourceDisplay() {
+    var btn = document.getElementById("show")
+    var source = document.getElementById("source");
+    if (btn.innerHTML=="Show Source") {
+      btn.innerHTML = "Hide Source";
+      source.style.display = "block";
+    } else {
+      btn.innerHTML = "Show Source";
+      source.style.display = "none";
+    }
+  }
+</script>
+  
+<!-- claude-artifacts:backlink -->
+<style>
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#ca-backlink{all:initial;position:fixed;z-index:2147483647;left:max(10px,env(safe-area-inset-left,0px));bottom:max(10px,env(safe-area-inset-bottom,0px));
+font:500 12px/1 system-ui,-apple-system,"Segoe UI",sans-serif;color:#1f1a22;background:rgba(251,250,252,.96);
+border:1px solid rgba(0,0,0,.14);border-radius:999px;padding:6px 10px;text-decoration:none;box-shadow:0 1px 3px rgba(0,0,0,.12);
+-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);cursor:pointer}
+#ca-backlink:hover,#ca-backlink:focus-visible{text-decoration:underline}
+@media (prefers-color-scheme:dark){#ca-backlink{color:#ece6ef;background:rgba(23,19,26,.94);border-color:rgba(255,255,255,.18)}}
+@media print{#ca-backlink{display:none}}
+body.rv-on #ca-backlink{display:none}
+</style>
+<a id="ca-backlink" href="https://pietroppeter.github.io/claude-artifacts/" title="All Claude artifacts">&larr; Claude artifacts</a>
+<!-- /claude-artifacts:backlink -->
+</body>
