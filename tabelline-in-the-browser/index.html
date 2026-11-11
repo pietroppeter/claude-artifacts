@@ -46,6 +46,272 @@ body pre.tabelline { font: 12.5px/1.35 ui-monospace, "SF Mono", Menlo, Consolas,
 </head>
 <body>
 <div id="app"></div>
+<article class="page explained">
+<style>
+.explained h2 { font-size: 1.3rem; margin: 2.2rem 0 .3rem; }
+.explained h3 { font-size: 1.05rem; margin: 1.6rem 0 .3rem; }
+.explained p, .explained li { line-height: 1.55; }
+.explained pre { background: #fff; border: 1px solid var(--line); border-radius: .5rem;
+  padding: .7rem .8rem; overflow-x: auto; }
+body .explained pre > code { font: 12.5px/1.45 ui-monospace, "SF Mono", Menlo, Consolas, monospace; overflow-x: auto; }
+.explained .file { font-size: .8rem; color: var(--muted); margin: .8rem 0 -.2rem; }
+.explained .file code { font-size: .8rem; }
+</style>
+<h2>The code, explained</h2>
+<p>Everything above is about 370 lines of Gleam (<code>lustre/demo/src/demo.gleam</code>), a 70-line
+module that turns a table into a Lustre element, and tabelline itself, compiled from Nim to
+JavaScript. Here is the code that matters, from the simplest piece to the deepest, as it is in
+<a href="https://github.com/pietroppeter/tabelline-polyglot">tabelline-polyglot</a>.</p>
+
+<h3>1. Three functions make an app</h3>
+<p>A <a href="https://hexdocs.pm/lustre/">Lustre</a> app is three functions. <code>init</code>
+makes the first <em>model</em> (everything the page can change), <code>update</code> makes a new
+model from a <em>message</em> (something the user did), <code>view</code> turns a model into the
+page. <code>main</code> ties them together and mounts the app on the page's
+<code>&lt;div id="app"&gt;</code>.</p>
+<p class="file"><code>demo.gleam</code></p>
+<pre><code class="language-gleam"><span class="hljs-keyword">pub</span> <span class="hljs-keyword">fn</span> main() {
+  <span class="hljs-keyword">let</span> app = <span class="hljs-keyword">lustre</span>.simple(init, update, view)
+  <span class="hljs-keyword">let</span> <span class="hljs-keyword">assert</span> Ok(_) = <span class="hljs-keyword">lustre</span>.start(app, <span class="hljs-string">"#app"</span>, Nil)
+  Nil
+}</code></pre>
+<h3>2. The model</h3>
+<p>The model is a record: one field for every control. The palette is not a string but a
+<code>Palette</code>, a type with one value per palette, so a palette that does not exist cannot
+be written; the same for the dataset, and for the output (HTML, text or Markdown).</p>
+<pre><code class="language-gleam"><span class="hljs-keyword">pub</span> <span class="hljs-keyword">type</span> Model {
+  Model(
+    title: String,
+    locale: String,
+    decimals: Int,
+    palette: Palette,
+    many_moons: Int,
+    output: Output,
+    dataset: Dataset,
+    top: Int,
+    bottom: Int,
+  )
+}</code></pre>
+<pre><code class="language-gleam"><span class="hljs-keyword">fn</span> init(_: Nil) -&gt; Model {
+  Model(
+    title: <span class="hljs-string">"The planets"</span>,
+    locale: <span class="hljs-string">"en"</span>,
+    decimals: <span class="hljs-number">2</span>,
+    palette: Blues,
+    many_moons: <span class="hljs-number">50</span>,
+    output: AsHtml,
+    dataset: Gtcars,
+    top: <span class="hljs-number">5</span>,
+    bottom: <span class="hljs-number">1</span>,
+  )
+}</code></pre>
+<h3>3. Messages</h3>
+<p>Each control sends a message, named after what the user did. <code>update</code> answers each
+with a new model: <code>Model(..model, title:)</code> is the old model with a new title (and
+<code>title:</code> is short for <code>title: title</code>). Nothing is changed in place.</p>
+<pre><code class="language-gleam"><span class="hljs-keyword">pub</span> <span class="hljs-keyword">type</span> Msg {
+  UserTypedTitle(String)
+  UserPickedLocale(String)
+  UserMovedDecimals(Int)
+  UserPickedPalette(Palette)
+  UserMovedMoons(Int)
+  UserPickedOutput(Output)
+  UserPickedDataset(Dataset)
+  UserMovedTop(Int)
+  UserMovedBottom(Int)
+}</code></pre>
+<pre><code class="language-gleam"><span class="hljs-keyword">fn</span> update(model: Model, msg: Msg) -&gt; Model {
+  <span class="hljs-keyword">case</span> msg {
+    UserTypedTitle(title) -&gt; Model(..model, title:)
+    UserPickedLocale(locale) -&gt; Model(..model, locale:)
+    UserMovedDecimals(decimals) -&gt; Model(..model, decimals:)
+    UserPickedPalette(palette) -&gt; Model(..model, palette:)
+    UserMovedMoons(many_moons) -&gt; Model(..model, many_moons:)
+    UserPickedOutput(output) -&gt; Model(..model, output:)
+    UserPickedDataset(dataset) -&gt; Model(..model, dataset:)
+    UserMovedTop(top) -&gt; Model(..model, top:)
+    UserMovedBottom(bottom) -&gt; Model(..model, bottom:)
+  }
+}</code></pre>
+<h3>4. The table</h3>
+<p>This is tabelline's Gleam API. A table starts from a list of records (the planets), and each
+column says how to get its value from a record: <code>column.int("moons", fn(planet) {
+planet.moons })</code>. Then come the verbs, one per line, named after
+<a href="https://gt.rstudio.com/">gt</a>'s: a stub and groups, a title, a spanner over two columns,
+labels, number formats, a colour scale, a bold style on some cells, a footnote, a source note. The
+model's values go in five places: the locale, the title, the decimals of the mass, the palette and
+the number of moons above which a cell is bold. Building the table only collects all this; nothing
+is drawn yet.</p>
+<pre><code class="language-gleam"><span class="hljs-keyword">fn</span> planets_table(model: Model) -&gt; Table(Planet) {
+  <span class="hljs-keyword">planets</span>.planets()
+  |&gt; <span class="hljs-keyword">tabelline</span>.from_list
+  |&gt; <span class="hljs-keyword">column</span>.string(<span class="hljs-string">"planet"</span>, <span class="hljs-keyword">fn</span>(planet) { <span class="hljs-keyword">planet</span>.name })
+  |&gt; <span class="hljs-keyword">column</span>.string(<span class="hljs-string">"type"</span>, <span class="hljs-keyword">fn</span>(planet) { kind_name(<span class="hljs-keyword">planet</span>.kind) })
+  |&gt; <span class="hljs-keyword">column</span>.int(<span class="hljs-string">"diameter"</span>, <span class="hljs-keyword">fn</span>(planet) { <span class="hljs-keyword">planet</span>.diameter })
+  |&gt; <span class="hljs-keyword">column</span>.float(<span class="hljs-string">"mass"</span>, <span class="hljs-keyword">fn</span>(planet) { <span class="hljs-keyword">planet</span>.mass })
+  |&gt; <span class="hljs-keyword">column</span>.float(<span class="hljs-string">"distance"</span>, <span class="hljs-keyword">fn</span>(planet) { <span class="hljs-keyword">planet</span>.distance })
+  |&gt; <span class="hljs-keyword">column</span>.int(<span class="hljs-string">"moons"</span>, <span class="hljs-keyword">fn</span>(planet) { <span class="hljs-keyword">planet</span>.moons })
+  |&gt; <span class="hljs-keyword">tabelline</span>.stub(<span class="hljs-string">"planet"</span>)
+  |&gt; <span class="hljs-keyword">tabelline</span>.group_by(<span class="hljs-string">"type"</span>)
+  |&gt; <span class="hljs-keyword">tabelline</span>.id(<span class="hljs-string">"planets"</span>)
+  |&gt; <span class="hljs-keyword">tabelline</span>.locale(<span class="hljs-keyword">model</span>.locale)
+  |&gt; <span class="hljs-keyword">tabelline</span>.title(Plain(<span class="hljs-keyword">model</span>.title))
+  |&gt; <span class="hljs-keyword">tabelline</span>.subtitle(Markdown(<span class="hljs-string">"of the *Solar System*"</span>))
+  |&gt; <span class="hljs-keyword">tabelline</span>.spanner(Plain(<span class="hljs-string">"Size"</span>), over: [<span class="hljs-string">"diameter"</span>, <span class="hljs-string">"mass"</span>])
+  |&gt; <span class="hljs-keyword">tabelline</span>.labels([
+    #(<span class="hljs-string">"diameter"</span>, Plain(<span class="hljs-string">"Diameter (km)"</span>)),
+    #(<span class="hljs-string">"mass"</span>, Plain(<span class="hljs-string">"Mass (10²⁴ kg)"</span>)),
+    #(<span class="hljs-string">"distance"</span>, Plain(<span class="hljs-string">"From the Sun (10⁶ km)"</span>)),
+    #(<span class="hljs-string">"moons"</span>, Plain(<span class="hljs-string">"Moons"</span>)),
+  ])
+  |&gt; <span class="hljs-keyword">tabelline</span>.format([<span class="hljs-string">"diameter"</span>], with: <span class="hljs-keyword">format</span>.integer())
+  |&gt; <span class="hljs-keyword">tabelline</span>.format([<span class="hljs-string">"mass"</span>], with: <span class="hljs-keyword">format</span>.number(decimals: <span class="hljs-keyword">model</span>.decimals))
+  |&gt; <span class="hljs-keyword">tabelline</span>.format([<span class="hljs-string">"distance"</span>], with: <span class="hljs-keyword">format</span>.number(decimals: <span class="hljs-number">1</span>))
+  |&gt; <span class="hljs-keyword">tabelline</span>.colour_scale([<span class="hljs-string">"moons"</span>], with: <span class="hljs-keyword">model</span>.palette)
+  |&gt; <span class="hljs-keyword">tabelline</span>.style([<span class="hljs-keyword">style</span>.bold()], at: [
+    <span class="hljs-keyword">location</span>.body(
+      columns: [<span class="hljs-string">"moons"</span>],
+      rows: <span class="hljs-keyword">rows</span>.where_int(<span class="hljs-string">"moons"</span>, Greater, <span class="hljs-keyword">model</span>.many_moons),
+    ),
+  ])
+  |&gt; <span class="hljs-keyword">tabelline</span>.footnote(Plain(<span class="hljs-string">"Moons confirmed by 2025."</span>), at: [
+    <span class="hljs-keyword">location</span>.column_labels([<span class="hljs-string">"moons"</span>]),
+  ])
+  |&gt; <span class="hljs-keyword">tabelline</span>.source_note(Plain(<span class="hljs-string">"NASA, Planetary Fact Sheet"</span>))
+}</code></pre>
+<p>The second table is shorter: one of tabelline's datasets, shown by its first and last rows.</p>
+<pre><code class="language-gleam"><span class="hljs-keyword">fn</span> dataset_table(model: Model) -&gt; Table(Nil) {
+  <span class="hljs-keyword">let</span> #(_, name, about) = dataset_info(<span class="hljs-keyword">model</span>.dataset)
+  <span class="hljs-keyword">tabelline</span>.from_dataset(<span class="hljs-keyword">model</span>.dataset)
+  |&gt; <span class="hljs-keyword">tabelline</span>.preview(top: <span class="hljs-keyword">model</span>.top, bottom: <span class="hljs-keyword">model</span>.bottom)
+  |&gt; <span class="hljs-keyword">tabelline</span>.id(<span class="hljs-string">"dataset"</span>)
+  |&gt; <span class="hljs-keyword">tabelline</span>.locale(<span class="hljs-keyword">model</span>.locale)
+  |&gt; <span class="hljs-keyword">tabelline</span>.title(Plain(name))
+  |&gt; <span class="hljs-keyword">tabelline</span>.subtitle(Plain(about))
+}</code></pre>
+<h3>5. The view</h3>
+<p><code>view</code> is called after every message. It builds both tables from the model, draws
+them, and times how long tabelline takes (the "tabelline took" line). <code>draw</code> picks the
+output.</p>
+<pre><code class="language-gleam"><span class="hljs-keyword">fn</span> view(model: Model) -&gt; Element(Msg) {
+  <span class="hljs-keyword">let</span> #(planets, planets_took) =
+    timed(<span class="hljs-keyword">fn</span>() { draw(planets_table(model), model) })
+  <span class="hljs-keyword">let</span> #(dataset, dataset_took) =
+    timed(<span class="hljs-keyword">fn</span>() { draw(dataset_table(model), model) })
+  <span class="hljs-keyword">html</span>.main([class(<span class="hljs-string">"page"</span>)], [
+    <span class="hljs-keyword">html</span>.header([class(<span class="hljs-string">"intro"</span>)], [
+      <span class="hljs-keyword">html</span>.h1([], [text(<span class="hljs-string">"tabelline, in your browser"</span>)]),
+      <span class="hljs-keyword">html</span>.p([class(<span class="hljs-string">"lede"</span>)], [
+        text(
+          <span class="hljs-string">"A Lustre app written in Gleam. Each change below is a message; the tables are then built again by tabelline, compiled from Nim to JavaScript, right here in the page."</span>,
+        ),
+      ]),
+    ]),
+    <span class="hljs-keyword">html</span>.section([], [
+      <span class="hljs-keyword">html</span>.h2([], [text(<span class="hljs-string">"The planets"</span>)]),
+      planet_controls(model),
+      took(planets_took),
+      planets,
+    ]),
+    <span class="hljs-keyword">html</span>.section([], [
+      <span class="hljs-keyword">html</span>.h2([], [text(<span class="hljs-string">"A dataset"</span>)]),
+      dataset_controls(model),
+      took(dataset_took),
+      dataset,
+    ]),
+  ])
+}</code></pre>
+<pre><code class="language-gleam"><span class="hljs-keyword">fn</span> draw(table: Table(row), model: Model) -&gt; Element(Msg) {
+  <span class="hljs-keyword">case</span> <span class="hljs-keyword">model</span>.output {
+    AsHtml -&gt; <span class="hljs-keyword">tabelline_lustre</span>.view_with(table, [class(<span class="hljs-string">"output"</span>)])
+    AsText -&gt; <span class="hljs-keyword">tabelline_lustre</span>.view_text(table)
+    AsMarkdown -&gt; <span class="hljs-keyword">tabelline_lustre</span>.view_markdown(table)
+  }
+}</code></pre>
+<p>A control is a small function too. A slider sends an <code>Int</code>, not the text the browser
+gives: the message is typed, so <code>update</code> never parses anything.</p>
+<pre><code class="language-gleam"><span class="hljs-keyword">fn</span> slider(
+  value: Int,
+  min: Int,
+  max: Int,
+  on_input: <span class="hljs-keyword">fn</span>(Int) -&gt; Msg,
+) -&gt; Element(Msg) {
+  <span class="hljs-keyword">html</span>.input([
+    <span class="hljs-keyword">attribute</span>.type_(<span class="hljs-string">"range"</span>),
+    <span class="hljs-keyword">attribute</span>.min(<span class="hljs-keyword">int</span>.to_string(min)),
+    <span class="hljs-keyword">attribute</span>.max(<span class="hljs-keyword">int</span>.to_string(max)),
+    <span class="hljs-keyword">attribute</span>.value(<span class="hljs-keyword">int</span>.to_string(value)),
+    <span class="hljs-keyword">event</span>.on_input(<span class="hljs-keyword">fn</span>(s) {
+      <span class="hljs-keyword">case</span> <span class="hljs-keyword">int</span>.parse(s) {
+        Ok(n) -&gt; on_input(n)
+        Error(Nil) -&gt; on_input(value)
+      }
+    }),
+  ])
+}</code></pre>
+<h3>6. A table is an element</h3>
+<p><code>tabelline_lustre</code> is the bridge between tabelline and Lustre, 70 lines in all. It
+asks tabelline for the HTML and puts it in the page as it is
+(<code>unsafe_raw_html</code>: the name warns about HTML from users; tabelline escapes every value
+it writes). If tabelline cannot draw the table, the page shows why, in a paragraph, and keeps
+working.</p>
+<p class="file"><code>lustre/src/tabelline_lustre.gleam</code></p>
+<pre><code class="language-gleam"><span class="hljs-keyword">pub</span> <span class="hljs-keyword">fn</span> view_with(
+  table: Table(row),
+  attributes: List(Attribute(msg)),
+) -&gt; Element(msg) {
+  <span class="hljs-keyword">case</span> <span class="hljs-keyword">tabelline</span>.to_html(table) {
+    <span class="hljs-comment">// tabelline escapes every value it writes, so its HTML can go in the page as it is</span>
+    Ok(drawn) -&gt;
+      <span class="hljs-keyword">element</span>.unsafe_raw_html(
+        <span class="hljs-string">""</span>,
+        <span class="hljs-string">"div"</span>,
+        [<span class="hljs-keyword">attribute</span>.class(<span class="hljs-string">"tabelline"</span>), ..attributes],
+        drawn,
+      )
+    Error(error) -&gt; problem(error)
+  }
+}</code></pre>
+<h3>7. Across the border: Gleam to Nim</h3>
+<p><code>tabelline.to_html</code> writes the table as JSON and calls one function written in
+another language. Gleam declares it with <code>@external</code>, once per target: on the BEAM it
+is Erlang code that calls tabelline as a native library (a NIF); in the browser it is
+JavaScript.</p>
+<p class="file"><code>gleam/src/tabelline.gleam</code></p>
+<pre><code class="language-gleam">@external(erlang, <span class="hljs-string">"tabelline_ffi"</span>, <span class="hljs-string">"render"</span>)
+@external(javascript, <span class="hljs-string">"./tabelline_ffi.mjs"</span>, <span class="hljs-string">"render"</span>)
+<span class="hljs-keyword">fn</span> render_spec(spec: String, format: String) -&gt; Result(String, String)</code></pre>
+<p>The JavaScript side turns tabelline's answer into a Gleam <code>Result</code>, with the
+<code>Ok</code> and <code>Error</code> of Gleam's own runtime.</p>
+<p class="file"><code>gleam/src/tabelline_ffi.mjs</code></p>
+<pre><code class="language-javascript"><span class="hljs-keyword">import</span> { Ok, Error, toList } <span class="hljs-keyword">from</span> <span class="hljs-string">"./gleam.mjs"</span>;
+<span class="hljs-keyword">import</span> { tabelline_render } <span class="hljs-keyword">from</span> <span class="hljs-string">"./tabelline_nim.mjs"</span>;
+
+<span class="hljs-keyword">export</span> <span class="hljs-keyword">function</span> render(spec, format) {
+  <span class="hljs-keyword">const</span> r = tabelline_render(spec, format);
+  <span class="hljs-keyword">return</span> r.ok ? <span class="hljs-keyword">new</span> Ok(r.value) : <span class="hljs-keyword">new</span> Error(r.value);
+}</code></pre>
+<p>And <code>tabelline_render</code> is Nim: tabelline compiled by <code>nim js</code>, which
+reads the JSON, builds the table with the same code as everywhere else, and writes the HTML: the
+same HTML, byte for byte, as tabelline in Nim, C, Rust or Erlang.</p>
+<p class="file"><code>js/tabelline_js.nim</code></p>
+<pre><code class="language-nim"><span class="hljs-keyword">proc</span> <span class="hljs-title function_">tabellineRender</span>(spec, format: cstring): JsObject <span class="hljs-string">{.</span><span class="hljs-string">exportc</span>: <span class="hljs-string">"</span><span class="hljs-string">tabelline_render</span><span class="hljs-string">".} =
+  </span><span class="hljs-string">result</span> <span class="hljs-string">= </span><span class="hljs-string">newJsObject</span><span class="hljs-string">()
+  </span><span class="hljs-string">try</span>:
+    <span class="hljs-string">let</span> <span class="hljs-string">t</span> <span class="hljs-string">= </span><span class="hljs-string">tabellaFromSpec</span><span class="hljs-string">(</span><span class="hljs-string">parseJson</span><span class="hljs-string">($</span><span class="hljs-string">spec</span><span class="hljs-string">))
+    </span><span class="hljs-string">let</span> <span class="hljs-string">output</span> <span class="hljs-string">= </span><span class="hljs-string">case</span> <span class="hljs-string">$</span><span class="hljs-string">format</span>
+      <span class="hljs-string">of</span> <span class="hljs-string">"", "</span><span class="hljs-string">html</span><span class="hljs-string">": </span><span class="hljs-string">t</span><span class="hljs-string">.</span><span class="hljs-string">toHtml</span>
+      <span class="hljs-string">of</span> <span class="hljs-string">"</span><span class="hljs-string">page</span><span class="hljs-string">": </span><span class="hljs-string">t</span><span class="hljs-string">.</span><span class="hljs-string">toHtml</span><span class="hljs-string">(</span><span class="hljs-string">makePage</span> <span class="hljs-string">= </span><span class="hljs-string">true</span><span class="hljs-string">)
+      </span><span class="hljs-string">of</span> <span class="hljs-string">"</span><span class="hljs-string">text</span><span class="hljs-string">": </span><span class="hljs-string">t</span><span class="hljs-string">.</span><span class="hljs-string">toText</span>
+      <span class="hljs-string">of</span> <span class="hljs-string">"</span><span class="hljs-string">markdown</span><span class="hljs-string">", "</span><span class="hljs-string">md</span><span class="hljs-string">": </span><span class="hljs-string">t</span><span class="hljs-string">.</span><span class="hljs-string">toMarkdown</span>
+      <span class="hljs-string">else</span>: <span class="hljs-string">raise</span> <span class="hljs-string">newException</span><span class="hljs-string">(</span><span class="hljs-string">ValueError</span>, <span class="hljs-string">"</span><span class="hljs-string">unknown</span> <span class="hljs-string">format</span> <span class="hljs-string">" &amp; $</span><span class="hljs-string">format</span> <span class="hljs-string">&amp; " (</span><span class="hljs-string">html</span>, <span class="hljs-string">page</span>, <span class="hljs-string">text</span>, <span class="hljs-string">markdown</span><span class="hljs-string">)")
+    </span><span class="hljs-string">result</span><span class="hljs-string">.</span><span class="hljs-string">ok</span> <span class="hljs-string">= </span><span class="hljs-string">true</span>
+    <span class="hljs-string">result</span><span class="hljs-string">.</span><span class="hljs-string">value</span> <span class="hljs-string">= </span><span class="hljs-string">cstring</span><span class="hljs-string">(</span><span class="hljs-string">output</span><span class="hljs-string">)
+  </span><span class="hljs-string">except</span> <span class="hljs-string">CatchableError</span> <span class="hljs-string">as</span> <span class="hljs-string">e</span>:
+    <span class="hljs-string">result</span><span class="hljs-string">.</span><span class="hljs-string">ok</span> <span class="hljs-string">= </span><span class="hljs-string">false</span>
+    <span class="hljs-string">result</span><span class="hljs-string">.</span><span class="hljs-string">value</span> <span class="hljs-string">= </span><span class="hljs-string">cstring</span><span class="hljs-string">(</span><span class="hljs-string">e</span><span class="hljs-string">.</span><span class="hljs-string">msg</span><span class="hljs-string">)</span></code></pre>
+<p>Gleam for the app, Lustre for the page, Nim for the tables: one file, nothing on a server.</p>
+</article>
 <footer class="page how">How it works: tabelline's Gleam binding writes each table as JSON;
 tabelline, compiled with <code>nim js</code>, reads it and writes the HTML. Gleam on the JavaScript target,
 Lustre for the page, Nim for the tables, all in one script, with nothing on a server.
