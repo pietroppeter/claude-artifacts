@@ -12,7 +12,7 @@ nb.doc.filename = srcDir.parentDir / "index.html"
 nb.usePage("Localizing nimib pages",
            "How to write a nimib page in more than one language: how other tools do it, three API sketches, and a prototype in Nim that this page uses for itself.")
 nb.useLingua(["en", "it"], ["English", "Italiano"])
-nbReview(tversion = 1, tpage = "nimib-localization", tsource = "nimib-localization/src/index.nim")
+nbReview(tversion = 2, tpage = "nimib-localization", tsource = "nimib-localization/src/index.nim")
 
 nbTitle "12 November 2026 · research for [nimib](https://github.com/pietroppeter/nimib)",
   "Localizing nimib pages",
@@ -22,12 +22,13 @@ Fluent, Sphinx, mdBook, Quarto, Hugo and others do it, sketches three ways nimib
 tries the best two in a small library, **lingua**. The page is its own example: the switch at
 the top shows it in Italian, from a catalog that lingua keeps up to date.
 """
-nbVersion 1, "12 November 2026"
+nbVersion 2, "12 November 2026, after the first review"
 
 nbNote """
 The Italian text was translated by Claude and nobody has reviewed it yet: the catalog marks
-every entry `machine` until someone does. A chunk with no translation shows in English, set
-apart by a dashed rule.
+every entry `machine` until someone does. Claude's choices, its conventions and every message
+side by side are in the [translation notes](notes-it.html), the page to review. A chunk with no
+translation shows in English, set apart by a dashed rule.
 """
 
 nbToc
@@ -63,39 +64,39 @@ type Tool = tuple[family, tool, unit, lives, reader: string]
 
 nbEach:
   let tools: seq[Tool] = @[
-    (tr"Messages in code", "[GNU gettext](https://www.gnu.org/software/gettext/)",
-     tr"a message: a string of the program", tr"a PO file per language", tr"the program picks the language when it runs; every translation tool reads PO"),
-    (tr"Messages in code", "[Fluent](https://projectfluent.org/)",
-     tr"a message with an id, plurals and genders written by the translator", tr"an FTL file per language", tr"a translation can have variants the source lacks (Mozilla's Firefox)"),
-    (tr"Messages in code", "[MessageFormat 2](https://unicode.org/reports/tr35/tr35-messageFormat.html)",
-     tr"a message with placeholders and variants", tr"wherever the program keeps them", tr"a Unicode standard, stable since CLDR 47 (March 2025)"),
-    (tr"Messages in code", "[nim-intl](https://github.com/iffy/nim-intl)",
-     tr"a string marked `tr`", tr"Nim files per locale, written by the tool", tr"chosen when compiling; alpha, by its author's word"),
-    (tr"Messages in code", "[nimterlingua](https://github.com/juancarlospaco/nim-nimterlingua)",
-     tr"a string", tr"an INI file", tr"chosen when compiling, with `-d:`"),
-    (tr"A document cut in segments", "[Sphinx](https://www.sphinx-doc.org/en/master/usage/advanced/intl.html) + [sphinx-intl](https://sphinx-intl.readthedocs.io/)",
-     tr"a paragraph", tr"PO files, extracted by `make gettext`", tr"one site per language; Jupyter Book 1 builds on it"),
-    (tr"A document cut in segments", "[mdbook-i18n-helpers](https://github.com/google/mdbook-i18n-helpers)",
-     tr"a paragraph, a heading, an item of a list", tr"a PO file per language, extracted by `mdbook-xgettext`", tr"one book per language: Comprehensive Rust, Rust by Example"),
-    (tr"A file per language", "[Quarto](https://quarto.org/) + [babelquarto](https://docs.ropensci.org/babelquarto/)",
-     tr"a whole file: `index.qmd`, `index.it.qmd`", tr"side by side in the project", tr"one site with a language switch; babeldown drafts the translation with DeepL"),
-    (tr"A file per language", "[Hugo](https://gohugo.io/content-management/multilingual/)",
-     tr"a whole page (`post.it.md`), and the words of the theme", tr"beside the page; the theme's words in `i18n/it.toml`", tr"one site per language, each page linked to its translations"),
-    (tr"A file per language", "[Jupyter Book 2](https://jupyterbook.org/)",
-     tr"nothing built in", tr"a folder or a repository per language", tr"each book on its own"),
-    (tr"One source, every language", "[Pandoc](https://pandoc.org/MANUAL.html#language-variables)",
-     tr"a span or a div with a `lang`", tr"in the source itself", tr"a filter keeps one language"),
-    (tr"One source, every language", "[action-translation](https://quantecon.github.io/action-translation)",
-     tr"a MyST document", tr"a repository per language, kept in step by a GitHub Action", tr"QuantEcon's: Claude translates every change, a person reviews it"),
-    (tr"Data in the reader's locale", "[tabelline](https://pietroppeter.github.io/tabelline/)",
-     tr"numbers, money and dates in a table", tr"every locale of CLDR, in the library", tr("`tabella(data, locale = \"it\")`"))]
+    ("Messages in code", "[GNU gettext](https://www.gnu.org/software/gettext/)",
+     "a message: a string of the program", "a PO file per language", "the program picks the language when it runs; every translation tool reads PO"),
+    ("Messages in code", "[Fluent](https://projectfluent.org/)",
+     "a message with an id, plurals and genders written by the translator", "an FTL file per language", "a translation can have variants the source lacks (Mozilla's Firefox)"),
+    ("Messages in code", "[MessageFormat 2](https://unicode.org/reports/tr35/tr35-messageFormat.html)",
+     "a message with placeholders and variants", "wherever the program keeps them", "a Unicode standard, stable since CLDR 47 (March 2025)"),
+    ("Messages in code", "[nim-intl](https://github.com/iffy/nim-intl)",
+     "a string marked `tr`", "Nim files per locale, written by the tool", "chosen when compiling; alpha, by its author's word"),
+    ("Messages in code", "[nimterlingua](https://github.com/juancarlospaco/nim-nimterlingua)",
+     "a string", "an INI file", "chosen when compiling, with `-d:`"),
+    ("A document cut in segments", "[Sphinx](https://www.sphinx-doc.org/en/master/usage/advanced/intl.html) + [sphinx-intl](https://sphinx-intl.readthedocs.io/)",
+     "a paragraph", "PO files, extracted by `make gettext`", "one site per language; Jupyter Book 1 builds on it"),
+    ("A document cut in segments", "[mdbook-i18n-helpers](https://github.com/google/mdbook-i18n-helpers)",
+     "a paragraph, a heading, an item of a list", "a PO file per language, extracted by `mdbook-xgettext`", "one book per language: Comprehensive Rust, Rust by Example"),
+    ("A file per language", "[Quarto](https://quarto.org/) + [babelquarto](https://docs.ropensci.org/babelquarto/)",
+     "a whole file: `index.qmd`, `index.it.qmd`", "side by side in the project", "one site with a language switch; babeldown drafts the translation with DeepL"),
+    ("A file per language", "[Hugo](https://gohugo.io/content-management/multilingual/)",
+     "a whole page (`post.it.md`), and the words of the theme", "beside the page; the theme's words in `i18n/it.toml`", "one site per language, each page linked to its translations"),
+    ("A file per language", "[Jupyter Book 2](https://jupyterbook.org/)",
+     "nothing built in", "a folder or a repository per language", "each book on its own"),
+    ("One source, every language", "[Pandoc](https://pandoc.org/MANUAL.html#language-variables)",
+     "a span or a div with a `lang`", "in the source itself", "a filter keeps one language"),
+    ("One source, every language", "[action-translation](https://quantecon.github.io/action-translation)",
+     "a MyST document", "a repository per language, kept in step by a GitHub Action", "QuantEcon's: Claude translates every change, a person reviews it"),
+    ("Data in the reader's locale", "[tabelline](https://pietroppeter.github.io/tabelline/)",
+     "numbers, money and dates in a table", "every locale of CLDR, in the library", "`tabella(data, locale = \"it\")`")]
   nbTable tools, groupnameCol = "family":
-    tabHeader tr"How others translate"
+    tabHeader "How others translate"
     colsLabel:
-      tool: tr"Tool"
-      unit: tr"What is translated"
-      lives: tr"Where translations live"
-      reader: tr"What a reader gets"
+      tool: "Tool"
+      unit: "What is translated"
+      lives: "Where translations live"
+      reader: "What a reader gets"
     fmtMarkdown ["tool", "unit", "lives", "reader"]
     optCssTheme()
 
@@ -121,9 +122,33 @@ Three lessons for nimib:
 
 - The unit that works for documents is the paragraph: small enough to see what changed, large
   enough to translate well. mdbook-i18n-helpers moved from whole pages to paragraphs for this.
-- PO is the lingua franca. A new format would cut nimib off from every tool translators use.
+- PO is the lingua franca (see below). A new format would cut nimib off from every tool
+  translators use, and from thirty years of conventions on how to keep a translation in step.
 - A machine draft and a human review is how translations are now made (babeldown with DeepL,
   QuantEcon with Claude). The catalog must say which entries a person has checked.
+
+**What a PO file is.** gettext, the GNU project's tool for translating programs, has kept its
+translations since the 1990s in *portable object* files: plain text, one file per language,
+and a list of entries. Each entry is a `msgid`, the text in the source language, and a
+`msgstr`, its translation; above it go comments, for the translator (`# `), from the tool that
+extracted the text (`#. `), or flags (`#, fuzzy`: a translation to check again). Here a comment
+says `machine` (not reviewed yet) and gives the message's key. A template,
+`.pot`, has every `msgid` and empty translations; `msgmerge` brings a language's `.po` in step
+with a new template, and keeps the entries no longer used at the end, as `#~`. Being plain text
+with one entry per paragraph, a PO file reads well in a diff and in a pull request, and Poedit,
+Weblate, Crowdin, Transifex and Lokalize all edit it. Two entries of this page's catalog:
+
+```po
+# machine
+# key: dfcec3
+msgid "## Open questions"
+msgstr "## Domande aperte"
+
+# machine
+# key: 3b66b3
+msgid "Leaving the libraries aside, the tools for documents are of two kinds."
+msgstr "Lasciando da parte le librerie, gli strumenti per i documenti sono di due tipi."
+```
 """
 
 nbText """
@@ -153,9 +178,10 @@ nbText:
   it: "Le isole del Mediterraneo"
 ```
 
-Everything is in one place, and a short page is easy to keep in step. But the source becomes
-twice as long for each language, a translator must edit Nim, and nothing says when the English
-changed and the Italian did not.
+Everything is in one place, and a short page is easy to keep in step. That a translator must
+edit Nim matters little when Claude translates and a person reviews. But the source becomes
+twice as long for each language, and nothing says when the English changed and the Italian did
+not.
 
 **B. The source stays as it is; a catalog beside it.** `nbText` does not change. The page's
 text is cut into chunks, and each chunk is an entry of `it.po`:
@@ -165,17 +191,18 @@ msgid "## Three things to translate"
 msgstr "## Tre cose da tradurre"
 ```
 
-A translator never sees Nim; a chunk that changes loses its translation and shows in English
-until someone translates it again; and every PO tool works.
+A chunk that changes loses its translation and shows in English until it is translated again,
+so nothing goes out of date unseen; the source stays as short as it was; and every PO tool
+works.
 
 **C. Code that runs once per language.** For what the code computes, `nbEach` runs a part of
-the page once per language, with `lang` set to it, and `tr` translates a message from the
-code:
+the page once per language, with `lang` set to it, and every string of its code that is text
+for a reader is translated, with no mark in the code:
 
 ```nim
 nbEach:
   nbTable tabella(islands, locale = lang):
-    tabHeader tr"The largest islands"
+    tabHeader "The largest islands"
 ```
 
 These are not rivals: **B for the text, C for the outputs**, and A for nothing, or for a
@@ -208,13 +235,17 @@ nbCode:
 nbText """
 A heading, a paragraph and a list: three messages. A block of code is a chunk of its own,
 and is not translated. Each chunk is a `msgid` of the catalog. When the page is built, lingua
-meets every chunk, adds the new ones to `it.po` with an empty translation, and moves those no
-longer used to the end, as gettext's `msgmerge` does. This is the catalog now:
+meets every chunk and writes them all, in order, to the template `messages.pot`, each with a
+short key made from its text. The Italian catalog `it.po` is then written by the
+[translation notes](notes-it.html): a nimib page made by Claude, with the conventions of the
+translation, the choices it made, and every message in English and in Italian side by side,
+each given by its key. Reviewing the translation is reviewing that page. This is the catalog
+it wrote:
 """
 
 nbCode:
   let catalog = readPo(srcDir / "it.po")
-  echo catalog.entries.len, " entries, ", catalog.obsolete.len, " obsolete"
+  echo catalog.entries.len, " entries"
   for e in catalog.entries.values:
     if e.msgid.startsWith("## "):
       echo e.msgid, "  →  ", e.msgstr
@@ -237,21 +268,22 @@ nbText """
 
 Here is C at work. The code below runs twice, once in English and once in Italian, and the
 switch at the top shows one run or the other. The table is tabelline's, given the language as
-its locale; the names of the islands and the title come from the catalog through `tr`.
+its locale; the names of the islands, the labels and the title come from the catalog, though
+the code has no `tr` in it.
 """
 
 type Island = tuple[island: string, area: int, people: float]
 
 nbEach:
   nbCode:
-    let islands: seq[Island] = @[(tr"Sicily", 25_460, 4.8), (tr"Sardinia", 23_813, 1.6),
-      (tr"Cyprus", 9_251, 1.3), (tr"Corsica", 8_680, 0.35), (tr"Crete", 8_336, 0.62)]
+    let islands: seq[Island] = @[("Sicily", 25_460, 4.8), ("Sardinia", 23_813, 1.6),
+      ("Cyprus", 9_251, 1.3), ("Corsica", 8_680, 0.35), ("Crete", 8_336, 0.62)]
     nbTable tabella(islands, locale = lang):
-      tabHeader tr"The largest islands of the Mediterranean", tr"Area in km², people in millions, rounded"
+      tabHeader "The largest islands of the Mediterranean", "Area in km², people in millions, rounded"
       colsLabel:
-        island: tr"Island"
-        area: tr"Area"
-        people: tr"People"
+        island: "Island"
+        area: "Area"
+        people: "People"
       fmtNumber "area", decimals = 0
       fmtNumber "people", decimals = 2, dropTrailingZeros = true
       optCssTheme()
@@ -267,8 +299,12 @@ language but English.
 
 nbNote("""
 `nbEach` runs its body once per language, so what it defines lives inside it: here `islands`
-is not seen after the block. `lang` is the language of the run (`en`, then `it`), and `tr`
-gives a message in it. The code shown is the same in both runs; only its output changes.
+is not seen after the block. `lang` is the language of the run (`en`, then `it`). `nbEach` is
+a macro: before the body runs, every string that looks like text (a capital first letter, or a
+space, and no address) is replaced by its translation, as if written `tr"Sicily"`. `"area"`,
+`"yMMMEd"` and `"2026-11-12"` are left alone. The code shown is the code as written, the same
+in both runs; only its output changes. Where the rule guesses wrong, `tr"..."` marks a string
+by hand, and `nbEachRaw` translates nothing.
 """, nkCode)
 
 nbText """
@@ -382,17 +418,28 @@ nbProc "lingua.nim", "useLingua", "localizedChunk", "localized"
 nbText """
 **Once per language.** `nbEach` makes a container with one part per language and runs its
 body inside each part, with `l10n.current` set; when drawn, each part is shown in its
-language.
+language. Before that, the macro walks the body and wraps every string that looks like text
+in a call to `tr`, keeping its place in the file, so nimib still shows the code as written.
 """
 
-nbProc "lingua.nim", "nbEach"
+nbProc "lingua.nim", "looksLikeText", "autoTr", "nbEachRaw", "nbEach"
 
 nbText """
-**Saving.** The page is drawn once to meet every message; then the catalogs are updated, the
-messages counted, and the page drawn again and written.
+**Saving.** The page is drawn once to meet every message; then the messages are counted, the
+template written, and the page drawn again and written.
 """
 
-nbProc "lingua.nim", "updateCatalogs", "nbSaveLingua", "nbSaveEach"
+nbProc "lingua.nim", "msgKey", "writePot", "nbSaveLingua"
+
+nbText """
+**The translation notes.** `notes.nim` has the blocks of the notes page: `nbMsg key, text`
+gives the translation of one message and shows it beside the English, `nbChoice` gives it as
+the first of several options, and `nbSaveNotes` checks that every message of the template has
+its translation (and that no key is left over), then writes `it.po`. The page is built in three
+steps: the page, which writes the template; the notes, which write the catalog; the page again.
+"""
+
+nbProc "notes.nim", "nbMsg", "nbChoice", "nbSaveNotes"
 
 nbText """
 ## The files
@@ -403,6 +450,9 @@ Everything that makes this page, as it is in its folder.
 nbFoldCode "lingua.nim"
 nbFoldCode "page.nim"
 nbFoldCode "index.nim"
+nbFoldCode "notes.nim"
+nbFoldCode "it.nim"
+nbFoldCode "messages.pot", "text"
 nbFoldCode "it.po", "text"
 
 nbText """

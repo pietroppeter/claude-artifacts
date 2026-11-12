@@ -34,6 +34,21 @@ h2 a.up { margin-left: auto; font-size: .9rem; text-decoration: none; color: var
 .note > [data-l] > :first-child, .note > :first-child > :first-child { margin-top: 0; }
 .note > [data-l]:last-child > :last-child { margin-bottom: 0; }
 .kicker [data-l], .langs-row [data-l] { display: inline; }
+/* translation notes: each message, the English beside its translation (stacked on a phone) */
+.msg { display: grid; grid-template-columns: 1fr 1fr; gap: .2rem 1.2rem; padding: .7rem 0 .3rem; border-top: 1px solid var(--line); }
+.msg p { margin: 0 0 .5rem; } .msg ul, .msg ol { margin: 0 0 .5rem; }
+.msg-en { color: var(--muted); font-size: .95rem; }
+.msg-h { font-weight: 700; font-family: var(--heading); }
+.msg-gone { font-style: italic; }
+.msg-key { grid-column: 1 / -1; justify-self: end; font: 11px var(--mono); color: var(--muted); }
+.msg.choice { background: var(--shade); padding-left: .6rem; padding-right: .6rem; }
+.options { list-style: none; padding: 0; margin: 0 0 .4rem; }
+.options li { display: flex; gap: .55rem; align-items: baseline; padding: .25rem .4rem; }
+.options li.picked { background: var(--primary-soft); }
+.options li > :last-child { margin-bottom: 0; }
+.options .opt { flex: none; font-weight: 700; }
+.why { font-size: .9rem; } .why p { margin: .3rem 0; }
+@media (max-width: 40rem) { .msg { grid-template-columns: 1fr; } }
 """
 
 # ------------------------------------------------------------------------------------- the title

@@ -17,7 +17,7 @@
 ##
 ## nimib renders with `noSideEffect` functions; lingua keeps its state in one global (`l10n`),
 ## so the functions that read it during rendering say so with `{.cast(noSideEffect).}`.
-import std/[strutils, tables, sets, os, json, strformat]
+import std/[strutils, tables, sets, os, json, strformat, macros]
 import nimib except md
 import nimib/themes
 
@@ -122,6 +122,26 @@ proc writePo*(c: Catalog, path, lang: string) =
     for line in ("msgid " & poString(e.msgid) & "\nmsgstr " & poString(e.msgstr)).splitLines:
       s.add "#~ " & line & "\n"
   writeFile(path, s)
+
+func msgKey*(msgid: string): string =
+  ## A short name for a message, from its text (FNV-1a, 24 bits): the translation notes use it.
+  ## The text changes, the name changes, so a translation of an older text is never used.
+  var h = 2166136261'u32
+  for c in msgid:
+    h = (h xor uint32(c)) * 16777619'u32
+  toHex(h shr 8, 6).toLowerAscii
+
+proc writePot*(path: string) =
+  ## The template: every message of the page, in its order, each with its key. The translation
+  ## notes of each language read it and write that language's catalog.
+  var s = "msgid \"\"\nmsgstr \"\"\n\"MIME-Version: 1.0\\n\"\n\"Content-Type: text/plain; charset=UTF-8\\n\"\n"
+  for msg in l10n.seen:
+    s.add "\n#. key: " & msgKey(msg) & "\nmsgid " & poString(msg) & "\nmsgstr \"\"\n"
+  writeFile(path, s)
+
+proc readPot*(path: string): seq[tuple[key, msgid: string]] =
+  ## The messages of a template, in its order, with their keys.
+  for msgid in readPo(path).entries.keys: result.add (msgKey(msgid), msgid)
 
 # ------------------------------------------------------------------------------------ the chunks
 
@@ -295,9 +315,26 @@ newNbBlock(NbEach of NbContainer):
         result.add(if all: &"""<div data-l="{l}" lang="{l}">{html}</div>""" & "\n" else: html)
       if all: l10n.rendering = ""
 
-template nbEach*(body: untyped) =
-  ## `body` runs once per language, with `lang` set to it; the blocks it adds are shown in their
-  ## language. For what the code computes in the reader's language: numbers, dates, a table.
+func looksLikeText*(s: string): bool =
+  ## A string of the code that is text for a reader: it starts with a capital letter, or has a
+  ## space in it, and is not an address. "Sicily" and "Area in km²" are; "area", "yMMMEd",
+  ## "2026-11-12" and a Markdown link are not.
+  s.len > 0 and "://" notin s and (s[0] in {'A'..'Z'} or (' ' in s and s.strip.len > 1))
+
+proc autoTr(n: NimNode): NimNode =
+  case n.kind
+  of nnkStrLit, nnkTripleStrLit, nnkRStrLit:
+    if looksLikeText(n.strVal):
+      result = newCall(bindSym"tr", n)
+      result.copyLineInfo(n); result[0].copyLineInfo(n)
+    else: result = n
+  of nnkCallStrLit, nnkPragma, nnkImportStmt, nnkIncludeStmt: result = n
+  else:
+    result = n
+    for i in 0 ..< n.len: result[i] = autoTr(n[i])
+
+template nbEachRaw*(body: untyped) =
+  ## `nbEach` without translating the strings of `body`.
   block:
     let each = newNbEach()
     for l in l10n.langs:
@@ -308,6 +345,13 @@ template nbEach*(body: untyped) =
       each.blocks.add part
     l10n.current = l10n.source
     nb.add each
+
+macro nbEach*(body: untyped): untyped =
+  ## `body` runs once per language, with `lang` set to it; the blocks it adds are shown in their
+  ## language. For what the code computes in the reader's language: numbers, dates, a table.
+  ## Every string of `body` that looks like text (`looksLikeText`) is a message: it is given in
+  ## the language of the run, as if written `tr"..."`, and the code shown keeps it as written.
+  result = newCall(bindSym"nbEachRaw", autoTr(body))
 
 # ----------------------------------------------------------------------------------------- saving
 
@@ -327,6 +371,8 @@ proc countStats*(nb: Nb) =
 proc updateCatalogs*() =
   ## Each catalog gets every message of the page, in its order: a new one with an empty
   ## translation, one no longer used moved to the obsolete entries at the end (as msgmerge does).
+  ## For a catalog written by hand or by a tool; this page's are written by its translation
+  ## notes, from the template (`writePot`).
   for l in l10n.langs[1 .. ^1]:
     let old = l10n.catalogs.getOrDefault(l)
     var c = Catalog(header: old.header, obsolete: old.obsolete)
@@ -338,18 +384,18 @@ proc updateCatalogs*() =
     l10n.catalogs[l] = c
 
 template nbSaveLingua* =
-  ## Render once to meet every message (`tr` met its own when the code ran), count, update
-  ## the catalogs, then write the page.
+  ## Render once to meet every message (`tr` met its own when the code ran), count, write the
+  ## template `messages.pot` for the translation notes, then write the page.
   discard nb.render(nb.doc)
   nb.countStats
-  updateCatalogs()
+  writePot(l10n.dir / "messages.pot")
   nbSave
 
 template nbSaveEach* =
   ## One file per language: the page's file for the source, `index.it.html` beside it for Italian.
   discard nb.render(nb.doc)
   nb.countStats
-  updateCatalogs()
+  writePot(l10n.dir / "messages.pot")
   let base = nb.doc.filename
   for l in l10n.langs:
     l10n.rendering = l
