@@ -1,0 +1,1156 @@
+msgid ""
+msgstr ""
+"Language: it\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# machine
+# key: 96d946
+msgid "Messages in code"
+msgstr "Messaggi nel codice"
+
+# machine
+# key: 228222
+msgid "a message: a string of the program"
+msgstr "un messaggio: una stringa del programma"
+
+# machine
+# key: dc7ba4
+msgid "a PO file per language"
+msgstr "un file PO per lingua"
+
+# machine
+# key: 27ee71
+msgid "the program picks the language when it runs; every translation tool reads PO"
+msgstr "il programma sceglie la lingua quando gira; ogni strumento di traduzione legge il PO"
+
+# machine
+# key: 29cba3
+msgid "a message with an id, plurals and genders written by the translator"
+msgstr "un messaggio con un id, con plurali e generi scritti da chi traduce"
+
+# machine
+# key: 019462
+msgid "an FTL file per language"
+msgstr "un file FTL per lingua"
+
+# machine
+# key: b4c88b
+msgid "a translation can have variants the source lacks (Mozilla's Firefox)"
+msgstr "una traduzione può avere varianti che l'originale non ha (Firefox di Mozilla)"
+
+# machine
+# key: 8153cb
+msgid "a message with placeholders and variants"
+msgstr "un messaggio con segnaposto e varianti"
+
+# machine
+# key: e985e1
+msgid "wherever the program keeps them"
+msgstr "dove il programma li tiene"
+
+# machine
+# key: 640070
+msgid "a Unicode standard, stable since CLDR 47 (March 2025)"
+msgstr "uno standard Unicode, stabile da CLDR 47 (marzo 2025)"
+
+# machine
+# key: 6a48d8
+msgid "a string marked `tr`"
+msgstr "una stringa marcata `tr`"
+
+# machine
+# key: 41411e
+msgid "Nim files per locale, written by the tool"
+msgstr "file Nim per locale, scritti dallo strumento"
+
+# machine
+# key: 14ace8
+msgid "chosen when compiling; alpha, by its author's word"
+msgstr "scelta in compilazione; alpha, a detta del suo autore"
+
+# machine
+# key: fcbbb8
+msgid "a string"
+msgstr "una stringa"
+
+# machine
+# key: 7b85c8
+msgid "an INI file"
+msgstr "un file INI"
+
+# machine
+# key: 9ab4eb
+msgid "chosen when compiling, with `-d:`"
+msgstr "scelta in compilazione, con `-d:`"
+
+# machine
+# key: 09780c
+msgid "A document cut in segments"
+msgstr "Un documento diviso in segmenti"
+
+# machine
+# key: e73fc2
+msgid "a paragraph"
+msgstr "un paragrafo"
+
+# machine
+# key: dc4169
+msgid "PO files, extracted by `make gettext`"
+msgstr "file PO, estratti da `make gettext`"
+
+# machine
+# key: 72ab00
+msgid "one site per language; Jupyter Book 1 builds on it"
+msgstr "un sito per lingua; Jupyter Book 1 si basa su questo"
+
+# machine
+# key: 65ff69
+msgid "a paragraph, a heading, an item of a list"
+msgstr "un paragrafo, un titolo, una voce di elenco"
+
+# machine
+# key: 3812d1
+msgid "a PO file per language, extracted by `mdbook-xgettext`"
+msgstr "un file PO per lingua, estratto da `mdbook-xgettext`"
+
+# machine
+# key: 8e7c73
+msgid "one book per language: Comprehensive Rust, Rust by Example"
+msgstr "un libro per lingua: Comprehensive Rust, Rust by Example"
+
+# machine
+# key: 599dde
+msgid "A file per language"
+msgstr "Un file per lingua"
+
+# machine
+# key: c189e7
+msgid "a whole file: `index.qmd`, `index.it.qmd`"
+msgstr "un file intero: `index.qmd`, `index.it.qmd`"
+
+# machine
+# key: 7c3c15
+msgid "side by side in the project"
+msgstr "uno accanto all'altro nel progetto"
+
+# machine
+# key: e64763
+msgid "one site with a language switch; babeldown drafts the translation with DeepL"
+msgstr "un sito con un selettore di lingua; babeldown abbozza la traduzione con DeepL"
+
+# machine
+# key: 094fb5
+msgid "a whole page (`post.it.md`), and the words of the theme"
+msgstr "una pagina intera (`post.it.md`), e le parole del tema"
+
+# machine
+# key: dac599
+msgid "beside the page; the theme's words in `i18n/it.toml`"
+msgstr "accanto alla pagina; le parole del tema in `i18n/it.toml`"
+
+# machine
+# key: 56b85e
+msgid "one site per language, each page linked to its translations"
+msgstr "un sito per lingua, ogni pagina collegata alle sue traduzioni"
+
+# machine
+# key: bc09e1
+msgid "nothing built in"
+msgstr "niente di integrato"
+
+# machine
+# key: 1a5c2c
+msgid "a folder or a repository per language"
+msgstr "una cartella o un repository per lingua"
+
+# machine
+# key: cc0bb3
+msgid "each book on its own"
+msgstr "ogni libro per conto suo"
+
+# machine
+# key: bd5fe2
+msgid "One source, every language"
+msgstr "Un sorgente, tutte le lingue"
+
+# machine
+# key: 6731d9
+msgid "a span or a div with a `lang`"
+msgstr "uno span o un div con un `lang`"
+
+# machine
+# key: 961d08
+msgid "in the source itself"
+msgstr "nel sorgente stesso"
+
+# machine
+# key: 0e6852
+msgid "a filter keeps one language"
+msgstr "un filtro tiene una sola lingua"
+
+# machine
+# key: 006197
+msgid "a MyST document"
+msgstr "un documento MyST"
+
+# machine
+# key: cb4524
+msgid "a repository per language, kept in step by a GitHub Action"
+msgstr "un repository per lingua, tenuto al passo da una GitHub Action"
+
+# machine
+# key: ae2e5b
+msgid "QuantEcon's: Claude translates every change, a person reviews it"
+msgstr "di QuantEcon: Claude traduce ogni modifica, una persona la rivede"
+
+# machine
+# key: 71e76d
+msgid "Data in the reader's locale"
+msgstr "Dati nella locale di chi legge"
+
+# machine
+# key: a5e18f
+msgid "numbers, money and dates in a table"
+msgstr "numeri, valute e date in una tabella"
+
+# machine
+# key: 15fa55
+msgid "every locale of CLDR, in the library"
+msgstr "tutte le locale di CLDR, nella libreria"
+
+# machine
+# key: 059029
+msgid "`tabella(data, locale = \"it\")`"
+msgstr "`tabella(data, locale = \"it\")`"
+
+# machine
+# key: 8eb40e
+msgid "How others translate"
+msgstr "Come traducono gli altri"
+
+# machine
+# key: d1a15a
+msgid "Tool"
+msgstr "Strumento"
+
+# machine
+# key: 4ef47a
+msgid "What is translated"
+msgstr "Cosa si traduce"
+
+# machine
+# key: daeb72
+msgid "Where translations live"
+msgstr "Dove stanno le traduzioni"
+
+# machine
+# key: 930471
+msgid "What a reader gets"
+msgstr "Cosa riceve chi legge"
+
+# machine
+# key: 8b68c6
+msgid "Sicily"
+msgstr "Sicilia"
+
+# machine
+# key: 812378
+msgid "Sardinia"
+msgstr "Sardegna"
+
+# machine
+# key: 8fc823
+msgid "Cyprus"
+msgstr "Cipro"
+
+# machine
+# key: aa4503
+msgid "Corsica"
+msgstr "Corsica"
+
+# machine
+# key: 761728
+msgid "Crete"
+msgstr "Creta"
+
+# machine
+# key: 4ef8ae
+msgid "The largest islands of the Mediterranean"
+msgstr "Le isole più grandi del Mediterraneo"
+
+# machine
+# key: c3f9a0
+msgid "Area in km², people in millions, rounded"
+msgstr "Superficie in km², abitanti in milioni, arrotondati"
+
+# machine
+# key: fea391
+msgid "Island"
+msgstr "Isola"
+
+# machine
+# key: 1db5d6
+msgid "Area"
+msgstr "Superficie"
+
+# machine
+# key: 839006
+msgid "People"
+msgstr "Abitanti"
+
+# machine
+# key: f86729
+msgid "nimib, in more than one language"
+msgstr "nimib, in più di una lingua"
+
+# machine
+# key: 17b7a2
+msgid "12 November 2026 · research for [nimib](https://github.com/pietroppeter/nimib)"
+msgstr "12 novembre 2026 · ricerca per [nimib](https://github.com/pietroppeter/nimib)"
+
+# machine
+# key: 323698
+msgid "Localizing nimib pages"
+msgstr "Pagine nimib in più lingue"
+
+# machine
+# key: f284cd
+msgid ""
+"How could a nimib page be read in more than one language? This page looks at how gettext,\n"
+"Fluent, Sphinx, mdBook, Quarto, Hugo and others do it, sketches three ways nimib could, and\n"
+"tries the best two in a small library, **lingua**. The page is its own example: the switch at\n"
+"the top shows it in Italian, from a catalog that lingua keeps up to date."
+msgstr ""
+"Come si può leggere una pagina nimib in più di una lingua? Questa pagina guarda come fanno\n"
+"gettext, Fluent, Sphinx, mdBook, Quarto, Hugo e altri, abbozza tre modi in cui potrebbe farlo\n"
+"nimib, e prova i due migliori in una piccola libreria, **lingua**. La pagina è il suo stesso\n"
+"esempio: il selettore in alto la mostra in italiano, da un catalogo che lingua tiene aggiornato."
+
+# machine
+# key: 12f183
+msgid ""
+"The Italian text was translated by Claude and nobody has reviewed it yet: the catalog marks\n"
+"every entry `machine` until someone does. Claude's choices, its conventions and every message\n"
+"side by side are in the [translation notes](notes-it.html), the page to review. A chunk with no\n"
+"translation shows in English, set apart by a dashed rule."
+msgstr ""
+"Il testo italiano è stato tradotto da Claude e nessuno l'ha ancora rivisto: il catalogo segna\n"
+"ogni voce `machine` finché qualcuno non lo fa. Le scelte di Claude, le sue convenzioni e ogni\n"
+"messaggio fianco a fianco sono nelle [note di traduzione](notes-it.html), la pagina da\n"
+"rivedere. Un pezzo senza traduzione appare in inglese, separato da una riga tratteggiata."
+
+# machine
+# key: c7b7fe
+msgid "Three things to translate"
+msgstr "Tre cose da tradurre"
+
+# machine
+# key: 7516e4
+msgid "How others do it"
+msgstr "Come fanno gli altri"
+
+# machine
+# key: 0dcee1
+msgid "Two families, and what they teach"
+msgstr "Due famiglie, e cosa insegnano"
+
+# machine
+# key: 388ca9
+msgid "What nimib has that the others lack"
+msgstr "Cosa ha nimib che agli altri manca"
+
+# machine
+# key: 0f8446
+msgid "Three ways to write it"
+msgstr "Tre modi di scriverlo"
+
+# machine
+# key: 4d749c
+msgid "lingua, a prototype"
+msgstr "lingua, un prototipo"
+
+# machine
+# key: fd42e2
+msgid "Outputs in the reader's language"
+msgstr "Gli output nella lingua di chi legge"
+
+# machine
+# key: 270797
+msgid "A real case: the islands story"
+msgstr "Un caso reale: la storia delle isole"
+
+# machine
+# key: 5b3498
+msgid "What nimib would need"
+msgstr "Cosa servirebbe a nimib"
+
+# machine
+# key: b093ef
+msgid "Open questions"
+msgstr "Domande aperte"
+
+# machine
+# key: 908a32
+msgid "How it is built"
+msgstr "Come è fatto"
+
+# machine
+# key: 24c008
+msgid "The files"
+msgstr "I file"
+
+# machine
+# key: a2c773
+msgid "Sources"
+msgstr "Fonti"
+
+# machine
+# key: 871f67
+msgid "Contents"
+msgstr "Indice"
+
+# machine
+# key: 0faab1
+msgid "## Three things to translate"
+msgstr "## Tre cose da tradurre"
+
+# machine
+# key: 6fe976
+msgid "Back to the contents"
+msgstr "Torna all'indice"
+
+# machine
+# key: 947d7e
+msgid ""
+"A nimib page is a Nim program that writes a page. To read it in another language, three\n"
+"different things change, and each asks for its own tool:"
+msgstr ""
+"Una pagina nimib è un programma Nim che scrive una pagina. Per leggerla in un'altra lingua\n"
+"cambiano tre cose diverse, e ognuna chiede il suo strumento:"
+
+# machine
+# key: b0f6a4
+msgid ""
+"- **The text**: what `nbText` says, the largest part, written by a person.\n"
+"- **The words of the page itself**: the header, the footer, a label like *output*, the buttons\n"
+"  of the review mode. Few, and the same on every page of a site.\n"
+"- **What the code prints**: numbers, dates and tables, which have their own conventions in each\n"
+"  language (25,460 in English is 25.460 in Italian), and any text the code writes."
+msgstr ""
+"- **Il testo**: quello che dice `nbText`, la parte più grande, scritta da una persona.\n"
+"- **Le parole della pagina stessa**: l'intestazione, il piè di pagina, un'etichetta come\n"
+"  *output*, i pulsanti della modalità revisione. Poche, e uguali in ogni pagina di un sito.\n"
+"- **Quello che stampa il codice**: numeri, date e tabelle, che in ogni lingua hanno le loro\n"
+"  convenzioni (25,460 in inglese è 25.460 in italiano), e ogni testo che il codice scrive."
+
+# machine
+# key: 330dd1
+msgid ""
+"Then there is what the browser must be told: `<html lang=\"en-us\">`, which nimib writes on\n"
+"every page, whatever its language. Screen readers, hyphenation and search engines read it."
+msgstr ""
+"Poi c'è quello che va detto al browser: `<html lang=\"en-us\">`, che nimib scrive in ogni\n"
+"pagina, qualunque sia la sua lingua. Lo leggono i lettori di schermo, la sillabazione e i\n"
+"motori di ricerca."
+
+# machine
+# key: 93b1ea
+msgid ""
+"The words of the trade: *internationalization* (i18n) is making a program ready to be\n"
+"translated; *localization* (l10n) is translating it; a *locale* is a language with its\n"
+"conventions for numbers, dates and money (`it`, `de-CH`)."
+msgstr ""
+"Le parole del mestiere: *internazionalizzazione* (i18n) è preparare un programma a essere\n"
+"tradotto; *localizzazione* (l10n) è tradurlo; una *locale* è una lingua con le sue convenzioni\n"
+"per numeri, date e valute (`it`, `de-CH`)."
+
+# machine
+# key: d9ebec
+msgid "## How others do it"
+msgstr "## Come fanno gli altri"
+
+# machine
+# key: bf2d29
+msgid ""
+"Thirteen tools, in five families. The first are libraries for messages in code; the others are\n"
+"for documents and sites. Links to each are under *Sources*, at the end."
+msgstr ""
+"Tredici strumenti, in cinque famiglie. I primi sono librerie per i messaggi nel codice; gli\n"
+"altri sono per documenti e siti. I link a ciascuno sono in *Fonti*, alla fine."
+
+# machine
+# key: f574db
+msgid "## Two families, and what they teach"
+msgstr "## Due famiglie, e cosa insegnano"
+
+# machine
+# key: 3b66b3
+msgid "Leaving the libraries aside, the tools for documents are of two kinds."
+msgstr "Lasciando da parte le librerie, gli strumenti per i documenti sono di due tipi."
+
+# machine
+# key: fa0f1c
+msgid ""
+"**A file per language** (Quarto with babelquarto, Hugo, MkDocs, Docusaurus): the Italian page\n"
+"is a copy of the English one, translated. Simple to start and to understand, and the\n"
+"translation can say things differently. But when the English page changes, nothing says which\n"
+"part of the Italian is now out of date, and the code is copied too: in a notebook, every code\n"
+"block would live, and run, twice."
+msgstr ""
+"**Un file per lingua** (Quarto con babelquarto, Hugo, MkDocs, Docusaurus): la pagina italiana\n"
+"è una copia di quella inglese, tradotta. Semplice da avviare e da capire, e la traduzione può\n"
+"dire le cose a modo suo. Ma quando la pagina inglese cambia, niente dice quale parte\n"
+"dell'italiano non è più aggiornata, e anche il codice è copiato: in un notebook, ogni blocco di\n"
+"codice vivrebbe, e girerebbe, due volte."
+
+# machine
+# key: add561
+msgid ""
+"**A document cut in segments** (Sphinx, mdBook with its helpers): the source stays the only\n"
+"page, a tool cuts its text into paragraphs, and each paragraph is a message of a catalog, in\n"
+"gettext's PO format. A paragraph that changes is a new message, so the catalog knows exactly\n"
+"what to translate again; code is never copied; and any PO editor (Poedit, Weblate, Crowdin)\n"
+"works on it. The translation follows the source paragraph by paragraph, which is also its\n"
+"limit."
+msgstr ""
+"**Un documento diviso in segmenti** (Sphinx, mdBook con i suoi helper): il sorgente resta\n"
+"l'unica pagina, uno strumento ne divide il testo in paragrafi, e ogni paragrafo è un messaggio\n"
+"di un catalogo, nel formato PO di gettext. Un paragrafo che cambia è un messaggio nuovo, così il\n"
+"catalogo sa esattamente cosa ritradurre; il codice non è mai copiato; e qualunque editor PO\n"
+"(Poedit, Weblate, Crowdin) ci lavora. La traduzione segue l'originale paragrafo per paragrafo,\n"
+"e questo è anche il suo limite."
+
+# machine
+# key: d1e80c
+msgid "Three lessons for nimib:"
+msgstr "Tre lezioni per nimib:"
+
+# machine
+# key: 71cdd2
+msgid ""
+"- The unit that works for documents is the paragraph: small enough to see what changed, large\n"
+"  enough to translate well. mdbook-i18n-helpers moved from whole pages to paragraphs for this.\n"
+"- PO is the lingua franca (see below). A new format would cut nimib off from every tool\n"
+"  translators use, and from thirty years of conventions on how to keep a translation in step.\n"
+"- A machine draft and a human review is how translations are now made (babeldown with DeepL,\n"
+"  QuantEcon with Claude). The catalog must say which entries a person has checked."
+msgstr ""
+"- L'unità che funziona per i documenti è il paragrafo: abbastanza piccolo da vedere cosa è\n"
+"  cambiato, abbastanza grande da tradurlo bene. mdbook-i18n-helpers è passato dalle pagine\n"
+"  intere ai paragrafi per questo.\n"
+"- Il PO è la lingua franca (vedi sotto). Un formato nuovo taglierebbe fuori nimib da ogni\n"
+"  strumento che usano i traduttori, e da trent'anni di convenzioni su come tenere una\n"
+"  traduzione al passo.\n"
+"- Una bozza della macchina e una revisione umana è come si fanno oggi le traduzioni (babeldown\n"
+"  con DeepL, QuantEcon con Claude). Il catalogo deve dire quali voci una persona ha controllato."
+
+# machine
+# key: ccf67e
+msgid ""
+"**What a PO file is.** gettext, the GNU project's tool for translating programs, has kept its\n"
+"translations since the 1990s in *portable object* files: plain text, one file per language,\n"
+"and a list of entries. Each entry is a `msgid`, the text in the source language, and a\n"
+"`msgstr`, its translation; above it go comments, for the translator (`# `), from the tool that\n"
+"extracted the text (`#. `), or flags (`#, fuzzy`: a translation to check again). Here a comment\n"
+"says `machine` (not reviewed yet) and gives the message's key. A template,\n"
+"`.pot`, has every `msgid` and empty translations; `msgmerge` brings a language's `.po` in step\n"
+"with a new template, and keeps the entries no longer used at the end, as `#~`. Being plain text\n"
+"with one entry per paragraph, a PO file reads well in a diff and in a pull request, and Poedit,\n"
+"Weblate, Crowdin, Transifex and Lokalize all edit it. Two entries of this page's catalog:"
+msgstr ""
+"**Che cos'è un file PO.** gettext, lo strumento del progetto GNU per tradurre i programmi,\n"
+"tiene le sue traduzioni dagli anni Novanta in file *portable object*: testo semplice, un file\n"
+"per lingua, e un elenco di voci. Ogni voce è un `msgid`, il testo nella lingua sorgente, e un\n"
+"`msgstr`, la sua traduzione; sopra vanno i commenti, per chi traduce (`# `), dello strumento\n"
+"che ha estratto il testo (`#. `), o dei flag (`#, fuzzy`: una traduzione da ricontrollare). Qui\n"
+"un commento dice `machine` (non ancora rivista) e dà la chiave del messaggio. Un modello,\n"
+"`.pot`, ha ogni `msgid` e traduzioni vuote; `msgmerge` allinea il `.po` di una lingua a un\n"
+"modello nuovo, e tiene in fondo le voci non più usate, come `#~`. Essendo testo semplice con\n"
+"una voce per paragrafo, un file PO si legge bene in un diff e in una pull request, e Poedit,\n"
+"Weblate, Crowdin, Transifex e Lokalize lo modificano tutti. Due voci del catalogo di questa\n"
+"pagina:"
+
+# machine
+# key: 91fb4b
+msgid "## What nimib has that the others lack"
+msgstr "## Cosa ha nimib che agli altri manca"
+
+# machine
+# key: 9bf032
+msgid "The tools above work on text files. A nimib page is a program, and that gives it four things:"
+msgstr "Gli strumenti qui sopra lavorano su file di testo. Una pagina nimib è un programma, e questo le dà quattro cose:"
+
+# machine
+# key: c044e9
+msgid ""
+"- **Blocks are values.** nimib knows which block is text, which is code and which is output,\n"
+"  so it never has to guess what to translate, as a tool that reads Markdown must.\n"
+"- **The code runs when the page is built.** It can run once per language and print numbers,\n"
+"  dates and tables in each language's own way. No other tool here localizes the outputs.\n"
+"- **One program writes every language.** The same run can write one page with a switch, or\n"
+"  one file per language, with no second build.\n"
+"- **nimib owns the words of the page.** Its header, footer and the review mode can take their\n"
+"  words from the same catalog as the text."
+msgstr ""
+"- **I blocchi sono valori.** nimib sa quale blocco è testo, quale codice e quale output,\n"
+"  quindi non deve mai indovinare cosa tradurre, come deve fare uno strumento che legge Markdown.\n"
+"- **Il codice gira quando la pagina viene costruita.** Può girare una volta per lingua e\n"
+"  stampare numeri, date e tabelle nel modo di ogni lingua. Nessun altro strumento qui\n"
+"  localizza gli output.\n"
+"- **Un solo programma scrive tutte le lingue.** La stessa esecuzione può scrivere una pagina\n"
+"  con un selettore, o un file per lingua, senza una seconda build.\n"
+"- **Le parole della pagina sono di nimib.** L'intestazione, il piè di pagina e la modalità\n"
+"  revisione possono prendere le loro parole dallo stesso catalogo del testo."
+
+# machine
+# key: 968f74
+msgid "## Three ways to write it"
+msgstr "## Tre modi di scriverlo"
+
+# machine
+# key: aad740
+msgid ""
+"**A. Every language in the source.** Each text block carries its translations, as Pandoc's\n"
+"`lang` divs do:"
+msgstr ""
+"**A. Tutte le lingue nel sorgente.** Ogni blocco di testo porta con sé le sue traduzioni,\n"
+"come fanno i div con `lang` di Pandoc:"
+
+# machine
+# key: af5336
+msgid ""
+"Everything is in one place, and a short page is easy to keep in step. That a translator must\n"
+"edit Nim matters little when Claude translates and a person reviews. But the source becomes\n"
+"twice as long for each language, and nothing says when the English changed and the Italian did\n"
+"not."
+msgstr ""
+"Tutto è in un posto solo, e una pagina breve è facile da tenere allineata. Che chi traduce debba\n"
+"modificare Nim conta poco quando traduce Claude e una persona rivede. Ma il sorgente diventa\n"
+"due volte più lungo per ogni lingua, e niente dice quando l'inglese è cambiato e l'italiano no."
+
+# machine
+# key: 93b6a3
+msgid ""
+"**B. The source stays as it is; a catalog beside it.** `nbText` does not change. The page's\n"
+"text is cut into chunks, and each chunk is an entry of `it.po`:"
+msgstr ""
+"**B. Il sorgente resta com'è; un catalogo accanto.** `nbText` non cambia. Il testo della\n"
+"pagina è diviso in pezzi, e ogni pezzo è una voce di `it.po`:"
+
+# machine
+# key: a04bc9
+msgid ""
+"A chunk that changes loses its translation and shows in English until it is translated again,\n"
+"so nothing goes out of date unseen; the source stays as short as it was; and every PO tool\n"
+"works."
+msgstr ""
+"Un pezzo che cambia perde la sua traduzione e appare in inglese finché non viene ritradotto,\n"
+"così niente resta indietro senza che si veda; il sorgente resta corto com'era; e ogni strumento\n"
+"PO funziona."
+
+# machine
+# key: 0d89db
+msgid ""
+"**C. Code that runs once per language.** For what the code computes, `nbEach` runs a part of\n"
+"the page once per language, with `lang` set to it, and every string of its code that is text\n"
+"for a reader is translated, with no mark in the code:"
+msgstr ""
+"**C. Codice che gira una volta per lingua.** Per quello che il codice calcola, `nbEach` fa\n"
+"girare una parte della pagina una volta per lingua, con `lang` impostato su di essa, e ogni\n"
+"stringa del suo codice che è testo per chi legge viene tradotta, senza segni nel codice:"
+
+# machine
+# key: ff63fd
+msgid ""
+"These are not rivals: **B for the text, C for the outputs**, and A for nothing, or for a\n"
+"note that only one language needs. Then, two ways to deliver the result: one page with a\n"
+"switch (an artifact, a post, a page shared by link), or one file per language, with the links\n"
+"between them that search engines read (a site, a book)."
+msgstr ""
+"Non sono in concorrenza: **B per il testo, C per gli output**, e A per niente, o per una nota\n"
+"che serve in una sola lingua. Poi, due modi di consegnare il risultato: una pagina con un\n"
+"selettore (un artifact, un post, una pagina condivisa con un link), o un file per lingua, con i\n"
+"link fra loro che leggono i motori di ricerca (un sito, un libro)."
+
+# machine
+# key: a920c7
+msgid "## lingua, a prototype"
+msgstr "## lingua, un prototipo"
+
+# machine
+# key: 4bc140
+msgid ""
+"lingua is B and C in about 300 lines of Nim, with no dependency but nimib. It changes nothing\n"
+"in nimib: it replaces how text blocks are drawn, which nimib allows. This page uses it; its\n"
+"first lines are:"
+msgstr ""
+"lingua è B e C in circa 300 righe di Nim, senza dipendenze oltre a nimib. Non cambia niente\n"
+"in nimib: sostituisce il modo in cui sono disegnati i blocchi di testo, cosa che nimib permette.\n"
+"Questa pagina la usa; le sue prime righe sono:"
+
+# machine
+# key: 5beac3
+msgid ""
+"and it ends with `nbSaveLingua` where a page ends with `nbSave`. In between it is a plain\n"
+"nimib page. Here is how lingua cuts a text into chunks:"
+msgstr ""
+"e finisce con `nbSaveLingua` dove una pagina finisce con `nbSave`. In mezzo è una normale\n"
+"pagina nimib. Ecco come lingua divide un testo in pezzi:"
+
+# machine
+# key: 97b0f6
+msgid ""
+"A heading, a paragraph and a list: three messages. A block of code is a chunk of its own,\n"
+"and is not translated. Each chunk is a `msgid` of the catalog. When the page is built, lingua\n"
+"meets every chunk and writes them all, in order, to the template `messages.pot`, each with a\n"
+"short key made from its text. The Italian catalog `it.po` is then written by the\n"
+"[translation notes](notes-it.html): a nimib page made by Claude, with the conventions of the\n"
+"translation, the choices it made, and every message in English and in Italian side by side,\n"
+"each given by its key. Reviewing the translation is reviewing that page. This is the catalog\n"
+"it wrote:"
+msgstr ""
+"Un titolo, un paragrafo e un elenco: tre messaggi. Un blocco di codice è un pezzo a sé, e non\n"
+"si traduce. Ogni pezzo è un `msgid` del catalogo. Quando la pagina viene costruita, lingua\n"
+"incontra ogni pezzo e li scrive tutti, in ordine, nel modello `messages.pot`, ciascuno con una\n"
+"chiave corta ricavata dal suo testo. Il catalogo italiano `it.po` è poi scritto dalle\n"
+"[note di traduzione](notes-it.html): una pagina nimib fatta da Claude, con le convenzioni della\n"
+"traduzione, le scelte fatte, e ogni messaggio in inglese e in italiano fianco a fianco, ciascuno\n"
+"indicato dalla sua chiave. Rivedere la traduzione è rivedere quella pagina. Questo è il catalogo\n"
+"che ha scritto:"
+
+# machine
+# key: 1e6740
+msgid ""
+"When the page is drawn, every chunk is written in every language, each in an element with its\n"
+"`lang`; the switch in the header shows one and hides the others, remembers the choice, and\n"
+"reads `?lang=it` in the address. Without JavaScript the page is in English. A heading takes\n"
+"its id from the English, so a link to a section works in both languages."
+msgstr ""
+"Quando la pagina viene disegnata, ogni pezzo è scritto in ogni lingua, ciascuno in un elemento\n"
+"con il suo `lang`; il selettore nell'intestazione ne mostra uno e nasconde gli altri, ricorda la\n"
+"scelta, e legge `?lang=it` nell'indirizzo. Senza JavaScript la pagina è in inglese. Un titolo\n"
+"prende il suo id dall'inglese, così un link a una sezione funziona in entrambe le lingue."
+
+# machine
+# key: 2336fe
+msgid ""
+"The table below is counted when the page is built: every message of the page (the chunks of\n"
+"its text, and the words of its blocks and tables), and how many have a translation."
+msgstr ""
+"La tabella qui sotto è contata quando la pagina viene costruita: ogni messaggio della pagina\n"
+"(i pezzi del suo testo, e le parole dei suoi blocchi e delle sue tabelle), e quanti hanno una\n"
+"traduzione."
+
+# machine
+# key: ac41a3
+msgid "The catalogs of this page"
+msgstr "I cataloghi di questa pagina"
+
+# machine
+# key: 9a73db
+msgid "Language"
+msgstr "Lingua"
+
+# machine
+# key: f8611f
+msgid "Messages"
+msgstr "Messaggi"
+
+# machine
+# key: 5fc652
+msgid "Translated"
+msgstr "Tradotti"
+
+# machine
+# key: 49930b
+msgid "By Claude"
+msgstr "Da Claude"
+
+# machine
+# key: 3d94d6
+msgid "Missing"
+msgstr "Mancanti"
+
+# machine
+# key: 197da8
+msgid "## Outputs in the reader's language"
+msgstr "## Gli output nella lingua di chi legge"
+
+# machine
+# key: 3b64e0
+msgid ""
+"Here is C at work. The code below runs twice, once in English and once in Italian, and the\n"
+"switch at the top shows one run or the other. The table is tabelline's, given the language as\n"
+"its locale; the names of the islands, the labels and the title come from the catalog, though\n"
+"the code has no `tr` in it."
+msgstr ""
+"Ecco C all'opera. Il codice qui sotto gira due volte, una in inglese e una in italiano, e il\n"
+"selettore in alto mostra l'una o l'altra esecuzione. La tabella è di tabelline, che riceve la\n"
+"lingua come locale; i nomi delle isole, le etichette e il titolo vengono dal catalogo, anche se\n"
+"nel codice non c'è nessun `tr`."
+
+# machine
+# key: 0d0b09
+msgid ""
+"The digits are grouped and the decimals marked as each language does (25,460 and 4.8 in\n"
+"English; 25.460 and 4,8 in Italian), and the date is written in each language's order and\n"
+"words, from the CLDR data that tabelline carries. Nim's own `std/times` can do part of it:\n"
+"`format` takes a `DateTimeLocale` with the names of months and days, but no data for any\n"
+"language but English."
+msgstr ""
+"Le cifre sono raggruppate e i decimali segnati come fa ogni lingua (25,460 e 4.8 in inglese;\n"
+"25.460 e 4,8 in italiano), e la data è scritta nell'ordine e con le parole di ogni lingua, dai\n"
+"dati CLDR che tabelline si porta dietro. `std/times` di Nim sa fare una parte del lavoro:\n"
+"`format` accetta una `DateTimeLocale` con i nomi dei mesi e dei giorni, ma nessun dato per\n"
+"nessuna lingua tranne l'inglese."
+
+# machine
+# key: 1dcdec
+msgid ""
+"`nbEach` runs its body once per language, so what it defines lives inside it: here `islands`\n"
+"is not seen after the block. `lang` is the language of the run (`en`, then `it`). `nbEach` is\n"
+"a macro: before the body runs, every string that looks like text (a capital first letter, or a\n"
+"space, and no address) is replaced by its translation, as if written `tr\"Sicily\"`. `\"area\"`,\n"
+"`\"yMMMEd\"` and `\"2026-11-12\"` are left alone. The code shown is the code as written, the same\n"
+"in both runs; only its output changes. Where the rule guesses wrong, `tr\"...\"` marks a string\n"
+"by hand, and `nbEachRaw` translates nothing."
+msgstr ""
+"`nbEach` fa girare il suo corpo una volta per lingua, quindi quello che definisce vive al suo\n"
+"interno: qui `islands` non si vede dopo il blocco. `lang` è la lingua dell'esecuzione (`en`, poi\n"
+"`it`). `nbEach` è una macro: prima che il corpo giri, ogni stringa che sembra testo (una\n"
+"maiuscola iniziale, o uno spazio, e nessun indirizzo) è sostituita dalla sua traduzione, come\n"
+"se fosse scritta `tr\"Sicily\"`. `\"area\"`, `\"yMMMEd\"` e `\"2026-11-12\"` restano come sono. Il codice\n"
+"mostrato è il codice come è scritto, uguale nelle due esecuzioni; cambia solo il suo output.\n"
+"Dove la regola sbaglia, `tr\"...\"` segna una stringa a mano, e `nbEachRaw` non traduce niente."
+
+# machine
+# key: b5904a
+msgid "## A real case: the islands story"
+msgstr "## Un caso reale: la storia delle isole"
+
+# machine
+# key: 4e8fc9
+msgid ""
+"While this page was being written, tabelline's story of the Mediterranean islands got its\n"
+"Italian version, built the simplest way. It is worth comparing, because it chose\n"
+"differently at almost every step:"
+msgstr ""
+"Mentre questa pagina veniva scritta, la storia delle isole del Mediterraneo di tabelline ha\n"
+"avuto la sua versione italiana, costruita nel modo più semplice. Vale la pena confrontarla,\n"
+"perché ha scelto diversamente quasi a ogni passo:"
+
+# machine
+# key: 3559bc
+msgid ""
+"- **One build per language.** `isole.nim` is the one source; `isole_it.nim` is two lines,\n"
+"  `const lang = \"it\"` and `include isole`. Two pages, two runs, and every output is in its\n"
+"  language without `nbEach`.\n"
+"- **`tr` for everything.** Every text a reader sees, text blocks included, goes through\n"
+"  `tr\"...\"`, which looks the English up in a plain text file of `en:` and `it:` pairs. An empty\n"
+"  `it:` keeps the English.\n"
+"- **A missing key fails the build.** It is written to a file of what is missing, so the two\n"
+"  languages cannot drift apart; lingua shows the English instead and counts it.\n"
+"- **Data translated at the source.** Values are translated where the data is read, and the\n"
+"  names of the islands come from Wikidata's Italian labels: no catalog needed for them."
+msgstr ""
+"- **Una build per lingua.** `isole.nim` è l'unico sorgente; `isole_it.nim` è di due righe,\n"
+"  `const lang = \"it\"` e `include isole`. Due pagine, due esecuzioni, e ogni output è nella sua\n"
+"  lingua senza `nbEach`.\n"
+"- **`tr` per tutto.** Ogni testo che chi legge vede, blocchi di testo compresi, passa da\n"
+"  `tr\"...\"`, che cerca l'inglese in un semplice file di testo di coppie `en:` e `it:`. Un `it:`\n"
+"  vuoto tiene l'inglese.\n"
+"- **Una chiave mancante fa fallire la build.** Viene scritta in un file di ciò che manca, così le\n"
+"  due lingue non possono allontanarsi; lingua invece mostra l'inglese e lo conta.\n"
+"- **I dati tradotti alla fonte.** I valori sono tradotti dove i dati vengono letti, e i nomi\n"
+"  delle isole vengono dalle etichette italiane di Wikidata: nessun catalogo per loro."
+
+# machine
+# key: 108f41
+msgid ""
+"Both work. Building once per language is simpler for a site, where each language has its own\n"
+"address anyway; one page with a switch suits a page shared by link. Failing the build is a\n"
+"choice a project should be able to make: lingua could take a `strict` flag."
+msgstr ""
+"Funzionano entrambi. Costruire una volta per lingua è più semplice per un sito, dove ogni\n"
+"lingua ha comunque il suo indirizzo; una pagina con un selettore va bene per una pagina\n"
+"condivisa con un link. Far fallire la build è una scelta che un progetto dovrebbe poter fare:\n"
+"lingua potrebbe accettare un'opzione `strict`."
+
+# machine
+# key: b1623b
+msgid ""
+"What it found missing is more useful than how it was done. Besides `<html lang>`, which it\n"
+"sets from JavaScript, and the English words of the review mode, the look switch, the footer\n"
+"and *Show code*:"
+msgstr ""
+"Quello che ha trovato mancante è più utile di come è stato fatto. Oltre a `<html lang>`, che\n"
+"imposta da JavaScript, e alle parole inglesi della modalità revisione, del selettore di stile,\n"
+"del piè di pagina e di *Show code*:"
+
+# machine
+# key: 22292a
+msgid ""
+"- **tabelline has no locale for the whole page.** Every `tabella()` takes `locale = lang`, and\n"
+"  `initTabellaPreview` takes none at all, so the locale is set on the table afterwards.\n"
+"- **`fmtInteger` in a `summaryRows` block ignores the table's locale.**\n"
+"- **The labels of summary rows come from identifiers** (`total: agg.sum`), so they need\n"
+"  `textTransform tr` to be translated; and **`fmtCountry` gives only English names**, fixed\n"
+"  the same way.\n"
+"- **Heading anchors drop accented letters** when a heading is turned into an id. lingua avoids\n"
+"  it by taking ids from the English, but a page written in Italian would hit it.\n"
+"- **Pictures**: the maps (SVG) and the photos have English words in them, which no catalog of\n"
+"  text reaches."
+msgstr ""
+"- **tabelline non ha una locale per tutta la pagina.** Ogni `tabella()` riceve\n"
+"  `locale = lang`, e `initTabellaPreview` non ne riceve affatto, quindi la locale viene\n"
+"  impostata sulla tabella dopo.\n"
+"- **`fmtInteger` in un blocco `summaryRows` ignora la locale della tabella.**\n"
+"- **Le etichette delle righe di riepilogo vengono da identificatori** (`total: agg.sum`), quindi\n"
+"  serve `textTransform tr` per tradurle; e **`fmtCountry` dà solo nomi inglesi**, sistemato\n"
+"  allo stesso modo.\n"
+"- **Le ancore dei titoli perdono le lettere accentate** quando un titolo diventa un id. lingua\n"
+"  lo evita prendendo gli id dall'inglese, ma una pagina scritta in italiano ci inciamperebbe.\n"
+"- **Le immagini**: le mappe (SVG) e le foto hanno parole inglesi dentro, che nessun catalogo di\n"
+"  testo raggiunge."
+
+# machine
+# key: 20c63a
+msgid "## What nimib would need"
+msgstr "## Cosa servirebbe a nimib"
+
+# machine
+# key: 80f7d8
+msgid ""
+"lingua works without changing nimib, but it had to work around five things, and the islands\n"
+"story adds a sixth. Each is a small change, and most would help any page, translated or not:"
+msgstr ""
+"lingua funziona senza cambiare nimib, ma ha dovuto aggirare cinque cose, e la storia delle\n"
+"isole ne aggiunge una sesta. Ognuna è una piccola modifica, e quasi tutte aiuterebbero\n"
+"qualunque pagina, tradotta o no:"
+
+# machine
+# key: f455ca
+msgid ""
+"- **The language of the page.** nimib writes `<html lang=\"en-us\">` on every page. A `lang`\n"
+"  in `nimib.toml` (or `nb.lang`) would fix it; lingua replaces the whole page to write it.\n"
+"- **State while drawing.** nimib draws with functions that cannot change anything\n"
+"  (`noSideEffect`), so lingua keeps its catalog in a global and says\n"
+"  `{.cast(noSideEffect).}` to read it. A place for a block's helpers in the document would do.\n"
+"- **Saving more than once.** `nbSave` writes one file; lingua's `nbSaveEach` calls it once per\n"
+"  language. A nimibook would need it per chapter, with a switch in its menu.\n"
+"- **nimib's own words.** The default theme and the review mode have English words in their\n"
+"  HTML and their scripts; they could take them from a small catalog that nimib ships.\n"
+"- **The review mode.** Its export should say which language was read, so a comment on the\n"
+"  Italian becomes a change to `it.po`, and marking a reviewed entry would clear `machine`.\n"
+"- **Heading ids for every language.** The slug of a heading should keep accented letters\n"
+"  (`perché` as `perche`, not `perch`), or be taken from the source language as lingua does."
+msgstr ""
+"- **La lingua della pagina.** nimib scrive `<html lang=\"en-us\">` in ogni pagina. Un `lang` in\n"
+"  `nimib.toml` (o `nb.lang`) lo sistemerebbe; lingua sostituisce l'intera pagina per scriverlo.\n"
+"- **Uno stato mentre si disegna.** nimib disegna con funzioni che non possono cambiare niente\n"
+"  (`noSideEffect`), così lingua tiene il suo catalogo in una globale e dice\n"
+"  `{.cast(noSideEffect).}` per leggerlo. Basterebbe un posto nel documento per gli aiutanti\n"
+"  di un blocco.\n"
+"- **Salvare più di una volta.** `nbSave` scrive un file; `nbSaveEach` di lingua lo chiama una\n"
+"  volta per lingua. Un nimibook ne avrebbe bisogno per ogni capitolo, con un selettore nel menu.\n"
+"- **Le parole di nimib stesso.** Il tema predefinito e la modalità revisione hanno parole\n"
+"  inglesi nel loro HTML e nei loro script; potrebbero prenderle da un piccolo catalogo\n"
+"  distribuito con nimib.\n"
+"- **La modalità revisione.** Il suo export dovrebbe dire quale lingua è stata letta, così un\n"
+"  commento sull'italiano diventa una modifica a `it.po`, e segnare una voce come rivista\n"
+"  toglierebbe `machine`.\n"
+"- **Gli id dei titoli per ogni lingua.** Lo slug di un titolo dovrebbe tenere le lettere\n"
+"  accentate (`perché` come `perche`, non `perch`), o essere preso dalla lingua sorgente come fa\n"
+"  lingua."
+
+# machine
+# key: 23a3ae
+msgid ""
+"For tabelline, the islands story asks for a locale for the whole page (an option that every\n"
+"`tabella` and `initTabellaPreview` follows), for every format to follow the table's locale\n"
+"(`fmtInteger` in summary rows), and for country names in every language of CLDR."
+msgstr ""
+"Per tabelline, la storia delle isole chiede una locale per tutta la pagina (un'opzione che\n"
+"ogni `tabella` e `initTabellaPreview` seguano), che ogni formato segua la locale della tabella\n"
+"(`fmtInteger` nelle righe di riepilogo), e i nomi dei paesi in ogni lingua di CLDR."
+
+# machine
+# key: dfcec3
+msgid "## Open questions"
+msgstr "## Domande aperte"
+
+# machine
+# key: 572106
+msgid ""
+"- **Code.** Comments and strings in code blocks stay in English here. mdbook-i18n-helpers\n"
+"  translates a block of code as a whole message; for a nimib page that would mean running\n"
+"  translated code, so it is probably better left alone.\n"
+"- **A chunk that changes.** A typo fixed in English makes its chunk a new message, and the\n"
+"  Italian is lost until it is translated again. `msgmerge` keeps the old translation as\n"
+"  *fuzzy* when the new text is close; lingua could do the same.\n"
+"- **Plurals and genders.** `tr` with `%` is enough for a page. Messages with plurals need\n"
+"  MessageFormat 2 or Fluent, and I found no Nim library for either.\n"
+"- **How large a site.** A catalog per page is right for a page; a book or a site might want\n"
+"  one per chapter, or one for all, as mdBook has.\n"
+"- **Right to left.** Arabic or Hebrew would need `dir=\"rtl\"` and a theme that follows it."
+msgstr ""
+"- **Il codice.** Commenti e stringhe nei blocchi di codice qui restano in inglese.\n"
+"  mdbook-i18n-helpers traduce un blocco di codice come un unico messaggio; per una pagina nimib\n"
+"  vorrebbe dire far girare codice tradotto, quindi probabilmente è meglio lasciarlo stare.\n"
+"- **Un pezzo che cambia.** Un refuso corretto in inglese fa del suo pezzo un messaggio nuovo, e\n"
+"  l'italiano si perde finché non viene ritradotto. `msgmerge` tiene la vecchia traduzione come\n"
+"  *fuzzy* quando il testo nuovo è simile; lingua potrebbe fare lo stesso.\n"
+"- **Plurali e generi.** `tr` con `%` basta per una pagina. I messaggi con plurali richiedono\n"
+"  MessageFormat 2 o Fluent, e non ho trovato una libreria Nim per nessuno dei due.\n"
+"- **Quanto grande un sito.** Un catalogo per pagina va bene per una pagina; un libro o un sito\n"
+"  potrebbero volerne uno per capitolo, o uno solo per tutto, come ha mdBook.\n"
+"- **Da destra a sinistra.** L'arabo o l'ebraico richiederebbero `dir=\"rtl\"` e un tema che lo\n"
+"  segua."
+
+# machine
+# key: 6a09b7
+msgid "## How it is built"
+msgstr "## Come è fatto"
+
+# machine
+# key: 387385
+msgid ""
+"lingua is one file, `lingua.nim`, in five parts, each built on the one before. Every piece is\n"
+"shown here as it is in the file; the whole file is folded at the end."
+msgstr ""
+"lingua è un file solo, `lingua.nim`, in cinque parti, ognuna costruita sulla precedente. Ogni\n"
+"pezzo è mostrato qui com'è nel file; il file intero è piegato in fondo."
+
+# machine
+# key: 639424
+msgid ""
+"**Chunks.** A text is cut at its blank lines, except inside a fence of code. A heading's id\n"
+"comes from its English text."
+msgstr ""
+"**I pezzi.** Un testo è diviso alle sue righe vuote, tranne dentro un blocco di codice. L'id\n"
+"di un titolo viene dal suo testo inglese."
+
+# machine
+# key: 28688b
+msgid ""
+"**The catalog.** A PO file is a list of entries: comments, then `msgid` and `msgstr`, each a\n"
+"quoted string that may go on over several lines. lingua reads only what it writes: no plural\n"
+"forms and no contexts. A translation is looked up by its whole English text, which is what\n"
+"gettext does."
+msgstr ""
+"**Il catalogo.** Un file PO è un elenco di voci: commenti, poi `msgid` e `msgstr`, ciascuno una\n"
+"stringa tra virgolette che può continuare su più righe. lingua legge solo quello che scrive:\n"
+"niente forme plurali e niente contesti. Una traduzione si cerca con il suo intero testo\n"
+"inglese, che è quello che fa gettext."
+
+# machine
+# key: 013ec6
+msgid ""
+"**Drawing.** `useLingua` reads the catalogs and puts its own function where nimib draws a\n"
+"text block (`partials[\"nbText\"]`). That function cuts the text into chunks and writes each\n"
+"in every language, or only in the one being written when there is one file per language."
+msgstr ""
+"**Disegnare.** `useLingua` legge i cataloghi e mette una sua funzione dove nimib disegna un\n"
+"blocco di testo (`partials[\"nbText\"]`). Quella funzione divide il testo in pezzi e scrive ognuno\n"
+"in ogni lingua, o solo in quella che si sta scrivendo quando c'è un file per lingua."
+
+# machine
+# key: 026b0d
+msgid ""
+"**Once per language.** `nbEach` makes a container with one part per language and runs its\n"
+"body inside each part, with `l10n.current` set; when drawn, each part is shown in its\n"
+"language. Before that, the macro walks the body and wraps every string that looks like text\n"
+"in a call to `tr`, keeping its place in the file, so nimib still shows the code as written."
+msgstr ""
+"**Una volta per lingua.** `nbEach` crea un contenitore con una parte per lingua e fa girare il\n"
+"suo corpo dentro ogni parte, con `l10n.current` impostato; quando viene disegnata, ogni parte\n"
+"appare nella sua lingua. Prima, la macro percorre il corpo e avvolge ogni stringa che sembra\n"
+"testo in una chiamata a `tr`, tenendone il posto nel file, così nimib mostra ancora il codice\n"
+"come è scritto."
+
+# machine
+# key: 421053
+msgid ""
+"**Saving.** The page is drawn once to meet every message; then the messages are counted, the\n"
+"template written, and the page drawn again and written."
+msgstr ""
+"**Salvare.** La pagina viene disegnata una volta per incontrare ogni messaggio; poi i messaggi\n"
+"vengono contati, il modello scritto, e la pagina disegnata di nuovo e scritta."
+
+# machine
+# key: dc6b2d
+msgid ""
+"**The translation notes.** `notes.nim` has the blocks of the notes page: `nbMsg key, text`\n"
+"gives the translation of one message and shows it beside the English, `nbChoice` gives it as\n"
+"the first of several options, and `nbSaveNotes` checks that every message of the template has\n"
+"its translation (and that no key is left over), then writes `it.po`. The page is built in three\n"
+"steps: the page, which writes the template; the notes, which write the catalog; the page again."
+msgstr ""
+"**Le note di traduzione.** `notes.nim` ha i blocchi della pagina delle note: `nbMsg key, text`\n"
+"dà la traduzione di un messaggio e la mostra accanto all'inglese, `nbChoice` la dà come la prima\n"
+"di più opzioni, e `nbSaveNotes` controlla che ogni messaggio del modello abbia la sua traduzione\n"
+"(e che non avanzino chiavi), poi scrive `it.po`. La pagina si costruisce in tre passi: la\n"
+"pagina, che scrive il modello; le note, che scrivono il catalogo; di nuovo la pagina."
+
+# machine
+# key: 0f7523
+msgid "## The files"
+msgstr "## I file"
+
+# machine
+# key: d0db13
+msgid "Everything that makes this page, as it is in its folder."
+msgstr "Tutto ciò che fa questa pagina, così com'è nella sua cartella."
+
+# machine
+# key: 12b18a
+msgid "## Sources"
+msgstr "## Fonti"
+
+# machine
+# key: 56efd1
+msgid ""
+"- gettext: [the GNU gettext manual](https://www.gnu.org/software/gettext/manual/gettext.html),\n"
+"  PO files and `msgmerge`.\n"
+"- Fluent: [projectfluent.org](https://projectfluent.org/). MessageFormat 2:\n"
+"  [stable in CLDR 47](https://blog.unicode.org/2025/03/unicode-cldr-47-release-messageformat-2.html).\n"
+"- Sphinx: [Internationalization](https://www.sphinx-doc.org/en/master/usage/advanced/intl.html)\n"
+"  and [sphinx-intl](https://sphinx-intl.readthedocs.io/). Jupyter Book: the discussion\n"
+"  [*multi language site in one repo*](https://github.com/orgs/executablebooks/discussions/220).\n"
+"- mdBook: [mdbook-i18n-helpers](https://github.com/google/mdbook-i18n-helpers) and its\n"
+"  [usage guide](https://github.com/google/mdbook-i18n-helpers/blob/main/i18n-helpers/USAGE.md).\n"
+"- Quarto: [babelquarto](https://docs.ropensci.org/babelquarto/) and\n"
+"  [babeldown](https://docs.ropensci.org/babeldown/), from rOpenSci.\n"
+"- Hugo: [Multilingual mode](https://gohugo.io/content-management/multilingual/).\n"
+"- Pandoc: [language variables](https://pandoc.org/MANUAL.html#language-variables).\n"
+"- QuantEcon: [action-translation](https://quantecon.github.io/action-translation).\n"
+"- Nim: [nim-intl](https://github.com/iffy/nim-intl),\n"
+"  [nimterlingua](https://github.com/juancarlospaco/nim-nimterlingua),\n"
+"  [std/times](https://nim-lang.org/docs/times.html#DateTimeLocale) and\n"
+"  [tabelline's locales](https://pietroppeter.github.io/tabelline/)."
+msgstr ""
+"- gettext: [il manuale di GNU gettext](https://www.gnu.org/software/gettext/manual/gettext.html),\n"
+"  i file PO e `msgmerge`.\n"
+"- Fluent: [projectfluent.org](https://projectfluent.org/). MessageFormat 2:\n"
+"  [stabile in CLDR 47](https://blog.unicode.org/2025/03/unicode-cldr-47-release-messageformat-2.html).\n"
+"- Sphinx: [Internationalization](https://www.sphinx-doc.org/en/master/usage/advanced/intl.html)\n"
+"  e [sphinx-intl](https://sphinx-intl.readthedocs.io/). Jupyter Book: la discussione\n"
+"  [*multi language site in one repo*](https://github.com/orgs/executablebooks/discussions/220).\n"
+"- mdBook: [mdbook-i18n-helpers](https://github.com/google/mdbook-i18n-helpers) e la sua\n"
+"  [guida](https://github.com/google/mdbook-i18n-helpers/blob/main/i18n-helpers/USAGE.md).\n"
+"- Quarto: [babelquarto](https://docs.ropensci.org/babelquarto/) e\n"
+"  [babeldown](https://docs.ropensci.org/babeldown/), di rOpenSci.\n"
+"- Hugo: [Multilingual mode](https://gohugo.io/content-management/multilingual/).\n"
+"- Pandoc: [language variables](https://pandoc.org/MANUAL.html#language-variables).\n"
+"- QuantEcon: [action-translation](https://quantecon.github.io/action-translation).\n"
+"- Nim: [nim-intl](https://github.com/iffy/nim-intl),\n"
+"  [nimterlingua](https://github.com/juancarlospaco/nim-nimterlingua),\n"
+"  [std/times](https://nim-lang.org/docs/times.html#DateTimeLocale) e\n"
+"  [le locale di tabelline](https://pietroppeter.github.io/tabelline/)."
+
+# machine
+# key: 27ff70
+msgid "Written in Nim with Claude, in a [nimib](https://github.com/pietroppeter/nimib) 🐳 page; the code on this page ran when it was built. [Source on GitHub](https://github.com/pietroppeter/claude-artifacts/tree/main/nimib-localization/src)."
+msgstr "Scritto in Nim con Claude, in una pagina [nimib](https://github.com/pietroppeter/nimib) 🐳; il codice di questa pagina è girato quando è stata costruita. [Sorgente su GitHub](https://github.com/pietroppeter/claude-artifacts/tree/main/nimib-localization/src)."
