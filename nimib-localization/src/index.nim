@@ -272,10 +272,48 @@ gives a message in it. The code shown is the same in both runs; only its output 
 """, nkCode)
 
 nbText """
+## A real case: the islands story
+
+While this page was being written, tabelline's story of the Mediterranean islands got its
+Italian version, built the simplest way. It is worth comparing, because it chose
+differently at almost every step:
+
+- **One build per language.** `isole.nim` is the one source; `isole_it.nim` is two lines,
+  `const lang = "it"` and `include isole`. Two pages, two runs, and every output is in its
+  language without `nbEach`.
+- **`tr` for everything.** Every text a reader sees, text blocks included, goes through
+  `tr"..."`, which looks the English up in a plain text file of `en:` and `it:` pairs. An empty
+  `it:` keeps the English.
+- **A missing key fails the build.** It is written to a file of what is missing, so the two
+  languages cannot drift apart; lingua shows the English instead and counts it.
+- **Data translated at the source.** Values are translated where the data is read, and the
+  names of the islands come from Wikidata's Italian labels: no catalog needed for them.
+
+Both work. Building once per language is simpler for a site, where each language has its own
+address anyway; one page with a switch suits a page shared by link. Failing the build is a
+choice a project should be able to make: lingua could take a `strict` flag.
+
+What it found missing is more useful than how it was done. Besides `<html lang>`, which it
+sets from JavaScript, and the English words of the review mode, the look switch, the footer
+and *Show code*:
+
+- **tabelline has no locale for the whole page.** Every `tabella()` takes `locale = lang`, and
+  `initTabellaPreview` takes none at all, so the locale is set on the table afterwards.
+- **`fmtInteger` in a `summaryRows` block ignores the table's locale.**
+- **The labels of summary rows come from identifiers** (`total: agg.sum`), so they need
+  `textTransform tr` to be translated; and **`fmtCountry` gives only English names**, fixed
+  the same way.
+- **Heading anchors drop accented letters** when a heading is turned into an id. lingua avoids
+  it by taking ids from the English, but a page written in Italian would hit it.
+- **Pictures**: the maps (SVG) and the photos have English words in them, which no catalog of
+  text reaches.
+"""
+
+nbText """
 ## What nimib would need
 
-lingua works without changing nimib, but it had to work around five things. Each is a small
-change, and the first three would help any page, translated or not:
+lingua works without changing nimib, but it had to work around five things, and the islands
+story adds a sixth. Each is a small change, and most would help any page, translated or not:
 
 - **The language of the page.** nimib writes `<html lang="en-us">` on every page. A `lang`
   in `nimib.toml` (or `nb.lang`) would fix it; lingua replaces the whole page to write it.
@@ -288,6 +326,12 @@ change, and the first three would help any page, translated or not:
   HTML and their scripts; they could take them from a small catalog that nimib ships.
 - **The review mode.** Its export should say which language was read, so a comment on the
   Italian becomes a change to `it.po`, and marking a reviewed entry would clear `machine`.
+- **Heading ids for every language.** The slug of a heading should keep accented letters
+  (`perché` as `perche`, not `perch`), or be taken from the source language as lingua does.
+
+For tabelline, the islands story asks for a locale for the whole page (an option that every
+`tabella` and `initTabellaPreview` follows), for every format to follow the table's locale
+(`fmtInteger` in summary rows), and for country names in every language of CLDR.
 """
 
 nbText """
