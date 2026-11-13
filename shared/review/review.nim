@@ -45,6 +45,8 @@ mark.rv-mark.rv-sent.rv-current { background: var(--secondary-soft); }
 .rv-bar .rv-count { min-width: 3.2rem; text-align: center; color: var(--muted); font-size: .85rem; }
 .rv-bar .rv-add, .rv-sheet .rv-save { background: var(--ink); color: var(--paper); border-color: var(--ink); font-weight: 700; }
 .rv-bar .rv-add.rv-selected { background: var(--secondary); color: var(--ink); border-color: var(--ink); }
+/* border-box: a plain page may not set it, and its sheets would run past the screen's edge */
+dialog.rv-sheet, .rv-panel, .rv-sheet textarea, .rv-note { box-sizing: border-box; }
 dialog.rv-sheet { width: 100%; max-width: 40rem; margin: 0 auto auto; padding: 1rem max(1rem, env(safe-area-inset-right, 0px)) 1rem max(1rem, env(safe-area-inset-left, 0px));
   border: 0; border-bottom: 3px solid var(--ink); background: var(--surface); color: var(--ink); font: 400 16px/1.45 var(--font);
   max-height: 90vh; overflow-y: auto; }
