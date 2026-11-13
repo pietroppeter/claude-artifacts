@@ -6,7 +6,7 @@
 ##   POLYGLOT=../tabelline-polyglot nim r tabelline-in-the-browser/src/build.nim
 ##
 ## Then run the post-build tools of this repository (codeblocks.py, backlink.py, phonecheck.js).
-import std/[os, strutils]
+import std/[os, osproc, strutils]
 
 let here = currentSourcePath.parentDir.parentDir
 let polyglot = absolutePath(getEnv("POLYGLOT", here.parentDir.parentDir / "tabelline-polyglot"))
@@ -151,8 +151,22 @@ same HTML, byte for byte, as tabelline in Nim, C, Rust or Erlang.</p>
 article.add code("nim", lines("js/tabelline_js.nim", "proc tabellineRender", "    result.value = cstring(e.msg)"))
 article.add """
 <p>Gleam for the app, Lustre for the page, Nim for the tables: one file, nothing on a server.</p>
+
+<h2>The story</h2>
+<p>Two posts tell how this came about:
+<a href="../tabelline-from-gleam/index.html"><em>tabelline in the browser, from Gleam</em></a>,
+the research (can Nim compiled to JavaScript and Gleam meet in a page? what broke, what it weighs,
+the other ways), and <a href="../tabelline-in-a-lustre-app/index.html"><em>tabelline in a Lustre
+app</em></a>, what was built from it.</p>
 </article>
 """
+
+# The code as it was when the demo was built: a link that keeps working (lustre/ is not on
+# tabelline-polyglot's main yet).
+let commit = execProcess("git rev-parse HEAD", workingDir = polyglot).strip
+let codeUrl = "https://github.com/pietroppeter/tabelline-polyglot/tree/" & commit & "/lustre"
+article = article.replace("as it is in\n<a href=\"https://github.com/pietroppeter/tabelline-polyglot\">tabelline-polyglot</a>",
+                          "as it is in\n<a href=\"" & codeUrl & "\">tabelline-polyglot</a>")
 
 let built = polyglot / "lustre" / "demo" / "dist" / "index.html"
 if not fileExists(built): quit "build the demo first: nim r lustre/demo/build.nim, in " & polyglot
@@ -160,5 +174,8 @@ var page = readFile(built)
 const footer = "<footer class=\"page how\">"
 if footer notin page: quit "no footer in the demo page"
 page = page.replace(footer, article & footer)
+const mainLink = "https://github.com/pietroppeter/tabelline-polyglot/tree/main/lustre"
+if mainLink notin page: quit "the footer's link to the code changed"
+page = page.replace(mainLink, codeUrl)
 writeFile(here / "index.html", page)
 echo "tabelline-in-the-browser/index.html: ", getFileSize(here / "index.html") div 1024, " KB"
