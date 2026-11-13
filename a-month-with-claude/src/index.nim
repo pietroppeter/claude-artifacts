@@ -30,7 +30,7 @@ nb.backend.partials["header"] = pageHeader
 nb.backend.partials["footer"] = pageFooter
 nb.backend.partials["left"] = empty
 nb.backend.partials["right"] = empty
-nbReview(tversion = 2, tpage = "a-month-with-claude", tsource = "a-month-with-claude/src/index.nim")
+nbReview(tpage = "a-month-with-claude", tsource = "a-month-with-claude/src/index.nim")
 
 # --------------------------------------------------------------------- tabs: Nim, Python, R
 const lingue = [("nim", "👑 Nim"), ("python", "🐍 Python"), ("r", "🏴‍☠️ R")]
@@ -81,7 +81,7 @@ way of working that grew out of it, and the next part of that way of working, sk
 <p>What an agent skill is, where skills live in an open source project, who does them well, and how to tell whether one helps.</p></div></li>
 </ol>
 """
-nbVersion 2, "10 November 2026"
+nbVersion()
 
 nbText: """
 The three parts were first written on 7 November 2026 as posts in the devlog of
