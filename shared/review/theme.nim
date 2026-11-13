@@ -1,4 +1,4 @@
-## Copied by sync.sh from pietroppeter/tabelline docs/stile.nim at 306abd33ddf17a3d086e623d035b2bae3d3f489d: the one
+## Copied by sync.sh from pietroppeter/tabelline docs/theme.nim at b7607193eb05ca0f7a18c0195e14c834b17ec684: the one
 ## function review.nim imports from it. Do not edit; run sync.sh.
 import std/strutils
 
