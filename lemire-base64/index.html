@@ -895,20 +895,7 @@ unchanged (same input generator, same protocol: check the bytes, warm up 600 cal
 of 10 batches of 200 calls, median of runs) and wrote a Nim harness that follows the same protocol.</p>
 <h2 id="the-ranking,-with-nim">The ranking, with Nim</h2>
 <figure class="chart"><figcaption>MIME base64 decoding, GB/s of input (higher is faster)</figcaption><div class="legend"><span class="key"><span class="swatch nim"></span>Nim</span><span class="key"><span class="swatch ffi"></span>Nim calling simdutf</span><span class="key"><span class="swatch other"></span>other languages</span></div><div class="bars"><div class="bar-row"><div class="bar-label"><strong>Python</strong> <code>fastpybase64 0.2.1 (icelake) b64decode</code></div><div class="bar-line"><span class="bar other" style="width:100.0%"></span><span class="bar-value">15.2 GB/s</span></div></div><div class="bar-row"><div class="bar-label"><strong>C++</strong> <code>base64_to_binary</code></div><div class="bar-line"><span class="bar other" style="width:94.6%"></span><span class="bar-value">14.4 GB/s</span></div></div><div class="bar-row"><div class="bar-label"><strong>Nim</strong> <code>simdutf 9.4.0 (icelake) base64_to_binary via FFI (preallocated)</code></div><div class="bar-line"><span class="bar ffi" style="width:93.5%"></span><span class="bar-value">14.2 GB/s</span></div></div><div class="bar-row"><div class="bar-label"><strong>Node.js</strong> <code>Buffer.from(str,'base64')</code></div><div class="bar-line"><span class="bar other" style="width:83.9%"></span><span class="bar-value">12.8 GB/s</span></div></div><div class="bar-row"><div class="bar-label"><strong>Nim</strong> <code>AVX-512 VBMI2 decode (preallocated)</code></div><div class="bar-line"><span class="bar nim" style="width:74.8%"></span><span class="bar-value">11.4 GB/s</span></div></div><div class="bar-row"><div class="bar-label"><strong>Nim</strong> <code>AVX-512 VBMI2 decode</code></div><div class="bar-line"><span class="bar nim" style="width:73.0%"></span><span class="bar-value">11.1 GB/s</span></div></div><div class="bar-row"><div class="bar-label"><strong>Bun</strong> <code>Buffer.from(str,'base64')</code></div><div class="bar-line"><span class="bar other" style="width:58.9%"></span><span class="bar-value">9.0 GB/s</span></div></div><div class="bar-row"><div class="bar-label"><strong>Nim</strong> <code>nimsimd AVX2 decode</code></div><div class="bar-line"><span class="bar nim" style="width:41.3%"></span><span class="bar-value">6.3 GB/s</span></div></div><div class="bar-row"><div class="bar-label"><strong>Nim</strong> <code>nimsimd AVX2 decode (preallocated)</code></div><div class="bar-line"><span class="bar nim" style="width:41.1%"></span><span class="bar-value">6.3 GB/s</span></div></div><div class="bar-row"><div class="bar-label"><strong>Bun</strong> <code>Uint8Array.fromBase64(str)</code></div><div class="bar-line"><span class="bar other" style="width:40.0%"></span><span class="bar-value">6.1 GB/s</span></div></div><div class="bar-row"><div class="bar-label"><strong>Nim</strong> <code>scalar (4 tables) decode (preallocated)</code></div><div class="bar-line"><span class="bar nim" style="width:26.2%"></span><span class="bar-value">4.0 GB/s</span></div></div><div class="bar-row"><div class="bar-label"><strong>Nim</strong> <code>scalar (4 tables) decode</code></div><div class="bar-line"><span class="bar nim" style="width:26.0%"></span><span class="bar-value">4.0 GB/s</span></div></div><div class="bar-row"><div class="bar-label"><strong>Go</strong> <code>base64.StdEncoding.Decode (preallocated)</code></div><div class="bar-line"><span class="bar other" style="width:8.9%"></span><span class="bar-value">1.4 GB/s</span></div></div><div class="bar-row"><div class="bar-label"><strong>Go</strong> <code>base64.StdEncoding.DecodeString</code></div><div class="bar-line"><span class="bar other" style="width:8.2%"></span><span class="bar-value">1.2 GB/s</span></div></div><div class="bar-row"><div class="bar-label"><strong>Nim</strong> <code>std/base64 decode</code></div><div class="bar-line"><span class="bar nim" style="width:6.6%"></span><span class="bar-value">1.0 GB/s</span></div></div><div class="bar-row"><div class="bar-label"><strong>Java</strong> <code>Base64.decode(byte[])</code></div><div class="bar-line"><span class="bar other" style="width:6.4%"></span><span class="bar-value">1.0 GB/s</span></div></div><div class="bar-row"><div class="bar-label"><strong>Zig</strong> <code>std.base64 decoderWithIgnore(&quot;\r\n&quot;)</code></div><div class="bar-line"><span class="bar other" style="width:4.3%"></span><span class="bar-value">0.7 GB/s</span></div></div><div class="bar-row"><div class="bar-label"><strong>PHP</strong> <code>base64_decode(str)</code></div><div class="bar-line"><span class="bar other" style="width:3.2%"></span><span class="bar-value">0.5 GB/s</span></div></div></div><p class="chart-note">Median of 5 runs on one core of a cloud VM, see below. "preallocated" means the output buffer is reused across calls.</p></figure>
-<pre><code class="nohighlight nim hljs"><span class="hljs-comment"># the ranking above as a table, made with tabelline from the same rows</span>
-<span class="hljs-keyword">var</span> ranking: <span class="hljs-built_in">seq</span>[<span class="hljs-keyword">tuple</span>[rank: <span class="hljs-built_in">int</span>, gbps, lo, hi: <span class="hljs-built_in">float</span>, lang, function: <span class="hljs-built_in">string</span>]]
-<span class="hljs-keyword">for</span> i, r <span class="hljs-keyword">in</span> ours:
-  ranking.add (i + <span class="hljs-number">1</span>, r.median, r.runs.min, r.runs.max, langName(r), <span class="hljs-string">&quot;`&quot;</span> &amp; r.function &amp; <span class="hljs-string">&quot;`&quot;</span>)
-<span class="hljs-keyword">let</span> rankTable = tabella(ranking):
-  optCssTheme()
-  optRowStriping()
-  tabHeader <span class="hljs-string">&quot;MIME base64 decoding, GB/s&quot;</span>, &amp;<span class="hljs-string">&quot;median and range of {nRuns} runs, one core&quot;</span>
-  colsLabel {<span class="hljs-string">&quot;rank&quot;</span>: <span class="hljs-string">&quot;#&quot;</span>, <span class="hljs-string">&quot;lang&quot;</span>: <span class="hljs-string">&quot;Language&quot;</span>, <span class="hljs-string">&quot;function&quot;</span>: <span class="hljs-string">&quot;Function&quot;</span>, <span class="hljs-string">&quot;gbps&quot;</span>: <span class="hljs-string">&quot;GB/s&quot;</span>, <span class="hljs-string">&quot;lo&quot;</span>: <span class="hljs-string">&quot;Runs&quot;</span>}
-  fmtMarkdown <span class="hljs-string">&quot;function&quot;</span>
-  fmtNumber [<span class="hljs-string">&quot;gbps&quot;</span>, <span class="hljs-string">&quot;lo&quot;</span>, <span class="hljs-string">&quot;hi&quot;</span>], decimals = <span class="hljs-number">1</span>
-  colsMergeRange <span class="hljs-string">&quot;lo&quot;</span>, <span class="hljs-string">&quot;hi&quot;</span>
-  tabStyle style.text(weight = <span class="hljs-string">&quot;bold&quot;</span>), loc.body(rows = where($it[<span class="hljs-string">&quot;lang&quot;</span>] == <span class="hljs-string">&quot;Nim&quot;</span>))
-nbTable rankTable</code></pre>
+<p>The same numbers as a table, made with <a href="https://pietroppeter.github.io/tabelline/">tabelline</a> from the same rows:</p>
 <div id="tabella-d6b33ffa" class="tabella tb_css_theme">
 <style>
 :where(.tabella):not(#_) { overflow-x: var(--tb-container-overflow-x, auto); overflow-y: var(--tb-container-overflow-y, auto); width: var(--tb-container-width, auto);
@@ -1037,6 +1024,20 @@ nbTable rankTable</code></pre>
 </tbody>
 </table>
 </div>
+<details class="nb-file"><summary class="nb-file-head">The code of this table (<a href="https://pietroppeter.github.io/tabelline/">tabelline</a>) <span class="nb-small">lines 104–115</span></summary>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">var</span> ranking: <span class="hljs-built_in">seq</span>[<span class="hljs-keyword">tuple</span>[rank: <span class="hljs-built_in">int</span>, gbps, lo, hi: <span class="hljs-built_in">float</span>, lang, function: <span class="hljs-built_in">string</span>]]
+<span class="hljs-keyword">for</span> i, r <span class="hljs-keyword">in</span> ours:
+  ranking.add (i + <span class="hljs-number">1</span>, r.median, r.runs.min, r.runs.max, langName(r), <span class="hljs-string">&quot;`&quot;</span> &amp; r.function &amp; <span class="hljs-string">&quot;`&quot;</span>)
+<span class="hljs-keyword">let</span> rankTable = tabella(ranking):
+  optCssTheme()
+  optRowStriping()
+  tabHeader <span class="hljs-string">&quot;MIME base64 decoding, GB/s&quot;</span>, &amp;<span class="hljs-string">&quot;median and range of {nRuns} runs, one core&quot;</span>
+  colsLabel {<span class="hljs-string">&quot;rank&quot;</span>: <span class="hljs-string">&quot;#&quot;</span>, <span class="hljs-string">&quot;lang&quot;</span>: <span class="hljs-string">&quot;Language&quot;</span>, <span class="hljs-string">&quot;function&quot;</span>: <span class="hljs-string">&quot;Function&quot;</span>, <span class="hljs-string">&quot;gbps&quot;</span>: <span class="hljs-string">&quot;GB/s&quot;</span>, <span class="hljs-string">&quot;lo&quot;</span>: <span class="hljs-string">&quot;Runs&quot;</span>}
+  fmtMarkdown <span class="hljs-string">&quot;function&quot;</span>
+  fmtNumber [<span class="hljs-string">&quot;gbps&quot;</span>, <span class="hljs-string">&quot;lo&quot;</span>, <span class="hljs-string">&quot;hi&quot;</span>], decimals = <span class="hljs-number">1</span>
+  colsMergeRange <span class="hljs-string">&quot;lo&quot;</span>, <span class="hljs-string">&quot;hi&quot;</span>
+  tabStyle style.text(weight = <span class="hljs-string">&quot;bold&quot;</span>), loc.body(rows = where($it[<span class="hljs-string">&quot;lang&quot;</span>] == <span class="hljs-string">&quot;Nim&quot;</span>))</code></pre>
+</details>
 <aside class="note careful"><span class="note-label">Careful</span><p>This is not Lemire's machine. It is a shared cloud VM: Intel(R) Xeon(R) Processor @ 2.10GHz,
 4 vCPUs, which reports CPU model 207, the same Emerald Rapids family as his Xeon Gold 6548N,
 but at 2.1 GHz and shared with other machines, so runs vary. The same simdutf code ran at 14.4 GB/s from C++ and
@@ -1047,22 +1048,6 @@ Python 3.13 with fastpybase64 0.2.1, Bun 1.4.4, and Zig 0.17.1 (the same as Lemi
 <code>ziglang</code> package). No Deno or .NET here.</p>
 </aside>
 <h3>Same tools, his machine and ours</h3>
-<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">var</span> compare: <span class="hljs-built_in">seq</span>[<span class="hljs-keyword">tuple</span>[lang: <span class="hljs-built_in">string</span>, his, here: <span class="hljs-built_in">float</span>, function: <span class="hljs-built_in">string</span>]]
-<span class="hljs-keyword">for</span> (sys, fn) <span class="hljs-keyword">in</span> [(<span class="hljs-string">&quot;c++&quot;</span>, <span class="hljs-string">&quot;base64_to_binary&quot;</span>), (<span class="hljs-string">&quot;python&quot;</span>, <span class="hljs-string">&quot;fastpybase64&quot;</span>), (<span class="hljs-string">&quot;node&quot;</span>, <span class="hljs-string">&quot;Buffer.from&quot;</span>),
-                  (<span class="hljs-string">&quot;bun&quot;</span>, <span class="hljs-string">&quot;Buffer.from&quot;</span>), (<span class="hljs-string">&quot;bun&quot;</span>, <span class="hljs-string">&quot;fromBase64&quot;</span>), (<span class="hljs-string">&quot;go&quot;</span>, <span class="hljs-string">&quot;preallocated&quot;</span>),
-                  (<span class="hljs-string">&quot;go&quot;</span>, <span class="hljs-string">&quot;DecodeString&quot;</span>), (<span class="hljs-string">&quot;java&quot;</span>, <span class="hljs-string">&quot;Base64&quot;</span>), (<span class="hljs-string">&quot;zig&quot;</span>, <span class="hljs-string">&quot;decoderWithIgnore&quot;</span>),
-                  (<span class="hljs-string">&quot;php 8.5&quot;</span>, <span class="hljs-string">&quot;base64_decode&quot;</span>)]:
-  <span class="hljs-keyword">let</span> a = his.pick(sys, fn)
-  compare.add (langName(a), a.median, ours.pick(sys.split(' <span class="hljs-string">')[0], fn).median, &quot;`&quot; &amp; a.function &amp; &quot;`&quot;)</span>
-<span class="hljs-keyword">let</span> compareTable = tabella(compare):
-  optCssTheme()
-  optRowStriping()
-  tabHeader <span class="hljs-string">&quot;Same tools, two machines&quot;</span>, <span class="hljs-string">&quot;GB/s, median of runs&quot;</span>
-  colsLabel {<span class="hljs-string">&quot;lang&quot;</span>: <span class="hljs-string">&quot;Language&quot;</span>, <span class="hljs-string">&quot;function&quot;</span>: <span class="hljs-string">&quot;Function&quot;</span>, <span class="hljs-string">&quot;his&quot;</span>: <span class="hljs-string">&quot;Lemire&quot;</span>, <span class="hljs-string">&quot;here&quot;</span>: <span class="hljs-string">&quot;Here&quot;</span>}
-  fmtMarkdown <span class="hljs-string">&quot;function&quot;</span>
-  fmtNumber [<span class="hljs-string">&quot;his&quot;</span>, <span class="hljs-string">&quot;here&quot;</span>], decimals = <span class="hljs-number">1</span>
-  tabSourceNote md(<span class="hljs-string">&quot;Lemire: Xeon Gold 6548N, his `results_big4_run*.txt`. Here: a cloud VM, see above.&quot;</span>)
-nbTable compareTable</code></pre>
 <div id="tabella-5f639a3f" class="tabella tb_css_theme">
 <table class="tb_table" aria-labelledby="tabella-5f639a3f-title">
 <thead>
@@ -1087,6 +1072,23 @@ nbTable compareTable</code></pre>
 </tfoot>
 </table>
 </div>
+<details class="nb-file"><summary class="nb-file-head">The code of this table (<a href="https://pietroppeter.github.io/tabelline/">tabelline</a>) <span class="nb-small">lines 135–149</span></summary>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">var</span> compare: <span class="hljs-built_in">seq</span>[<span class="hljs-keyword">tuple</span>[lang: <span class="hljs-built_in">string</span>, his, here: <span class="hljs-built_in">float</span>, function: <span class="hljs-built_in">string</span>]]
+<span class="hljs-keyword">for</span> (sys, fn) <span class="hljs-keyword">in</span> [(<span class="hljs-string">&quot;c++&quot;</span>, <span class="hljs-string">&quot;base64_to_binary&quot;</span>), (<span class="hljs-string">&quot;python&quot;</span>, <span class="hljs-string">&quot;fastpybase64&quot;</span>), (<span class="hljs-string">&quot;node&quot;</span>, <span class="hljs-string">&quot;Buffer.from&quot;</span>),
+                  (<span class="hljs-string">&quot;bun&quot;</span>, <span class="hljs-string">&quot;Buffer.from&quot;</span>), (<span class="hljs-string">&quot;bun&quot;</span>, <span class="hljs-string">&quot;fromBase64&quot;</span>), (<span class="hljs-string">&quot;go&quot;</span>, <span class="hljs-string">&quot;preallocated&quot;</span>),
+                  (<span class="hljs-string">&quot;go&quot;</span>, <span class="hljs-string">&quot;DecodeString&quot;</span>), (<span class="hljs-string">&quot;java&quot;</span>, <span class="hljs-string">&quot;Base64&quot;</span>), (<span class="hljs-string">&quot;zig&quot;</span>, <span class="hljs-string">&quot;decoderWithIgnore&quot;</span>),
+                  (<span class="hljs-string">&quot;php 8.5&quot;</span>, <span class="hljs-string">&quot;base64_decode&quot;</span>)]:
+  <span class="hljs-keyword">let</span> a = his.pick(sys, fn)
+  compare.add (langName(a), a.median, ours.pick(sys.split(' <span class="hljs-string">')[0], fn).median, &quot;`&quot; &amp; a.function &amp; &quot;`&quot;)</span>
+<span class="hljs-keyword">let</span> compareTable = tabella(compare):
+  optCssTheme()
+  optRowStriping()
+  tabHeader <span class="hljs-string">&quot;Same tools, two machines&quot;</span>, <span class="hljs-string">&quot;GB/s, median of runs&quot;</span>
+  colsLabel {<span class="hljs-string">&quot;lang&quot;</span>: <span class="hljs-string">&quot;Language&quot;</span>, <span class="hljs-string">&quot;function&quot;</span>: <span class="hljs-string">&quot;Function&quot;</span>, <span class="hljs-string">&quot;his&quot;</span>: <span class="hljs-string">&quot;Lemire&quot;</span>, <span class="hljs-string">&quot;here&quot;</span>: <span class="hljs-string">&quot;Here&quot;</span>}
+  fmtMarkdown <span class="hljs-string">&quot;function&quot;</span>
+  fmtNumber [<span class="hljs-string">&quot;his&quot;</span>, <span class="hljs-string">&quot;here&quot;</span>], decimals = <span class="hljs-number">1</span>
+  tabSourceNote md(<span class="hljs-string">&quot;Lemire: Xeon Gold 6548N, his `results_big4_run*.txt`. Here: a cloud VM, see above.&quot;</span>)</code></pre>
+</details>
 <p>The order is the same: simdutf-based decoders on top, then Go, Java, Zig and stock PHP an
 order of magnitude lower. Our absolute numbers are lower because of the slower clock and the older
 versions (Bun moved the most).</p>
@@ -1106,8 +1108,8 @@ written one byte at a time. That is about Go's speed (1.4 GB/s) and Java's
 <p>Base64 packs 3 bytes (24 bits) into 4 characters of 6 bits each. A plain decoder (like
 <code>std/base64</code>) looks up each character's 6-bit value, checks it, then shifts and ORs the four
 values together and writes three bytes one by one.</p>
-<p>The trick comes from <strong>modp_b64</strong>, the base64 code of Nick Galbreath's <em>stringencoders</em> C library,
-which Chromium has long shipped as <code>third_party/modp_b64</code> for its own base64 functions. It moves
+<p>The trick comes from <strong>modp_b64</strong>, the base64 code of Nick Galbreath's <a href="https://github.com/client9/stringencoders"><em>stringencoders</em></a> C library,
+which Chromium ships as <a href="https://github.com/chromium/chromium/tree/main/third_party/modp_b64"><code>third_party/modp_b64</code></a> for its own base64 functions. It moves
 the shifting into the tables: instead of one table of 6-bit values, four tables <code>d0</code>..<code>d3</code>, one per
 position in the group of four. <code>d0[c]</code> holds the value of <code>c</code> already shifted to bits 23..18,
 <code>d1[c]</code> to bits 17..12, and so on, and already in the byte order the CPU stores (little-endian).
@@ -1227,16 +1229,17 @@ and 14.2 GB/s. Calling through Python or Nim adds a few nanoseconds per call, no
 next to the 94 µs a call takes to decode
 1.37 MB. The compiler is not it either: the C++ benchmark built with clang 18 instead of g++ 13
 ran at the same speed (14.0 to 14.7 GB/s in three runs); the fastpybase64 wheel was built with clang 21.</p>
-<aside class="note reading"><span class="note-label">What we found</span><p>Three things cost more than the algorithm while writing the AVX2 decoder, each found by reading
-the generated assembly:</p>
+<aside class="note reading"><span class="note-label">What we found</span><p>Three things made the AVX2 decoder slow while we wrote it. All three are fixed in the code on
+this page (the numbers are before and after); each was found by reading the generated assembly:</p>
 <ul>
 <li><strong><code>countSetBits</code> from <code>std/bitops</code></strong> showed up as a function call in the hot loop, where one
-<code>popcnt</code> instruction was wanted. <code>mm_popcnt_u32</code> from nimsimd is the instruction.</li>
+<code>popcnt</code> instruction was wanted. Fixed by using <code>mm_popcnt_u32</code> from nimsimd, which is the instruction.</li>
 <li><strong><code>copyMem</code> into a stack array</strong> became <code>__memcpy_chk</code>, because Ubuntu's gcc turns on
-<code>_FORTIFY_SOURCE</code>. Each call also emitted a <code>vzeroupper</code>. A plain 8-byte store through a
-<code>ptr uint64</code> took the AVX2 decoder from 1.6 to 5.5 GB/s.</li>
+<code>_FORTIFY_SOURCE</code>. Each call also emitted a <code>vzeroupper</code>. Fixed with a plain 8-byte store
+through a <code>ptr uint64</code>, which took the AVX2 decoder from 1.6 to 5.5 GB/s.</li>
 <li><strong>A branch-free compaction was slower</strong> (5.5 GB/s) than branching on &quot;is this block clean?&quot;
-(6.7 GB/s): with 78-byte lines more than half of the 32-byte blocks are clean, and the predictor copes.</li>
+(6.7 GB/s): with 78-byte lines more than half of the 32-byte blocks are clean, and the predictor copes.
+The code keeps the branch.</li>
 </ul>
 </aside>
 <aside class="note nimib"><span class="note-label">For Nim</span><p>The cheap win is the scalar decoder: plain Nim, no SIMD, no new dependency, and
@@ -2031,7 +2034,7 @@ env -u _JAVA_OPTIONS <span class="hljs-variable">$PIN</span> java -cp build Benc
 <h3>This page</h3>
 <p>A <a href="https://github.com/pietroppeter/nimib">nimib</a> document; the tables are made with
 <a href="https://pietroppeter.github.io/tabelline/">tabelline</a>.</p>
-<details class="nb-file"><summary class="nb-file-head"><code>index.nim</code> <span class="nb-small">342 lines</span></summary>
+<details class="nb-file"><summary class="nb-file-head"><code>index.nim</code> <span class="nb-small">345 lines</span></summary>
 <pre><code class="nohighlight nim hljs"><span class="hljs-comment">## Lemire's MIME base64 decoding ranking, replicated, with Nim added.</span>
 <span class="hljs-comment">## Build: sh deps.sh &amp;&amp; nim r index.nim   (writes ../index.html; the numbers come from data/, written by bench/run_cloud.sh)</span>
 <span class="hljs-keyword">import</span> std/[strformat, strutils, sequtils, os]
@@ -2133,22 +2136,23 @@ of 10 batches of 200 calls, median of runs) and wrote a Nim harness that follows
 nbBars(<span class="hljs-string">&quot;MIME base64 decoding, GB/s of input (higher is faster)&quot;</span>,
   ours.mapIt((label: short(it), value: it.median, kind: kindOf(it))),
   &amp;<span class="hljs-string">&quot;Median of {nRuns} runs on one core of a cloud VM, see below. </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">preallocated</span><span class="hljs-meta">\&quot;</span><span class="hljs-string"> means the output buffer is reused across calls.&quot;</span>)
+nbText: <span class="hljs-string">&quot;The same numbers as a table, made with [tabelline](https://pietroppeter.github.io/tabelline/) from the same rows:&quot;</span>
 
-nbCode:
-  <span class="hljs-comment"># the ranking above as a table, made with tabelline from the same rows</span>
-  <span class="hljs-keyword">var</span> ranking: <span class="hljs-built_in">seq</span>[<span class="hljs-keyword">tuple</span>[rank: <span class="hljs-built_in">int</span>, gbps, lo, hi: <span class="hljs-built_in">float</span>, lang, function: <span class="hljs-built_in">string</span>]]
-  <span class="hljs-keyword">for</span> i, r <span class="hljs-keyword">in</span> ours:
-    ranking.add (i + <span class="hljs-number">1</span>, r.median, r.runs.min, r.runs.max, langName(r), <span class="hljs-string">&quot;`&quot;</span> &amp; r.function &amp; <span class="hljs-string">&quot;`&quot;</span>)
-  <span class="hljs-keyword">let</span> rankTable = tabella(ranking):
-    optCssTheme()
-    optRowStriping()
-    tabHeader <span class="hljs-string">&quot;MIME base64 decoding, GB/s&quot;</span>, &amp;<span class="hljs-string">&quot;median and range of {nRuns} runs, one core&quot;</span>
-    colsLabel {<span class="hljs-string">&quot;rank&quot;</span>: <span class="hljs-string">&quot;#&quot;</span>, <span class="hljs-string">&quot;lang&quot;</span>: <span class="hljs-string">&quot;Language&quot;</span>, <span class="hljs-string">&quot;function&quot;</span>: <span class="hljs-string">&quot;Function&quot;</span>, <span class="hljs-string">&quot;gbps&quot;</span>: <span class="hljs-string">&quot;GB/s&quot;</span>, <span class="hljs-string">&quot;lo&quot;</span>: <span class="hljs-string">&quot;Runs&quot;</span>}
-    fmtMarkdown <span class="hljs-string">&quot;function&quot;</span>
-    fmtNumber [<span class="hljs-string">&quot;gbps&quot;</span>, <span class="hljs-string">&quot;lo&quot;</span>, <span class="hljs-string">&quot;hi&quot;</span>], decimals = <span class="hljs-number">1</span>
-    colsMergeRange <span class="hljs-string">&quot;lo&quot;</span>, <span class="hljs-string">&quot;hi&quot;</span>
-    tabStyle style.text(weight = <span class="hljs-string">&quot;bold&quot;</span>), loc.body(rows = where($it[<span class="hljs-string">&quot;lang&quot;</span>] == <span class="hljs-string">&quot;Nim&quot;</span>))
-  nbTable rankTable
+<span class="hljs-keyword">var</span> ranking: <span class="hljs-built_in">seq</span>[<span class="hljs-keyword">tuple</span>[rank: <span class="hljs-built_in">int</span>, gbps, lo, hi: <span class="hljs-built_in">float</span>, lang, function: <span class="hljs-built_in">string</span>]]
+<span class="hljs-keyword">for</span> i, r <span class="hljs-keyword">in</span> ours:
+  ranking.add (i + <span class="hljs-number">1</span>, r.median, r.runs.min, r.runs.max, langName(r), <span class="hljs-string">&quot;`&quot;</span> &amp; r.function &amp; <span class="hljs-string">&quot;`&quot;</span>)
+<span class="hljs-keyword">let</span> rankTable = tabella(ranking):
+  optCssTheme()
+  optRowStriping()
+  tabHeader <span class="hljs-string">&quot;MIME base64 decoding, GB/s&quot;</span>, &amp;<span class="hljs-string">&quot;median and range of {nRuns} runs, one core&quot;</span>
+  colsLabel {<span class="hljs-string">&quot;rank&quot;</span>: <span class="hljs-string">&quot;#&quot;</span>, <span class="hljs-string">&quot;lang&quot;</span>: <span class="hljs-string">&quot;Language&quot;</span>, <span class="hljs-string">&quot;function&quot;</span>: <span class="hljs-string">&quot;Function&quot;</span>, <span class="hljs-string">&quot;gbps&quot;</span>: <span class="hljs-string">&quot;GB/s&quot;</span>, <span class="hljs-string">&quot;lo&quot;</span>: <span class="hljs-string">&quot;Runs&quot;</span>}
+  fmtMarkdown <span class="hljs-string">&quot;function&quot;</span>
+  fmtNumber [<span class="hljs-string">&quot;gbps&quot;</span>, <span class="hljs-string">&quot;lo&quot;</span>, <span class="hljs-string">&quot;hi&quot;</span>], decimals = <span class="hljs-number">1</span>
+  colsMergeRange <span class="hljs-string">&quot;lo&quot;</span>, <span class="hljs-string">&quot;hi&quot;</span>
+  tabStyle style.text(weight = <span class="hljs-string">&quot;bold&quot;</span>), loc.body(rows = where($it[<span class="hljs-string">&quot;lang&quot;</span>] == <span class="hljs-string">&quot;Nim&quot;</span>))
+nbTable rankTable
+nbFile <span class="hljs-string">&quot;index.nim&quot;</span>, start = <span class="hljs-string">&quot;var ranking:&quot;</span>, stop = <span class="hljs-string">&quot;nbTable rankTable&quot;</span>, folded = <span class="hljs-literal">true</span>,
+  title = <span class="hljs-string">&quot;The code of this table ([tabelline](https://pietroppeter.github.io/tabelline/))&quot;</span>
 
 nbNote(nkCareful, &amp;<span class="hljs-string">&quot;&quot;&quot;
 This is not Lemire's machine. It is a shared cloud VM: {ourHeader[1].split(':')[1].strip},
@@ -2165,23 +2169,24 @@ nbText: <span class="hljs-string">&quot;&quot;&quot;
 ### Same tools, his machine and ours
 &quot;&quot;&quot;</span>
 
-nbCode:
-  <span class="hljs-keyword">var</span> compare: <span class="hljs-built_in">seq</span>[<span class="hljs-keyword">tuple</span>[lang: <span class="hljs-built_in">string</span>, his, here: <span class="hljs-built_in">float</span>, function: <span class="hljs-built_in">string</span>]]
-  <span class="hljs-keyword">for</span> (sys, fn) <span class="hljs-keyword">in</span> [(<span class="hljs-string">&quot;c++&quot;</span>, <span class="hljs-string">&quot;base64_to_binary&quot;</span>), (<span class="hljs-string">&quot;python&quot;</span>, <span class="hljs-string">&quot;fastpybase64&quot;</span>), (<span class="hljs-string">&quot;node&quot;</span>, <span class="hljs-string">&quot;Buffer.from&quot;</span>),
-                    (<span class="hljs-string">&quot;bun&quot;</span>, <span class="hljs-string">&quot;Buffer.from&quot;</span>), (<span class="hljs-string">&quot;bun&quot;</span>, <span class="hljs-string">&quot;fromBase64&quot;</span>), (<span class="hljs-string">&quot;go&quot;</span>, <span class="hljs-string">&quot;preallocated&quot;</span>),
-                    (<span class="hljs-string">&quot;go&quot;</span>, <span class="hljs-string">&quot;DecodeString&quot;</span>), (<span class="hljs-string">&quot;java&quot;</span>, <span class="hljs-string">&quot;Base64&quot;</span>), (<span class="hljs-string">&quot;zig&quot;</span>, <span class="hljs-string">&quot;decoderWithIgnore&quot;</span>),
-                    (<span class="hljs-string">&quot;php 8.5&quot;</span>, <span class="hljs-string">&quot;base64_decode&quot;</span>)]:
-    <span class="hljs-keyword">let</span> a = his.pick(sys, fn)
-    compare.add (langName(a), a.median, ours.pick(sys.split(' <span class="hljs-string">')[0], fn).median, &quot;`&quot; &amp; a.function &amp; &quot;`&quot;)</span>
-  <span class="hljs-keyword">let</span> compareTable = tabella(compare):
-    optCssTheme()
-    optRowStriping()
-    tabHeader <span class="hljs-string">&quot;Same tools, two machines&quot;</span>, <span class="hljs-string">&quot;GB/s, median of runs&quot;</span>
-    colsLabel {<span class="hljs-string">&quot;lang&quot;</span>: <span class="hljs-string">&quot;Language&quot;</span>, <span class="hljs-string">&quot;function&quot;</span>: <span class="hljs-string">&quot;Function&quot;</span>, <span class="hljs-string">&quot;his&quot;</span>: <span class="hljs-string">&quot;Lemire&quot;</span>, <span class="hljs-string">&quot;here&quot;</span>: <span class="hljs-string">&quot;Here&quot;</span>}
-    fmtMarkdown <span class="hljs-string">&quot;function&quot;</span>
-    fmtNumber [<span class="hljs-string">&quot;his&quot;</span>, <span class="hljs-string">&quot;here&quot;</span>], decimals = <span class="hljs-number">1</span>
-    tabSourceNote md(<span class="hljs-string">&quot;Lemire: Xeon Gold 6548N, his `results_big4_run*.txt`. Here: a cloud VM, see above.&quot;</span>)
-  nbTable compareTable
+<span class="hljs-keyword">var</span> compare: <span class="hljs-built_in">seq</span>[<span class="hljs-keyword">tuple</span>[lang: <span class="hljs-built_in">string</span>, his, here: <span class="hljs-built_in">float</span>, function: <span class="hljs-built_in">string</span>]]
+<span class="hljs-keyword">for</span> (sys, fn) <span class="hljs-keyword">in</span> [(<span class="hljs-string">&quot;c++&quot;</span>, <span class="hljs-string">&quot;base64_to_binary&quot;</span>), (<span class="hljs-string">&quot;python&quot;</span>, <span class="hljs-string">&quot;fastpybase64&quot;</span>), (<span class="hljs-string">&quot;node&quot;</span>, <span class="hljs-string">&quot;Buffer.from&quot;</span>),
+                  (<span class="hljs-string">&quot;bun&quot;</span>, <span class="hljs-string">&quot;Buffer.from&quot;</span>), (<span class="hljs-string">&quot;bun&quot;</span>, <span class="hljs-string">&quot;fromBase64&quot;</span>), (<span class="hljs-string">&quot;go&quot;</span>, <span class="hljs-string">&quot;preallocated&quot;</span>),
+                  (<span class="hljs-string">&quot;go&quot;</span>, <span class="hljs-string">&quot;DecodeString&quot;</span>), (<span class="hljs-string">&quot;java&quot;</span>, <span class="hljs-string">&quot;Base64&quot;</span>), (<span class="hljs-string">&quot;zig&quot;</span>, <span class="hljs-string">&quot;decoderWithIgnore&quot;</span>),
+                  (<span class="hljs-string">&quot;php 8.5&quot;</span>, <span class="hljs-string">&quot;base64_decode&quot;</span>)]:
+  <span class="hljs-keyword">let</span> a = his.pick(sys, fn)
+  compare.add (langName(a), a.median, ours.pick(sys.split(' <span class="hljs-string">')[0], fn).median, &quot;`&quot; &amp; a.function &amp; &quot;`&quot;)</span>
+<span class="hljs-keyword">let</span> compareTable = tabella(compare):
+  optCssTheme()
+  optRowStriping()
+  tabHeader <span class="hljs-string">&quot;Same tools, two machines&quot;</span>, <span class="hljs-string">&quot;GB/s, median of runs&quot;</span>
+  colsLabel {<span class="hljs-string">&quot;lang&quot;</span>: <span class="hljs-string">&quot;Language&quot;</span>, <span class="hljs-string">&quot;function&quot;</span>: <span class="hljs-string">&quot;Function&quot;</span>, <span class="hljs-string">&quot;his&quot;</span>: <span class="hljs-string">&quot;Lemire&quot;</span>, <span class="hljs-string">&quot;here&quot;</span>: <span class="hljs-string">&quot;Here&quot;</span>}
+  fmtMarkdown <span class="hljs-string">&quot;function&quot;</span>
+  fmtNumber [<span class="hljs-string">&quot;his&quot;</span>, <span class="hljs-string">&quot;here&quot;</span>], decimals = <span class="hljs-number">1</span>
+  tabSourceNote md(<span class="hljs-string">&quot;Lemire: Xeon Gold 6548N, his `results_big4_run*.txt`. Here: a cloud VM, see above.&quot;</span>)
+nbTable compareTable
+nbFile <span class="hljs-string">&quot;index.nim&quot;</span>, start = <span class="hljs-string">&quot;var compare:&quot;</span>, stop = <span class="hljs-string">&quot;nbTable compareTable&quot;</span>, folded = <span class="hljs-literal">true</span>,
+  title = <span class="hljs-string">&quot;The code of this table ([tabelline](https://pietroppeter.github.io/tabelline/))&quot;</span>
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 The order is the same: simdutf-based decoders on top, then Go, Java, Zig and stock PHP an
@@ -2212,8 +2217,8 @@ Base64 packs 3 bytes (24 bits) into 4 characters of 6 bits each. A plain decoder
 `std/base64`) looks up each character's 6-bit value, checks it, then shifts and ORs the four
 values together and writes three bytes one by one.
 
-The trick comes from **modp_b64**, the base64 code of Nick Galbreath's *stringencoders* C library,
-which Chromium has long shipped as `third_party/modp_b64` for its own base64 functions. It moves
+The trick comes from **modp_b64**, the base64 code of Nick Galbreath's [*stringencoders*](https://github.com/client9/stringencoders) C library,
+which Chromium ships as [`third_party/modp_b64`](https://github.com/chromium/chromium/tree/main/third_party/modp_b64) for its own base64 functions. It moves
 the shifting into the tables: instead of one table of 6-bit values, four tables `d0`..`d3`, one per
 position in the group of four. `d0[c]` holds the value of `c` already shifted to bits 23..18,
 `d1[c]` to bits 17..12, and so on, and already in the byte order the CPU stores (little-endian).
@@ -2304,16 +2309,17 @@ ran at the same speed (14.0 to 14.7 GB/s in three runs); the fastpybase64 wheel 
 &quot;&quot;&quot;</span>
 
 nbNote(nkReading, <span class="hljs-string">&quot;&quot;&quot;
-Three things cost more than the algorithm while writing the AVX2 decoder, each found by reading
-the generated assembly:
+Three things made the AVX2 decoder slow while we wrote it. All three are fixed in the code on
+this page (the numbers are before and after); each was found by reading the generated assembly:
 
 - **`countSetBits` from `std/bitops`** showed up as a function call in the hot loop, where one
-  `popcnt` instruction was wanted. `mm_popcnt_u32` from nimsimd is the instruction.
+  `popcnt` instruction was wanted. Fixed by using `mm_popcnt_u32` from nimsimd, which is the instruction.
 - **`copyMem` into a stack array** became `__memcpy_chk`, because Ubuntu's gcc turns on
-  `_FORTIFY_SOURCE`. Each call also emitted a `vzeroupper`. A plain 8-byte store through a
-  `ptr uint64` took the AVX2 decoder from 1.6 to 5.5 GB/s.
+  `_FORTIFY_SOURCE`. Each call also emitted a `vzeroupper`. Fixed with a plain 8-byte store
+  through a `ptr uint64`, which took the AVX2 decoder from 1.6 to 5.5 GB/s.
 - **A branch-free compaction was slower** (5.5 GB/s) than branching on &quot;is this block clean?&quot;
   (6.7 GB/s): with 78-byte lines more than half of the 32-byte blocks are clean, and the predictor copes.
+  The code keeps the branch.
 &quot;&quot;&quot;</span>)
 
 nbNote(nkNimib, &amp;<span class="hljs-string">&quot;&quot;&quot;
@@ -2765,22 +2771,23 @@ of 10 batches of 200 calls, median of runs) and wrote a Nim harness that follows
 nbBars(<span class="hljs-string">&quot;MIME base64 decoding, GB/s of input (higher is faster)&quot;</span>,
   ours.mapIt((label: short(it), value: it.median, kind: kindOf(it))),
   &amp;<span class="hljs-string">&quot;Median of {nRuns} runs on one core of a cloud VM, see below. </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">preallocated</span><span class="hljs-meta">\&quot;</span><span class="hljs-string"> means the output buffer is reused across calls.&quot;</span>)
+nbText: <span class="hljs-string">&quot;The same numbers as a table, made with [tabelline](https://pietroppeter.github.io/tabelline/) from the same rows:&quot;</span>
 
-nbCode:
-  <span class="hljs-comment"># the ranking above as a table, made with tabelline from the same rows</span>
-  <span class="hljs-keyword">var</span> ranking: <span class="hljs-built_in">seq</span>[<span class="hljs-keyword">tuple</span>[rank: <span class="hljs-built_in">int</span>, gbps, lo, hi: <span class="hljs-built_in">float</span>, lang, function: <span class="hljs-built_in">string</span>]]
-  <span class="hljs-keyword">for</span> i, r <span class="hljs-keyword">in</span> ours:
-    ranking.add (i + <span class="hljs-number">1</span>, r.median, r.runs.min, r.runs.max, langName(r), <span class="hljs-string">&quot;`&quot;</span> &amp; r.function &amp; <span class="hljs-string">&quot;`&quot;</span>)
-  <span class="hljs-keyword">let</span> rankTable = tabella(ranking):
-    optCssTheme()
-    optRowStriping()
-    tabHeader <span class="hljs-string">&quot;MIME base64 decoding, GB/s&quot;</span>, &amp;<span class="hljs-string">&quot;median and range of {nRuns} runs, one core&quot;</span>
-    colsLabel {<span class="hljs-string">&quot;rank&quot;</span>: <span class="hljs-string">&quot;#&quot;</span>, <span class="hljs-string">&quot;lang&quot;</span>: <span class="hljs-string">&quot;Language&quot;</span>, <span class="hljs-string">&quot;function&quot;</span>: <span class="hljs-string">&quot;Function&quot;</span>, <span class="hljs-string">&quot;gbps&quot;</span>: <span class="hljs-string">&quot;GB/s&quot;</span>, <span class="hljs-string">&quot;lo&quot;</span>: <span class="hljs-string">&quot;Runs&quot;</span>}
-    fmtMarkdown <span class="hljs-string">&quot;function&quot;</span>
-    fmtNumber [<span class="hljs-string">&quot;gbps&quot;</span>, <span class="hljs-string">&quot;lo&quot;</span>, <span class="hljs-string">&quot;hi&quot;</span>], decimals = <span class="hljs-number">1</span>
-    colsMergeRange <span class="hljs-string">&quot;lo&quot;</span>, <span class="hljs-string">&quot;hi&quot;</span>
-    tabStyle style.text(weight = <span class="hljs-string">&quot;bold&quot;</span>), loc.body(rows = where($it[<span class="hljs-string">&quot;lang&quot;</span>] == <span class="hljs-string">&quot;Nim&quot;</span>))
-  nbTable rankTable
+<span class="hljs-keyword">var</span> ranking: <span class="hljs-built_in">seq</span>[<span class="hljs-keyword">tuple</span>[rank: <span class="hljs-built_in">int</span>, gbps, lo, hi: <span class="hljs-built_in">float</span>, lang, function: <span class="hljs-built_in">string</span>]]
+<span class="hljs-keyword">for</span> i, r <span class="hljs-keyword">in</span> ours:
+  ranking.add (i + <span class="hljs-number">1</span>, r.median, r.runs.min, r.runs.max, langName(r), <span class="hljs-string">&quot;`&quot;</span> &amp; r.function &amp; <span class="hljs-string">&quot;`&quot;</span>)
+<span class="hljs-keyword">let</span> rankTable = tabella(ranking):
+  optCssTheme()
+  optRowStriping()
+  tabHeader <span class="hljs-string">&quot;MIME base64 decoding, GB/s&quot;</span>, &amp;<span class="hljs-string">&quot;median and range of {nRuns} runs, one core&quot;</span>
+  colsLabel {<span class="hljs-string">&quot;rank&quot;</span>: <span class="hljs-string">&quot;#&quot;</span>, <span class="hljs-string">&quot;lang&quot;</span>: <span class="hljs-string">&quot;Language&quot;</span>, <span class="hljs-string">&quot;function&quot;</span>: <span class="hljs-string">&quot;Function&quot;</span>, <span class="hljs-string">&quot;gbps&quot;</span>: <span class="hljs-string">&quot;GB/s&quot;</span>, <span class="hljs-string">&quot;lo&quot;</span>: <span class="hljs-string">&quot;Runs&quot;</span>}
+  fmtMarkdown <span class="hljs-string">&quot;function&quot;</span>
+  fmtNumber [<span class="hljs-string">&quot;gbps&quot;</span>, <span class="hljs-string">&quot;lo&quot;</span>, <span class="hljs-string">&quot;hi&quot;</span>], decimals = <span class="hljs-number">1</span>
+  colsMergeRange <span class="hljs-string">&quot;lo&quot;</span>, <span class="hljs-string">&quot;hi&quot;</span>
+  tabStyle style.text(weight = <span class="hljs-string">&quot;bold&quot;</span>), loc.body(rows = where($it[<span class="hljs-string">&quot;lang&quot;</span>] == <span class="hljs-string">&quot;Nim&quot;</span>))
+nbTable rankTable
+nbFile <span class="hljs-string">&quot;index.nim&quot;</span>, start = <span class="hljs-string">&quot;var ranking:&quot;</span>, stop = <span class="hljs-string">&quot;nbTable rankTable&quot;</span>, folded = <span class="hljs-literal">true</span>,
+  title = <span class="hljs-string">&quot;The code of this table ([tabelline](https://pietroppeter.github.io/tabelline/))&quot;</span>
 
 nbNote(nkCareful, &amp;<span class="hljs-string">&quot;&quot;&quot;
 This is not Lemire's machine. It is a shared cloud VM: {ourHeader[1].split(':')[1].strip},
@@ -2797,23 +2804,24 @@ nbText: <span class="hljs-string">&quot;&quot;&quot;
 ### Same tools, his machine and ours
 &quot;&quot;&quot;</span>
 
-nbCode:
-  <span class="hljs-keyword">var</span> compare: <span class="hljs-built_in">seq</span>[<span class="hljs-keyword">tuple</span>[lang: <span class="hljs-built_in">string</span>, his, here: <span class="hljs-built_in">float</span>, function: <span class="hljs-built_in">string</span>]]
-  <span class="hljs-keyword">for</span> (sys, fn) <span class="hljs-keyword">in</span> [(<span class="hljs-string">&quot;c++&quot;</span>, <span class="hljs-string">&quot;base64_to_binary&quot;</span>), (<span class="hljs-string">&quot;python&quot;</span>, <span class="hljs-string">&quot;fastpybase64&quot;</span>), (<span class="hljs-string">&quot;node&quot;</span>, <span class="hljs-string">&quot;Buffer.from&quot;</span>),
-                    (<span class="hljs-string">&quot;bun&quot;</span>, <span class="hljs-string">&quot;Buffer.from&quot;</span>), (<span class="hljs-string">&quot;bun&quot;</span>, <span class="hljs-string">&quot;fromBase64&quot;</span>), (<span class="hljs-string">&quot;go&quot;</span>, <span class="hljs-string">&quot;preallocated&quot;</span>),
-                    (<span class="hljs-string">&quot;go&quot;</span>, <span class="hljs-string">&quot;DecodeString&quot;</span>), (<span class="hljs-string">&quot;java&quot;</span>, <span class="hljs-string">&quot;Base64&quot;</span>), (<span class="hljs-string">&quot;zig&quot;</span>, <span class="hljs-string">&quot;decoderWithIgnore&quot;</span>),
-                    (<span class="hljs-string">&quot;php 8.5&quot;</span>, <span class="hljs-string">&quot;base64_decode&quot;</span>)]:
-    <span class="hljs-keyword">let</span> a = his.pick(sys, fn)
-    compare.add (langName(a), a.median, ours.pick(sys.split(' <span class="hljs-string">')[0], fn).median, &quot;`&quot; &amp; a.function &amp; &quot;`&quot;)</span>
-  <span class="hljs-keyword">let</span> compareTable = tabella(compare):
-    optCssTheme()
-    optRowStriping()
-    tabHeader <span class="hljs-string">&quot;Same tools, two machines&quot;</span>, <span class="hljs-string">&quot;GB/s, median of runs&quot;</span>
-    colsLabel {<span class="hljs-string">&quot;lang&quot;</span>: <span class="hljs-string">&quot;Language&quot;</span>, <span class="hljs-string">&quot;function&quot;</span>: <span class="hljs-string">&quot;Function&quot;</span>, <span class="hljs-string">&quot;his&quot;</span>: <span class="hljs-string">&quot;Lemire&quot;</span>, <span class="hljs-string">&quot;here&quot;</span>: <span class="hljs-string">&quot;Here&quot;</span>}
-    fmtMarkdown <span class="hljs-string">&quot;function&quot;</span>
-    fmtNumber [<span class="hljs-string">&quot;his&quot;</span>, <span class="hljs-string">&quot;here&quot;</span>], decimals = <span class="hljs-number">1</span>
-    tabSourceNote md(<span class="hljs-string">&quot;Lemire: Xeon Gold 6548N, his `results_big4_run*.txt`. Here: a cloud VM, see above.&quot;</span>)
-  nbTable compareTable
+<span class="hljs-keyword">var</span> compare: <span class="hljs-built_in">seq</span>[<span class="hljs-keyword">tuple</span>[lang: <span class="hljs-built_in">string</span>, his, here: <span class="hljs-built_in">float</span>, function: <span class="hljs-built_in">string</span>]]
+<span class="hljs-keyword">for</span> (sys, fn) <span class="hljs-keyword">in</span> [(<span class="hljs-string">&quot;c++&quot;</span>, <span class="hljs-string">&quot;base64_to_binary&quot;</span>), (<span class="hljs-string">&quot;python&quot;</span>, <span class="hljs-string">&quot;fastpybase64&quot;</span>), (<span class="hljs-string">&quot;node&quot;</span>, <span class="hljs-string">&quot;Buffer.from&quot;</span>),
+                  (<span class="hljs-string">&quot;bun&quot;</span>, <span class="hljs-string">&quot;Buffer.from&quot;</span>), (<span class="hljs-string">&quot;bun&quot;</span>, <span class="hljs-string">&quot;fromBase64&quot;</span>), (<span class="hljs-string">&quot;go&quot;</span>, <span class="hljs-string">&quot;preallocated&quot;</span>),
+                  (<span class="hljs-string">&quot;go&quot;</span>, <span class="hljs-string">&quot;DecodeString&quot;</span>), (<span class="hljs-string">&quot;java&quot;</span>, <span class="hljs-string">&quot;Base64&quot;</span>), (<span class="hljs-string">&quot;zig&quot;</span>, <span class="hljs-string">&quot;decoderWithIgnore&quot;</span>),
+                  (<span class="hljs-string">&quot;php 8.5&quot;</span>, <span class="hljs-string">&quot;base64_decode&quot;</span>)]:
+  <span class="hljs-keyword">let</span> a = his.pick(sys, fn)
+  compare.add (langName(a), a.median, ours.pick(sys.split(' <span class="hljs-string">')[0], fn).median, &quot;`&quot; &amp; a.function &amp; &quot;`&quot;)</span>
+<span class="hljs-keyword">let</span> compareTable = tabella(compare):
+  optCssTheme()
+  optRowStriping()
+  tabHeader <span class="hljs-string">&quot;Same tools, two machines&quot;</span>, <span class="hljs-string">&quot;GB/s, median of runs&quot;</span>
+  colsLabel {<span class="hljs-string">&quot;lang&quot;</span>: <span class="hljs-string">&quot;Language&quot;</span>, <span class="hljs-string">&quot;function&quot;</span>: <span class="hljs-string">&quot;Function&quot;</span>, <span class="hljs-string">&quot;his&quot;</span>: <span class="hljs-string">&quot;Lemire&quot;</span>, <span class="hljs-string">&quot;here&quot;</span>: <span class="hljs-string">&quot;Here&quot;</span>}
+  fmtMarkdown <span class="hljs-string">&quot;function&quot;</span>
+  fmtNumber [<span class="hljs-string">&quot;his&quot;</span>, <span class="hljs-string">&quot;here&quot;</span>], decimals = <span class="hljs-number">1</span>
+  tabSourceNote md(<span class="hljs-string">&quot;Lemire: Xeon Gold 6548N, his `results_big4_run*.txt`. Here: a cloud VM, see above.&quot;</span>)
+nbTable compareTable
+nbFile <span class="hljs-string">&quot;index.nim&quot;</span>, start = <span class="hljs-string">&quot;var compare:&quot;</span>, stop = <span class="hljs-string">&quot;nbTable compareTable&quot;</span>, folded = <span class="hljs-literal">true</span>,
+  title = <span class="hljs-string">&quot;The code of this table ([tabelline](https://pietroppeter.github.io/tabelline/))&quot;</span>
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 The order is the same: simdutf-based decoders on top, then Go, Java, Zig and stock PHP an
@@ -2844,8 +2852,8 @@ Base64 packs 3 bytes (24 bits) into 4 characters of 6 bits each. A plain decoder
 `std/base64`) looks up each character's 6-bit value, checks it, then shifts and ORs the four
 values together and writes three bytes one by one.
 
-The trick comes from **modp_b64**, the base64 code of Nick Galbreath's *stringencoders* C library,
-which Chromium has long shipped as `third_party/modp_b64` for its own base64 functions. It moves
+The trick comes from **modp_b64**, the base64 code of Nick Galbreath's [*stringencoders*](https://github.com/client9/stringencoders) C library,
+which Chromium ships as [`third_party/modp_b64`](https://github.com/chromium/chromium/tree/main/third_party/modp_b64) for its own base64 functions. It moves
 the shifting into the tables: instead of one table of 6-bit values, four tables `d0`..`d3`, one per
 position in the group of four. `d0[c]` holds the value of `c` already shifted to bits 23..18,
 `d1[c]` to bits 17..12, and so on, and already in the byte order the CPU stores (little-endian).
@@ -2936,16 +2944,17 @@ ran at the same speed (14.0 to 14.7 GB/s in three runs); the fastpybase64 wheel 
 &quot;&quot;&quot;</span>
 
 nbNote(nkReading, <span class="hljs-string">&quot;&quot;&quot;
-Three things cost more than the algorithm while writing the AVX2 decoder, each found by reading
-the generated assembly:
+Three things made the AVX2 decoder slow while we wrote it. All three are fixed in the code on
+this page (the numbers are before and after); each was found by reading the generated assembly:
 
 - **`countSetBits` from `std/bitops`** showed up as a function call in the hot loop, where one
-  `popcnt` instruction was wanted. `mm_popcnt_u32` from nimsimd is the instruction.
+  `popcnt` instruction was wanted. Fixed by using `mm_popcnt_u32` from nimsimd, which is the instruction.
 - **`copyMem` into a stack array** became `__memcpy_chk`, because Ubuntu's gcc turns on
-  `_FORTIFY_SOURCE`. Each call also emitted a `vzeroupper`. A plain 8-byte store through a
-  `ptr uint64` took the AVX2 decoder from 1.6 to 5.5 GB/s.
+  `_FORTIFY_SOURCE`. Each call also emitted a `vzeroupper`. Fixed with a plain 8-byte store
+  through a `ptr uint64`, which took the AVX2 decoder from 1.6 to 5.5 GB/s.
 - **A branch-free compaction was slower** (5.5 GB/s) than branching on &quot;is this block clean?&quot;
   (6.7 GB/s): with 78-byte lines more than half of the 32-byte blocks are clean, and the predictor copes.
+  The code keeps the branch.
 &quot;&quot;&quot;</span>)
 
 nbNote(nkNimib, &amp;<span class="hljs-string">&quot;&quot;&quot;

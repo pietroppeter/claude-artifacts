@@ -99,22 +99,23 @@ of 10 batches of 200 calls, median of runs) and wrote a Nim harness that follows
 nbBars("MIME base64 decoding, GB/s of input (higher is faster)",
   ours.mapIt((label: short(it), value: it.median, kind: kindOf(it))),
   &"Median of {nRuns} runs on one core of a cloud VM, see below. \"preallocated\" means the output buffer is reused across calls.")
+nbText: "The same numbers as a table, made with [tabelline](https://pietroppeter.github.io/tabelline/) from the same rows:"
 
-nbCode:
-  # the ranking above as a table, made with tabelline from the same rows
-  var ranking: seq[tuple[rank: int, gbps, lo, hi: float, lang, function: string]]
-  for i, r in ours:
-    ranking.add (i + 1, r.median, r.runs.min, r.runs.max, langName(r), "`" & r.function & "`")
-  let rankTable = tabella(ranking):
-    optCssTheme()
-    optRowStriping()
-    tabHeader "MIME base64 decoding, GB/s", &"median and range of {nRuns} runs, one core"
-    colsLabel {"rank": "#", "lang": "Language", "function": "Function", "gbps": "GB/s", "lo": "Runs"}
-    fmtMarkdown "function"
-    fmtNumber ["gbps", "lo", "hi"], decimals = 1
-    colsMergeRange "lo", "hi"
-    tabStyle style.text(weight = "bold"), loc.body(rows = where($it["lang"] == "Nim"))
-  nbTable rankTable
+var ranking: seq[tuple[rank: int, gbps, lo, hi: float, lang, function: string]]
+for i, r in ours:
+  ranking.add (i + 1, r.median, r.runs.min, r.runs.max, langName(r), "`" & r.function & "`")
+let rankTable = tabella(ranking):
+  optCssTheme()
+  optRowStriping()
+  tabHeader "MIME base64 decoding, GB/s", &"median and range of {nRuns} runs, one core"
+  colsLabel {"rank": "#", "lang": "Language", "function": "Function", "gbps": "GB/s", "lo": "Runs"}
+  fmtMarkdown "function"
+  fmtNumber ["gbps", "lo", "hi"], decimals = 1
+  colsMergeRange "lo", "hi"
+  tabStyle style.text(weight = "bold"), loc.body(rows = where($it["lang"] == "Nim"))
+nbTable rankTable
+nbFile "index.nim", start = "var ranking:", stop = "nbTable rankTable", folded = true,
+  title = "The code of this table ([tabelline](https://pietroppeter.github.io/tabelline/))"
 
 nbNote(nkCareful, &"""
 This is not Lemire's machine. It is a shared cloud VM: {ourHeader[1].split(':')[1].strip},
@@ -131,23 +132,24 @@ nbText: """
 ### Same tools, his machine and ours
 """
 
-nbCode:
-  var compare: seq[tuple[lang: string, his, here: float, function: string]]
-  for (sys, fn) in [("c++", "base64_to_binary"), ("python", "fastpybase64"), ("node", "Buffer.from"),
-                    ("bun", "Buffer.from"), ("bun", "fromBase64"), ("go", "preallocated"),
-                    ("go", "DecodeString"), ("java", "Base64"), ("zig", "decoderWithIgnore"),
-                    ("php 8.5", "base64_decode")]:
-    let a = his.pick(sys, fn)
-    compare.add (langName(a), a.median, ours.pick(sys.split(' ')[0], fn).median, "`" & a.function & "`")
-  let compareTable = tabella(compare):
-    optCssTheme()
-    optRowStriping()
-    tabHeader "Same tools, two machines", "GB/s, median of runs"
-    colsLabel {"lang": "Language", "function": "Function", "his": "Lemire", "here": "Here"}
-    fmtMarkdown "function"
-    fmtNumber ["his", "here"], decimals = 1
-    tabSourceNote md("Lemire: Xeon Gold 6548N, his `results_big4_run*.txt`. Here: a cloud VM, see above.")
-  nbTable compareTable
+var compare: seq[tuple[lang: string, his, here: float, function: string]]
+for (sys, fn) in [("c++", "base64_to_binary"), ("python", "fastpybase64"), ("node", "Buffer.from"),
+                  ("bun", "Buffer.from"), ("bun", "fromBase64"), ("go", "preallocated"),
+                  ("go", "DecodeString"), ("java", "Base64"), ("zig", "decoderWithIgnore"),
+                  ("php 8.5", "base64_decode")]:
+  let a = his.pick(sys, fn)
+  compare.add (langName(a), a.median, ours.pick(sys.split(' ')[0], fn).median, "`" & a.function & "`")
+let compareTable = tabella(compare):
+  optCssTheme()
+  optRowStriping()
+  tabHeader "Same tools, two machines", "GB/s, median of runs"
+  colsLabel {"lang": "Language", "function": "Function", "his": "Lemire", "here": "Here"}
+  fmtMarkdown "function"
+  fmtNumber ["his", "here"], decimals = 1
+  tabSourceNote md("Lemire: Xeon Gold 6548N, his `results_big4_run*.txt`. Here: a cloud VM, see above.")
+nbTable compareTable
+nbFile "index.nim", start = "var compare:", stop = "nbTable compareTable", folded = true,
+  title = "The code of this table ([tabelline](https://pietroppeter.github.io/tabelline/))"
 
 nbText: """
 The order is the same: simdutf-based decoders on top, then Go, Java, Zig and stock PHP an
@@ -178,8 +180,8 @@ Base64 packs 3 bytes (24 bits) into 4 characters of 6 bits each. A plain decoder
 `std/base64`) looks up each character's 6-bit value, checks it, then shifts and ORs the four
 values together and writes three bytes one by one.
 
-The trick comes from **modp_b64**, the base64 code of Nick Galbreath's *stringencoders* C library,
-which Chromium has long shipped as `third_party/modp_b64` for its own base64 functions. It moves
+The trick comes from **modp_b64**, the base64 code of Nick Galbreath's [*stringencoders*](https://github.com/client9/stringencoders) C library,
+which Chromium ships as [`third_party/modp_b64`](https://github.com/chromium/chromium/tree/main/third_party/modp_b64) for its own base64 functions. It moves
 the shifting into the tables: instead of one table of 6-bit values, four tables `d0`..`d3`, one per
 position in the group of four. `d0[c]` holds the value of `c` already shifted to bits 23..18,
 `d1[c]` to bits 17..12, and so on, and already in the byte order the CPU stores (little-endian).
@@ -270,16 +272,17 @@ ran at the same speed (14.0 to 14.7 GB/s in three runs); the fastpybase64 wheel 
 """
 
 nbNote(nkReading, """
-Three things cost more than the algorithm while writing the AVX2 decoder, each found by reading
-the generated assembly:
+Three things made the AVX2 decoder slow while we wrote it. All three are fixed in the code on
+this page (the numbers are before and after); each was found by reading the generated assembly:
 
 - **`countSetBits` from `std/bitops`** showed up as a function call in the hot loop, where one
-  `popcnt` instruction was wanted. `mm_popcnt_u32` from nimsimd is the instruction.
+  `popcnt` instruction was wanted. Fixed by using `mm_popcnt_u32` from nimsimd, which is the instruction.
 - **`copyMem` into a stack array** became `__memcpy_chk`, because Ubuntu's gcc turns on
-  `_FORTIFY_SOURCE`. Each call also emitted a `vzeroupper`. A plain 8-byte store through a
-  `ptr uint64` took the AVX2 decoder from 1.6 to 5.5 GB/s.
+  `_FORTIFY_SOURCE`. Each call also emitted a `vzeroupper`. Fixed with a plain 8-byte store
+  through a `ptr uint64`, which took the AVX2 decoder from 1.6 to 5.5 GB/s.
 - **A branch-free compaction was slower** (5.5 GB/s) than branching on "is this block clean?"
   (6.7 GB/s): with 78-byte lines more than half of the 32-byte blocks are clean, and the predictor copes.
+  The code keeps the branch.
 """)
 
 nbNote(nkNimib, &"""
