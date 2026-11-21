@@ -174,12 +174,36 @@ written one byte at a time. That is about Go's speed ({g(goPre)} GB/s) and Java'
 
 ### 2. Plain Nim, four tables: {g(nimScalar)} GB/s
 
-The modp_b64 trick (used by Chromium): four 256-entry `uint32` tables, one per position in
-a group of four characters, already shifted into place. Four characters become three bytes
-with four loads and three ORs, and an invalid character sets a high bit, so one comparison
-checks all four. A line ending is skipped when it starts a group, which it always does with
-76-character lines.
+Base64 packs 3 bytes (24 bits) into 4 characters of 6 bits each. A plain decoder (like
+`std/base64`) looks up each character's 6-bit value, checks it, then shifts and ORs the four
+values together and writes three bytes one by one.
 
+The trick comes from **modp_b64**, the base64 code of Nick Galbreath's *stringencoders* C library,
+which Chromium has long shipped as `third_party/modp_b64` for its own base64 functions. It moves
+the shifting into the tables: instead of one table of 6-bit values, four tables `d0`..`d3`, one per
+position in the group of four. `d0[c]` holds the value of `c` already shifted to bits 23..18,
+`d1[c]` to bits 17..12, and so on, and already in the byte order the CPU stores (little-endian).
+Decoding a group is then four loads and three ORs, and one 4-byte store writes the three bytes
+(the fourth byte is overwritten by the next group). An invalid character's entry has bits above
+the 24 set, so one comparison of the result checks all four characters. With `"TWFu"`, the base64
+of `"Man"`:
+"""
+
+nbCode:
+  let quad = "TWFu"
+  let tables = [d0, d1, d2, d3]
+  var x = 0'u32
+  for k, c in quad:
+    echo "d", k, "['", c, "'] = 0x", tables[k][uint8 c].toHex(8)
+    x = x or tables[k][uint8 c]
+  echo "OR      = 0x", x.toHex(8), "  bytes in memory: ", [char(x and 0xFF), char(x shr 8 and 0xFF), char(x shr 16 and 0xFF)]
+  echo "d0['!'] = 0x", d0[uint8 '!'].toHex(8), "  >= bad: invalid"
+
+nbText: &"""
+A line ending is skipped when it starts a group, which it always does with 76-character lines
+(76 is a multiple of 4). Anywhere else it sends the decoder to the slow path in `decodeTail`
+for the rest of the input, the cliff Lemire's post is about: this decoder is fast for email and
+PEM (64 is a multiple of 4 too), not for any line length.
 """
 
 nbFile "bench/nim/b64scalar.nim", start = "while i + 4 < n:", stop = "decodeTail(src, i, n, dst, o)"
@@ -230,9 +254,19 @@ nbText: &"""
 
 ### 5. Nim calling simdutf: {g(nimFfi)} GB/s
 
-The same as PHP's pull request or Python's fastpybase64: a small `extern "C"` wrapper
-around `simdutf::base64_to_binary`, compiled once with g++, and a `{{.importc.}}` in Nim.
-It runs the same code as the C++ entry, so its number is the C++ one plus noise.
+The same as PHP's pull request or Python's fastpybase64: Nim calls the C++ library. Nim
+compiles to C here (the C backend, not `nim cpp`), and C cannot call a C++ function directly, so
+`simdutf_wrap.cpp` is a small `extern "C"` wrapper around `simdutf::base64_to_binary`. g++
+compiles it and simdutf into object files, `simdutf.nim` declares the wrapper's functions with
+`{{.importc.}}` and links the objects with `-lstdc++`. With `nim cpp` one could instead call
+simdutf directly with `{{.importcpp.}}` and no wrapper; it would run the same simdutf code.
+
+C++, Python and Nim all run the same simdutf kernel ("icelake", the AVX-512 one), so they should
+be equally fast, and they are, within this machine's noise: {g(cpp)}, {g(ours.pick("python", "fastpybase64"))}
+and {g(nimFfi)} GB/s. Calling through Python or Nim adds a few nanoseconds per call, nothing
+next to the {int(1368424.0 / cpp.median / 1000)} µs a call takes to decode
+1.37 MB. The compiler is not it either: the C++ benchmark built with clang 18 instead of g++ 13
+ran at the same speed (14.0 to 14.7 GB/s in three runs); the fastpybase64 wheel was built with clang 21.
 """
 
 nbNote(nkReading, """

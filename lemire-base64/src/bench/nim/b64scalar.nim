@@ -5,7 +5,7 @@
 ## sets the top bit, so one comparison per quad validates it. Line endings
 ## (and spaces) are skipped wherever they occur.
 
-const bad = 0x01FF_FFFF'u32
+const bad* = 0x01FF_FFFF'u32   ## any table entry >= bad marks an invalid character
 
 func charValue(c: char): int =
   case c
@@ -28,10 +28,10 @@ func makeTable(shift: int): array[256, uint32] =
       result[i] = ((x shr 16) and 0xFF) or (x and 0xFF00) or ((x and 0xFF) shl 16)
 
 const
-  d0 = makeTable(18)
-  d1 = makeTable(12)
-  d2 = makeTable(6)
-  d3 = makeTable(0)
+  d0* = makeTable(18)   ## first character of a group: bits 23..18 of the 24
+  d1* = makeTable(12)
+  d2* = makeTable(6)
+  d3* = makeTable(0)    ## fourth character: bits 5..0
 
 template isSpace(c: char): bool = c in {'\r', '\n', ' ', '\t'}
 

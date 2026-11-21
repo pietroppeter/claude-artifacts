@@ -1103,11 +1103,37 @@ it skips <code>\r</code>, <code>\n</code> and spaces. Each character is then a t
 written one byte at a time. That is about Go's speed (1.4 GB/s) and Java's
 (1.0 GB/s), faster than Zig's <code>decoderWithIgnore</code> (0.7 GB/s), and twice stock PHP (0.5 GB/s).</p>
 <h3>2. Plain Nim, four tables: 4.0 GB/s</h3>
-<p>The modp_b64 trick (used by Chromium): four 256-entry <code>uint32</code> tables, one per position in
-a group of four characters, already shifted into place. Four characters become three bytes
-with four loads and three ORs, and an invalid character sets a high bit, so one comparison
-checks all four. A line ending is skipped when it starts a group, which it always does with
-76-character lines.</p>
+<p>Base64 packs 3 bytes (24 bits) into 4 characters of 6 bits each. A plain decoder (like
+<code>std/base64</code>) looks up each character's 6-bit value, checks it, then shifts and ORs the four
+values together and writes three bytes one by one.</p>
+<p>The trick comes from <strong>modp_b64</strong>, the base64 code of Nick Galbreath's <em>stringencoders</em> C library,
+which Chromium has long shipped as <code>third_party/modp_b64</code> for its own base64 functions. It moves
+the shifting into the tables: instead of one table of 6-bit values, four tables <code>d0</code>..<code>d3</code>, one per
+position in the group of four. <code>d0[c]</code> holds the value of <code>c</code> already shifted to bits 23..18,
+<code>d1[c]</code> to bits 17..12, and so on, and already in the byte order the CPU stores (little-endian).
+Decoding a group is then four loads and three ORs, and one 4-byte store writes the three bytes
+(the fourth byte is overwritten by the next group). An invalid character's entry has bits above
+the 24 set, so one comparison of the result checks all four characters. With <code>&quot;TWFu&quot;</code>, the base64
+of <code>&quot;Man&quot;</code>:</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">let</span> quad = <span class="hljs-string">&quot;TWFu&quot;</span>
+<span class="hljs-keyword">let</span> tables = [d0, d1, d2, d3]
+<span class="hljs-keyword">var</span> x = <span class="hljs-number">0'</span>u32
+<span class="hljs-keyword">for</span> k, c <span class="hljs-keyword">in</span> quad:
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;d&quot;</span>, k, <span class="hljs-string">&quot;['&quot;</span>, c, <span class="hljs-string">&quot;'] = 0x&quot;</span>, tables[k][<span class="hljs-built_in">uint8</span> c].toHex(<span class="hljs-number">8</span>)
+  x = x <span class="hljs-keyword">or</span> tables[k][<span class="hljs-built_in">uint8</span> c]
+<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;OR      = 0x&quot;</span>, x.toHex(<span class="hljs-number">8</span>), <span class="hljs-string">&quot;  bytes in memory: &quot;</span>, [<span class="hljs-built_in">char</span>(x <span class="hljs-keyword">and</span> <span class="hljs-number">0xFF</span>), <span class="hljs-built_in">char</span>(x <span class="hljs-keyword">shr</span> <span class="hljs-number">8</span> <span class="hljs-keyword">and</span> <span class="hljs-number">0xFF</span>), <span class="hljs-built_in">char</span>(x <span class="hljs-keyword">shr</span> <span class="hljs-number">16</span> <span class="hljs-keyword">and</span> <span class="hljs-number">0xFF</span>)]
+<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;d0['!'] = 0x&quot;</span>, d0[<span class="hljs-built_in">uint8</span> <span class="hljs-string">'!'</span>].toHex(<span class="hljs-number">8</span>), <span class="hljs-string">&quot;  &gt;= bad: invalid&quot;</span></code></pre>
+<pre class="nb-output">d0['T'] = 0x0000004C
+d1['W'] = 0x00006001
+d2['F'] = 0x00400100
+d3['u'] = 0x002E0000
+OR      = 0x006E614D  bytes in memory: ['M', 'a', 'n']
+d0['!'] = 0x01FFFFFF  >= bad: invalid
+</pre>
+<p>A line ending is skipped when it starts a group, which it always does with 76-character lines
+(76 is a multiple of 4). Anywhere else it sends the decoder to the slow path in <code>decodeTail</code>
+for the rest of the input, the cliff Lemire's post is about: this decoder is fast for email and
+PEM (64 is a multiple of 4 too), not for any line length.</p>
 <div class="nb-file"><div class="nb-file-head"><code>bench/nim/b64scalar.nim</code> <span class="nb-small">lines 83–92</span></div>
 <pre><code class="nohighlight nim hljs"><span class="hljs-keyword">while</span> i + <span class="hljs-number">4</span> &lt; n:
   <span class="hljs-keyword">let</span> c0 = src[i]
@@ -1189,9 +1215,18 @@ clean blocks straight from the input and compacts only the blocks that need it.<
   i += <span class="hljs-number">64</span></code></pre>
 </div>
 <h3>5. Nim calling simdutf: 14.2 GB/s</h3>
-<p>The same as PHP's pull request or Python's fastpybase64: a small <code>extern &quot;C&quot;</code> wrapper
-around <code>simdutf::base64_to_binary</code>, compiled once with g++, and a <code>{.importc.}</code> in Nim.
-It runs the same code as the C++ entry, so its number is the C++ one plus noise.</p>
+<p>The same as PHP's pull request or Python's fastpybase64: Nim calls the C++ library. Nim
+compiles to C here (the C backend, not <code>nim cpp</code>), and C cannot call a C++ function directly, so
+<code>simdutf_wrap.cpp</code> is a small <code>extern &quot;C&quot;</code> wrapper around <code>simdutf::base64_to_binary</code>. g++
+compiles it and simdutf into object files, <code>simdutf.nim</code> declares the wrapper's functions with
+<code>{.importc.}</code> and links the objects with <code>-lstdc++</code>. With <code>nim cpp</code> one could instead call
+simdutf directly with <code>{.importcpp.}</code> and no wrapper; it would run the same simdutf code.</p>
+<p>C++, Python and Nim all run the same simdutf kernel (&quot;icelake&quot;, the AVX-512 one), so they should
+be equally fast, and they are, within this machine's noise: 14.4, 15.2
+and 14.2 GB/s. Calling through Python or Nim adds a few nanoseconds per call, nothing
+next to the 94 µs a call takes to decode
+1.37 MB. The compiler is not it either: the C++ benchmark built with clang 18 instead of g++ 13
+ran at the same speed (14.0 to 14.7 GB/s in three runs); the fastpybase64 wheel was built with clang 21.</p>
 <aside class="note reading"><span class="note-label">What we found</span><p>Three things cost more than the algorithm while writing the AVX2 decoder, each found by reading
 the generated assembly:</p>
 <ul>
@@ -1233,7 +1268,7 @@ they could be used anywhere but on a machine you know.</p>
 <span class="hljs-comment">## sets the top bit, so one comparison per quad validates it. Line endings</span>
 <span class="hljs-comment">## (and spaces) are skipped wherever they occur.</span>
 
-<span class="hljs-keyword">const</span> bad = <span class="hljs-number">0x01FF_FFFF'</span>u32
+<span class="hljs-keyword">const</span> bad* = <span class="hljs-number">0x01FF_FFFF'</span>u32   <span class="hljs-comment">## any table entry &gt;= bad marks an invalid character</span>
 
 <span class="hljs-keyword">func</span> charValue(c: <span class="hljs-built_in">char</span>): <span class="hljs-built_in">int</span> =
   <span class="hljs-keyword">case</span> c
@@ -1256,10 +1291,10 @@ they could be used anywhere but on a machine you know.</p>
       <span class="hljs-literal">result</span>[i] = ((x <span class="hljs-keyword">shr</span> <span class="hljs-number">16</span>) <span class="hljs-keyword">and</span> <span class="hljs-number">0xFF</span>) <span class="hljs-keyword">or</span> (x <span class="hljs-keyword">and</span> <span class="hljs-number">0xFF00</span>) <span class="hljs-keyword">or</span> ((x <span class="hljs-keyword">and</span> <span class="hljs-number">0xFF</span>) <span class="hljs-keyword">shl</span> <span class="hljs-number">16</span>)
 
 <span class="hljs-keyword">const</span>
-  d0 = makeTable(<span class="hljs-number">18</span>)
-  d1 = makeTable(<span class="hljs-number">12</span>)
-  d2 = makeTable(<span class="hljs-number">6</span>)
-  d3 = makeTable(<span class="hljs-number">0</span>)
+  d0* = makeTable(<span class="hljs-number">18</span>)   <span class="hljs-comment">## first character of a group: bits 23..18 of the 24</span>
+  d1* = makeTable(<span class="hljs-number">12</span>)
+  d2* = makeTable(<span class="hljs-number">6</span>)
+  d3* = makeTable(<span class="hljs-number">0</span>)    <span class="hljs-comment">## fourth character: bits 5..0</span>
 
 <span class="hljs-keyword">template</span> isSpace(c: <span class="hljs-built_in">char</span>): <span class="hljs-built_in">bool</span> = c <span class="hljs-keyword">in</span> {'\r<span class="hljs-string">', '</span>\n<span class="hljs-string">', '</span> <span class="hljs-string">', '</span>\t<span class="hljs-string">'}</span>
 
@@ -1996,7 +2031,7 @@ env -u _JAVA_OPTIONS <span class="hljs-variable">$PIN</span> java -cp build Benc
 <h3>This page</h3>
 <p>A <a href="https://github.com/pietroppeter/nimib">nimib</a> document; the tables are made with
 <a href="https://pietroppeter.github.io/tabelline/">tabelline</a>.</p>
-<details class="nb-file"><summary class="nb-file-head"><code>index.nim</code> <span class="nb-small">308 lines</span></summary>
+<details class="nb-file"><summary class="nb-file-head"><code>index.nim</code> <span class="nb-small">342 lines</span></summary>
 <pre><code class="nohighlight nim hljs"><span class="hljs-comment">## Lemire's MIME base64 decoding ranking, replicated, with Nim added.</span>
 <span class="hljs-comment">## Build: sh deps.sh &amp;&amp; nim r index.nim   (writes ../index.html; the numbers come from data/, written by bench/run_cloud.sh)</span>
 <span class="hljs-keyword">import</span> std/[strformat, strutils, sequtils, os]
@@ -2173,12 +2208,36 @@ written one byte at a time. That is about Go's speed ({g(goPre)} GB/s) and Java'
 
 ### 2. Plain Nim, four tables: {g(nimScalar)} GB/s
 
-The modp_b64 trick (used by Chromium): four 256-entry `uint32` tables, one per position in
-a group of four characters, already shifted into place. Four characters become three bytes
-with four loads and three ORs, and an invalid character sets a high bit, so one comparison
-checks all four. A line ending is skipped when it starts a group, which it always does with
-76-character lines.
+Base64 packs 3 bytes (24 bits) into 4 characters of 6 bits each. A plain decoder (like
+`std/base64`) looks up each character's 6-bit value, checks it, then shifts and ORs the four
+values together and writes three bytes one by one.
 
+The trick comes from **modp_b64**, the base64 code of Nick Galbreath's *stringencoders* C library,
+which Chromium has long shipped as `third_party/modp_b64` for its own base64 functions. It moves
+the shifting into the tables: instead of one table of 6-bit values, four tables `d0`..`d3`, one per
+position in the group of four. `d0[c]` holds the value of `c` already shifted to bits 23..18,
+`d1[c]` to bits 17..12, and so on, and already in the byte order the CPU stores (little-endian).
+Decoding a group is then four loads and three ORs, and one 4-byte store writes the three bytes
+(the fourth byte is overwritten by the next group). An invalid character's entry has bits above
+the 24 set, so one comparison of the result checks all four characters. With `&quot;TWFu&quot;`, the base64
+of `&quot;Man&quot;`:
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">let</span> quad = <span class="hljs-string">&quot;TWFu&quot;</span>
+  <span class="hljs-keyword">let</span> tables = [d0, d1, d2, d3]
+  <span class="hljs-keyword">var</span> x = <span class="hljs-number">0'</span>u32
+  <span class="hljs-keyword">for</span> k, c <span class="hljs-keyword">in</span> quad:
+    <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;d&quot;</span>, k, <span class="hljs-string">&quot;['&quot;</span>, c, <span class="hljs-string">&quot;'] = 0x&quot;</span>, tables[k][<span class="hljs-built_in">uint8</span> c].toHex(<span class="hljs-number">8</span>)
+    x = x <span class="hljs-keyword">or</span> tables[k][<span class="hljs-built_in">uint8</span> c]
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;OR      = 0x&quot;</span>, x.toHex(<span class="hljs-number">8</span>), <span class="hljs-string">&quot;  bytes in memory: &quot;</span>, [<span class="hljs-built_in">char</span>(x <span class="hljs-keyword">and</span> <span class="hljs-number">0xFF</span>), <span class="hljs-built_in">char</span>(x <span class="hljs-keyword">shr</span> <span class="hljs-number">8</span> <span class="hljs-keyword">and</span> <span class="hljs-number">0xFF</span>), <span class="hljs-built_in">char</span>(x <span class="hljs-keyword">shr</span> <span class="hljs-number">16</span> <span class="hljs-keyword">and</span> <span class="hljs-number">0xFF</span>)]
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;d0['!'] = 0x&quot;</span>, d0[<span class="hljs-built_in">uint8</span> <span class="hljs-string">'!'</span>].toHex(<span class="hljs-number">8</span>), <span class="hljs-string">&quot;  &gt;= bad: invalid&quot;</span>
+
+nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
+A line ending is skipped when it starts a group, which it always does with 76-character lines
+(76 is a multiple of 4). Anywhere else it sends the decoder to the slow path in `decodeTail`
+for the rest of the input, the cliff Lemire's post is about: this decoder is fast for email and
+PEM (64 is a multiple of 4 too), not for any line length.
 &quot;&quot;&quot;</span>
 
 nbFile <span class="hljs-string">&quot;bench/nim/b64scalar.nim&quot;</span>, start = <span class="hljs-string">&quot;while i + 4 &lt; n:&quot;</span>, stop = <span class="hljs-string">&quot;decodeTail(src, i, n, dst, o)&quot;</span>
@@ -2229,9 +2288,19 @@ nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
 
 ### 5. Nim calling simdutf: {g(nimFfi)} GB/s
 
-The same as PHP's pull request or Python's fastpybase64: a small `extern &quot;C&quot;` wrapper
-around `simdutf::base64_to_binary`, compiled once with g++, and a `{{.importc.}}` in Nim.
-It runs the same code as the C++ entry, so its number is the C++ one plus noise.
+The same as PHP's pull request or Python's fastpybase64: Nim calls the C++ library. Nim
+compiles to C here (the C backend, not `nim cpp`), and C cannot call a C++ function directly, so
+`simdutf_wrap.cpp` is a small `extern &quot;C&quot;` wrapper around `simdutf::base64_to_binary`. g++
+compiles it and simdutf into object files, `simdutf.nim` declares the wrapper's functions with
+`{{.importc.}}` and links the objects with `-lstdc++`. With `nim cpp` one could instead call
+simdutf directly with `{{.importcpp.}}` and no wrapper; it would run the same simdutf code.
+
+C++, Python and Nim all run the same simdutf kernel (&quot;icelake&quot;, the AVX-512 one), so they should
+be equally fast, and they are, within this machine's noise: {g(cpp)}, {g(ours.pick(&quot;python&quot;, &quot;fastpybase64&quot;))}
+and {g(nimFfi)} GB/s. Calling through Python or Nim adds a few nanoseconds per call, nothing
+next to the {int(1368424.0 / cpp.median / 1000)} µs a call takes to decode
+1.37 MB. The compiler is not it either: the C++ benchmark built with clang 18 instead of g++ 13
+ran at the same speed (14.0 to 14.7 GB/s in three runs); the fastpybase64 wheel was built with clang 21.
 &quot;&quot;&quot;</span>
 
 nbNote(nkReading, <span class="hljs-string">&quot;&quot;&quot;
@@ -2771,12 +2840,36 @@ written one byte at a time. That is about Go's speed ({g(goPre)} GB/s) and Java'
 
 ### 2. Plain Nim, four tables: {g(nimScalar)} GB/s
 
-The modp_b64 trick (used by Chromium): four 256-entry `uint32` tables, one per position in
-a group of four characters, already shifted into place. Four characters become three bytes
-with four loads and three ORs, and an invalid character sets a high bit, so one comparison
-checks all four. A line ending is skipped when it starts a group, which it always does with
-76-character lines.
+Base64 packs 3 bytes (24 bits) into 4 characters of 6 bits each. A plain decoder (like
+`std/base64`) looks up each character's 6-bit value, checks it, then shifts and ORs the four
+values together and writes three bytes one by one.
 
+The trick comes from **modp_b64**, the base64 code of Nick Galbreath's *stringencoders* C library,
+which Chromium has long shipped as `third_party/modp_b64` for its own base64 functions. It moves
+the shifting into the tables: instead of one table of 6-bit values, four tables `d0`..`d3`, one per
+position in the group of four. `d0[c]` holds the value of `c` already shifted to bits 23..18,
+`d1[c]` to bits 17..12, and so on, and already in the byte order the CPU stores (little-endian).
+Decoding a group is then four loads and three ORs, and one 4-byte store writes the three bytes
+(the fourth byte is overwritten by the next group). An invalid character's entry has bits above
+the 24 set, so one comparison of the result checks all four characters. With `&quot;TWFu&quot;`, the base64
+of `&quot;Man&quot;`:
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">let</span> quad = <span class="hljs-string">&quot;TWFu&quot;</span>
+  <span class="hljs-keyword">let</span> tables = [d0, d1, d2, d3]
+  <span class="hljs-keyword">var</span> x = <span class="hljs-number">0'</span>u32
+  <span class="hljs-keyword">for</span> k, c <span class="hljs-keyword">in</span> quad:
+    <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;d&quot;</span>, k, <span class="hljs-string">&quot;['&quot;</span>, c, <span class="hljs-string">&quot;'] = 0x&quot;</span>, tables[k][<span class="hljs-built_in">uint8</span> c].toHex(<span class="hljs-number">8</span>)
+    x = x <span class="hljs-keyword">or</span> tables[k][<span class="hljs-built_in">uint8</span> c]
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;OR      = 0x&quot;</span>, x.toHex(<span class="hljs-number">8</span>), <span class="hljs-string">&quot;  bytes in memory: &quot;</span>, [<span class="hljs-built_in">char</span>(x <span class="hljs-keyword">and</span> <span class="hljs-number">0xFF</span>), <span class="hljs-built_in">char</span>(x <span class="hljs-keyword">shr</span> <span class="hljs-number">8</span> <span class="hljs-keyword">and</span> <span class="hljs-number">0xFF</span>), <span class="hljs-built_in">char</span>(x <span class="hljs-keyword">shr</span> <span class="hljs-number">16</span> <span class="hljs-keyword">and</span> <span class="hljs-number">0xFF</span>)]
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;d0['!'] = 0x&quot;</span>, d0[<span class="hljs-built_in">uint8</span> <span class="hljs-string">'!'</span>].toHex(<span class="hljs-number">8</span>), <span class="hljs-string">&quot;  &gt;= bad: invalid&quot;</span>
+
+nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
+A line ending is skipped when it starts a group, which it always does with 76-character lines
+(76 is a multiple of 4). Anywhere else it sends the decoder to the slow path in `decodeTail`
+for the rest of the input, the cliff Lemire's post is about: this decoder is fast for email and
+PEM (64 is a multiple of 4 too), not for any line length.
 &quot;&quot;&quot;</span>
 
 nbFile <span class="hljs-string">&quot;bench/nim/b64scalar.nim&quot;</span>, start = <span class="hljs-string">&quot;while i + 4 &lt; n:&quot;</span>, stop = <span class="hljs-string">&quot;decodeTail(src, i, n, dst, o)&quot;</span>
@@ -2827,9 +2920,19 @@ nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
 
 ### 5. Nim calling simdutf: {g(nimFfi)} GB/s
 
-The same as PHP's pull request or Python's fastpybase64: a small `extern &quot;C&quot;` wrapper
-around `simdutf::base64_to_binary`, compiled once with g++, and a `{{.importc.}}` in Nim.
-It runs the same code as the C++ entry, so its number is the C++ one plus noise.
+The same as PHP's pull request or Python's fastpybase64: Nim calls the C++ library. Nim
+compiles to C here (the C backend, not `nim cpp`), and C cannot call a C++ function directly, so
+`simdutf_wrap.cpp` is a small `extern &quot;C&quot;` wrapper around `simdutf::base64_to_binary`. g++
+compiles it and simdutf into object files, `simdutf.nim` declares the wrapper's functions with
+`{{.importc.}}` and links the objects with `-lstdc++`. With `nim cpp` one could instead call
+simdutf directly with `{{.importcpp.}}` and no wrapper; it would run the same simdutf code.
+
+C++, Python and Nim all run the same simdutf kernel (&quot;icelake&quot;, the AVX-512 one), so they should
+be equally fast, and they are, within this machine's noise: {g(cpp)}, {g(ours.pick(&quot;python&quot;, &quot;fastpybase64&quot;))}
+and {g(nimFfi)} GB/s. Calling through Python or Nim adds a few nanoseconds per call, nothing
+next to the {int(1368424.0 / cpp.median / 1000)} µs a call takes to decode
+1.37 MB. The compiler is not it either: the C++ benchmark built with clang 18 instead of g++ 13
+ran at the same speed (14.0 to 14.7 GB/s in three runs); the fastpybase64 wheel was built with clang 21.
 &quot;&quot;&quot;</span>
 
 nbNote(nkReading, <span class="hljs-string">&quot;&quot;&quot;
