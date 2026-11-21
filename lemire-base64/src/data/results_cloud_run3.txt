@@ -1,0 +1,23 @@
+Linux 6.18.44-fc-v726 x86_64
+model name	: Intel(R) Xeon(R) Processor @ 2.10GHz
+g++ (Ubuntu 13.3.0-6ubuntu2~24.04.1) 13.3.0
+1000000 127503914
+simdutf 9.4.0, implementation icelake
+c++ simdutf mime base64_to_binary: 14.41 GB/s
+go go1.27.0 mime base64.StdEncoding.DecodeString: 1.29 GB/s
+go go1.27.0 mime base64.StdEncoding.Decode (preallocated): 1.36 GB/s
+zig 0.17.1 mime std.base64 decoderWithIgnore("\r\n"): 0.66 GB/s
+java 21.0.13.0.3+1-1-24.04.1-Ubuntu mime Base64.decode(byte[]): 0.95 GB/s
+node v22.23.5 mime Buffer.from(str,'base64'): 12.83 GB/s
+bun 1.4.4 mime Buffer.from(str,'base64'): 8.94 GB/s
+bun 1.4.4 mime Uint8Array.fromBase64(str): 6.09 GB/s
+php 8.3.6 mime base64_decode(str): 0.49 GB/s
+python 3.13.18 mime fastpybase64 0.2.1 (icelake) b64decode: 15.24 GB/s
+nim 2.2.4 mime std/base64 decode: 1.03 GB/s
+nim 2.2.4 mime scalar (4 tables) decode: 3.99 GB/s
+nim 2.2.4 mime scalar (4 tables) decode (preallocated): 3.99 GB/s
+nim 2.2.4 mime nimsimd AVX2 decode: 6.30 GB/s
+nim 2.2.4 mime nimsimd AVX2 decode (preallocated): 6.24 GB/s
+nim 2.2.4 mime AVX-512 VBMI2 decode: 9.94 GB/s
+nim 2.2.4 mime AVX-512 VBMI2 decode (preallocated): 9.92 GB/s
+nim 2.2.4 mime simdutf 9.4.0 (icelake) base64_to_binary via FFI (preallocated): 14.14 GB/s

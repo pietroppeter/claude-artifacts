@@ -43,6 +43,7 @@ PRE = re.compile(r"(<pre\b[^>]*>)(\s*)(<code\b[^>]*>)(.*?)(</code>\s*</pre>)", r
 SKIP_PRE = re.compile(r'class="[^"]*\b(nb-output|out|plain)\b', re.I)
 SKIP_CODE = re.compile(r'class="[^"]*\blanguage-(text|plaintext|none|output)\b', re.I)
 LANG_CLASS = re.compile(r'class="[^"]*\b(?:language|lang)-([\w+#-]+)', re.I)
+NIMIB_CLASS = re.compile(r'class="\s*([\w+#-]+)\s+hljs"', re.I)  # nimib's nbFile: class="php hljs"
 EXT = {"nim": "nim", "nims": "nim", "nimble": "nim", "py": "python", "c": "c", "h": "c",
        "js": "javascript", "mjs": "javascript", "ts": "typescript", "toml": "toml",
        "sh": "bash", "json": "json", "swift": "swift", "yaml": "yaml", "yml": "yaml",
@@ -139,7 +140,8 @@ def fix(text):
         pre, ws, code, body, close = m.groups()
         src = html.unescape(body)
         lc = LANG_CLASS.search(code)
-        lang = lc.group(1).lower() if lc else guess(src)
+        nc = None if lc else NIMIB_CLASS.search(code)
+        lang = lc.group(1).lower() if lc else (nc.group(1).lower() if nc else guess(src))
         if not lang:
             print(f"    left as text, mark it language-text: {src.strip().splitlines()[0][:60]!r}")
             return m.group(0)

@@ -1,0 +1,1 @@
+ok: 15005 round trips x 4 decoders, 14970 corrupted inputs rejected x 3 decoders
