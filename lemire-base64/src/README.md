@@ -7,7 +7,8 @@ page; tables by [tabelline](https://pietroppeter.github.io/tabelline/); files sh
 
 - `index.nim`: the page, writes `../index.html`. Build: `sh deps.sh && nim r index.nim` (Nim 2.2, `libpcre3`, and
   [nimsimd](https://github.com/guzba/nimsimd) installed with nimble, for the decoders the page runs).
-- `bench/`: Lemire's files, unchanged (commit in `UPSTREAM_COMMIT`), `run_cloud.sh` (one run on this machine's tools).
+- `bench/`: Lemire's files, unchanged (commit in `UPSTREAM_COMMIT`; his repository's README: "I make no copyright claim
+  on this code: you may consider it to be in the public domain"), `run_cloud.sh` (one run on this machine's tools).
 - `bench/nim/`: the Nim decoders (`b64scalar`, `b64avx2`, `b64avx512`, `simdutf` + `simdutf_wrap.cpp`), `bench.nim`, `test.nim`.
 - `data/`: raw result lines, ours (`results_cloud_run*.txt`) and Lemire's (`results_big4_run*.txt`), and the test output.
 - `lib/`: `data.nim` (reads the results), `blocks.nim` (notes, stats, bars), `style.nim` (every colour and rule).
