@@ -43,6 +43,13 @@ body pre.nb-output{font:12.5px/1.45 var(--mono);background:var(--ink);color:#f3e
 .toc ol{margin:.4rem 0;padding-left:1.3rem}
 .toc li{margin:.2rem 0}
 h2 .ch-span{display:block;font-size:.82rem;font-weight:400;color:var(--muted);margin-top:.15rem}
+h2 .ch-top{display:inline-block;font-size:.78rem;font-weight:600;color:var(--sea);text-decoration:none;margin-top:.2rem}
+.prompt{margin:1.4rem 0 1.6rem}
+.prompt figcaption{font-size:.78rem;color:var(--muted);margin:0 0 .35rem .2rem}
+.prompt .prompt-who{font-weight:700;color:var(--ink)}
+.prompt blockquote{margin:0;padding:.8rem 1rem;background:var(--ink);color:var(--paper);border-radius:16px 16px 16px 4px;font-size:1.02rem;line-height:1.55;max-width:34rem}
+.prompt blockquote p{margin:0}
+.prompt blockquote a{color:var(--gold-soft);text-decoration-color:var(--gold);overflow-wrap:anywhere}
 aside.note{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--muted);padding:.5rem .9rem;margin:1rem 0;font-size:.95rem}
 aside.note.aside{border-left-color:var(--aside);background:var(--aside-soft)}
 aside.note.careful{border-left-color:var(--careful);background:var(--careful-soft)}
@@ -825,7 +832,7 @@ years he has posted its progress on the Nim forum one line at a time: &quot;NJVL
 <a href="https://github.com/nim-lang/nimony">nimony repo</a> (2,348 commits) and Araq's blog, with every term
 explained at the point where it shows up.</p>
 </div>
-<p class="rv-enter"><span class="rv-version">Version 3 · updated 23 Nov 2026</span></p>
+<p class="rv-enter"><span class="rv-version">Version 4 · updated 23 Nov 2026</span></p>
 <div class="tldr"><span class="tldr-label">The short version</span><ul>
 <li><strong>What it is.</strong> A from-scratch Nim compiler built as a chain of small tools that pass
 <strong>NIF</strong> files to each other (NIF is a Lisp-like text format, &quot;JSON for compilers&quot;). Because every
@@ -841,14 +848,18 @@ and a &quot;great christmas release&quot; is planned.</li>
 built the Nimony way. Nim 2.x and Nimony now &quot;compete for the Nim 3 title&quot;.</li>
 </ul>
 </div>
-<nav class="toc"><span class="toc-label">Contents</span><ol><li><a href="#avoidtemps">How this page started: avoidtemps</a></li><li><a href="#prehistory">2023 to 2024: NIR, a survey, then NIF</a></li><li><a href="#hello">Feb to May 2025: hello world to a minimal Nim</a></li><li><a href="#growing">May to Nov 2025: closures, passive procs, release 0.2</a></li><li><a href="#ic">Dec 2025 to Jun 2026: IC for Nim 2, NJ, borrow checking, self-hosting</a></li><li><a href="#native">Jun to Sep 2026: Leng, Shoggoth, Arkham, no C compiler</a></li><li><a href="#complete">Oct to Nov 2026: feature complete, the fuzzer, avoidtemps</a></li><li><a href="#today">The pipeline today</a></li><li><a href="#names">The names that changed</a></li><li><a href="#glossary">Index of terms</a></li><li><a href="#sources">Sources</a></li></ol></nav>
-<h2 id="avoidtemps">How this page started: avoidtemps<span class="ch-span">promised 3 May 2025, shipped 22 Nov 2026</span></h2>
+<nav class="toc" id="toc"><span class="toc-label">Contents</span><ol><li><a href="#avoidtemps">How this page started: avoidtemps</a></li><li><a href="#prehistory">2023 to 2024: NIR, a survey, then NIF</a></li><li><a href="#hello">Feb to May 2025: hello world to a minimal Nim</a></li><li><a href="#growing">May to Nov 2025: closures, passive procs, release 0.2</a></li><li><a href="#ic">Dec 2025 to Jun 2026: IC for Nim 2, NJ, borrow checking, self-hosting</a></li><li><a href="#native">Jun to Sep 2026: Leng, Shoggoth, Arkham, no C compiler</a></li><li><a href="#complete">Oct to Nov 2026: feature complete, the fuzzer, avoidtemps</a></li><li><a href="#today">The pipeline today</a></li><li><a href="#names">The names that changed</a></li><li><a href="#glossary">Index of terms</a></li><li><a href="#sources">Sources</a></li></ol></nav>
+<h2 id="avoidtemps">How this page started: avoidtemps<span class="ch-span">promised 3 May 2025, shipped 22 Nov 2026</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
 <p>On 22 Nov 2026 Araq <a href="https://forum.nim-lang.org/t/14201#86812">posted</a> one more line in his progress thread: &quot;The plugin
 called avoidtemps the manual outlined is now a reality.&quot; It was the umpteenth post of that kind, a
 name that sounds interesting and assumes you have read the forty posts before it. So Pietro decided
 to catch up, and asked Claude for an explainer of how Nimony evolved from the beginning until now:
 follow all the forum threads, look at the repo and anywhere else that helps, explain every term,
 and start from that thread with one concrete question: what is avoidtemps?</p>
+<p>This was the request, word for word:</p>
+<figure class="prompt"><figcaption><span class="prompt-who">Pietro</span> asked Claude, 22 Nov 2026</figcaption><blockquote><p>Explain to me Nimony evolution tracking all forum threads and looking at the repo and possibly
+elsewhere. Explain all things. https://forum.nim-lang.org/t/14201 eg what is avoidtemps?</p>
+</blockquote></figure>
 <p>This page is the answer, and it starts where the question did.</p>
 <p>Take a small matrix type with the usual operators. Each operator copies its left operand into a
 new result and then works in place on it. That is the standard way to write them, and it means
@@ -916,7 +927,7 @@ first user.</p>
 plugins that are ordinary Nim programs compiled to machine code, and a compiler that speaks
 <strong>NIF</strong> between every step so a plugin can read and write the program. Here is how all of that
 came to be.</p>
-<h2 id="prehistory">2023 to 2024: NIR, a survey, then NIF<span class="ch-span">Nov 2023 to Jan 2025</span></h2>
+<h2 id="prehistory">2023 to 2024: NIR, a survey, then NIF<span class="ch-span">Nov 2023 to Jan 2025</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
 <ol class="events"><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/10594#70808">2 Nov 2023</a></span><div class="ev-text"><p>Araq announces <strong>NIR</strong>, a new intermediate format &quot;lower level than Nim's AST&quot; for future Nim versions, and runs a survey: REPL, not-nil checking, a new C backend, incremental compilation or better borrow checking? The answers are nearly unanimous.</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/10594#70902">5 Nov 2023</a></span><div class="ev-text"><p>&quot;Ok, ok, IC it is.&quot;</p>
 </div></li><li><span class="ev-date"><a href="https://github.com/nim-lang/nimony/commits/master?after=36bde262&path=README.md">6 Jul 2024</a></span><div class="ev-text"><p>A new repo, then called <code>nim-lang/nif</code>: &quot;Spec version 1.0&quot;, &quot;file extensions are a type system for files&quot;, and <strong>nifler</strong>, the parser tool.</p>
@@ -968,7 +979,7 @@ Jan 2025 it was renamed <strong>hexer</strong>, and in Oct 2026 hexer became par
 and more rewarding than generating LLVM's IR&quot;, plus a long-term plan to run the generated machine
 code at <em>compile time</em> instead of keeping Nim's VM. That plan came true in 2026 (see Arkham).</p>
 </aside>
-<h2 id="hello">Feb to May 2025: hello world to a minimal Nim<span class="ch-span">progress report, part 1</span></h2>
+<h2 id="hello">Feb to May 2025: hello world to a minimal Nim<span class="ch-span">progress report, part 1</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
 <blockquote class="quote"><p>Tonight the following program worked for the first time: <code>import std/syncio; echo &quot;hi&quot;, &quot;abc&quot;</code>.
 This might not look impressive but it is (IMO): Nimony is a new Nim compiler which does not use
 much of the old codebase.</p>
@@ -1074,7 +1085,7 @@ and other analyses need. Araq had first tried his own approach and replaced it i
 &quot;I thought I had found a better way than the split streams algorithm but it turns out, it was
 just a terrible hack.&quot;</p>
 <span class="term-since"><a href="https://forum.nim-lang.org/t/12693#79379">May 2025</a></span></section>
-<h2 id="growing">May to Nov 2025: closures, passive procs, release 0.2<span class="ch-span">progress reports, parts 2 to 4</span></h2>
+<h2 id="growing">May to Nov 2025: closures, passive procs, release 0.2<span class="ch-span">progress reports, parts 2 to 4</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
 <ol class="events"><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/12978#79797">2 Jun 2025</a></span><div class="ev-text"><p>Nimony builds with its own tool, <strong>nifmake</strong>, instead of <code>make</code>.</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/12978#79840">6 Jun 2025</a></span><div class="ev-text"><p><code>import abc {.plugin: &quot;v2&quot;.}</code> works: a module compiled by the Nim 2 compiler is imported into Nimony.</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/12978#79953">11 Jun 2025</a></span><div class="ev-text"><p>Closures; two days later the compiler avoids their heap allocation when the closure does not escape, which makes capturing <code>var</code> parameters legal.</p>
@@ -1124,7 +1135,7 @@ must not alias the caller's frame, take them as <code>sink</code>);</li>
 <li>the <strong>scheduler</strong> is replaceable, so a thread pool and an event loop are the same mechanism:
 &quot;Async event loop unified with multi-threading.&quot;</li>
 </ul>
-<p>A user report: tokyovigilante's CPS web server Hashi reached parity with Mummy.</p>
+<p>A user report: tokyovigilante's CPS web server <a href="https://github.com/kaitakeradiology/hashi">Hashi</a> reached parity with Mummy.</p>
 <span class="term-since"><a href="https://forum.nim-lang.org/t/12978#80257">first ran 7 Jul 2025</a>, <a href="https://forum.nim-lang.org/t/13651#83618">working Mar 2026</a></span></section>
 <section class="term" id="t-nimlody"><div class="term-head"><span class="term-name">Nimlody</span></div><p>An idea from Aug 2025: keep the compiler's standard library small and ship a &quot;distribution&quot;
 called Nimlody, a set of libraries designed together (including an async event loop), probably
@@ -1153,7 +1164,7 @@ assigned exactly once, so <code>x = 1; x = 2</code> becomes <code>x1 = 1; x2 = 2
 <strong>phi node</strong> says &quot;x3 is x1 or x2, depending on where we came from&quot;. Phi nodes are what NJVL's
 versioned locations replaced with fixed join points in the tree.</p>
 </section>
-<h2 id="ic">Dec 2025 to Jun 2026: IC for Nim 2, NJ, borrow checking, self-hosting<span class="ch-span">progress reports, parts 5 and 6</span></h2>
+<h2 id="ic">Dec 2025 to Jun 2026: IC for Nim 2, NJ, borrow checking, self-hosting<span class="ch-span">progress reports, parts 5 and 6</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
 <p>On Christmas Day 2025 Araq posted a <a href="https://forum.nim-lang.org/t/13585#82419">progress report on IC</a>, but for <strong>Nim 2</strong>:
 the design was &quot;taken from Nimony&quot;. A pre-pass with nifler builds the import graph, nifmake runs
 <code>nim m</code> (compile one module, load its dependencies from their <code>.nif</code> files) for each module, then
@@ -1169,7 +1180,7 @@ innovations can be brought to the 2.x line which is what pays my bills.&quot;</p
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/13651#83608">13 Mar 2026</a></span><div class="ev-text"><p>Borrow checking is implemented.</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/13651#83639">14 Mar 2026</a></span><div class="ev-text"><p>Asked how much is vibe-coded: &quot;Close to 100% these days&quot;, the architecture (token streams, continuations, NJ) having been in place &quot;before AI got really good&quot;. Later: &quot;I care about the code, I read it.&quot;</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/13651#83749">22 Mar 2026</a></span><div class="ev-text"><p>Strings with small-string optimization and copy-on-write.</p>
-</div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/13651#83895">2 Apr 2026</a></span><div class="ev-text"><p>Sum types and pattern matching (RFC 559).</p>
+</div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/13651#83895">2 Apr 2026</a></span><div class="ev-text"><p>Sum types and pattern matching (<a href="https://github.com/nim-lang/RFCs/issues/559">RFC 559</a>).</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/13651#83973">8 Apr 2026</a></span><div class="ev-text"><p>&quot;hello world&quot; through a new LLVM backend, generating <code>.ll</code> text.</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/13651#84016">11 Apr 2026</a></span><div class="ev-text"><p>Not-nil <code>ref</code>/<code>ptr</code> become the default.</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/13864#84093">19 Apr 2026</a></span><div class="ev-text"><p>A <strong>validator</strong> checks plugins and compiler passes.</p>
@@ -1192,12 +1203,10 @@ buffer is sealed while a cursor reads it (no iterator invalidation) and cannot b
 Nim 2 <code>=copy</code> hook marked <code>.error</code>). &quot;The tree exists only implicitly in the call stack.&quot;
 Helper structures like symbol tables are built for one pass and thrown away.</p>
 <span class="term-since">the design since 2024; <a href="https://nim-lang.org/araq/nif_implementation.html">explained Mar 2026</a></span></section>
-<section class="term" id="t-nif24-nif26-nif27"><div class="term-head"><span class="term-name">NIF24, NIF26, NIF27</span></div><p>The first line of a NIF file names its version: <code>(.nif24)</code>, <code>(.nif26)</code>, <code>(.nif27)</code>. NIF26 (Jan</p>
-<ol start="2026">
-<li>brought a better index and NIF's own module system (Nim 2's IC files shrank from 4 MB to 3.3
-MB); NIF27 (May 2026) made NIF a general data format, friendlier to write by hand, with</li>
-</ol>
-<p><code>.lang</code> blocks so one file can mix languages (<code>(.lang html (div ...))</code>). Yes, NIF27 appeared in
+<section class="term" id="t-nif24-nif26-nif27"><div class="term-head"><span class="term-name">NIF24, NIF26, NIF27</span></div><p>The first line of a NIF file names its version: <code>(.nif24)</code>, <code>(.nif26)</code>, <code>(.nif27)</code>.
+NIF26 (January 2026) brought a better index and NIF's own module system (Nim 2's IC files shrank from 4 MB to 3.3
+MB); NIF27 (May 2026) made NIF a general data format, friendlier to write by hand, with
+<code>.lang</code> blocks so one file can mix languages (<code>(.lang html (div ...))</code>). Yes, NIF27 appeared in
 2026: the version is ahead of the calendar.</p>
 <span class="term-since"><a href="https://forum.nim-lang.org/t/13651#82706">NIF26 Jan 2026</a>, <a href="https://forum.nim-lang.org/t/13864#84218">NIF27 May 2026</a></span></section>
 <section class="term" id="t-cyclic-imports"><div class="term-head"><span class="term-name">cyclic imports</span></div><p>Nim 2 forbids import cycles, which forces people to merge modules or make fields public. Nimony
@@ -1211,10 +1220,10 @@ mutate disjoint siblings (<code>data.metadata</code>). Borrowing is only allowed
 <code>ref</code> are rejected because another alias could change them: either move the container out and
 back in, or write <code>uncheckedBorrow app.users</code> to take the responsibility yourself. Araq's rules,
 <a href="https://forum.nim-lang.org/t/14201#86426">posted in Oct 2026</a>; the rules were also modelled in <strong>Lean</strong> (a proof
-assistant), which found bugs. &quot;The borrow checker is now considered to be complete&quot; (20 Oct 2026).
+assistant), which found bugs (<a href="https://github.com/nim-lang/nimony/pull/2697">PR #2697</a>). &quot;The borrow checker is now considered to be complete&quot; (20 Oct 2026).
 Nim 2 will get it next.</p>
 <span class="term-since"><a href="https://forum.nim-lang.org/t/13651#83608">Mar 2026</a></span></section>
-<section class="term" id="t-sum-types-and-pattern-matching"><div class="term-head"><span class="term-name">sum types and pattern matching</span></div><p>From RFC 559: a new <code>case</code> syntax inside objects and matching on it, positionally:
+<section class="term" id="t-sum-types-and-pattern-matching"><div class="term-head"><span class="term-name">sum types and pattern matching</span></div><p>From <a href="https://github.com/nim-lang/RFCs/issues/559">RFC 559</a>: a new <code>case</code> syntax inside objects and matching on it, positionally:
 <code>of AddOpr(a, b): eval(a) + eval(b)</code>. In Jul 2026 the stdlib gained <code>Opt[T]</code> and <code>Result[T, E]</code>
 built on them (even though Araq still prefers exceptions to Option for &quot;the auto-return
 behavior&quot;).</p>
@@ -1252,9 +1261,9 @@ shipped on <a href="https://forum.nim-lang.org/t/14251#86508">28 Oct 2026</a>: &
 the development of an entirely new compiler and then months of grinding with AI to bring it to
 Nim... Easily the hardest problem of my entire career.&quot;</p>
 </aside>
-<h2 id="native">Jun to Sep 2026: Leng, Shoggoth, Arkham, no C compiler<span class="ch-span">progress reports, parts 6 and 7</span></h2>
+<h2 id="native">Jun to Sep 2026: Leng, Shoggoth, Arkham, no C compiler<span class="ch-span">progress reports, parts 6 and 7</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
 <ol class="events"><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/13864#84683">4 Jun 2026</a></span><div class="ev-text"><p>Nim's own allocator ported (mimalloc optional). A new optimizer, <strong>shoggoth</strong>; native code generators for amd64 and arm64, <strong>arkham</strong>: &quot;hello world&quot; without a C compiler.</p>
-</div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/13864#84726">7 Jun 2026</a></span><div class="ev-text"><p>A &quot;benchmark-winning&quot; JSON library, built on the NIF API.</p>
+</div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/13864#84726">7 Jun 2026</a></span><div class="ev-text"><p>A &quot;benchmark-winning&quot; <a href="https://github.com/nim-lang/nimony/blob/master/lib/std/json.nim">JSON library</a>, built on the NIF API (<a href="https://github.com/nim-lang/nimony/blob/master/tests/nimony/stdlib/tjson.nim">its test</a> shows the API).</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/13864#84783">11 Jun 2026</a></span><div class="ev-text"><p>Nearly libc-free: Nimony calls the operating system's entry points directly.</p>
 </div></li><li><span class="ev-date">15 Jun 2026</span><div class="ev-text"><p>Commit &quot;renamefest: nifc -&gt; leng&quot;, &quot;because everybody, LLMs included, always confused&quot; NIF and NIFC.</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/13864#84952">26 Jun 2026</a></span><div class="ev-text"><p>The <code>||</code> parallel for loop.</p>
@@ -1268,7 +1277,7 @@ Nim... Easily the hardest problem of my entire career.&quot;</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/14014#85717">27 Aug 2026</a></span><div class="ev-text"><p>Memory layouts for embedded chips (ARM Cortex-M, RISC-V 32, AVR).</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/14014#85733">29 Aug 2026</a></span><div class="ev-text"><p>WebAssembly: <code>nimony w</code>.</p>
 </div></li><li><span class="ev-date">31 Aug 2026</span><div class="ev-text"><p>NJVL's pipeline is removed.</p>
-</div></li><li><span class="ev-date"><a href="https://nim-lang.github.io/nimony-website/version0_6.html">8 Sep 2026</a></span><div class="ev-text"><p><strong>Nimony 0.6.2</strong>, with a guest report by tokyovigilante on a year of porting projects.</p>
+</div></li><li><span class="ev-date"><a href="https://nim-lang.github.io/nimony-website/version0_6.html">8 Sep 2026</a></span><div class="ev-text"><p><strong>Nimony 0.6.2</strong>, with a <a href="https://nim-lang.github.io/nimony-website/version0_6.html">guest report</a> by tokyovigilante on a year of porting projects.</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/14014#85982">14 Sep 2026</a></span><div class="ev-text"><p>Nimony's own lexer and parser, generated from a DSL by plugins.</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/14014#86003">15 Sep 2026</a></span><div class="ev-text"><p><code>{.feature: &quot;staticContracts&quot;.}</code>: every contract must be proven.</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/14014#86047">18 Sep 2026</a></span><div class="ev-text"><p>The backend uses the &quot;Final IR&quot; consistently: &quot;the last big refactoring of the compilation pipeline&quot;.</p>
@@ -1307,7 +1316,7 @@ cryptography (<code>std/crypto/x25519</code>, <code>chacha20poly1305</code>). Th
 <span class="term-since"><a href="https://forum.nim-lang.org/t/14014#85729">Aug 2026</a></span></section>
 <section class="term" id="t-bif"><div class="term-head"><span class="term-name">BIF</span></div><p>&quot;Binary NIF&quot;: the token stream written as raw 32-bit tokens with an index, little-endian, with a
 version byte (now 5). It trades readability for loading speed (memory-mapped, no parsing).
-Converters <code>nif2bif</code>/<code>bif2nif</code> exist. Third parties wrote codecs (nifkit).</p>
+Converters <code>nif2bif</code>/<code>bif2nif</code> exist. Third parties wrote codecs (<a href="https://github.com/puffball1567/nifkit">nifkit</a>).</p>
 <span class="term-since"><a href="https://forum.nim-lang.org/t/13585#85069">Jul 2026</a></span></section>
 <section class="term" id="t-nifcore"><div class="term-head"><span class="term-name">nifcore</span></div><p>The third generation of the library that reads and writes NIF inside the toolchain, with lower
 memory use, binary BIF support and a plugin API on top. The whole codebase was ported to it by
@@ -1332,15 +1341,15 @@ prover also reasons about integer overflow. dwhall256's thread walks through the
 <span class="term-since">Aug and Sep 2026</span></section>
 <section class="term" id="t-parallel-for"><div class="term-head"><span class="term-name"><code>||</code> parallel for</span></div><p><code>for i in 0 || 1: r[i] = pfib(n - 1 - i)</code>: like <code>0 .. 1</code>, but every iteration runs in parallel.
 The compiler checks that the writes <code>r[i]</code> do not race, and the parallelism ends with the loop.
-No <code>spawn</code>, no FlowVar, no <code>sync</code>. Araq considers it simpler than his Malebolgia library.</p>
+No <code>spawn</code>, no FlowVar, no <code>sync</code>. Araq considers it simpler than his <a href="https://github.com/Araq/malebolgia">Malebolgia</a> library.</p>
 <span class="term-since"><a href="https://forum.nim-lang.org/t/13864#84952">Jun 2026</a></span></section>
-<h2 id="complete">Oct to Nov 2026: feature complete, the fuzzer, avoidtemps<span class="ch-span">progress report, part 8</span></h2>
+<h2 id="complete">Oct to Nov 2026: feature complete, the fuzzer, avoidtemps<span class="ch-span">progress report, part 8</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
 <ol class="events"><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/14201#86216">2 Oct 2026</a></span><div class="ev-text"><p>FreeBSD. ORC and YRC ported: all four memory modes plus custom ones with <code>--mm:&lt;path&gt;</code>.</p>
-</div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/14201#86220">3 Oct 2026</a></span><div class="ev-text"><p><code>break</code> and <code>block</code> work &quot;as they should for Nim 3&quot; (RFC 576).</p>
+</div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/14201#86220">3 Oct 2026</a></span><div class="ev-text"><p><code>break</code> and <code>block</code> work &quot;as they should for Nim 3&quot; (<a href="https://github.com/nim-lang/RFCs/issues/576">RFC 576</a>).</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/14201#86241">6 Oct 2026</a></span><div class="ev-text"><p>Better decisions about what to recompile. Hexer is folded into Shoggoth.</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/14201#86298">13 Oct 2026</a></span><div class="ev-text"><p><code>owned ref T</code>, like Nim devel.</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/14201#86331">16 Oct 2026</a></span><div class="ev-text"><p>An <code>httpclient</code> with its own TLS, to try the assembler design.</p>
-</div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/14201#86371">17 Oct 2026</a></span><div class="ev-text"><p>Borrowing rules modelled in Lean; bugs found and fixed.</p>
+</div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/14201#86371">17 Oct 2026</a></span><div class="ev-text"><p>Borrowing rules modelled in Lean; bugs found and fixed (<a href="https://github.com/nim-lang/nimony/pull/2697">PR #2697</a>).</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/14201#86422">20 Oct 2026</a></span><div class="ev-text"><p>Strict funcs (&quot;No standard library code broke&quot;); &quot;The borrow checker is now considered to be complete.&quot;</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/14201#86496">27 Oct 2026</a></span><div class="ev-text"><p>&quot;Focus is on bugfixes, Nimony is feature complete. But I've been saying this for some time, I think.&quot;</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/14201#86518">28 Oct 2026</a></span><div class="ev-text"><p>Nim 2.4.0 released, with IC. <code>strutils</code> compiles with staticContracts; the regex engine is much faster.</p>
@@ -1373,7 +1382,7 @@ overflow wraps around (<code>high(int) + 1 == low(int)</code>); <code>{.keepOver
 nor miscompiles them. Since Nov 2026 it has found &quot;hundreds of bugs&quot;, now the main work before
 the release planned for Christmas 2026.</p>
 <span class="term-since"><a href="https://forum.nim-lang.org/t/14201#86744">Nov 2026</a></span></section>
-<h2 id="today">The pipeline today<span class="ch-span">Nov 2026</span></h2>
+<h2 id="today">The pipeline today<span class="ch-span">Nov 2026</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
 <p>This is what <code>nimony c hello.nim</code> runs, from <a href="https://github.com/nim-lang/nimony/blob/master/doc/design.md">design.md</a> and the repo's
 <code>AGENTS.md</code>. Every arrow is a file in <code>nimcache/</code>, and nifmake reruns only the stages whose
 inputs changed.</p>
@@ -1391,7 +1400,7 @@ tend to be in Nimony or Shoggoth&quot;.</p>
 <code>hastur test</code>, <code>hastur bug</code>, <code>hastur rep</code> run tests and reproduce bugs. You need an existing Nim 2
 only to build Nimony from source; the nightly builds need nothing.</p>
 </section>
-<h2 id="names">The names that changed<span class="ch-span">a rename map</span></h2>
+<h2 id="names">The names that changed<span class="ch-span">a rename map</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
 <p>Most confusion in the forum threads comes from names that changed while the work went on.</p>
 <div id="tabella-717f74c3" class="tabella">
 <style>
@@ -1515,11 +1524,11 @@ only to build Nimony from source; the nightly builds need nothing.</p>
 commit saying &quot;Leng&quot; mean the same thing. Some docs in the repo still mention old names (the
 repo's own agent instructions say to ignore stray mentions of NJVL).</p>
 </aside>
-<h2 id="glossary">Index of terms<span class="ch-span">every card on this page</span></h2>
-<div id="tabella-283a0b28" class="tabella">
-<table class="tb_table" aria-labelledby="tabella-283a0b28-title">
+<h2 id="glossary">Index of terms<span class="ch-span">every card on this page</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
+<div id="tabella-89584ae9" class="tabella">
+<table class="tb_table" aria-labelledby="tabella-89584ae9-title">
 <thead>
-<tr class="tb_heading"><th colspan="3" id="tabella-283a0b28-title" class="tb_title tb_heading_last">Terms, in the order they appear</th></tr>
+<tr class="tb_heading"><th colspan="3" id="tabella-89584ae9-title" class="tb_title tb_heading_last">Terms, in the order they appear</th></tr>
 <tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_left" scope="col" id="short">in one line</th><th class="tb_col_heading tb_left" scope="col" id="chapter">chapter</th></tr>
 </thead>
 <tbody class="tb_table_body">
@@ -1571,7 +1580,7 @@ repo's own agent instructions say to ignore stray mentions of NJVL).</p>
 <tr><th scope="row" class="tb_row tb_left tb_stub"><code>nimony c</code>, <code>n</code>, <code>w</code>, <code>j</code></th><td class="tb_row tb_left">the four backends: <code>c</code> through C, <code>n</code> native (Arkham), <code>w</code> WebAssembly, <code>j</code> JavaScript</td><td class="tb_row tb_left">Jun to Sep 2026: Leng, Shoggoth, Arkham, no C compiler</td></tr>
 <tr><th scope="row" class="tb_row tb_left tb_stub"><code>||</code> parallel for</th><td class="tb_row tb_left">structured parallelism without FlowVars</td><td class="tb_row tb_left">Jun to Sep 2026: Leng, Shoggoth, Arkham, no C compiler</td></tr>
 <tr><th scope="row" class="tb_row tb_left tb_stub">memory management modes</th><td class="tb_row tb_left">atomicArc by default; arc, orc, yrc, or your own</td><td class="tb_row tb_left">Oct to Nov 2026: feature complete, the fuzzer, avoidtemps</td></tr>
-<tr><th scope="row" class="tb_row tb_left tb_stub"><code>owned ref T</code></th><td class="tb_row tb_left">a checked unique owner for a ref (RFC 575)</td><td class="tb_row tb_left">Oct to Nov 2026: feature complete, the fuzzer, avoidtemps</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><code>owned ref T</code></th><td class="tb_row tb_left">a checked unique owner for a ref (<a href="https://github.com/nim-lang/RFCs/issues/575">RFC 575</a>)</td><td class="tb_row tb_left">Oct to Nov 2026: feature complete, the fuzzer, avoidtemps</td></tr>
 <tr><th scope="row" class="tb_row tb_left tb_stub">strict funcs</th><td class="tb_row tb_left">a <code>func</code> cannot mutate through refs either</td><td class="tb_row tb_left">Oct to Nov 2026: feature complete, the fuzzer, avoidtemps</td></tr>
 <tr><th scope="row" class="tb_row tb_left tb_stub">break and block, case sensitivity</th><td class="tb_row tb_left">two small Nim 3 changes, each with an opt-out</td><td class="tb_row tb_left">Oct to Nov 2026: feature complete, the fuzzer, avoidtemps</td></tr>
 <tr><th scope="row" class="tb_row tb_left tb_stub">fuzzer</th><td class="tb_row tb_left">random programs that hunt compiler bugs</td><td class="tb_row tb_left">Oct to Nov 2026: feature complete, the fuzzer, avoidtemps</td></tr>
@@ -1580,7 +1589,7 @@ repo's own agent instructions say to ignore stray mentions of NJVL).</p>
 </tbody>
 </table>
 </div>
-<h2 id="sources">Sources<span class="ch-span">read on 22 Nov 2026</span></h2>
+<h2 id="sources">Sources<span class="ch-span">read on 22 Nov 2026</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
 <p><strong>Forum threads</strong> (in order): <a href="https://forum.nim-lang.org/t/10594">NIR</a> (2023),
 <a href="https://forum.nim-lang.org/t/12534">NIF, NIFC, native code</a> (2024),
 <a href="https://forum.nim-lang.org/t/12693">Nimony progress</a> and progress reports
@@ -1661,7 +1670,7 @@ years he has posted its progress on the Nim forum one line at a time: &quot;NJVL
 [nimony repo](https://github.com/nim-lang/nimony) (2,348 commits) and Araq's blog, with every term
 explained at the point where it shows up.
 &quot;&quot;&quot;</span>
-nbVersion(<span class="hljs-number">3</span>, <span class="hljs-string">&quot;23 Nov 2026&quot;</span>)
+nbVersion(<span class="hljs-number">4</span>, <span class="hljs-string">&quot;23 Nov 2026&quot;</span>)
 
 nbTldr: <span class="hljs-string">&quot;&quot;&quot;
 - **What it is.** A from-scratch Nim compiler built as a chain of small tools that pass
@@ -1703,6 +1712,15 @@ to catch up, and asked Claude for an explainer of how Nimony evolved from the be
 follow all the forum threads, look at the repo and anywhere else that helps, explain every term,
 and start from that thread with one concrete question: what is avoidtemps?
 
+This was the request, word for word:
+&quot;&quot;&quot;</span>
+
+nbPrompt(<span class="hljs-string">&quot;Pietro&quot;</span>, <span class="hljs-string">&quot;22 Nov 2026&quot;</span>, <span class="hljs-string">&quot;&quot;&quot;
+Explain to me Nimony evolution tracking all forum threads and looking at the repo and possibly
+elsewhere. Explain all things. https://forum.nim-lang.org/t/14201 eg what is avoidtemps?
+&quot;&quot;&quot;</span>)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
 This page is the answer, and it starts where the question did.
 
 Take a small matrix type with the usual operators. Each operator copies its left operand into a
@@ -2053,7 +2071,7 @@ so it looks like a blocking call. The pieces, from [passive_procs.md]({docs}pass
 - the **scheduler** is replaceable, so a thread pool and an event loop are the same mechanism:
   &quot;Async event loop unified with multi-threading.&quot;
 
-A user report: tokyovigilante's CPS web server Hashi reached parity with Mummy.
+A user report: tokyovigilante's CPS web server [Hashi](https://github.com/kaitakeradiology/hashi) reached parity with Mummy.
 &quot;&quot;&quot;</span>, taka = <span class="hljs-string">&quot;async, coroutines&quot;</span>, tsince = &amp;<span class="hljs-string">&quot;[first ran 7 Jul 2025]({f(12978, 80257)}), [working Mar 2026]({f(13651, 83618)})&quot;</span>)
 
 term(<span class="hljs-string">&quot;Nimlody&quot;</span>, <span class="hljs-string">&quot;an idea: a batteries-included distribution on top of Nimony&quot;</span>, <span class="hljs-string">&quot;&quot;&quot;
@@ -2114,7 +2132,7 @@ nbEvents @[
   (<span class="hljs-string">&quot;13 Mar 2026&quot;</span>, <span class="hljs-string">&quot;Borrow checking is implemented.&quot;</span>, f(<span class="hljs-number">13651</span>, <span class="hljs-number">83608</span>)),
   (<span class="hljs-string">&quot;14 Mar 2026&quot;</span>, <span class="hljs-string">&quot;Asked how much is vibe-coded: </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">Close to 100% these days</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">, the architecture (token streams, continuations, NJ) having been in place </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">before AI got really good</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">. Later: </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">I care about the code, I read it.</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&quot;</span>, f(<span class="hljs-number">13651</span>, <span class="hljs-number">83639</span>)),
   (<span class="hljs-string">&quot;22 Mar 2026&quot;</span>, <span class="hljs-string">&quot;Strings with small-string optimization and copy-on-write.&quot;</span>, f(<span class="hljs-number">13651</span>, <span class="hljs-number">83749</span>)),
-  (<span class="hljs-string">&quot;2 Apr 2026&quot;</span>, <span class="hljs-string">&quot;Sum types and pattern matching (RFC 559).&quot;</span>, f(<span class="hljs-number">13651</span>, <span class="hljs-number">83895</span>)),
+  (<span class="hljs-string">&quot;2 Apr 2026&quot;</span>, <span class="hljs-string">&quot;Sum types and pattern matching ([RFC 559](https://github.com/nim-lang/RFCs/issues/559)).&quot;</span>, f(<span class="hljs-number">13651</span>, <span class="hljs-number">83895</span>)),
   (<span class="hljs-string">&quot;8 Apr 2026&quot;</span>, <span class="hljs-string">&quot;</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">hello world</span><span class="hljs-meta">\&quot;</span><span class="hljs-string"> through a new LLVM backend, generating `.ll` text.&quot;</span>, f(<span class="hljs-number">13651</span>, <span class="hljs-number">83973</span>)),
   (<span class="hljs-string">&quot;11 Apr 2026&quot;</span>, <span class="hljs-string">&quot;Not-nil `ref`/`ptr` become the default.&quot;</span>, f(<span class="hljs-number">13651</span>, <span class="hljs-number">84016</span>)),
   (<span class="hljs-string">&quot;19 Apr 2026&quot;</span>, <span class="hljs-string">&quot;A **validator** checks plugins and compiler passes.&quot;</span>, f(<span class="hljs-number">13864</span>, <span class="hljs-number">84093</span>)),
@@ -2142,8 +2160,8 @@ Helper structures like symbol tables are built for one pass and thrown away.
 &quot;&quot;&quot;</span>, taka = <span class="hljs-string">&quot;PackedToken, TokenBuf, Cursor&quot;</span>, tsince = <span class="hljs-string">&quot;the design since 2024; [explained Mar 2026](&quot;</span> &amp; blog &amp; <span class="hljs-string">&quot;nif_implementation.html)&quot;</span>)
 
 term(<span class="hljs-string">&quot;NIF24, NIF26, NIF27&quot;</span>, <span class="hljs-string">&quot;versions of the NIF spec, named by year&quot;</span>, <span class="hljs-string">&quot;&quot;&quot;
-The first line of a NIF file names its version: `(.nif24)`, `(.nif26)`, `(.nif27)`. NIF26 (Jan
-2026) brought a better index and NIF's own module system (Nim 2's IC files shrank from 4 MB to 3.3
+The first line of a NIF file names its version: `(.nif24)`, `(.nif26)`, `(.nif27)`.
+NIF26 (January 2026) brought a better index and NIF's own module system (Nim 2's IC files shrank from 4 MB to 3.3
 MB); NIF27 (May 2026) made NIF a general data format, friendlier to write by hand, with
 `.lang` blocks so one file can mix languages (`(.lang html (div ...))`). Yes, NIF27 appeared in
 2026: the version is ahead of the calendar.
@@ -2163,12 +2181,12 @@ mutate disjoint siblings (`data.metadata`). Borrowing is only allowed from **sim
 `ref` are rejected because another alias could change them: either move the container out and
 back in, or write `uncheckedBorrow app.users` to take the responsibility yourself. Araq's rules,
 [posted in Oct 2026]({f(14201, 86426)}); the rules were also modelled in **Lean** (a proof
-assistant), which found bugs. &quot;The borrow checker is now considered to be complete&quot; (20 Oct 2026).
+assistant), which found bugs ([PR #2697]({repo}/pull/2697)). &quot;The borrow checker is now considered to be complete&quot; (20 Oct 2026).
 Nim 2 will get it next.
 &quot;&quot;&quot;</span>, taka = <span class="hljs-string">&quot;uncheckedBorrow&quot;</span>, tsince = &amp;<span class="hljs-string">&quot;[Mar 2026]({f(13651, 83608)})&quot;</span>)
 
 term(<span class="hljs-string">&quot;sum types and pattern matching&quot;</span>, <span class="hljs-string">&quot;`case` objects with real patterns, plus Opt[T] and Result[T, E]&quot;</span>, <span class="hljs-string">&quot;&quot;&quot;
-From RFC 559: a new `case` syntax inside objects and matching on it, positionally:
+From [RFC 559](https://github.com/nim-lang/RFCs/issues/559): a new `case` syntax inside objects and matching on it, positionally:
 `of AddOpr(a, b): eval(a) + eval(b)`. In Jul 2026 the stdlib gained `Opt[T]` and `Result[T, E]`
 built on them (even though Araq still prefers exceptions to Option for &quot;the auto-return
 behavior&quot;).
@@ -2224,7 +2242,7 @@ chap(<span class="hljs-string">&quot;native&quot;</span>, <span class="hljs-stri
 
 nbEvents @[
   (<span class="hljs-string">&quot;4 Jun 2026&quot;</span>, <span class="hljs-string">&quot;Nim's own allocator ported (mimalloc optional). A new optimizer, **shoggoth**; native code generators for amd64 and arm64, **arkham**: </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">hello world</span><span class="hljs-meta">\&quot;</span><span class="hljs-string"> without a C compiler.&quot;</span>, f(<span class="hljs-number">13864</span>, <span class="hljs-number">84683</span>)),
-  (<span class="hljs-string">&quot;7 Jun 2026&quot;</span>, <span class="hljs-string">&quot;A </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">benchmark-winning</span><span class="hljs-meta">\&quot;</span><span class="hljs-string"> JSON library, built on the NIF API.&quot;</span>, f(<span class="hljs-number">13864</span>, <span class="hljs-number">84726</span>)),
+  (<span class="hljs-string">&quot;7 Jun 2026&quot;</span>, <span class="hljs-string">&quot;A </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">benchmark-winning</span><span class="hljs-meta">\&quot;</span><span class="hljs-string"> [JSON library](https://github.com/nim-lang/nimony/blob/master/lib/std/json.nim), built on the NIF API ([its test](https://github.com/nim-lang/nimony/blob/master/tests/nimony/stdlib/tjson.nim) shows the API).&quot;</span>, f(<span class="hljs-number">13864</span>, <span class="hljs-number">84726</span>)),
   (<span class="hljs-string">&quot;11 Jun 2026&quot;</span>, <span class="hljs-string">&quot;Nearly libc-free: Nimony calls the operating system's entry points directly.&quot;</span>, f(<span class="hljs-number">13864</span>, <span class="hljs-number">84783</span>)),
   (<span class="hljs-string">&quot;15 Jun 2026&quot;</span>, <span class="hljs-string">&quot;Commit </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">renamefest: nifc -&gt; leng</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">, </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">because everybody, LLMs included, always confused</span><span class="hljs-meta">\&quot;</span><span class="hljs-string"> NIF and NIFC.&quot;</span>, <span class="hljs-string">&quot;&quot;</span>),
   (<span class="hljs-string">&quot;26 Jun 2026&quot;</span>, <span class="hljs-string">&quot;The `||` parallel for loop.&quot;</span>, f(<span class="hljs-number">13864</span>, <span class="hljs-number">84952</span>)),
@@ -2238,7 +2256,7 @@ nbEvents @[
   (<span class="hljs-string">&quot;27 Aug 2026&quot;</span>, <span class="hljs-string">&quot;Memory layouts for embedded chips (ARM Cortex-M, RISC-V 32, AVR).&quot;</span>, f(<span class="hljs-number">14014</span>, <span class="hljs-number">85717</span>)),
   (<span class="hljs-string">&quot;29 Aug 2026&quot;</span>, <span class="hljs-string">&quot;WebAssembly: `nimony w`.&quot;</span>, f(<span class="hljs-number">14014</span>, <span class="hljs-number">85733</span>)),
   (<span class="hljs-string">&quot;31 Aug 2026&quot;</span>, <span class="hljs-string">&quot;NJVL's pipeline is removed.&quot;</span>, <span class="hljs-string">&quot;&quot;</span>),
-  (<span class="hljs-string">&quot;8 Sep 2026&quot;</span>, <span class="hljs-string">&quot;**Nimony 0.6.2**, with a guest report by tokyovigilante on a year of porting projects.&quot;</span>, <span class="hljs-string">&quot;https://nim-lang.github.io/nimony-website/version0_6.html&quot;</span>),
+  (<span class="hljs-string">&quot;8 Sep 2026&quot;</span>, <span class="hljs-string">&quot;**Nimony 0.6.2**, with a [guest report](https://nim-lang.github.io/nimony-website/version0_6.html) by tokyovigilante on a year of porting projects.&quot;</span>, <span class="hljs-string">&quot;https://nim-lang.github.io/nimony-website/version0_6.html&quot;</span>),
   (<span class="hljs-string">&quot;14 Sep 2026&quot;</span>, <span class="hljs-string">&quot;Nimony's own lexer and parser, generated from a DSL by plugins.&quot;</span>, f(<span class="hljs-number">14014</span>, <span class="hljs-number">85982</span>)),
   (<span class="hljs-string">&quot;15 Sep 2026&quot;</span>, <span class="hljs-string">&quot;`{.feature: </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">staticContracts</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">.}`: every contract must be proven.&quot;</span>, f(<span class="hljs-number">14014</span>, <span class="hljs-number">86003</span>)),
   (<span class="hljs-string">&quot;18 Sep 2026&quot;</span>, <span class="hljs-string">&quot;The backend uses the </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">Final IR</span><span class="hljs-meta">\&quot;</span><span class="hljs-string"> consistently: </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">the last big refactoring of the compilation pipeline</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">.&quot;</span>, f(<span class="hljs-number">14014</span>, <span class="hljs-number">86047</span>)),
@@ -2287,7 +2305,7 @@ cryptography (`std/crypto/x25519`, `chacha20poly1305`). The `httpclient` with it
 term(<span class="hljs-string">&quot;BIF&quot;</span>, <span class="hljs-string">&quot;binary NIF: the same tokens, loaded with mmap&quot;</span>, <span class="hljs-string">&quot;&quot;&quot;
 &quot;Binary NIF&quot;: the token stream written as raw 32-bit tokens with an index, little-endian, with a
 version byte (now 5). It trades readability for loading speed (memory-mapped, no parsing).
-Converters `nif2bif`/`bif2nif` exist. Third parties wrote codecs (nifkit).
+Converters `nif2bif`/`bif2nif` exist. Third parties wrote codecs ([nifkit](https://github.com/puffball1567/nifkit)).
 &quot;&quot;&quot;</span>, tsince = <span class="hljs-string">&quot;[Jul 2026](&quot;</span> &amp; f(<span class="hljs-number">13585</span>, <span class="hljs-number">85069</span>) &amp; <span class="hljs-string">&quot;)&quot;</span>)
 
 term(<span class="hljs-string">&quot;nifcore&quot;</span>, <span class="hljs-string">&quot;the latest NIF API inside the compiler&quot;</span>, <span class="hljs-string">&quot;&quot;&quot;
@@ -2322,7 +2340,7 @@ term(<span class="hljs-string">&quot;`nimony c`, `n`, `w`, `j`&quot;</span>, <sp
 term(<span class="hljs-string">&quot;`||` parallel for&quot;</span>, <span class="hljs-string">&quot;structured parallelism without FlowVars&quot;</span>, <span class="hljs-string">&quot;&quot;&quot;
 `for i in 0 || 1: r[i] = pfib(n - 1 - i)`: like `0 .. 1`, but every iteration runs in parallel.
 The compiler checks that the writes `r[i]` do not race, and the parallelism ends with the loop.
-No `spawn`, no FlowVar, no `sync`. Araq considers it simpler than his Malebolgia library.
+No `spawn`, no FlowVar, no `sync`. Araq considers it simpler than his [Malebolgia](https://github.com/Araq/malebolgia) library.
 &quot;&quot;&quot;</span>, tsince = <span class="hljs-string">&quot;[Jun 2026](&quot;</span> &amp; f(<span class="hljs-number">13864</span>, <span class="hljs-number">84952</span>) &amp; <span class="hljs-string">&quot;)&quot;</span>)
 
 <span class="hljs-comment"># =========================================================================================== 6</span>
@@ -2330,11 +2348,11 @@ chap(<span class="hljs-string">&quot;complete&quot;</span>, <span class="hljs-st
 
 nbEvents @[
   (<span class="hljs-string">&quot;2 Oct 2026&quot;</span>, <span class="hljs-string">&quot;FreeBSD. ORC and YRC ported: all four memory modes plus custom ones with `--mm:&lt;path&gt;`.&quot;</span>, f(<span class="hljs-number">14201</span>, <span class="hljs-number">86216</span>)),
-  (<span class="hljs-string">&quot;3 Oct 2026&quot;</span>, <span class="hljs-string">&quot;`break` and `block` work </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">as they should for Nim 3</span><span class="hljs-meta">\&quot;</span><span class="hljs-string"> (RFC 576).&quot;</span>, f(<span class="hljs-number">14201</span>, <span class="hljs-number">86220</span>)),
+  (<span class="hljs-string">&quot;3 Oct 2026&quot;</span>, <span class="hljs-string">&quot;`break` and `block` work </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">as they should for Nim 3</span><span class="hljs-meta">\&quot;</span><span class="hljs-string"> ([RFC 576](https://github.com/nim-lang/RFCs/issues/576)).&quot;</span>, f(<span class="hljs-number">14201</span>, <span class="hljs-number">86220</span>)),
   (<span class="hljs-string">&quot;6 Oct 2026&quot;</span>, <span class="hljs-string">&quot;Better decisions about what to recompile. Hexer is folded into Shoggoth.&quot;</span>, f(<span class="hljs-number">14201</span>, <span class="hljs-number">86241</span>)),
   (<span class="hljs-string">&quot;13 Oct 2026&quot;</span>, <span class="hljs-string">&quot;`owned ref T`, like Nim devel.&quot;</span>, f(<span class="hljs-number">14201</span>, <span class="hljs-number">86298</span>)),
   (<span class="hljs-string">&quot;16 Oct 2026&quot;</span>, <span class="hljs-string">&quot;An `httpclient` with its own TLS, to try the assembler design.&quot;</span>, f(<span class="hljs-number">14201</span>, <span class="hljs-number">86331</span>)),
-  (<span class="hljs-string">&quot;17 Oct 2026&quot;</span>, <span class="hljs-string">&quot;Borrowing rules modelled in Lean; bugs found and fixed.&quot;</span>, f(<span class="hljs-number">14201</span>, <span class="hljs-number">86371</span>)),
+  (<span class="hljs-string">&quot;17 Oct 2026&quot;</span>, <span class="hljs-string">&quot;Borrowing rules modelled in Lean; bugs found and fixed ([PR #2697](https://github.com/nim-lang/nimony/pull/2697)).&quot;</span>, f(<span class="hljs-number">14201</span>, <span class="hljs-number">86371</span>)),
   (<span class="hljs-string">&quot;20 Oct 2026&quot;</span>, <span class="hljs-string">&quot;Strict funcs (</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">No standard library code broke</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">); </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">The borrow checker is now considered to be complete.</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&quot;</span>, f(<span class="hljs-number">14201</span>, <span class="hljs-number">86422</span>)),
   (<span class="hljs-string">&quot;27 Oct 2026&quot;</span>, <span class="hljs-string">&quot;</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">Focus is on bugfixes, Nimony is feature complete. But I've been saying this for some time, I think.</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&quot;</span>, f(<span class="hljs-number">14201</span>, <span class="hljs-number">86496</span>)),
   (<span class="hljs-string">&quot;28 Oct 2026&quot;</span>, <span class="hljs-string">&quot;Nim 2.4.0 released, with IC. `strutils` compiles with staticContracts; the regex engine is much faster.&quot;</span>, f(<span class="hljs-number">14201</span>, <span class="hljs-number">86518</span>)),
@@ -2352,7 +2370,7 @@ concurrently. A strategy is just a file `lib/std/system/&lt;name&gt;.nim` defini
 `--mm:&lt;path&gt;` plugs in your own. [stdlib guide]({docs}stdlib.md).
 &quot;&quot;&quot;</span>, taka = <span class="hljs-string">&quot;ARC, ORC, YRC&quot;</span>, tsince = <span class="hljs-string">&quot;[Oct 2026](&quot;</span> &amp; f(<span class="hljs-number">14201</span>, <span class="hljs-number">86216</span>) &amp; <span class="hljs-string">&quot;)&quot;</span>)
 
-term(<span class="hljs-string">&quot;`owned ref T`&quot;</span>, <span class="hljs-string">&quot;a checked unique owner for a ref (RFC 575)&quot;</span>, &amp;<span class="hljs-string">&quot;&quot;&quot;
+term(<span class="hljs-string">&quot;`owned ref T`&quot;</span>, <span class="hljs-string">&quot;a checked unique owner for a ref ([RFC 575](https://github.com/nim-lang/RFCs/issues/575))&quot;</span>, &amp;<span class="hljs-string">&quot;&quot;&quot;
 `owned X` marks the location that holds the *unique owning* edge to a ref cell; ordinary refs to
 it can still exist and keep it alive. Copying an owned location is an error (move it instead),
 and `{{.feature: &quot;ownedRefs&quot;.}}` makes object construction return `owned`. It gives a way to

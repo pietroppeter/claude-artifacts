@@ -39,7 +39,7 @@ years he has posted its progress on the Nim forum one line at a time: "NJVL", "S
 [nimony repo](https://github.com/nim-lang/nimony) (2,348 commits) and Araq's blog, with every term
 explained at the point where it shows up.
 """
-nbVersion(3, "23 Nov 2026")
+nbVersion(4, "23 Nov 2026")
 
 nbTldr: """
 - **What it is.** A from-scratch Nim compiler built as a chain of small tools that pass
@@ -81,6 +81,15 @@ to catch up, and asked Claude for an explainer of how Nimony evolved from the be
 follow all the forum threads, look at the repo and anywhere else that helps, explain every term,
 and start from that thread with one concrete question: what is avoidtemps?
 
+This was the request, word for word:
+"""
+
+nbPrompt("Pietro", "22 Nov 2026", """
+Explain to me Nimony evolution tracking all forum threads and looking at the repo and possibly
+elsewhere. Explain all things. https://forum.nim-lang.org/t/14201 eg what is avoidtemps?
+""")
+
+nbText: """
 This page is the answer, and it starts where the question did.
 
 Take a small matrix type with the usual operators. Each operator copies its left operand into a
@@ -431,7 +440,7 @@ so it looks like a blocking call. The pieces, from [passive_procs.md]({docs}pass
 - the **scheduler** is replaceable, so a thread pool and an event loop are the same mechanism:
   "Async event loop unified with multi-threading."
 
-A user report: tokyovigilante's CPS web server Hashi reached parity with Mummy.
+A user report: tokyovigilante's CPS web server [Hashi](https://github.com/kaitakeradiology/hashi) reached parity with Mummy.
 """, taka = "async, coroutines", tsince = &"[first ran 7 Jul 2025]({f(12978, 80257)}), [working Mar 2026]({f(13651, 83618)})")
 
 term("Nimlody", "an idea: a batteries-included distribution on top of Nimony", """
@@ -492,7 +501,7 @@ nbEvents @[
   ("13 Mar 2026", "Borrow checking is implemented.", f(13651, 83608)),
   ("14 Mar 2026", "Asked how much is vibe-coded: \"Close to 100% these days\", the architecture (token streams, continuations, NJ) having been in place \"before AI got really good\". Later: \"I care about the code, I read it.\"", f(13651, 83639)),
   ("22 Mar 2026", "Strings with small-string optimization and copy-on-write.", f(13651, 83749)),
-  ("2 Apr 2026", "Sum types and pattern matching (RFC 559).", f(13651, 83895)),
+  ("2 Apr 2026", "Sum types and pattern matching ([RFC 559](https://github.com/nim-lang/RFCs/issues/559)).", f(13651, 83895)),
   ("8 Apr 2026", "\"hello world\" through a new LLVM backend, generating `.ll` text.", f(13651, 83973)),
   ("11 Apr 2026", "Not-nil `ref`/`ptr` become the default.", f(13651, 84016)),
   ("19 Apr 2026", "A **validator** checks plugins and compiler passes.", f(13864, 84093)),
@@ -520,8 +529,8 @@ Helper structures like symbol tables are built for one pass and thrown away.
 """, taka = "PackedToken, TokenBuf, Cursor", tsince = "the design since 2024; [explained Mar 2026](" & blog & "nif_implementation.html)")
 
 term("NIF24, NIF26, NIF27", "versions of the NIF spec, named by year", """
-The first line of a NIF file names its version: `(.nif24)`, `(.nif26)`, `(.nif27)`. NIF26 (Jan
-2026) brought a better index and NIF's own module system (Nim 2's IC files shrank from 4 MB to 3.3
+The first line of a NIF file names its version: `(.nif24)`, `(.nif26)`, `(.nif27)`.
+NIF26 (January 2026) brought a better index and NIF's own module system (Nim 2's IC files shrank from 4 MB to 3.3
 MB); NIF27 (May 2026) made NIF a general data format, friendlier to write by hand, with
 `.lang` blocks so one file can mix languages (`(.lang html (div ...))`). Yes, NIF27 appeared in
 2026: the version is ahead of the calendar.
@@ -541,12 +550,12 @@ mutate disjoint siblings (`data.metadata`). Borrowing is only allowed from **sim
 `ref` are rejected because another alias could change them: either move the container out and
 back in, or write `uncheckedBorrow app.users` to take the responsibility yourself. Araq's rules,
 [posted in Oct 2026]({f(14201, 86426)}); the rules were also modelled in **Lean** (a proof
-assistant), which found bugs. "The borrow checker is now considered to be complete" (20 Oct 2026).
+assistant), which found bugs ([PR #2697]({repo}/pull/2697)). "The borrow checker is now considered to be complete" (20 Oct 2026).
 Nim 2 will get it next.
 """, taka = "uncheckedBorrow", tsince = &"[Mar 2026]({f(13651, 83608)})")
 
 term("sum types and pattern matching", "`case` objects with real patterns, plus Opt[T] and Result[T, E]", """
-From RFC 559: a new `case` syntax inside objects and matching on it, positionally:
+From [RFC 559](https://github.com/nim-lang/RFCs/issues/559): a new `case` syntax inside objects and matching on it, positionally:
 `of AddOpr(a, b): eval(a) + eval(b)`. In Jul 2026 the stdlib gained `Opt[T]` and `Result[T, E]`
 built on them (even though Araq still prefers exceptions to Option for "the auto-return
 behavior").
@@ -602,7 +611,7 @@ chap("native", "Jun to Sep 2026: Leng, Shoggoth, Arkham, no C compiler", "progre
 
 nbEvents @[
   ("4 Jun 2026", "Nim's own allocator ported (mimalloc optional). A new optimizer, **shoggoth**; native code generators for amd64 and arm64, **arkham**: \"hello world\" without a C compiler.", f(13864, 84683)),
-  ("7 Jun 2026", "A \"benchmark-winning\" JSON library, built on the NIF API.", f(13864, 84726)),
+  ("7 Jun 2026", "A \"benchmark-winning\" [JSON library](https://github.com/nim-lang/nimony/blob/master/lib/std/json.nim), built on the NIF API ([its test](https://github.com/nim-lang/nimony/blob/master/tests/nimony/stdlib/tjson.nim) shows the API).", f(13864, 84726)),
   ("11 Jun 2026", "Nearly libc-free: Nimony calls the operating system's entry points directly.", f(13864, 84783)),
   ("15 Jun 2026", "Commit \"renamefest: nifc -> leng\", \"because everybody, LLMs included, always confused\" NIF and NIFC.", ""),
   ("26 Jun 2026", "The `||` parallel for loop.", f(13864, 84952)),
@@ -616,7 +625,7 @@ nbEvents @[
   ("27 Aug 2026", "Memory layouts for embedded chips (ARM Cortex-M, RISC-V 32, AVR).", f(14014, 85717)),
   ("29 Aug 2026", "WebAssembly: `nimony w`.", f(14014, 85733)),
   ("31 Aug 2026", "NJVL's pipeline is removed.", ""),
-  ("8 Sep 2026", "**Nimony 0.6.2**, with a guest report by tokyovigilante on a year of porting projects.", "https://nim-lang.github.io/nimony-website/version0_6.html"),
+  ("8 Sep 2026", "**Nimony 0.6.2**, with a [guest report](https://nim-lang.github.io/nimony-website/version0_6.html) by tokyovigilante on a year of porting projects.", "https://nim-lang.github.io/nimony-website/version0_6.html"),
   ("14 Sep 2026", "Nimony's own lexer and parser, generated from a DSL by plugins.", f(14014, 85982)),
   ("15 Sep 2026", "`{.feature: \"staticContracts\".}`: every contract must be proven.", f(14014, 86003)),
   ("18 Sep 2026", "The backend uses the \"Final IR\" consistently: \"the last big refactoring of the compilation pipeline\".", f(14014, 86047)),
@@ -665,7 +674,7 @@ cryptography (`std/crypto/x25519`, `chacha20poly1305`). The `httpclient` with it
 term("BIF", "binary NIF: the same tokens, loaded with mmap", """
 "Binary NIF": the token stream written as raw 32-bit tokens with an index, little-endian, with a
 version byte (now 5). It trades readability for loading speed (memory-mapped, no parsing).
-Converters `nif2bif`/`bif2nif` exist. Third parties wrote codecs (nifkit).
+Converters `nif2bif`/`bif2nif` exist. Third parties wrote codecs ([nifkit](https://github.com/puffball1567/nifkit)).
 """, tsince = "[Jul 2026](" & f(13585, 85069) & ")")
 
 term("nifcore", "the latest NIF API inside the compiler", """
@@ -700,7 +709,7 @@ term("`nimony c`, `n`, `w`, `j`", "the four backends: `c` through C, `n` native 
 term("`||` parallel for", "structured parallelism without FlowVars", """
 `for i in 0 || 1: r[i] = pfib(n - 1 - i)`: like `0 .. 1`, but every iteration runs in parallel.
 The compiler checks that the writes `r[i]` do not race, and the parallelism ends with the loop.
-No `spawn`, no FlowVar, no `sync`. Araq considers it simpler than his Malebolgia library.
+No `spawn`, no FlowVar, no `sync`. Araq considers it simpler than his [Malebolgia](https://github.com/Araq/malebolgia) library.
 """, tsince = "[Jun 2026](" & f(13864, 84952) & ")")
 
 # =========================================================================================== 6
@@ -708,11 +717,11 @@ chap("complete", "Oct to Nov 2026: feature complete, the fuzzer, avoidtemps", "p
 
 nbEvents @[
   ("2 Oct 2026", "FreeBSD. ORC and YRC ported: all four memory modes plus custom ones with `--mm:<path>`.", f(14201, 86216)),
-  ("3 Oct 2026", "`break` and `block` work \"as they should for Nim 3\" (RFC 576).", f(14201, 86220)),
+  ("3 Oct 2026", "`break` and `block` work \"as they should for Nim 3\" ([RFC 576](https://github.com/nim-lang/RFCs/issues/576)).", f(14201, 86220)),
   ("6 Oct 2026", "Better decisions about what to recompile. Hexer is folded into Shoggoth.", f(14201, 86241)),
   ("13 Oct 2026", "`owned ref T`, like Nim devel.", f(14201, 86298)),
   ("16 Oct 2026", "An `httpclient` with its own TLS, to try the assembler design.", f(14201, 86331)),
-  ("17 Oct 2026", "Borrowing rules modelled in Lean; bugs found and fixed.", f(14201, 86371)),
+  ("17 Oct 2026", "Borrowing rules modelled in Lean; bugs found and fixed ([PR #2697](https://github.com/nim-lang/nimony/pull/2697)).", f(14201, 86371)),
   ("20 Oct 2026", "Strict funcs (\"No standard library code broke\"); \"The borrow checker is now considered to be complete.\"", f(14201, 86422)),
   ("27 Oct 2026", "\"Focus is on bugfixes, Nimony is feature complete. But I've been saying this for some time, I think.\"", f(14201, 86496)),
   ("28 Oct 2026", "Nim 2.4.0 released, with IC. `strutils` compiles with staticContracts; the regex engine is much faster.", f(14201, 86518)),
@@ -730,7 +739,7 @@ concurrently. A strategy is just a file `lib/std/system/<name>.nim` defining thr
 `--mm:<path>` plugs in your own. [stdlib guide]({docs}stdlib.md).
 """, taka = "ARC, ORC, YRC", tsince = "[Oct 2026](" & f(14201, 86216) & ")")
 
-term("`owned ref T`", "a checked unique owner for a ref (RFC 575)", &"""
+term("`owned ref T`", "a checked unique owner for a ref ([RFC 575](https://github.com/nim-lang/RFCs/issues/575))", &"""
 `owned X` marks the location that holds the *unique owning* edge to a ref cell; ordinary refs to
 it can still exist and keep it alive. Copying an owned location is an error (move it instead),
 and `{{.feature: "ownedRefs".}}` makes object construction return `owned`. It gives a way to

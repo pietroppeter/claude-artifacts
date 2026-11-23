@@ -57,6 +57,13 @@ body pre.nb-output{font:12.5px/1.45 var(--mono);background:var(--ink);color:#f3e
 .toc ol{margin:.4rem 0;padding-left:1.3rem}
 .toc li{margin:.2rem 0}
 h2 .ch-span{display:block;font-size:.82rem;font-weight:400;color:var(--muted);margin-top:.15rem}
+h2 .ch-top{display:inline-block;font-size:.78rem;font-weight:600;color:var(--sea);text-decoration:none;margin-top:.2rem}
+.prompt{margin:1.4rem 0 1.6rem}
+.prompt figcaption{font-size:.78rem;color:var(--muted);margin:0 0 .35rem .2rem}
+.prompt .prompt-who{font-weight:700;color:var(--ink)}
+.prompt blockquote{margin:0;padding:.8rem 1rem;background:var(--ink);color:var(--paper);border-radius:16px 16px 16px 4px;font-size:1.02rem;line-height:1.55;max-width:34rem}
+.prompt blockquote p{margin:0}
+.prompt blockquote a{color:var(--gold-soft);text-decoration-color:var(--gold);overflow-wrap:anywhere}
 aside.note{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--muted);padding:.5rem .9rem;margin:1rem 0;font-size:.95rem}
 aside.note.aside{border-left-color:var(--aside);background:var(--aside-soft)}
 aside.note.careful{border-left-color:var(--careful);background:var(--careful-soft)}

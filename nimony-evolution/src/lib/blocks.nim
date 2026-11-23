@@ -113,7 +113,7 @@ template nbPipeline*(ttitle: string; tstages: seq[Stage]) =
 newNbBlock(NbToc):
   items: seq[(string, string)]   ## (anchor, Markdown label)
   toHtml:
-    var s = """<nav class="toc"><span class="toc-label">Contents</span><ol>"""
+    var s = """<nav class="toc" id="toc"><span class="toc-label">Contents</span><ol>"""
     for (a, label) in blk.items:
       s.add &"""<li><a href="#{a}">{inlineMd(label)}</a></li>"""
     s & "</ol></nav>"
@@ -127,8 +127,19 @@ newNbBlock(NbChapter):
   span: string     ## the months it covers
   toHtml:
     let span = if blk.span.len > 0: &"""<span class="ch-span">{esc(blk.span)}</span>""" else: ""
-    &"""<h2 id="{blk.id}">{inlineMd(blk.title)}{span}</h2>"""
+    &"""<h2 id="{blk.id}">{inlineMd(blk.title)}{span}<a class="ch-top" href="#toc">↑ Contents</a></h2>"""
 
 template nbChapter*(tid, ttitle: string; tspan = "") =
-  ## A chapter heading with an anchor and the months it covers.
+  ## A chapter heading with an anchor, the months it covers and a link back to the contents.
   nb.add newNbChapter(id = tid, title = ttitle, span = tspan)
+
+newNbBlock(NbPrompt):
+  who: string
+  date: string
+  text: string     ## Markdown
+  toHtml:
+    &"""<figure class="prompt"><figcaption><span class="prompt-who">{esc(blk.who)}</span> asked Claude, {esc(blk.date)}</figcaption><blockquote>{markdownToHtml(blk.text)}</blockquote></figure>"""
+
+template nbPrompt*(twho, tdate, ttext: string) =
+  ## The request that started the page, as a chat bubble, verbatim.
+  nb.add newNbPrompt(who = twho, date = tdate, text = ttext)
