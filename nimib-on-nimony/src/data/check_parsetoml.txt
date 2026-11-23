@@ -1,0 +1,1 @@
+[Error] parsetoml.nim(89, 5) illformed AST inside case object: (err . "not all cases are covered; missing\3A \7BNone, Int, Float, Bool, Datetime, Date, Time, String, Array, Table\7D")

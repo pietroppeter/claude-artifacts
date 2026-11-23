@@ -1,0 +1,4 @@
+Error compiling macro plugin for 'isObjectVariant':
+jsony/objvar.nim(20, 15) Error: undeclared identifier: 'getTypeImpl'
+jsony/objvar.nim(21, 9) Error: undeclared field: 'kind' for type auto
+jsony/objvar.nim(23, 12) Error: undeclared field: 'kind' for type auto

@@ -1,0 +1,63 @@
+/* The explainer's theme, on top of nimiboth's: two compilers, two colours.
+   Nim 2 is the crown's gold, Nimony a deep violet; the paper is cool grey. */
+:root{--paper:#f5f6f8;--ink:#161b26;--muted:#5a6070;--line:#d3d6de;--card:#fff;
+  --nim:#c99a06;--nim-soft:#f8eecb;--nimony:#5b3fa6;--nimony-soft:#e9e3f7;--accent:#5b3fa6;
+  --ok:#1f7a4d;--ok-soft:#dcefe4;--no:#b3392f;--no-soft:#f6e1de;
+  --code-bg:#fff;--out-bg:#161b26;--out-ink:#eef0f5;
+  --kw:#5b3fa6;--str:#2d6e3a;--num:#9a5300;--com:#878c99;
+  --font:"IBM Plex Sans",system-ui,sans-serif;--mono:"IBM Plex Mono",ui-monospace,monospace;
+  /* the names the review mode reads */
+  --surface:#fff;--shade:#e6e8ee;--secondary:#8f7ad1;--secondary-soft:#e9e3f7;--primary-text:#5b3fa6;--neutral-1:#e6e8ee}
+h2{border-top:3px solid var(--ink);padding-top:.6rem}
+h2 .ch-span{display:block;font-size:.82rem;font-weight:400;color:var(--muted);margin-top:.15rem}
+.lede{font-size:1.12rem;color:var(--muted);margin:.2rem 0 1rem}
+.tldr{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--nimony);padding:.4rem 1rem;margin:1rem 0}
+.label{display:block;font-weight:700;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:.4rem}
+.tldr ul{padding-left:1.1rem;margin:.4rem 0}
+.tldr li{margin:.25rem 0}
+aside.note{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--muted);padding:.5rem .9rem;margin:1rem 0;font-size:.95rem}
+aside.note.aside{border-left-color:var(--nimony);background:var(--nimony-soft)}
+aside.note.careful{border-left-color:var(--no);background:var(--no-soft)}
+aside.note.nim2{border-left-color:var(--nim);background:var(--nim-soft)}
+aside.note p{margin:.3rem 0}
+.built{display:flex;flex-wrap:wrap;gap:.4rem;margin:.6rem 0 1rem;font-size:.85rem}
+.built span{border:1px solid var(--line);background:var(--card);padding:.15rem .5rem;border-radius:999px}
+.built span.label{border:0;background:none;padding:.15rem 0;margin:0}
+.built .by{border-color:var(--nimony);background:var(--nimony-soft);font-weight:600}
+.pair{display:grid;grid-template-columns:1fr;gap:.6rem;margin:.8rem 0}
+@media (min-width:40rem){.pair{grid-template-columns:1fr 1fr}}
+.pair > div{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--nim);padding:.4rem .8rem;font-size:.93rem}
+.pair > div.nimony{border-top-color:var(--nimony)}
+.pair p{margin:.3rem 0}
+.verdict{border:2px solid var(--ink);background:var(--card);padding:.5rem 1rem;margin:1.2rem 0}
+.verdict .q{font-weight:700}
+.verdict p{margin:.3rem 0}
+table caption{text-align:left;font-weight:700;font-size:.85rem;padding-bottom:.3rem}
+td.ok{color:var(--ok);font-weight:600}
+td.no{color:var(--no);font-weight:600}
+.nb-err{font:12px/1.45 var(--mono);white-space:pre;overflow-x:auto;background:var(--no-soft);border:1px solid var(--line);border-radius:4px;padding:.5rem .7rem;margin:.4rem 0 .9rem}
+/* the NIF explorer (nbJsFromCode "nifx"): the real NIF text, folded like a code editor's */
+.nifx-tabs{display:flex;flex-wrap:wrap;gap:.4rem;margin:.6rem 0}
+.nifx-tabs button{font:inherit;font-size:.9rem;min-height:44px;padding:0 .9rem;border:1px solid var(--line);background:var(--card);color:var(--ink);border-radius:999px;cursor:pointer}
+.nifx-tabs button[aria-pressed="true"]{border-color:var(--nimony);background:var(--nimony);color:#fff}
+.nifx-file{border:1px solid #2a2340;border-radius:6px;overflow:hidden;background:#17131f;color:#e6e1f0}
+.nifx-bar{display:flex;flex-wrap:wrap;gap:.3rem .8rem;align-items:center;justify-content:space-between;padding:.45rem .7rem;background:#221c30;border-bottom:1px solid #2f2744;font:12px/1.4 var(--mono);color:#a99fc2}
+.nifx-acts{display:flex;gap:.4rem}
+.nifx-acts button{font:12px var(--mono);color:#e6e1f0;background:transparent;border:1px solid #4a3f66;border-radius:4px;min-height:32px;padding:0 .6rem;cursor:pointer}
+body .nifx-file pre{margin:0;border:0;border-radius:0;background:transparent;padding:.7rem .7rem .9rem 0;max-height:75vh;overflow:auto}
+body .nifx-file pre > code{font:12.5px/1.6 var(--mono);color:#e6e1f0;overflow:visible;padding-left:1.5rem;display:inline-block;min-width:100%;box-sizing:border-box}
+#nifx-code .fold{display:inline-block;width:1.2em;margin-left:-1.2em;padding:0;border:0;background:transparent;color:#8c7fb0;cursor:pointer;font:inherit;line-height:inherit;text-align:center}
+#nifx-code .fold::before{content:"▾"}
+#nifx-code .nd.c > .fold::before{content:"▸"}
+#nifx-code .fold:hover,#nifx-code .fold:focus-visible{color:#fff;outline:none}
+#nifx-code .dots{display:none;color:#8c7fb0;background:#2a2340;border-radius:3px;padding:0 .3em;margin-left:.2em}
+#nifx-code .nd.c > .kids{display:none}
+#nifx-code .nd.c > .dots{display:inline}
+#nifx-code .p{color:#6f6590}
+#nifx-code .t{color:#c9a7ff;font-weight:600}
+#nifx-code .d{color:#7fb7ff}
+#nifx-code .s{color:#a5d6a7}
+#nifx-code .n{color:#ffb86c}
+#nifx-code .y{color:#8be9fd}
+#nifx-code .e{color:#6f6590}
+#nifx-code .li{color:#6f6590;font-size:.9em}

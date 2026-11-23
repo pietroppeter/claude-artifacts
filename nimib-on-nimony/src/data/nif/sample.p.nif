@@ -1,0 +1,20 @@
+(.nif27)
+(.vendor "Nifler")
+(.dialect "nim-parsed")
+(stmts@,1,sample.nim
+ (import
+  (infix@A / std~3 syncio@1))
+ (proc@,2 square@5 . . .
+  (params@B
+   (param@1 x . . int@3 .))int@A . .
+  (stmts@R
+   (infix@2 * x~2 x@2)))
+ (var@4,4 total . . . 0@8)
+ (for@4,5
+  (infix@7 \2E\2E 1~2 3@3)
+  (unpackflat
+   (let i . . ..))
+  (stmts~2,1
+   (infix@6 \2B= total~6
+    (call@9 square~6 i@1))))
+ (cmd@,7 echo "total\3A "@5 total@G))

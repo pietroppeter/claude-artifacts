@@ -1,0 +1,6 @@
+nimcache/
+.nimiboth/
+.nimiboth-capture.txt
+nimony/
+deps/
+t/hello.html

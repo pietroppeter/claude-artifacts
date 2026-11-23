@@ -1,0 +1,4 @@
+nimib/logging.nim(1, 1) Error: file not found: /tmp/w/nimony/src/lib/std/strformat.nim
+nimib/logging.nim(8, 7) Error: undeclared identifier: 'echo'
+nimib/logging.nim(8, 12) Error: undeclared identifier: 'fmt'
+nimib/logging.nim(10, 7) Error: undeclared identifier: 'echo'
