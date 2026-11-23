@@ -825,7 +825,7 @@ years he has posted its progress on the Nim forum one line at a time: &quot;NJVL
 <a href="https://github.com/nim-lang/nimony">nimony repo</a> (2,348 commits) and Araq's blog, with every term
 explained at the point where it shows up.</p>
 </div>
-<p class="rv-enter"><span class="rv-version">Version 1 · updated 22 Nov 2026</span></p>
+<p class="rv-enter"><span class="rv-version">Version 2 · updated 23 Nov 2026</span></p>
 <div class="tldr"><span class="tldr-label">The short version</span><ul>
 <li><strong>What it is.</strong> A from-scratch Nim compiler built as a chain of small tools that pass
 <strong>NIF</strong> files to each other (NIF is a Lisp-like text format, &quot;JSON for compilers&quot;). Because every
@@ -969,7 +969,8 @@ code at <em>compile time</em> instead of keeping Nim's VM. That plan came true i
 This might not look impressive but it is (IMO): Nimony is a new Nim compiler which does not use
 much of the old codebase.</p>
 <cite>Araq, <a href="https://forum.nim-lang.org/t/12693#78247">22 Feb 2025</a></cite></blockquote>
-<ol class="events"><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/12693#78257">25 Feb 2025</a></span><div class="ev-text"><p>Plugins first described: &quot;a program that receives two filenames, input.nif and output.nif&quot;.</p>
+<ol class="events"><li><span class="ev-date"><a href="https://github.com/nim-lang/nimony/discussions/529">13 Feb 2025</a></span><div class="ev-text"><p>Araq opens discussion #529, the plan: two language modes, <code>compat</code> (as close to Nim 2 as is cheap, which &quot;might evolve into Nim version 3&quot;) and <code>aufbruch</code> (the focus: atomicArc only, not nil by default, no exceptions but <code>ErrorCode</code>, contracts instead of runtime checks, plugins instead of macros, a tiny standard library).</p>
+</div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/12693#78257">25 Feb 2025</a></span><div class="ev-text"><p>Plugins first described: &quot;a program that receives two filenames, input.nif and output.nif&quot;.</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/12693#78280">1 Mar 2025</a></span><div class="ev-text"><p><code>openArray</code> written as a normal library type with the new <code>.view</code> pragma; <code>.requires</code> contracts for bounds checks; one polymorphic <code>[]</code> instead of two.</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/12693#78292">3 Mar 2025</a></span><div class="ev-text"><p><code>parseopt</code> works. &quot;Watching this thread weekly is more exciting than Netflix.&quot;</p>
 </div></li><li><span class="ev-date"><a href="https://forum.nim-lang.org/t/12693#78315">4 Mar 2025</a></span><div class="ev-text"><p><code>case</code> on strings compiles to dispatch trees instead of hashing: one scan of the string instead of two.</p>
@@ -1020,6 +1021,14 @@ See the <a href="https://github.com/nim-lang/nimony/blob/master/doc/language.md#
 name for Nimony's minimal language: IC plus ARC plus type-checked generics, &quot;a 10 times smaller
 Nim compressed to its essentials&quot;, meant to survive as <code>--mode:aufbruch</code>. By Mar 2026: &quot;we moved
 beyond that aufbruch thing, we don't need a better name for it, it's gone.&quot;</p>
+<p>The plan was in discussion #529 (Feb 2025): <code>aufbruch</code> next to a <code>compat</code> mode for Nim 2 code,
+which would break only where the new runtime forces it (strings and seqs not ABI compatible with
+Nim 2, no <code>cast</code> between <code>seq</code> and <code>string</code>, <code>s[i]</code> not passable as <code>var char</code> because of
+copy-on-write literals, dearer <code>cstring</code> conversions with no terminating zero). Aufbruch started
+without dirty templates, <code>range</code>, the effect system, user pragmas, closure iterators or <code>static</code>
+evaluation; most came back. Asked in Aug 2026 what had changed, Araq answered &quot;Everything&quot;:
+there are no modes any more, only per-feature switches (<code>{.feature: &quot;name&quot;.}</code>), and he marked the
+discussion outdated.</p>
 <span class="term-since"><a href="https://forum.nim-lang.org/t/12693#78387">Mar 2025</a></span></section>
 <section class="term" id="t-plugins"><div class="term-head"><span class="term-name">plugins</span><span class="term-aka">compiler plugins</span></div><p>&quot;Plugins are the final evolved form of Nim's macros.&quot; A plugin is a Nim program, compiled to a
 native executable, that reads the code to transform from an <code>.in.nif</code> file and writes the result
@@ -1380,7 +1389,7 @@ only to build Nimony from source; the nightly builds need nothing.</p>
 </section>
 <h2 id="names">The names that changed<span class="ch-span">a rename map</span></h2>
 <p>Most confusion in the forum threads comes from names that changed while the work went on.</p>
-<div id="tabella-2d5ca3af" class="tabella">
+<div id="tabella-717f74c3" class="tabella">
 <style>
 :where(.tabella):not(#_) { overflow-x: var(--tb-container-overflow-x, auto); overflow-y: var(--tb-container-overflow-y, auto); width: var(--tb-container-width, auto);
   height: var(--tb-container-height, auto); padding: var(--tb-container-padding-y, 0px) var(--tb-container-padding-x, 0px); }
@@ -1480,16 +1489,16 @@ only to build Nimony from source; the nightly builds need nothing.</p>
 :where(.tabella):not(#_) .tb_nanoplot_static .y-axis-line text { stroke: white; stroke-width: 0.20em; fill: #1A1C1F; }
 :where(.tabella.tb_css_theme) { --tb-table-font-color: var(--ink, #1C1C1C); --tb-table-font-names: var(--font, system-ui, sans-serif); --tb-table-background-color: var(--paper, #FFFFFF); --tb-table-border-top-width: 3px; --tb-table-border-top-color: var(--ink, #1C1C1C); --tb-table-border-bottom-width: 3px; --tb-table-border-bottom-color: var(--ink, #1C1C1C); --tb-heading-border-bottom-color: var(--primary, var(--ink, #1C1C1C)); --tb-column-labels-font-weight: bold; --tb-column-labels-border-bottom-color: var(--ink, #1C1C1C); --tb-row-group-background-color: var(--shade, color-mix(in oklab, var(--ink, #1C1C1C) 4%, var(--paper, #FFFFFF))); --tb-row-group-border-color: var(--ink, #1C1C1C); --tb-table-body-hlines-color: var(--line, color-mix(in oklab, var(--ink, #1C1C1C) 14%, var(--paper, #FFFFFF))); --tb-row-striping-background-color: var(--shade, color-mix(in oklab, var(--ink, #1C1C1C) 4%, var(--paper, #FFFFFF))); --tb-summary-row-border-width: 1px; --tb-summary-row-border-color: var(--ink, #1C1C1C); --tb-grand-summary-row-border-width: 4px; --tb-grand-summary-row-border-color: var(--ink, #1C1C1C); }
 </style>
-<table class="tb_table" aria-labelledby="tabella-2d5ca3af-title">
+<table class="tb_table" aria-labelledby="tabella-717f74c3-title">
 <thead>
-<tr class="tb_heading"><th colspan="4" id="tabella-2d5ca3af-title" class="tb_title tb_heading_last">Old name, new name</th></tr>
+<tr class="tb_heading"><th colspan="4" id="tabella-717f74c3-title" class="tb_title tb_heading_last">Old name, new name</th></tr>
 <tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left" scope="col" id="was">was</th><th class="tb_col_heading tb_left" scope="col" id="now">now</th><th class="tb_col_heading tb_left" scope="col" id="since">when</th><th class="tb_col_heading tb_left" scope="col" id="why">why</th></tr>
 </thead>
 <tbody class="tb_table_body">
 <tr><td class="tb_row tb_left">NIR (2023)</td><td class="tb_row tb_left">NIF</td><td class="tb_row tb_left">Oct 2024</td><td class="tb_row tb_left">NIR was for backends only, NIF is for everything</td></tr>
 <tr><td class="tb_row tb_left">nim-lang/nif repo</td><td class="tb_row tb_left">nim-lang/nimony, spec in nim-lang/nifspec</td><td class="tb_row tb_left">late 2024</td><td class="tb_row tb_left">the spec got its own repo in Dec 2024</td></tr>
 <tr><td class="tb_row tb_left">gear3</td><td class="tb_row tb_left">hexer</td><td class="tb_row tb_left">Jan 2025</td><td class="tb_row tb_left">commit &quot;gear3 is now hexer&quot;</td></tr>
-<tr><td class="tb_row tb_left">aufbruch mode</td><td class="tb_row tb_left">(gone)</td><td class="tb_row tb_left">Mar 2026</td><td class="tb_row tb_left">Nimony grew past a minimal mode</td></tr>
+<tr><td class="tb_row tb_left">aufbruch and compat modes</td><td class="tb_row tb_left"><code>.feature</code> switches</td><td class="tb_row tb_left">Mar to Aug 2026</td><td class="tb_row tb_left">the modes of discussion #529 became per-feature switches</td></tr>
 <tr><td class="tb_row tb_left">NJVL</td><td class="tb_row tb_left">NJ, then nothing</td><td class="tb_row tb_left">Jan 2026, removed Aug 2026</td><td class="tb_row tb_left">replaced by the multi-join IR (Final IR)</td></tr>
 <tr><td class="tb_row tb_left">nimpac</td><td class="tb_row tb_left">pnak</td><td class="tb_row tb_left">May 2026</td><td class="tb_row tb_left">the package manager</td></tr>
 <tr><td class="tb_row tb_left">NIFC</td><td class="tb_row tb_left">Leng (Arkham IR), lengc</td><td class="tb_row tb_left">Jun 2026</td><td class="tb_row tb_left">everyone confused NIF and NIFC</td></tr>
@@ -1593,12 +1602,11 @@ nifkit, the template plugin).</p>
 <a href="https://github.com/nim-lang/nimony/blob/master/doc/design.md">design.md</a>, <a href="https://github.com/nim-lang/nimony/blob/master/doc/differences.md">differences.md</a>,
 <a href="https://github.com/nim-lang/nimony/blob/master/doc/language.md">language.md</a>, <a href="https://github.com/nim-lang/nimony/blob/master/doc/plugins.md">plugins.md</a>,
 <a href="https://github.com/nim-lang/nimony/blob/master/doc/passive_procs.md">passive_procs.md</a>, <a href="https://github.com/nim-lang/nimony/blob/master/doc/lenientnils.md">lenientnils.md</a>,
-<a href="https://github.com/nim-lang/nimony/blob/master/doc/assembler.md">assembler.md</a>, the internals docs (IC, multi-join IR, contracts), the git
+<a href="https://github.com/nim-lang/nimony/blob/master/doc/assembler.md">assembler.md</a>, <a href="https://github.com/nim-lang/nimony/discussions/529">discussion #529</a> (the plan of Feb 2025), the internals docs (IC, multi-join IR, contracts), the git
 history; <a href="https://github.com/nim-lang/nifspec">nifspec</a>; the
 <a href="https://nim-lang.github.io/nimony-website/">Nimony website</a> (FAQ, tools, release articles).</p>
-<aside class="note careful"><span class="note-label">Careful</span><p>Not read: GitHub discussion #529 (Nimony's early design plan, which this session could not
-open; its content lives on in <code>differences.md</code>) and the Discord conversations Araq sometimes
-refers to. Dates are the day of the forum post, in UTC.</p>
+<aside class="note careful"><span class="note-label">Careful</span><p>Not read: the Discord conversations Araq sometimes refers to. Discussion #529 was added in
+version 2 of this page. Dates are the day of the forum post, in UTC.</p>
 </aside>
 </main>
 <footer>
@@ -1650,7 +1658,7 @@ years he has posted its progress on the Nim forum one line at a time: &quot;NJVL
 [nimony repo](https://github.com/nim-lang/nimony) (2,348 commits) and Araq's blog, with every term
 explained at the point where it shows up.
 &quot;&quot;&quot;</span>
-nbVersion(<span class="hljs-number">1</span>, <span class="hljs-string">&quot;22 Nov 2026&quot;</span>)
+nbVersion(<span class="hljs-number">2</span>, <span class="hljs-string">&quot;23 Nov 2026&quot;</span>)
 
 nbTldr: <span class="hljs-string">&quot;&quot;&quot;
 - **What it is.** A from-scratch Nim compiler built as a chain of small tools that pass
@@ -1848,6 +1856,7 @@ much of the old codebase.
 &quot;&quot;&quot;</span>, f(<span class="hljs-number">12693</span>, <span class="hljs-number">78247</span>), <span class="hljs-string">&quot;22 Feb 2025&quot;</span>)
 
 nbEvents @[
+  (<span class="hljs-string">&quot;13 Feb 2025&quot;</span>, <span class="hljs-string">&quot;Araq opens discussion #529, the plan: two language modes, `compat` (as close to Nim 2 as is cheap, which </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">might evolve into Nim version 3</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">) and `aufbruch` (the focus: atomicArc only, not nil by default, no exceptions but `ErrorCode`, contracts instead of runtime checks, plugins instead of macros, a tiny standard library).&quot;</span>, repo &amp; <span class="hljs-string">&quot;/discussions/529&quot;</span>),
   (<span class="hljs-string">&quot;25 Feb 2025&quot;</span>, <span class="hljs-string">&quot;Plugins first described: </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">a program that receives two filenames, input.nif and output.nif</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">.&quot;</span>, f(<span class="hljs-number">12693</span>, <span class="hljs-number">78257</span>)),
   (<span class="hljs-string">&quot;1 Mar 2025&quot;</span>, <span class="hljs-string">&quot;`openArray` written as a normal library type with the new `.view` pragma; `.requires` contracts for bounds checks; one polymorphic `[]` instead of two.&quot;</span>, f(<span class="hljs-number">12693</span>, <span class="hljs-number">78280</span>)),
   (<span class="hljs-string">&quot;3 Mar 2025&quot;</span>, <span class="hljs-string">&quot;`parseopt` works. </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">Watching this thread weekly is more exciting than Netflix.</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&quot;</span>, f(<span class="hljs-number">12693</span>, <span class="hljs-number">78292</span>)),
@@ -1911,6 +1920,15 @@ German for &quot;setting out&quot; (and, Araq added, &quot;it got broken up&quot
 name for Nimony's minimal language: IC plus ARC plus type-checked generics, &quot;a 10 times smaller
 Nim compressed to its essentials&quot;, meant to survive as `--mode:aufbruch`. By Mar 2026: &quot;we moved
 beyond that aufbruch thing, we don't need a better name for it, it's gone.&quot;
+
+The plan was in discussion #529 (Feb 2025): `aufbruch` next to a `compat` mode for Nim 2 code,
+which would break only where the new runtime forces it (strings and seqs not ABI compatible with
+Nim 2, no `cast` between `seq` and `string`, `s[i]` not passable as `var char` because of
+copy-on-write literals, dearer `cstring` conversions with no terminating zero). Aufbruch started
+without dirty templates, `range`, the effect system, user pragmas, closure iterators or `static`
+evaluation; most came back. Asked in Aug 2026 what had changed, Araq answered &quot;Everything&quot;:
+there are no modes any more, only per-feature switches (`{.feature: &quot;name&quot;.}`), and he marked the
+discussion outdated.
 &quot;&quot;&quot;</span>, tsince = <span class="hljs-string">&quot;[Mar 2025](&quot;</span> &amp; f(<span class="hljs-number">12693</span>, <span class="hljs-number">78387</span>) &amp; <span class="hljs-string">&quot;)&quot;</span>)
 
 term(<span class="hljs-string">&quot;plugins&quot;</span>, <span class="hljs-string">&quot;Nim programs, compiled to machine code, that transform NIF: the successor of macros&quot;</span>, &amp;<span class="hljs-string">&quot;&quot;&quot;
@@ -2396,7 +2414,7 @@ nbTable toTableData(@[
   (was: <span class="hljs-string">&quot;NIR (2023)&quot;</span>, now: <span class="hljs-string">&quot;NIF&quot;</span>, since: <span class="hljs-string">&quot;Oct 2024&quot;</span>, why: <span class="hljs-string">&quot;NIR was for backends only, NIF is for everything&quot;</span>),
   (was: <span class="hljs-string">&quot;nim-lang/nif repo&quot;</span>, now: <span class="hljs-string">&quot;nim-lang/nimony, spec in nim-lang/nifspec&quot;</span>, since: <span class="hljs-string">&quot;late 2024&quot;</span>, why: <span class="hljs-string">&quot;the spec got its own repo in Dec 2024&quot;</span>),
   (was: <span class="hljs-string">&quot;gear3&quot;</span>, now: <span class="hljs-string">&quot;hexer&quot;</span>, since: <span class="hljs-string">&quot;Jan 2025&quot;</span>, why: <span class="hljs-string">&quot;commit </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">gear3 is now hexer</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&quot;</span>),
-  (was: <span class="hljs-string">&quot;aufbruch mode&quot;</span>, now: <span class="hljs-string">&quot;(gone)&quot;</span>, since: <span class="hljs-string">&quot;Mar 2026&quot;</span>, why: <span class="hljs-string">&quot;Nimony grew past a minimal mode&quot;</span>),
+  (was: <span class="hljs-string">&quot;aufbruch and compat modes&quot;</span>, now: <span class="hljs-string">&quot;`.feature` switches&quot;</span>, since: <span class="hljs-string">&quot;Mar to Aug 2026&quot;</span>, why: <span class="hljs-string">&quot;the modes of discussion #529 became per-feature switches&quot;</span>),
   (was: <span class="hljs-string">&quot;NJVL&quot;</span>, now: <span class="hljs-string">&quot;NJ, then nothing&quot;</span>, since: <span class="hljs-string">&quot;Jan 2026, removed Aug 2026&quot;</span>, why: <span class="hljs-string">&quot;replaced by the multi-join IR (Final IR)&quot;</span>),
   (was: <span class="hljs-string">&quot;nimpac&quot;</span>, now: <span class="hljs-string">&quot;pnak&quot;</span>, since: <span class="hljs-string">&quot;May 2026&quot;</span>, why: <span class="hljs-string">&quot;the package manager&quot;</span>),
   (was: <span class="hljs-string">&quot;NIFC&quot;</span>, now: <span class="hljs-string">&quot;Leng (Arkham IR), lengc&quot;</span>, since: <span class="hljs-string">&quot;Jun 2026&quot;</span>, why: <span class="hljs-string">&quot;everyone confused NIF and NIFC&quot;</span>),
@@ -2458,15 +2476,14 @@ nifkit, the template plugin).
 [design.md]({docs}design.md), [differences.md]({docs}differences.md),
 [language.md]({docs}language.md), [plugins.md]({docs}plugins.md),
 [passive_procs.md]({docs}passive_procs.md), [lenientnils.md]({docs}lenientnils.md),
-[assembler.md]({docs}assembler.md), the internals docs (IC, multi-join IR, contracts), the git
+[assembler.md]({docs}assembler.md), [discussion #529]({repo}/discussions/529) (the plan of Feb 2025), the internals docs (IC, multi-join IR, contracts), the git
 history; [nifspec](https://github.com/nim-lang/nifspec); the
 [Nimony website](https://nim-lang.github.io/nimony-website/) (FAQ, tools, release articles).
 &quot;&quot;&quot;</span>
 
 nbNote(nkCareful, <span class="hljs-string">&quot;&quot;&quot;
-Not read: GitHub discussion #529 (Nimony's early design plan, which this session could not
-open; its content lives on in `differences.md`) and the Discord conversations Araq sometimes
-refers to. Dates are the day of the forum post, in UTC.
+Not read: the Discord conversations Araq sometimes refers to. Discussion #529 was added in
+version 2 of this page. Dates are the day of the forum post, in UTC.
 &quot;&quot;&quot;</span>)
 
 nbSave
