@@ -825,7 +825,7 @@ years he has posted its progress on the Nim forum one line at a time: &quot;NJVL
 <a href="https://github.com/nim-lang/nimony">nimony repo</a> (2,348 commits) and Araq's blog, with every term
 explained at the point where it shows up.</p>
 </div>
-<p class="rv-enter"><span class="rv-version">Version 2 · updated 23 Nov 2026</span></p>
+<p class="rv-enter"><span class="rv-version">Version 3 · updated 23 Nov 2026</span></p>
 <div class="tldr"><span class="tldr-label">The short version</span><ul>
 <li><strong>What it is.</strong> A from-scratch Nim compiler built as a chain of small tools that pass
 <strong>NIF</strong> files to each other (NIF is a Lisp-like text format, &quot;JSON for compilers&quot;). Because every
@@ -839,13 +839,17 @@ old codebase without going insane.&quot;</li>
 and a &quot;great christmas release&quot; is planned.</li>
 <li><strong>Side effect.</strong> The ideas flowed back: Nim <strong>2.4</strong> (28 Oct 2026) ships incremental compilation
 built the Nimony way. Nim 2.x and Nimony now &quot;compete for the Nim 3 title&quot;.</li>
-<li><strong>avoidtemps</strong> (your example) is a <em>type plugin</em>: mark a type with it and the compiler rewrites
-<code>let e = a*b + c - d</code> into <code>var e = a; e *= b; e += c; e -= d</code>, so no temporary values are
-created. Promised in May 2025, shipped today, 22 Nov 2026.</li>
 </ul>
 </div>
-<nav class="toc"><span class="toc-label">Contents</span><ol><li><a href="#avoidtemps">Start with your example: avoidtemps</a></li><li><a href="#prehistory">2023 to 2024: NIR, a survey, then NIF</a></li><li><a href="#hello">Feb to May 2025: hello world to a minimal Nim</a></li><li><a href="#growing">May to Nov 2025: closures, passive procs, release 0.2</a></li><li><a href="#ic">Dec 2025 to Jun 2026: IC for Nim 2, NJ, borrow checking, self-hosting</a></li><li><a href="#native">Jun to Sep 2026: Leng, Shoggoth, Arkham, no C compiler</a></li><li><a href="#complete">Oct to Nov 2026: feature complete, the fuzzer, avoidtemps</a></li><li><a href="#today">The pipeline today</a></li><li><a href="#names">The names that changed</a></li><li><a href="#glossary">Index of terms</a></li><li><a href="#sources">Sources</a></li></ol></nav>
-<h2 id="avoidtemps">Start with your example: avoidtemps<span class="ch-span">promised 3 May 2025, shipped 22 Nov 2026</span></h2>
+<nav class="toc"><span class="toc-label">Contents</span><ol><li><a href="#avoidtemps">How this page started: avoidtemps</a></li><li><a href="#prehistory">2023 to 2024: NIR, a survey, then NIF</a></li><li><a href="#hello">Feb to May 2025: hello world to a minimal Nim</a></li><li><a href="#growing">May to Nov 2025: closures, passive procs, release 0.2</a></li><li><a href="#ic">Dec 2025 to Jun 2026: IC for Nim 2, NJ, borrow checking, self-hosting</a></li><li><a href="#native">Jun to Sep 2026: Leng, Shoggoth, Arkham, no C compiler</a></li><li><a href="#complete">Oct to Nov 2026: feature complete, the fuzzer, avoidtemps</a></li><li><a href="#today">The pipeline today</a></li><li><a href="#names">The names that changed</a></li><li><a href="#glossary">Index of terms</a></li><li><a href="#sources">Sources</a></li></ol></nav>
+<h2 id="avoidtemps">How this page started: avoidtemps<span class="ch-span">promised 3 May 2025, shipped 22 Nov 2026</span></h2>
+<p>On 22 Nov 2026 Araq <a href="https://forum.nim-lang.org/t/14201#86812">posted</a> one more line in his progress thread: &quot;The plugin
+called avoidtemps the manual outlined is now a reality.&quot; It was the umpteenth post of that kind, a
+name that sounds interesting and assumes you have read the forty posts before it. So Pietro decided
+to catch up, and asked Claude for an explainer of how Nimony evolved from the beginning until now:
+follow all the forum threads, look at the repo and anywhere else that helps, explain every term,
+and start from that thread with one concrete question: what is avoidtemps?</p>
+<p>This page is the answer, and it starts where the question did.</p>
 <p>Take a small matrix type with the usual operators. Each operator copies its left operand into a
 new result and then works in place on it. That is the standard way to write them, and it means
 every operator in an expression makes a new matrix. This runs in Nim 2 and counts the copies:</p>
@@ -1512,14 +1516,14 @@ commit saying &quot;Leng&quot; mean the same thing. Some docs in the repo still 
 repo's own agent instructions say to ignore stray mentions of NJVL).</p>
 </aside>
 <h2 id="glossary">Index of terms<span class="ch-span">every card on this page</span></h2>
-<div id="tabella-7bd86029" class="tabella">
-<table class="tb_table" aria-labelledby="tabella-7bd86029-title">
+<div id="tabella-283a0b28" class="tabella">
+<table class="tb_table" aria-labelledby="tabella-283a0b28-title">
 <thead>
-<tr class="tb_heading"><th colspan="3" id="tabella-7bd86029-title" class="tb_title tb_heading_last">Terms, in the order they appear</th></tr>
+<tr class="tb_heading"><th colspan="3" id="tabella-283a0b28-title" class="tb_title tb_heading_last">Terms, in the order they appear</th></tr>
 <tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_left" scope="col" id="short">in one line</th><th class="tb_col_heading tb_left" scope="col" id="chapter">chapter</th></tr>
 </thead>
 <tbody class="tb_table_body">
-<tr><th scope="row" class="tb_row tb_left tb_stub">avoidtemps</th><td class="tb_row tb_left">type plugin that removes temporaries from <code>a*b + c - d</code></td><td class="tb_row tb_left">Start with your example: avoidtemps</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">avoidtemps</th><td class="tb_row tb_left">type plugin that removes temporaries from <code>a*b + c - d</code></td><td class="tb_row tb_left">How this page started: avoidtemps</td></tr>
 <tr><th scope="row" class="tb_row tb_left tb_stub">NIR</th><td class="tb_row tb_left">2023's backend-only IR, replaced by NIF</td><td class="tb_row tb_left">2023 to 2024: NIR, a survey, then NIF</td></tr>
 <tr><th scope="row" class="tb_row tb_left tb_stub">IC</th><td class="tb_row tb_left">incremental compilation: rebuild only what changed</td><td class="tb_row tb_left">2023 to 2024: NIR, a survey, then NIF</td></tr>
 <tr><th scope="row" class="tb_row tb_left tb_stub">NIF</th><td class="tb_row tb_left">Nim Intermediate Format, the S-expression text format every tool speaks</td><td class="tb_row tb_left">2023 to 2024: NIR, a survey, then NIF</td></tr>
@@ -1564,7 +1568,7 @@ repo's own agent instructions say to ignore stray mentions of NJVL).</p>
 <tr><th scope="row" class="tb_row tb_left tb_stub">nifcore</th><td class="tb_row tb_left">the latest NIF API inside the compiler</td><td class="tb_row tb_left">Jun to Sep 2026: Leng, Shoggoth, Arkham, no C compiler</td></tr>
 <tr><th scope="row" class="tb_row tb_left tb_stub">multi-join IR (Final IR)</th><td class="tb_row tb_left">the control-flow form shared by both IRs, with forward jumps to labels</td><td class="tb_row tb_left">Jun to Sep 2026: Leng, Shoggoth, Arkham, no C compiler</td></tr>
 <tr><th scope="row" class="tb_row tb_left tb_stub">staticContracts</th><td class="tb_row tb_left">a module where every contract must be proven</td><td class="tb_row tb_left">Jun to Sep 2026: Leng, Shoggoth, Arkham, no C compiler</td></tr>
-<tr><th scope="row" class="tb_row tb_left tb_stub"><code>nimony c</code>, <code>n</code>, <code>w</code>, <code>j</code></th><td class="tb_row tb_left">one compiler, four kinds of output</td><td class="tb_row tb_left">Jun to Sep 2026: Leng, Shoggoth, Arkham, no C compiler</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><code>nimony c</code>, <code>n</code>, <code>w</code>, <code>j</code></th><td class="tb_row tb_left">the four backends: <code>c</code> through C, <code>n</code> native (Arkham), <code>w</code> WebAssembly, <code>j</code> JavaScript</td><td class="tb_row tb_left">Jun to Sep 2026: Leng, Shoggoth, Arkham, no C compiler</td></tr>
 <tr><th scope="row" class="tb_row tb_left tb_stub"><code>||</code> parallel for</th><td class="tb_row tb_left">structured parallelism without FlowVars</td><td class="tb_row tb_left">Jun to Sep 2026: Leng, Shoggoth, Arkham, no C compiler</td></tr>
 <tr><th scope="row" class="tb_row tb_left tb_stub">memory management modes</th><td class="tb_row tb_left">atomicArc by default; arc, orc, yrc, or your own</td><td class="tb_row tb_left">Oct to Nov 2026: feature complete, the fuzzer, avoidtemps</td></tr>
 <tr><th scope="row" class="tb_row tb_left tb_stub"><code>owned ref T</code></th><td class="tb_row tb_left">a checked unique owner for a ref (RFC 575)</td><td class="tb_row tb_left">Oct to Nov 2026: feature complete, the fuzzer, avoidtemps</td></tr>
@@ -1605,8 +1609,7 @@ nifkit, the template plugin).</p>
 <a href="https://github.com/nim-lang/nimony/blob/master/doc/assembler.md">assembler.md</a>, <a href="https://github.com/nim-lang/nimony/discussions/529">discussion #529</a> (the plan of Feb 2025), the internals docs (IC, multi-join IR, contracts), the git
 history; <a href="https://github.com/nim-lang/nifspec">nifspec</a>; the
 <a href="https://nim-lang.github.io/nimony-website/">Nimony website</a> (FAQ, tools, release articles).</p>
-<aside class="note careful"><span class="note-label">Careful</span><p>Not read: the Discord conversations Araq sometimes refers to. Discussion #529 was added in
-version 2 of this page. Dates are the day of the forum post, in UTC.</p>
+<aside class="note careful"><span class="note-label">Careful</span><p>Not read: the Discord conversations Araq sometimes refers to. Dates are the day of the forum post, in UTC.</p>
 </aside>
 </main>
 <footer>
@@ -1658,7 +1661,7 @@ years he has posted its progress on the Nim forum one line at a time: &quot;NJVL
 [nimony repo](https://github.com/nim-lang/nimony) (2,348 commits) and Araq's blog, with every term
 explained at the point where it shows up.
 &quot;&quot;&quot;</span>
-nbVersion(<span class="hljs-number">2</span>, <span class="hljs-string">&quot;23 Nov 2026&quot;</span>)
+nbVersion(<span class="hljs-number">3</span>, <span class="hljs-string">&quot;23 Nov 2026&quot;</span>)
 
 nbTldr: <span class="hljs-string">&quot;&quot;&quot;
 - **What it is.** A from-scratch Nim compiler built as a chain of small tools that pass
@@ -1673,13 +1676,10 @@ nbTldr: <span class="hljs-string">&quot;&quot;&quot;
   and a &quot;great christmas release&quot; is planned.
 - **Side effect.** The ideas flowed back: Nim **2.4** (28 Oct 2026) ships incremental compilation
   built the Nimony way. Nim 2.x and Nimony now &quot;compete for the Nim 3 title&quot;.
-- **avoidtemps** (your example) is a *type plugin*: mark a type with it and the compiler rewrites
-  `let e = a*b + c - d` into `var e = a; e *= b; e += c; e -= d`, so no temporary values are
-  created. Promised in May 2025, shipped today, 22 Nov 2026.
 &quot;&quot;&quot;</span>
 
 nbToc @[
-  (<span class="hljs-string">&quot;avoidtemps&quot;</span>, <span class="hljs-string">&quot;Start with your example: avoidtemps&quot;</span>),
+  (<span class="hljs-string">&quot;avoidtemps&quot;</span>, <span class="hljs-string">&quot;How this page started: avoidtemps&quot;</span>),
   (<span class="hljs-string">&quot;prehistory&quot;</span>, <span class="hljs-string">&quot;2023 to 2024: NIR, a survey, then NIF&quot;</span>),
   (<span class="hljs-string">&quot;hello&quot;</span>, <span class="hljs-string">&quot;Feb to May 2025: hello world to a minimal Nim&quot;</span>),
   (<span class="hljs-string">&quot;growing&quot;</span>, <span class="hljs-string">&quot;May to Nov 2025: closures, passive procs, release 0.2&quot;</span>),
@@ -1693,9 +1693,18 @@ nbToc @[
 ]
 
 <span class="hljs-comment"># =========================================================================================== 0</span>
-chap(<span class="hljs-string">&quot;avoidtemps&quot;</span>, <span class="hljs-string">&quot;Start with your example: avoidtemps&quot;</span>, <span class="hljs-string">&quot;promised 3 May 2025, shipped 22 Nov 2026&quot;</span>)
+chap(<span class="hljs-string">&quot;avoidtemps&quot;</span>, <span class="hljs-string">&quot;How this page started: avoidtemps&quot;</span>, <span class="hljs-string">&quot;promised 3 May 2025, shipped 22 Nov 2026&quot;</span>)
 
-nbText: <span class="hljs-string">&quot;&quot;&quot;
+nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
+On 22 Nov 2026 Araq [posted]({f(14201, 86812)}) one more line in his progress thread: &quot;The plugin
+called avoidtemps the manual outlined is now a reality.&quot; It was the umpteenth post of that kind, a
+name that sounds interesting and assumes you have read the forty posts before it. So Pietro decided
+to catch up, and asked Claude for an explainer of how Nimony evolved from the beginning until now:
+follow all the forum threads, look at the repo and anywhere else that helps, explain every term,
+and start from that thread with one concrete question: what is avoidtemps?
+
+This page is the answer, and it starts where the question did.
+
 Take a small matrix type with the usual operators. Each operator copies its left operand into a
 new result and then works in place on it. That is the standard way to write them, and it means
 every operator in an expression makes a new matrix. This runs in Nim 2 and counts the copies:
@@ -1768,7 +1777,7 @@ right side could alias them. `std/vectors` (the new `Vec[N, T]` type, merged the
 first user.
 &quot;&quot;&quot;</span>, taka = <span class="hljs-string">&quot;expression templates, term rewriting macros&quot;</span>,
   tsince = &amp;<span class="hljs-string">&quot;Outlined in [Araq's design post]({blog}nimony.html) (3 May 2025) and the manual (Aug 2025); real on [22 Nov 2026]({f(14201, 86812)}) ([PR #3089]({repo}/pull/3089))&quot;</span>)
-index.add (term: <span class="hljs-string">&quot;avoidtemps&quot;</span>, short: <span class="hljs-string">&quot;type plugin that removes temporaries from `a*b + c - d`&quot;</span>, chapter: <span class="hljs-string">&quot;Start with your example: avoidtemps&quot;</span>)
+index.add (term: <span class="hljs-string">&quot;avoidtemps&quot;</span>, short: <span class="hljs-string">&quot;type plugin that removes temporaries from `a*b + c - d`&quot;</span>, chapter: <span class="hljs-string">&quot;How this page started: avoidtemps&quot;</span>)
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 Behind that one line sit most of the ideas this page explains: **plugins** instead of macros,
@@ -2305,7 +2314,7 @@ prover also reasons about integer overflow. dwhall256's thread walks through the
 [strutils diff](https://forum.nim-lang.org/t/14257).
 &quot;&quot;&quot;</span>, tsince = <span class="hljs-string">&quot;[Sep 2026](&quot;</span> &amp; f(<span class="hljs-number">14014</span>, <span class="hljs-number">86003</span>) &amp; <span class="hljs-string">&quot;)&quot;</span>)
 
-term(<span class="hljs-string">&quot;`nimony c`, `n`, `w`, `j`&quot;</span>, <span class="hljs-string">&quot;one compiler, four kinds of output&quot;</span>, <span class="hljs-string">&quot;&quot;&quot;
+term(<span class="hljs-string">&quot;`nimony c`, `n`, `w`, `j`&quot;</span>, <span class="hljs-string">&quot;the four backends: `c` through C, `n` native (Arkham), `w` WebAssembly, `j` JavaScript&quot;</span>, <span class="hljs-string">&quot;&quot;&quot;
 `nimony c` compiles through C (with a C compiler), `nimony n` natively through Arkham,
 `nimony w` to WebAssembly, `nimony j` to JavaScript. An LLVM path exists in lengc too.
 &quot;&quot;&quot;</span>, tsince = <span class="hljs-string">&quot;Aug and Sep 2026&quot;</span>)
@@ -2482,8 +2491,7 @@ history; [nifspec](https://github.com/nim-lang/nifspec); the
 &quot;&quot;&quot;</span>
 
 nbNote(nkCareful, <span class="hljs-string">&quot;&quot;&quot;
-Not read: the Discord conversations Araq sometimes refers to. Discussion #529 was added in
-version 2 of this page. Dates are the day of the forum post, in UTC.
+Not read: the Discord conversations Araq sometimes refers to. Dates are the day of the forum post, in UTC.
 &quot;&quot;&quot;</span>)
 
 nbSave

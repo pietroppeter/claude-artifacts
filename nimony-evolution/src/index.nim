@@ -39,7 +39,7 @@ years he has posted its progress on the Nim forum one line at a time: "NJVL", "S
 [nimony repo](https://github.com/nim-lang/nimony) (2,348 commits) and Araq's blog, with every term
 explained at the point where it shows up.
 """
-nbVersion(2, "23 Nov 2026")
+nbVersion(3, "23 Nov 2026")
 
 nbTldr: """
 - **What it is.** A from-scratch Nim compiler built as a chain of small tools that pass
@@ -54,13 +54,10 @@ nbTldr: """
   and a "great christmas release" is planned.
 - **Side effect.** The ideas flowed back: Nim **2.4** (28 Oct 2026) ships incremental compilation
   built the Nimony way. Nim 2.x and Nimony now "compete for the Nim 3 title".
-- **avoidtemps** (your example) is a *type plugin*: mark a type with it and the compiler rewrites
-  `let e = a*b + c - d` into `var e = a; e *= b; e += c; e -= d`, so no temporary values are
-  created. Promised in May 2025, shipped today, 22 Nov 2026.
 """
 
 nbToc @[
-  ("avoidtemps", "Start with your example: avoidtemps"),
+  ("avoidtemps", "How this page started: avoidtemps"),
   ("prehistory", "2023 to 2024: NIR, a survey, then NIF"),
   ("hello", "Feb to May 2025: hello world to a minimal Nim"),
   ("growing", "May to Nov 2025: closures, passive procs, release 0.2"),
@@ -74,9 +71,18 @@ nbToc @[
 ]
 
 # =========================================================================================== 0
-chap("avoidtemps", "Start with your example: avoidtemps", "promised 3 May 2025, shipped 22 Nov 2026")
+chap("avoidtemps", "How this page started: avoidtemps", "promised 3 May 2025, shipped 22 Nov 2026")
 
-nbText: """
+nbText: &"""
+On 22 Nov 2026 Araq [posted]({f(14201, 86812)}) one more line in his progress thread: "The plugin
+called avoidtemps the manual outlined is now a reality." It was the umpteenth post of that kind, a
+name that sounds interesting and assumes you have read the forty posts before it. So Pietro decided
+to catch up, and asked Claude for an explainer of how Nimony evolved from the beginning until now:
+follow all the forum threads, look at the repo and anywhere else that helps, explain every term,
+and start from that thread with one concrete question: what is avoidtemps?
+
+This page is the answer, and it starts where the question did.
+
 Take a small matrix type with the usual operators. Each operator copies its left operand into a
 new result and then works in place on it. That is the standard way to write them, and it means
 every operator in an expression makes a new matrix. This runs in Nim 2 and counts the copies:
@@ -149,7 +155,7 @@ right side could alias them. `std/vectors` (the new `Vec[N, T]` type, merged the
 first user.
 """, taka = "expression templates, term rewriting macros",
   tsince = &"Outlined in [Araq's design post]({blog}nimony.html) (3 May 2025) and the manual (Aug 2025); real on [22 Nov 2026]({f(14201, 86812)}) ([PR #3089]({repo}/pull/3089))")
-index.add (term: "avoidtemps", short: "type plugin that removes temporaries from `a*b + c - d`", chapter: "Start with your example: avoidtemps")
+index.add (term: "avoidtemps", short: "type plugin that removes temporaries from `a*b + c - d`", chapter: "How this page started: avoidtemps")
 
 nbText: """
 Behind that one line sit most of the ideas this page explains: **plugins** instead of macros,
@@ -686,7 +692,7 @@ prover also reasons about integer overflow. dwhall256's thread walks through the
 [strutils diff](https://forum.nim-lang.org/t/14257).
 """, tsince = "[Sep 2026](" & f(14014, 86003) & ")")
 
-term("`nimony c`, `n`, `w`, `j`", "one compiler, four kinds of output", """
+term("`nimony c`, `n`, `w`, `j`", "the four backends: `c` through C, `n` native (Arkham), `w` WebAssembly, `j` JavaScript", """
 `nimony c` compiles through C (with a C compiler), `nimony n` natively through Arkham,
 `nimony w` to WebAssembly, `nimony j` to JavaScript. An LLVM path exists in lengc too.
 """, tsince = "Aug and Sep 2026")
@@ -863,8 +869,7 @@ history; [nifspec](https://github.com/nim-lang/nifspec); the
 """
 
 nbNote(nkCareful, """
-Not read: the Discord conversations Araq sometimes refers to. Discussion #529 was added in
-version 2 of this page. Dates are the day of the forum post, in UTC.
+Not read: the Discord conversations Araq sometimes refers to. Dates are the day of the forum post, in UTC.
 """)
 
 nbSave
