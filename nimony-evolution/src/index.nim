@@ -39,7 +39,7 @@ years he has posted its progress on the Nim forum one line at a time: "NJVL", "S
 [nimony repo](https://github.com/nim-lang/nimony) (2,348 commits) and Araq's blog, with every term
 explained at the point where it shows up.
 """
-nbVersion(1, "22 Nov 2026")
+nbVersion(2, "23 Nov 2026")
 
 nbTldr: """
 - **What it is.** A from-scratch Nim compiler built as a chain of small tools that pass
@@ -237,6 +237,7 @@ much of the old codebase.
 """, f(12693, 78247), "22 Feb 2025")
 
 nbEvents @[
+  ("13 Feb 2025", "Araq opens discussion #529, the plan: two language modes, `compat` (as close to Nim 2 as is cheap, which \"might evolve into Nim version 3\") and `aufbruch` (the focus: atomicArc only, not nil by default, no exceptions but `ErrorCode`, contracts instead of runtime checks, plugins instead of macros, a tiny standard library).", repo & "/discussions/529"),
   ("25 Feb 2025", "Plugins first described: \"a program that receives two filenames, input.nif and output.nif\".", f(12693, 78257)),
   ("1 Mar 2025", "`openArray` written as a normal library type with the new `.view` pragma; `.requires` contracts for bounds checks; one polymorphic `[]` instead of two.", f(12693, 78280)),
   ("3 Mar 2025", "`parseopt` works. \"Watching this thread weekly is more exciting than Netflix.\"", f(12693, 78292)),
@@ -300,6 +301,15 @@ German for "setting out" (and, Araq added, "it got broken up", as in breaking ch
 name for Nimony's minimal language: IC plus ARC plus type-checked generics, "a 10 times smaller
 Nim compressed to its essentials", meant to survive as `--mode:aufbruch`. By Mar 2026: "we moved
 beyond that aufbruch thing, we don't need a better name for it, it's gone."
+
+The plan was in discussion #529 (Feb 2025): `aufbruch` next to a `compat` mode for Nim 2 code,
+which would break only where the new runtime forces it (strings and seqs not ABI compatible with
+Nim 2, no `cast` between `seq` and `string`, `s[i]` not passable as `var char` because of
+copy-on-write literals, dearer `cstring` conversions with no terminating zero). Aufbruch started
+without dirty templates, `range`, the effect system, user pragmas, closure iterators or `static`
+evaluation; most came back. Asked in Aug 2026 what had changed, Araq answered "Everything":
+there are no modes any more, only per-feature switches (`{.feature: "name".}`), and he marked the
+discussion outdated.
 """, tsince = "[Mar 2025](" & f(12693, 78387) & ")")
 
 term("plugins", "Nim programs, compiled to machine code, that transform NIF: the successor of macros", &"""
@@ -785,7 +795,7 @@ nbTable toTableData(@[
   (was: "NIR (2023)", now: "NIF", since: "Oct 2024", why: "NIR was for backends only, NIF is for everything"),
   (was: "nim-lang/nif repo", now: "nim-lang/nimony, spec in nim-lang/nifspec", since: "late 2024", why: "the spec got its own repo in Dec 2024"),
   (was: "gear3", now: "hexer", since: "Jan 2025", why: "commit \"gear3 is now hexer\""),
-  (was: "aufbruch mode", now: "(gone)", since: "Mar 2026", why: "Nimony grew past a minimal mode"),
+  (was: "aufbruch and compat modes", now: "`.feature` switches", since: "Mar to Aug 2026", why: "the modes of discussion #529 became per-feature switches"),
   (was: "NJVL", now: "NJ, then nothing", since: "Jan 2026, removed Aug 2026", why: "replaced by the multi-join IR (Final IR)"),
   (was: "nimpac", now: "pnak", since: "May 2026", why: "the package manager"),
   (was: "NIFC", now: "Leng (Arkham IR), lengc", since: "Jun 2026", why: "everyone confused NIF and NIFC"),
@@ -847,15 +857,14 @@ nifkit, the template plugin).
 [design.md]({docs}design.md), [differences.md]({docs}differences.md),
 [language.md]({docs}language.md), [plugins.md]({docs}plugins.md),
 [passive_procs.md]({docs}passive_procs.md), [lenientnils.md]({docs}lenientnils.md),
-[assembler.md]({docs}assembler.md), the internals docs (IC, multi-join IR, contracts), the git
+[assembler.md]({docs}assembler.md), [discussion #529]({repo}/discussions/529) (the plan of Feb 2025), the internals docs (IC, multi-join IR, contracts), the git
 history; [nifspec](https://github.com/nim-lang/nifspec); the
 [Nimony website](https://nim-lang.github.io/nimony-website/) (FAQ, tools, release articles).
 """
 
 nbNote(nkCareful, """
-Not read: GitHub discussion #529 (Nimony's early design plan, which this session could not
-open; its content lives on in `differences.md`) and the Discord conversations Araq sometimes
-refers to. Dates are the day of the forum post, in UTC.
+Not read: the Discord conversations Araq sometimes refers to. Discussion #529 was added in
+version 2 of this page. Dates are the day of the forum post, in UTC.
 """)
 
 nbSave
