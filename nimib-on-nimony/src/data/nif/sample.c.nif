@@ -1,0 +1,130 @@
+(.nif27)
+(.indexat 3191             )
+(stmts@,1,sample.nim
+ (gvar@4,4 :total.0. .
+  (i 64)0@8)
+ (gvar :`iniGuard.0. .
+  (bool).)
+ (type :`cchar.0.
+  (pragmas
+   (importc "char")
+   (nodecl))
+  (i 8))
+ (gvar :`cmdCount.0.
+  (pragmas
+   (exportc "cmdCount"))
+  (i 32).)
+ (gvar :`cmdLine.0.
+  (pragmas
+   (exportc "cmdLine"))
+  (ptr
+   (ptr
+    (c 8))).)
+ (gvar :`nimEnviron.0.
+  (pragmas
+   (exportc "nimEnviron"))
+  (ptr
+   (ptr
+    (c 8))).)
+ (proc :`main.0.
+  (params
+   (param :`argc.0. .
+    (i 32))
+   (param :`argv.0. .
+    (ptr
+     (ptr `cchar.0.)))
+   (param :`envp.0. .
+    (ptr
+     (ptr `cchar.0.))))
+  (i 32)
+  (pragmas
+   (exportc "main")
+   (smry writeGlobal readGlobal callsUnknown
+    (param 0 0 reads)
+    (param 1 1 reads)
+    (param 2 2 reads)))
+  (stmts
+   (asgn `cmdCount.0. `argc.0.)
+   (asgn `cmdLine.0.
+    (cast
+     (ptr
+      (ptr
+       (c 8)))`argv.0.))
+   (asgn `nimEnviron.0.
+    (cast
+     (ptr
+      (ptr
+       (c 8)))`envp.0.))
+   (scope
+    (scope
+     (if
+      (elif `iniGuard.0.
+       (stmts
+        (jmp returnLabel`h.13))))
+     (asgn `iniGuard.0.
+      (true))
+     (call `ini.0.sysvq0asl)
+     (call `ini.0.syn1lfpjv)
+     (call `ini.0.comwsgwbr1)
+     (scope@4,5
+      (var@17,E,/tmp/w/nimony/lib/std/system/iterators.nim :`lf`h.7 .
+       (i 64)1@9,6,sample.nim)
+      (var@1A,E,/tmp/w/nimony/lib/std/system/iterators.nim :`lf`h.8 .
+       (i 64)3@E,6,sample.nim)
+      (stmts@2,L,/tmp/w/nimony/lib/std/system/iterators.nim
+       (var@4,A :`ii`h.9 .
+        (i@F,3,sample.nim 64)`lf`h.7@4)
+       (stmts@2,L
+        (ite@8
+         (le `ii`h.9~2 `lf`h.8@3)
+         (stmts
+          (loop
+           (stmts
+            (stmts~6,1
+             (scope
+              (scope@4,6,sample.nim
+               (var@7,1 :`ii`h.10 .
+                (i~1,~4 64).~1,~4)
+               (scope@7,1
+                (scope@G,~4
+                 (asgn@2 `ii`h.10
+                  (mul
+                   (i@G,11,/tmp/w/nimony/lib/std/system/arithmetics.nim 64)`ii`h.9~B,4 `ii`h.9~B,4))
+                 (lab :returnLabel`h.16)))
+               (scope@4,1
+                (scope@2,3B,/tmp/w/nimony/lib/std/system/arithmetics.nim
+                 (asgn@2
+                  (deref~2
+                   (haddr@2,7,sample.nim total.0.))
+                  (add@4
+                   (i@8,~2M 64)
+                   (deref~2
+                    (haddr@2,7,sample.nim total.0.))`ii`h.10@B,7,sample.nim))
+                 (lab :returnLabel`h.19))))
+              (asgn@,1 `ii`h.9@4
+               (add
+                (i 64)`ii`h.9@4 1))))
+            (continue
+             (le `ii`h.9~2 `lf`h.8@3))))).@3)
+        (lab@8 :`ii`h.11))))
+     (lab@4,5 :´lx`h.12)
+     (call@4,6Z,/tmp/w/nimony/lib/std/syncio.nim write.0.syn1lfpjv stdout.0.syn1lfpjv@6
+      (oconstr@5,8,sample.nim string.0.sysvq0asl
+       (kv bytes.0 2322287723684000775u)
+       (kv more.0
+        (nil))))
+     (call@4,6Z,/tmp/w/nimony/lib/std/syncio.nim write.2.syn1lfpjv stdout.0.syn1lfpjv@6 total.0.@G,8,sample.nim)
+     (call@2,6a,/tmp/w/nimony/lib/std/syncio.nim write.7.syn1lfpjv stdout.0.syn1lfpjv@6 '\0A'@E)
+     (lab :returnLabel`h.13)))
+   (call nimFlushStdStreams.0.sysvq0asl)
+   (ret 0))))(.index@,1,sample.nim
+ (h total.0. 58)
+ (h `iniGuard.0. 36)
+ (x `cchar.0. 34)
+ (x `cmdCount.0. 71)
+ (x `cmdLine.0. 68)
+ (x `nimEnviron.0. 84)
+ (x `main.0. 90)
+ (h `argc.0. 27)
+ (h `argv.0. 34)
+ (h `envp.0. 54))

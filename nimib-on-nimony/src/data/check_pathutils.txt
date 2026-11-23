@@ -1,0 +1,4 @@
+nimib/pathutils.nim(30, 47) Error: type mismatch: got: auto but wanted: string
+nimib/pathutils.nim(33, 5) Error: undeclared identifier in module: 'copyFile'
+nimib/pathutils.nim(35, 17) Error: Type mismatch at [position]
+nimib/pathutils.nim(51, 16) Error: Type mismatch at [position]

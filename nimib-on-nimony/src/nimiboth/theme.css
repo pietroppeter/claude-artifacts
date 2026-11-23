@@ -1,0 +1,32 @@
+/* nimiboth's default theme: one column, small code that scrolls inside its box, outputs in dark.
+   Colours are custom properties, so a page can set its own on :root. */
+:root{--paper:#fdfcf9;--ink:#1d2330;--muted:#5f6573;--line:#d9d6ce;--card:#fff;--accent:#c99a06;
+  --code-bg:#fff;--out-bg:#1d2330;--out-ink:#f2efe8;
+  --kw:#8a1f5c;--str:#2d6e3a;--num:#9a5300;--com:#8a857b;
+  --font:system-ui,sans-serif;--mono:ui-monospace,SFMono-Regular,Menlo,monospace}
+html{-webkit-text-size-adjust:100%}
+body{margin:0 auto;max-width:44rem;padding:1rem max(1rem,env(safe-area-inset-right)) 3rem max(1rem,env(safe-area-inset-left));
+  background:var(--paper);color:var(--ink);font:400 17px/1.6 var(--font)}
+h1{font-size:2rem;line-height:1.15;margin:1.2rem 0 .4rem}
+h2{font-size:1.35rem;margin:2.4rem 0 .6rem}
+h3{font-size:1.08rem;margin:1.6rem 0 .4rem}
+a{color:var(--ink);text-decoration-color:var(--accent);text-underline-offset:2px}
+code{font:13px/1.45 var(--mono);background:var(--card);border:1px solid var(--line);padding:0 .2em;border-radius:3px}
+body pre{overflow-x:auto;background:var(--code-bg);border:1px solid var(--line);border-radius:4px;padding:.6rem .7rem;margin:.6rem 0}
+body pre > code{display:block;overflow-x:auto;font:13px/1.45 var(--mono);background:transparent;border:0;padding:0;white-space:pre}
+body pre.nb-output{font:12.5px/1.45 var(--mono);background:var(--out-bg);color:var(--out-ink);border-color:var(--out-bg);white-space:pre;overflow-x:auto}
+.hljs-keyword{color:var(--kw);font-weight:600}
+.hljs-string{color:var(--str)}
+.hljs-number{color:var(--num)}
+.hljs-comment{color:var(--com);font-style:italic}
+details.nb-file{margin:.6rem 0;border:1px solid var(--line);border-radius:4px;background:var(--card)}
+details.nb-file > summary{cursor:pointer;padding:.55rem .7rem;min-height:28px;list-style-position:inside}
+details.nb-file > summary span{color:var(--muted);font-size:.85rem}
+details.nb-file > pre{margin:0;border:0;border-top:1px solid var(--line);border-radius:0 0 4px 4px}
+figure.nb-file{margin:.6rem 0}
+figure.nb-file figcaption{font-size:.85rem;color:var(--muted)}
+table{border-collapse:collapse;width:100%;font-size:.88rem;margin:.8rem 0;display:block;overflow-x:auto}
+th,td{border-bottom:1px solid var(--line);padding:.35rem .5rem .35rem 0;text-align:left;vertical-align:top}
+th{border-bottom:2px solid var(--ink)}
+td code,th code{font-size:12px}
+pre.nb-data{display:none;font:13px/1.4 var(--mono)}

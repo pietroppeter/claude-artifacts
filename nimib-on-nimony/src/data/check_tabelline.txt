@@ -1,0 +1,4 @@
+tabelline/colors.nim(55, 30) Error: cannot evaluate expression at compile time: undeclared identifier: 'staticRead'("data/r-colors.tsv")
+tabelline/colors.nim(62, 25) Error: undeclared field: 'splitLines' for type auto
+tabelline/colors.nim(63, 23) Error: Type mismatch at [position]
+tabelline/colors.nim(63, 42) Error: Type mismatch at [position]

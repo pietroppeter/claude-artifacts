@@ -1,0 +1,4 @@
+Error compiling macro plugin for 'generateBlockInitializer':
+nimib/nimibSugars.nim(39, 29) Error: undeclared identifier: 'getTypeFields'
+nimib/nimibSugars.nim(39, 45) Error: undeclared identifier: 'mapIt'
+nimib/nimibSugars.nim(39, 51) Error: undeclared identifier: it

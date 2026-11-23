@@ -1,0 +1,164 @@
+(.nif27)
+(.indexat 5067             )
+(stmts@,1,sample.nim
+ (import
+  (kv sysvq0asl "../../../../../../tmp/w/nimony/lib/std/system.nim")
+  (kv syn1lfpjv "../../../../../../tmp/w/nimony/lib/std/syncio.nim")
+  (kv comwsgwbr1 "../../../../../../tmp/w/nimony/lib/std/commonio.nim"))
+ (proc@,2 :square.0.@5 . . .
+  (params@B
+   (param@1 :x.0 . .
+    (i@3 64).))
+  (i@A 64).@A .
+  (stmts@R
+   (result@2 :result.0 . .
+    (i~E 64).~E)
+   (asgn@2 result.0
+    (mul
+     (i@G,11,/tmp/w/nimony/lib/std/system/arithmetics.nim 64)x.0~2 x.0@2))
+   (ret@4 result.0)))
+ (gvar@4,4 :total.0. . .
+  (i 64)0@8)
+ (for@4,5
+  (infix@7 \2E..0.Ibdympw. 1~2 3@3)
+  (unpackflat
+   (let :i.0 . .
+    (i@B,~3 64).))
+  (scope
+   (assume
+    (le
+     (i@H,17,/tmp/w/nimony/lib/std/system/comparisons.nim 64)1@5 i.0))
+   (assume
+    (le
+     (i@H,17,/tmp/w/nimony/lib/std/system/comparisons.nim 64)i.0 3@A))
+   (let@7,1 :`x.0 .
+    (pragmas
+     (inline))
+    (i~1,~4 64)
+    (call square.0. i.0@7))
+   (infix@4,1 \2B=.0.Ihg6mz11.
+    (haddr~6 total.0.)`x.0@3)
+   (continue .)))
+ (lab@4,5 :´lx.0)
+ (stmts@2,6X,/tmp/w/nimony/lib/std/syncio.nim
+  (stmts@2,2
+   (cmd write.0.syn1lfpjv stdout.0.syn1lfpjv@6 "total\3A "@5,8,sample.nim))
+  (stmts@2,2
+   (cmd write.2.syn1lfpjv stdout.0.syn1lfpjv@6 total.0.@G,8,sample.nim))
+  (cmd@,3 write.7.syn1lfpjv stdout.0.syn1lfpjv@6 '\0A'@E))
+ (comment@F,2 int.0.sysvq0asl int.0.sysvq0asl~5 echo.0.syn1lfpjv~F,5)
+ (iterator@B,5 :\2E..0.Ibdympw. . .@,E,/tmp/w/nimony/lib/std/system/iterators.nim
+  (at \2E..0.sysvq0asl
+   (i 64))
+  (params@16,E,/tmp/w/nimony/lib/std/system/iterators.nim
+   (param@1 :a.1 . .
+    (i 64).)
+   (param@4 :b.1 . .
+    (i 64).))
+  (i@1A,E,/tmp/w/nimony/lib/std/system/iterators.nim 64)
+  (pragmas@1J,E,/tmp/w/nimony/lib/std/system/iterators.nim
+   (inline@2)
+   (requires~1F,1
+    (or@n,3
+     (or~5,~1
+      (or~2,~1
+       (or~K,~1
+        (lt~A
+         (i@G,1C,/tmp/w/nimony/lib/std/system/comparisons.nim 64)b.1~2
+         (suf@6 9223372036854775807 "i64"))
+        (and~4,1
+         (eq~5
+          (i@H,12,/tmp/w/nimony/lib/std/system/comparisons.nim 64)
+          (sizeof~4
+           (i 64))1@3)
+         (lt@H
+          (i@G,1C,/tmp/w/nimony/lib/std/system/comparisons.nim 64)
+          (expr@2,3T,/tmp/w/nimony/lib/std/system.nim
+           (conv@3,2
+            (i 64)
+            (suf@Y,G,/tmp/w/nimony/lib/std/system/iterators.nim 9223372036854775807 "i64")))127@2)))
+       (and~O,1
+        (eq~5
+         (i@H,12,/tmp/w/nimony/lib/std/system/comparisons.nim 64)
+         (sizeof~4
+          (i 64))2@3)
+        (lt@H
+         (i@G,1C,/tmp/w/nimony/lib/std/system/comparisons.nim 64)
+         (expr@2,3T,/tmp/w/nimony/lib/std/system.nim
+          (conv@3,2
+           (i 64)
+           (suf@Y,H,/tmp/w/nimony/lib/std/system/iterators.nim 9223372036854775807 "i64")))32767@2)))
+      (and~Q,1
+       (eq~5
+        (i@H,12,/tmp/w/nimony/lib/std/system/comparisons.nim 64)
+        (sizeof~4
+         (i 64))4@3)
+       (lt@H
+        (i@G,1C,/tmp/w/nimony/lib/std/system/comparisons.nim 64)
+        (expr@2,3T,/tmp/w/nimony/lib/std/system.nim
+         (conv@3,2
+          (i 64)
+          (suf@Y,I,/tmp/w/nimony/lib/std/system/iterators.nim 9223372036854775807 "i64")))2147483647@2)))
+     (and~V,1
+      (eq~5
+       (i@H,12,/tmp/w/nimony/lib/std/system/comparisons.nim 64)
+       (sizeof~4
+        (i 64))8@3)
+      (lt@H
+       (i@G,1C,/tmp/w/nimony/lib/std/system/comparisons.nim 64)
+       (expr@2,3T,/tmp/w/nimony/lib/std/system.nim
+        (conv@3,2
+         (i 64)
+         (suf@Y,J,/tmp/w/nimony/lib/std/system/iterators.nim 9223372036854775807 "i64")))
+       (suf@2 9223372036854775807 "i64")))))
+   (ensures~1F,6
+    (expr@9
+     (result :result.3 . .
+      (i@F,3,sample.nim 64).@F,3,sample.nim)
+     (expr
+      (result :result.2 . .
+       (i 64).@10,~6)
+      (and@D
+       (le~A
+        (i@H,17,/tmp/w/nimony/lib/std/system/comparisons.nim 64)a.1~2 result.2@3)
+       (le@B
+        (i@H,17,/tmp/w/nimony/lib/std/system/comparisons.nim 64)result.2~7 b.1@3)))))).@,E,/tmp/w/nimony/lib/std/system/iterators.nim
+  (stmts@2,L,/tmp/w/nimony/lib/std/system/iterators.nim
+   (var@4,A :i.1 . .
+    (i@F,3,sample.nim 64)a.1@4)
+   (stmts@2,L
+    (loop@8
+     (scope
+      (ite
+       (le
+        (i@H,17,/tmp/w/nimony/lib/std/system/comparisons.nim 64)i.1~2 b.1@3)
+       (scope~6,1
+        (yld i.1@6)
+        (inc@,1
+         (i 64)i.1@4))
+       (scope
+        (jmp ´lx.1)))
+      (continue .)))
+    (lab@8 :´lx.1))))
+ (func@8,6 :\2B=.0.Ihg6mz11. . .@,3A,/tmp/w/nimony/lib/std/system/arithmetics.nim
+  (at \2B=.0.sysvq0asl
+   (i 64))
+  (params@P,3A,/tmp/w/nimony/lib/std/system/arithmetics.nim
+   (param@1 :x.2 . .
+    (mut@3
+     (i 64)).)
+   (param@B :y.1 . .
+    (i 64).)).@,3A,/tmp/w/nimony/lib/std/system/arithmetics.nim
+  (pragmas@g,3A,/tmp/w/nimony/lib/std/system/arithmetics.nim
+   (untyped@2)
+   (inline@B)).@,3A,/tmp/w/nimony/lib/std/system/arithmetics.nim
+  (stmts@2,3B,/tmp/w/nimony/lib/std/system/arithmetics.nim
+   (asgn@2
+    (hderef~2 x.2)
+    (add@4
+     (i@8,~2M 64)
+     (hderef~2 x.2)y.1@2)))))(.index@,1,sample.nim
+ (h square.0. 278)
+ (h total.0. 275)
+ (h \2E..0.Ibdympw. 863)
+ (h \2B=.0.Ihg6mz11. 3054))
