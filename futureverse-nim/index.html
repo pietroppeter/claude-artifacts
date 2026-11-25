@@ -1,0 +1,2243 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <title>The cloakroom of the future: R's futureverse, explained in Nim</title>
+  <meta content="text/html; charset=utf-8" http-equiv="content-type">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <meta content="nimib 0.4.3" name="generator">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Source+Sans+3:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"><style>:root{--paper:#f6f0e4;--card:#fffdf8;--ink:#2a1d1f;--muted:#6d5f5a;--line:#dccfbd;--bordeaux:#7b1e34;--bordeaux-soft:#f3dfe2;--brass:#b0851f;--brass-soft:#f6ebcd;--rblue:#2766b0;--rblue-soft:#e1ebf7;--careful:#a33a1c;--careful-soft:#f8e1d8;--link:#7b1e34;--code-bg:#fffdf8;--out-bg:#2a1d1f;--out-ink:#f6f0e4;--err-ink:#ffb7a3;--kw:#7b1e34;--str:#3d6b2a;--num:#9a5a00;--com:#8b7f76;--type:#2766b0;--surface:#fffdf8;--shade:#ece3d3;--secondary:#b0851f;--secondary-soft:#f6ebcd;--primary-text:#7b1e34;--neutral-1:#ece3d3;--serif:"DM Serif Display", Georgia, serif;--font:"Source Sans 3", system-ui, sans-serif;--mono:"JetBrains Mono", ui-monospace, monospace;}html{-webkit-text-size-adjust:100%}
+body{margin:0 auto;max-width:44rem;padding:1rem max(1rem,env(safe-area-inset-right)) 3rem max(1rem,env(safe-area-inset-left));
+  background:var(--paper);color:var(--ink);font:400 17.5px/1.6 var(--font);counter-reset:ticket}
+h1{font:400 2.15rem/1.12 var(--serif);margin:1.2rem 0 .4rem;color:var(--bordeaux)}
+h2{font:400 1.55rem/1.2 var(--serif);margin:2.8rem 0 .6rem;padding-top:.7rem;border-top:2px dashed var(--bordeaux);counter-increment:ticket}
+h2::before{content:"N° " counter(ticket);display:inline-block;font:700 .72rem/1 var(--font);letter-spacing:.08em;
+  color:var(--card);background:var(--bordeaux);padding:.32rem .5rem;margin-right:.55rem;border-radius:3px;vertical-align:.3rem}
+h3{font-size:1.1rem;margin:1.8rem 0 .4rem}
+a{color:var(--link);text-underline-offset:2px}
+code{font:13px/1.45 var(--mono);background:var(--brass-soft);padding:0 .25em;border-radius:3px}
+header,footer{font-size:.85rem;color:var(--muted)}
+header a,footer a{color:var(--muted)}
+header code{background:none;font:inherit;padding:0}
+hr{border:0;border-top:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:.88rem;margin:.8rem 0;display:block;overflow-x:auto}
+th,td{border-bottom:1px solid var(--line);padding:.35rem .5rem .35rem 0;text-align:left;vertical-align:top}
+th{border-bottom:2px solid var(--ink)}
+td code,th code{font-size:12px}
+/* code: small, scrolling inside its box, highlighted at build time (nimib-theme) */
+body pre{overflow-x:auto;background:var(--code-bg);border:1px solid var(--line);border-radius:4px;padding:.6rem .7rem;margin:.6rem 0}
+body pre > code{display:block;overflow-x:auto;font:13px/1.45 var(--mono);background:transparent;padding:0;white-space:pre}
+body pre.nb-output{font:12.5px/1.45 var(--mono);background:var(--out-bg);color:var(--out-ink);border-color:var(--out-bg);white-space:pre-wrap;overflow-wrap:anywhere;overflow-x:auto}
+body pre.nb-output.err{color:var(--err-ink)}
+figure.snippet{margin:.8rem 0}
+figure.snippet figcaption{font-size:.8rem;color:var(--muted);margin:0 0 -.3rem .2rem}
+figure.rcode{margin:.8rem 0}
+figure.rcode figcaption{display:inline-block;font:700 .72rem/1 var(--font);letter-spacing:.08em;color:var(--card);background:var(--rblue);padding:.25rem .45rem;border-radius:3px 3px 0 0}
+figure.rcode pre{margin-top:0;border-color:var(--rblue);border-left-width:4px;background:var(--rblue-soft)}
+figure.rcode pre.nb-output{background:#1d2a3b;border-color:#1d2a3b}
+details.fold{margin:.8rem 0;border:1px solid var(--line);background:var(--card);padding:0 .8rem}
+details.fold > summary{cursor:pointer;min-height:44px;box-sizing:border-box;padding:.55rem 0;font-weight:700}
+details.fold[open]{padding-bottom:.4rem}
+.hljs-keyword,.hljs-selector-tag{color:var(--kw);font-weight:600}
+.hljs-string,.hljs-template-string{color:var(--str)}
+.hljs-number,.hljs-literal{color:var(--num)}
+.hljs-comment,.hljs-meta{color:var(--com);font-style:italic}
+.hljs-type,.hljs-built_in,.hljs-title{color:var(--type)}
+/* blocks (blocks.nim) */
+.lede{font-size:1.12rem;color:var(--muted);margin:.2rem 0 1rem}
+.tldr{position:relative;background:var(--card);border:2px solid var(--bordeaux);border-radius:6px;padding:.4rem 1rem .4rem 1.4rem;margin:1.2rem 0;
+  background-image:radial-gradient(circle at 0 50%,var(--paper) .55rem,transparent .6rem)}
+.tldr-label{display:block;font-weight:700;font-size:.78rem;letter-spacing:.08em;text-transform:uppercase;color:var(--bordeaux);margin-top:.4rem}
+.tldr ul{padding-left:1.1rem;margin:.4rem 0}
+.tldr li{margin:.25rem 0}
+.prompt{margin:1.4rem 0 1.6rem}
+.prompt figcaption{font-size:.78rem;color:var(--muted);margin:0 0 .35rem .2rem}
+.prompt .prompt-who{font-weight:700;color:var(--ink)}
+.prompt blockquote{margin:0;padding:.8rem 1rem;background:var(--bordeaux);color:var(--card);border-radius:16px 16px 16px 4px;font-size:1.02rem;line-height:1.55;max-width:34rem}
+.prompt blockquote p{margin:0}
+.prompt blockquote a{color:var(--brass-soft);overflow-wrap:anywhere}
+aside.note{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--muted);padding:.5rem .9rem;margin:1rem 0;font-size:.95rem}
+aside.note.aside{border-left-color:var(--brass);background:var(--brass-soft)}
+aside.note.careful{border-left-color:var(--careful);background:var(--careful-soft)}
+aside.note.nim{border-left-color:var(--bordeaux);background:var(--bordeaux-soft)}
+aside.note.r{border-left-color:var(--rblue);background:var(--rblue-soft)}
+aside.note .note-label{display:block;font-weight:700;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+aside.note p{margin:.3rem 0}
+details.source{margin:.8rem 0;border:1px solid var(--line);background:var(--card)}
+details.source > summary{cursor:pointer;padding:.55rem .8rem;min-height:44px;box-sizing:border-box;font-weight:700}
+details.source > summary code{font-weight:400}
+details.source .src-lines{font-weight:400;color:var(--muted);font-size:.85rem}
+details.source pre{margin:0;border:0;border-top:1px solid var(--line);border-radius:0}
+/* the cloakroom: steps as tickets */
+figure.steps{margin:1.2rem 0}
+figure.steps ol{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.6rem}
+figure.steps li{background:var(--card);border:2px dashed var(--brass);border-radius:8px;padding:.55rem .7rem}
+figure.steps .step-icon{display:block;font-size:1.6rem;line-height:1.2}
+figure.steps .step-title{display:block;font-weight:700;color:var(--bordeaux)}
+figure.steps .step-what{display:block;font-size:.92rem}
+figure.steps figcaption{font-size:.85rem;color:var(--muted);margin-top:.5rem}
+</style>
+<style>
+/* the colours and fonts the review mode uses, for a page that has none of its own (a plain nimib
+   page): `:where` weighs nothing, so a page's own tokens (tabelline's, on :root) win */
+:where(html) { --paper: #fffdf8; --ink: #1f1f1f; --surface: #f6f3ec; --line: #c9c4ba; --shade: #e7e2d8;
+  --muted: #6b675f; --secondary: #6aa9d6; --secondary-soft: #d6e8f5; --primary-text: #8a3550;
+  --neutral-1: #ece8df; --font: system-ui, sans-serif; --mono: ui-monospace, monospace; }
+/* the review mode (review.nim, nbReview): a Review button, then marks on the text, a bar at
+   the bottom, the comment's sheet at the top, export and history */
+.rv-only { display: none; }
+body.rv-on .rv-only { display: block; }
+.rv-bar[hidden], .rv-panel[hidden] { display: none; }
+.rv-enter { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .8rem; margin: .8rem 0 1.4rem; color: var(--muted); font-size: .92rem; }
+.rv-enter .rv-version { font-weight: 700; color: var(--ink); }
+.rv-toggle { font: inherit; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 0;
+  min-height: 44px; padding: 0 .8rem; cursor: pointer; }
+.rv-toggle[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 -3px 0 var(--secondary); }
+body.rv-on { padding-bottom: calc(4.6rem + env(safe-area-inset-bottom, 0px)); }
+mark.rv-mark { background: var(--secondary-soft); color: inherit; box-shadow: 0 2px 0 var(--secondary); cursor: pointer; }
+mark.rv-mark.rv-current { background: var(--secondary); }
+.rv-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; display: flex; align-items: center; gap: .3rem;
+  justify-content: center; padding: .45rem max(.5rem, env(safe-area-inset-right, 0px)) calc(.45rem + env(safe-area-inset-bottom, 0px)) max(.5rem, env(safe-area-inset-left, 0px));
+  background: var(--surface); border-top: 3px solid var(--ink); font: 400 15px/1.2 var(--font); }
+.rv-bar button, .rv-sheet button { font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line);
+  border-radius: 0; min-height: 44px; min-width: 44px; padding: 0 .7rem; cursor: pointer; white-space: nowrap; }
+.rv-bar button { padding: 0 .55rem; }
+.rv-bar button[data-do="delete"] { color: var(--primary-text); }
+.rv-bar button:disabled { color: var(--muted); border-color: var(--shade); cursor: default; }
+.rv-bar button[data-do="prev"], .rv-bar button[data-do="next"] { font-size: 1.4rem; padding: 0; }
+.rv-bar .rv-count { min-width: 3.2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+.rv-bar .rv-add, .rv-sheet .rv-save { background: var(--ink); color: var(--paper); border-color: var(--ink); font-weight: 700; }
+.rv-bar .rv-add.rv-selected { background: var(--secondary); color: var(--ink); border-color: var(--ink); }
+dialog.rv-sheet { width: 100%; max-width: 40rem; margin: 0 auto auto; padding: 1rem max(1rem, env(safe-area-inset-right, 0px)) 1rem max(1rem, env(safe-area-inset-left, 0px));
+  border: 0; border-bottom: 3px solid var(--ink); background: var(--surface); color: var(--ink); font: 400 16px/1.45 var(--font);
+  max-height: 90vh; overflow-y: auto; }
+dialog.rv-sheet::backdrop { background: color-mix(in oklab, var(--ink) 30%, transparent); }
+.rv-sheet .rv-where { margin: 0 0 .4rem; font-weight: 700; }
+.rv-sheet textarea { display: block; width: 100%; margin-top: .2rem; font: 16px/1.4 var(--font); color: var(--ink);
+  background: var(--paper); border: 1px solid var(--line); border-radius: 0; padding: .5rem; }
+.rv-export textarea { font: 16px/1.45 var(--mono); white-space: pre-wrap; }   /* 16px: a phone zooms on smaller fields */
+.rv-sheet .rv-actions { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: flex-end; }
+.rv-sheet .rv-left { margin-right: auto; }
+.rv-sheet .rv-danger { color: var(--primary-text); }
+/* the comment's sheet: at the top, small, not modal: the bar and the page stay in reach */
+.rv-panel { position: fixed; top: 0; left: 0; right: 0; z-index: 60; max-width: 40rem; margin: 0 auto;
+  padding: .5rem max(.6rem, env(safe-area-inset-right, 0px)) .6rem max(.6rem, env(safe-area-inset-left, 0px));
+  background: var(--surface); border-bottom: 3px solid var(--ink); color: var(--ink); font: 400 16px/1.45 var(--font);
+  animation: rv-down .2s ease-out; }
+.rv-panel .rv-whole { margin: 0 0 .3rem; color: var(--muted); font-size: .85rem; }
+.rv-panel .rv-note { margin: 0; }
+.rv-panel .rv-thumbs { margin-top: .45rem; }
+.rv-panel button { font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 0; cursor: pointer; }
+/* history: one line per version */
+.rv-versions { list-style: none; margin: 0 0 .8rem; padding: 0; }
+.rv-versions li { display: flex; align-items: center; gap: .5rem; min-height: 48px; border-bottom: 1px solid var(--shade); }
+.rv-versions a { color: var(--ink); }
+.rv-versions .rv-date { flex: 1; color: var(--muted); font-size: .9rem; }
+.rv-versions .rv-n { font-size: .85rem; }
+/* a screenshot, as large as the screen allows */
+dialog.rv-zoom { width: 100vw; height: 100vh; max-width: 100vw; max-height: 100vh; margin: 0; padding: 0; border: 0; background: transparent; }
+dialog.rv-zoom[open] { display: flex; align-items: center; justify-content: center; }
+dialog.rv-zoom::backdrop { background: color-mix(in oklab, var(--ink) 88%, transparent); }
+dialog.rv-zoom img { max-width: 100%; max-height: 100%; object-fit: contain; }
+dialog.rv-zoom button { position: fixed; top: max(.5rem, env(safe-area-inset-top, 0px)); right: .5rem; min-width: 44px; min-height: 44px;
+  font-size: 1.5rem; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 0; }
+.rv-thumb img, .rv-shot img { cursor: zoom-in; }
+dialog.rv-sheet[open] { animation: rv-down .2s ease-out; }
+@keyframes rv-down { from { transform: translateY(-100%); } }
+/* the note: an editable box, so a phone offers to paste a screenshot in it */
+.rv-note { min-height: 3.2rem; max-height: 9rem; overflow-y: auto; padding: .5rem; font: 16px/1.4 var(--font);
+  background: var(--paper); border: 1px solid var(--line); white-space: pre-wrap; overflow-wrap: anywhere; }
+.rv-note:empty::before { content: attr(data-placeholder); color: var(--muted); }
+.rv-note:focus { outline: 2px solid var(--secondary); outline-offset: -1px; }
+.rv-thumbs { display: flex; flex-wrap: wrap; gap: .5rem; }
+.rv-thumb { position: relative; }
+.rv-thumb img { display: block; height: 4.5rem; width: auto; border: 1px solid var(--line); }
+.rv-thumb button { position: absolute; top: 0; right: 0; min-height: 32px; min-width: 32px; padding: 0; font-size: 1.1rem; }
+/* the export: each screenshot with its own Copy */
+.rv-shotlist { display: flex; flex-direction: column; gap: .35rem; margin: 0 0 .6rem; }
+.rv-shot { display: flex; align-items: center; gap: .5rem; font-size: .85rem; color: var(--muted); }
+.rv-shot img { height: 2.75rem; width: auto; border: 1px solid var(--line); }
+.rv-shot span { flex: 1; overflow-wrap: anywhere; }
+/* the strip of versions of the older versions of the post Review mode (nbVersions) */
+.versioni { margin: 1rem 0 1.4rem; font-size: .92rem; }
+.versioni ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .4rem; }
+.versioni li { border: 1px solid var(--line); background: var(--surface); }
+.versioni li > a, .versioni li > .voce { display: flex; align-items: center; min-height: 44px; padding: 0 .7rem; color: var(--ink); text-decoration: none; }
+.versioni li > a:hover b { text-decoration: underline; }
+.versioni li[aria-current] { border-color: var(--ink); box-shadow: inset 0 -3px 0 var(--ink); }
+.versioni .titolo { font-weight: 700; margin-right: .5rem; }
+.versioni li span span, .versioni li a span { color: var(--muted); margin-left: .35rem; }
+/* moving between versions: a short slide, the bar stays where it is */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: versione-out .22s ease-in both; }
+::view-transition-new(root) { animation: versione-in .26s ease-out both; }
+@keyframes versione-out { to { opacity: 0; transform: translateX(-1.5rem); } }
+@keyframes versione-in { from { opacity: 0; transform: translateX(1.5rem); } }
+.rv-bar { view-transition-name: rv-bar; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+}
+html[data-tema="quaderno"] mark.rv-mark { background: var(--highlight); box-shadow: 0 2px 0 var(--red-pen); }
+html[data-tema="quaderno"] mark.rv-mark.rv-current { background: var(--postit); box-shadow: 0 2px 0 var(--red-pen), 0 0 0 2px var(--red-pen); }
+html[data-tema="quaderno"] .rv-bar { font-family: var(--font); }
+</style>
+  
+  <style>
+.nb-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nb-small {
+  font-size: 0.8rem;
+}
+button.nb-small {
+  float: right;
+  padding: 2px;
+  padding-right: 5px;
+  padding-left: 5px;
+}
+section#source {
+  display:none
+}
+pre > code {
+  font-size: 1.2em;
+}
+.nb-output {
+  line-height: 1.15;
+}
+figure {
+  margin: 2rem 0;
+}
+figcaption {
+  text-align: center;
+}
+  
+</style>
+  
+    
+<!-- claude-artifacts:codeblocks -->
+<style>pre{overflow-x:auto}pre>code{overflow-x:auto}</style>
+<!-- /claude-artifacts:codeblocks -->
+</head>
+<body>
+<header>
+<div class="nb-box">
+ <span><a href=".">🏡</a></span>
+ <span><code>The cloakroom of the future: R's futureverse, explained in Nim</code></span>
+ <span><a href="https://github.com/pietroppeter/claude-artifacts"><svg aria-hidden="true" width="1.2em" height="1.2em" style="vertical-align: middle;" preserveAspectRatio="xMidYMid meet" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59c.4.07.55-.17.55-.38c0-.19-.01-.82-.01-1.49c-2.01.37-2.53-.49-2.69-.94c-.09-.23-.48-.94-.82-1.13c-.28-.15-.68-.52-.01-.53c.63-.01 1.08.58 1.23.82c.72 1.21 1.87.87 2.33.66c.07-.52.28-.87.51-1.07c-1.78-.2-3.64-.89-3.64-3.95c0-.87.31-1.59.82-2.15c-.08-.2-.36-1.02.08-2.12c0 0 .67-.21 2.2.82c.64-.18 1.32-.27 2-.27c.68 0 1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82c.44 1.1.16 1.92.08 2.12c.51.56.82 1.27.82 2.15c0 3.07-1.87 3.75-3.65 3.95c.29.25.54.73.54 1.48c0 1.07-.01 1.93-.01 2.2c0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z" fill="#000"></path></svg></a></span>
+</div>
+<hr>
+</header>
+<main>
+<div id="review" hidden data-page="futureverse-nim" data-version="1" data-title="The cloakroom of the future: R's futureverse, explained in Nim" data-source="futureverse-nim/src/index.nim" data-versions=""></div><script>
+document.addEventListener('DOMContentLoaded', function () {
+// Review mode for a nimib page: open it with the Review button, select text, comment on it, keep
+// the comments in this browser, export them as Markdown with a YAML block for a coding agent.
+// No dependencies. The page gives its settings on
+// <div id="review" data-page data-version data-title data-source data-versions>.
+// Each part is between `// part:` lines, which the devlog post "Review mode" shows one by one.
+(function () {
+  var cfg = document.getElementById('review');
+  var root = document.querySelector('main');
+  if (!cfg || !root) return;
+  var page = cfg.dataset;
+
+  // part: anchor
+  // A comment points at the text it quotes, with a few words around it (as a W3C text quote
+  // selector does), and the heading it is under. Not at an element: the page is rebuilt from its
+  // source, and the text is what stays. The text of the page is its text nodes, in order.
+  var CONTEXT = 32;
+  var BLOCKS = 'p, li, h1, h2, h3, h4, pre, td, th, caption, blockquote, summary, dt, dd, div, nav';
+  function textIndex() {
+    // a line break between blocks, so the words around a quote read "page Select", not "pageSelect"
+    var nodes = [], text = '', last = null;
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) {
+        var p = n.parentNode.closest('script, style, #review');
+        return p ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    for (var n = walker.nextNode(); n; n = walker.nextNode()) {
+      var block = n.parentNode.closest(BLOCKS);
+      if (nodes.length && block !== last) text += '\n';
+      last = block;
+      nodes.push({ node: n, start: text.length });
+      text += n.data;
+    }
+    return { nodes: nodes, text: text };
+  }
+  function pointToIndex(idx, container, offset) {
+    if (container.nodeType === 3) {
+      for (var i = 0; i < idx.nodes.length; i++)
+        if (idx.nodes[i].node === container) return idx.nodes[i].start + offset;
+    }
+    var at = document.createRange();
+    at.setStart(container, offset);
+    for (var j = 0; j < idx.nodes.length; j++)   // the first text node after the point
+      if (at.comparePoint(idx.nodes[j].node, 0) >= 0) return idx.nodes[j].start;
+    return idx.text.length;
+  }
+  function sectionOf(node) {
+    var found = { title: '', id: '' };
+    root.querySelectorAll('h1, h2, h3').forEach(function (h) {
+      if (h.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING)
+        found = { title: h.textContent.trim(), id: h.id || '' };
+    });
+    return found;
+  }
+  function describe(range) {
+    var idx = textIndex();
+    var s = pointToIndex(idx, range.startContainer, range.startOffset);
+    var e = pointToIndex(idx, range.endContainer, range.endOffset);
+    var quote = idx.text.slice(s, e);
+    if (!quote.trim()) return null;
+    return { quote: quote, prefix: idx.text.slice(Math.max(0, s - CONTEXT), s),
+             suffix: idx.text.slice(e, e + CONTEXT), section: sectionOf(range.startContainer) };
+  }
+  function locate(note, idx) {
+    // every place the quote is, scored by how much of its context matches; the best wins
+    var best = null, bestScore = -1;
+    for (var at = idx.text.indexOf(note.quote); at >= 0; at = idx.text.indexOf(note.quote, at + 1)) {
+      var before = idx.text.slice(Math.max(0, at - note.prefix.length), at);
+      var after = idx.text.slice(at + note.quote.length, at + note.quote.length + note.suffix.length);
+      var score = common(before, note.prefix, true) + common(after, note.suffix, false);
+      if (score > bestScore) { best = at; bestScore = score; }
+    }
+    return best === null ? null : { start: best, end: best + note.quote.length };
+  }
+  function common(a, b, fromEnd) {
+    var n = 0;
+    while (n < a.length && n < b.length &&
+           (fromEnd ? a[a.length - 1 - n] === b[b.length - 1 - n] : a[n] === b[n])) n++;
+    return n;
+  }
+
+  // part: mark
+  // A located comment is drawn with <mark> around each piece of text it covers (a quote can
+  // cross a link or a paragraph). Marks only wrap text, so the text of the page stays the same.
+  function mark(note) {
+    if (!note.quote) return;   // a comment on the whole page has nothing to mark
+    var idx = textIndex(), at = locate(note, idx);
+    note.found = !!at;
+    if (!at) return;
+    idx.nodes.forEach(function (n) {
+      var a = Math.max(at.start, n.start) - n.start;
+      var b = Math.min(at.end, n.start + n.node.data.length) - n.start;
+      if (b <= a || !n.node.data.slice(a, b).trim()) return;
+      if (n.node.parentNode.closest('table') && !n.node.parentNode.closest('td, th, caption')) return;
+      var t = n.node;
+      if (b < t.data.length) t.splitText(b);
+      if (a > 0) t = t.splitText(a);
+      var m = document.createElement('mark');
+      m.className = 'rv-mark';
+      m.dataset.id = note.id;
+      t.parentNode.replaceChild(m, t);
+      m.appendChild(t);
+    });
+  }
+  function unmarkAll() {
+    root.querySelectorAll('mark.rv-mark').forEach(function (m) {
+      var p = m.parentNode;
+      while (m.firstChild) p.insertBefore(m.firstChild, m);
+      p.removeChild(m);
+      p.normalize();
+    });
+  }
+  function drawAll() {
+    unmarkAll();
+    notes.forEach(mark);
+    var idx = textIndex();
+    function place(note) {   // the page's order: a comment on the whole page first, one not found last
+      if (!note.quote) return -1;
+      var m = root.querySelector('mark.rv-mark[data-id="' + note.id + '"]');
+      return m ? pointToIndex(idx, m.firstChild, 0) : Infinity;
+    }
+    notes.sort(function (a, b) { return place(a) - place(b); });
+  }
+
+  // part: store
+  // The comments of a page live in this browser's localStorage, one key per page and version,
+  // so a new version starts with no comments and the old ones stay with the version they are on.
+  // Whether the review mode is open is kept too, so a page opens the way it was left.
+  var PREFIX = 'nimib-review:', KEY = PREFIX + page.page + '@v' + page.version;
+  var MODE = 'nimib-review-mode:' + page.page;
+  function read(key) {
+    try { return JSON.parse(localStorage.getItem(key)) || []; } catch (e) { return []; }
+  }
+  function save() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(notes.map(function (n) {
+        return { id: n.id, kind: n.kind, quote: n.quote, prefix: n.prefix, suffix: n.suffix,
+                 section: n.section, text: n.text, replacement: n.replacement, at: n.at, images: n.images };
+      })));
+      full = false;
+    } catch (e) { full = true; }   // the browser's storage is full: screenshots take the most
+  }
+  function remember(on) {
+    try { if (on) localStorage.setItem(MODE, '1'); else localStorage.removeItem(MODE); } catch (e) {}
+  }
+  var notes = read(KEY);
+  var current = -1, full = false, on = false;
+
+  // part: mode
+  // Reading is the default: no bar, no marks, nothing of the review mode but one button, Review,
+  // beside the version (in `.rv-enter`, or under the title). It opens the review mode, and closes
+  // it. Blocks that only matter while reviewing (`.rv-only`) show only then.
+  var slot = document.querySelector('.rv-enter');
+  if (!slot) {
+    slot = document.createElement('p');
+    slot.className = 'rv-enter';
+    var after = root.querySelector('.lede') || root.querySelector('h1');
+    if (after) after.insertAdjacentElement('afterend', slot); else root.prepend(slot);
+  }
+  var toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'rv-toggle';
+  slot.appendChild(toggle);
+  toggle.addEventListener('click', function () { setMode(!on); });
+  function setMode(open) {
+    on = open;
+    remember(on);
+    document.body.classList.toggle('rv-on', on);
+    toggle.textContent = on ? 'Close review' : '✎ Review';
+    toggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+    bar.hidden = !on;
+    if (on) drawAll(); else { leave(); unmarkAll(); pending = null; }
+    show();
+  }
+
+  // part: bar
+  // While reviewing, a bar stays at the bottom of the screen, where a thumb reaches on a phone:
+  // the previous and next comment and which one this is, delete it, a new one (*Page note* when
+  // nothing is selected, a note on the whole page; *Comment ✓* on the words selected), and
+  // export. A selection is kept as soon as it is made, because tapping a button can clear it.
+  var bar = document.createElement('div');
+  bar.className = 'rv-bar';
+  bar.hidden = true;
+  bar.setAttribute('role', 'toolbar');
+  bar.setAttribute('aria-label', 'Review mode');
+  bar.innerHTML =
+    '<button type="button" data-do="prev" aria-label="Previous comment">‹</button>' +
+    '<span class="rv-count" aria-live="polite"></span>' +
+    '<button type="button" data-do="next" aria-label="Next comment">›</button>' +
+    '<button type="button" data-do="delete" aria-label="Delete this comment">Delete</button>' +
+    '<button type="button" data-do="add" class="rv-add">Page note</button>' +
+    '<button type="button" data-do="export">Export</button>';
+  document.body.appendChild(bar);
+  var pending = null;
+  document.addEventListener('selectionchange', function () {
+    if (!on) return;
+    var sel = document.getSelection();
+    if (sel.rangeCount && !sel.isCollapsed && root.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+      pending = describe(sel.getRangeAt(0));
+    } else {
+      setTimeout(function () { if (document.getSelection().isCollapsed) { pending = null; show(); } }, 400);
+    }
+    show();
+  });
+  bar.addEventListener('pointerdown', function (e) { e.preventDefault(); });   // keep the selection
+  bar.addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    var act = b.dataset.do;
+    if (act === 'prev' || act === 'next') step(act === 'next' ? 1 : -1);
+    if (act === 'delete' && notes[current]) remove(notes[current]);
+    if (act === 'add') add();
+    if (act === 'export') openExport();
+  });
+  root.addEventListener('click', function (e) {   // a tap on marked words opens them, anywhere else closes
+    if (!on || !document.getSelection().isCollapsed) return;
+    var m = e.target.closest('mark.rv-mark');
+    if (m) {
+      var n = notes.find(function (x) { return x.id === m.dataset.id; });
+      if (n) select(n);
+    } else if (current >= 0 && !e.target.closest('a, button')) leave();
+  });
+  function show() {
+    var c = bar.querySelector('.rv-count');
+    c.textContent = full ? 'storage full: export'
+                  : notes.length ? (current >= 0 ? (current + 1) + '/' : '') + notes.length : 'none';
+    bar.querySelector('[data-do="prev"]').disabled = !notes.length;
+    bar.querySelector('[data-do="next"]').disabled = !notes.length;
+    bar.querySelector('[data-do="delete"]').disabled = current < 0;
+    var add = bar.querySelector('.rv-add');
+    add.textContent = pending ? 'Comment ✓' : 'Page note';   // says what it will do: on the words, or on the page
+    add.classList.toggle('rv-selected', !!pending);
+    add.setAttribute('aria-label', pending ? 'Comment on the selected text' : 'Comment on the whole page');
+  }
+
+  // part: sheet
+  // The comment that ‹ and › stop on is open in a sheet at the top of the screen: there is no
+  // Edit, no Save and no Cancel. What is typed is kept as it is typed; ‹ and › keep working and
+  // take the sheet to the next comment; a tap on the page closes it. A comment left empty is
+  // dropped. The sheet is small, so the words it is about stay in view under it, marked. There
+  // are no kinds: to replace the words, the note says so ("Replace with: ..."), or "Remove". A
+  // screenshot is pasted in the note, like text: the note is an editable box, so a phone offers
+  // to paste an image there. While the sheet is open the page may not zoom.
+  var viewport = document.querySelector('meta[name="viewport"]');
+  var looseViewport = viewport ? viewport.content : '';
+  function noZoom(yes) {
+    if (viewport) viewport.content = yes ? looseViewport + ', maximum-scale=1' : looseViewport;
+  }
+  var sheet = document.createElement('div');
+  sheet.className = 'rv-panel';
+  sheet.hidden = true;
+  sheet.innerHTML =
+    '<p class="rv-whole">On the whole page</p>' +
+    '<div class="rv-note" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Comment"' +
+    ' data-placeholder="What should change, and why. To replace the words: Replace with: and the new text; ' +
+    'to drop them: Remove. Paste a screenshot here too."></div>' +
+    '<div class="rv-thumbs"></div>';
+  document.body.appendChild(sheet);
+  var noteBox = sheet.querySelector('.rv-note');
+  function add() {
+    var n = Object.assign({ text: '', quote: '', prefix: '', suffix: '', section: { title: '', id: '' } }, pending || {});
+    n.id = 'c' + Date.now().toString(36);
+    n.at = new Date().toISOString();
+    notes.push(n);
+    document.getSelection().removeAllRanges();
+    pending = null;
+    select(n);
+    noteBox.focus();
+  }
+  function select(n) {
+    var was = notes[current];
+    if (was && was !== n) drop(was);
+    drawAll();
+    current = notes.indexOf(n);
+    root.querySelectorAll('mark.rv-current').forEach(function (m) { m.classList.remove('rv-current'); });
+    var ms = root.querySelectorAll('mark.rv-mark[data-id="' + n.id + '"]');
+    ms.forEach(function (m) { m.classList.add('rv-current'); });
+    sheet.querySelector('.rv-whole').hidden = !!n.quote;
+    noteBox.textContent = n.text || '';
+    thumbs();
+    sheet.hidden = false;
+    noZoom(true);
+    keepInView();
+    show();
+  }
+  function step(d) {
+    if (!notes.length) return;
+    var target = notes[((current < 0 ? (d > 0 ? -1 : 0) : current) + d + notes.length) % notes.length];
+    if (target !== notes[current]) select(target);
+  }
+  function leave() {   // close the sheet; an empty comment goes
+    var n = notes[current];
+    current = -1;
+    sheet.hidden = true;
+    noZoom(false);
+    if (n) drop(n);
+    root.querySelectorAll('mark.rv-current').forEach(function (m) { m.classList.remove('rv-current'); });
+    show();
+  }
+  function empty(n) { return !(n.text || '').trim() && !(n.images || []).length && n.replacement == null; }
+  function drop(n) { if (empty(n)) { notes = notes.filter(function (x) { return x !== n; }); save(); drawAll(); } }
+  function remove(n) {
+    notes = notes.filter(function (x) { return x !== n; });
+    save();
+    current = -1;
+    sheet.hidden = true;
+    noZoom(false);
+    drawAll();
+    show();
+  }
+  function keepInView() {   // the marked words, just under the sheet
+    var m = root.querySelector('mark.rv-current');
+    if (!m) return;
+    var under = sheet.offsetHeight + 24;
+    window.scrollBy({ top: m.getBoundingClientRect().top - under, behavior: 'smooth' });
+  }
+  noteBox.addEventListener('input', function () {
+    var n = notes[current];
+    if (!n) return;
+    n.text = noteBox.innerText.trim();
+    save();
+    show();
+  });
+  function thumbs() {
+    var n = notes[current], shots = (n && n.images) || [];
+    var box = sheet.querySelector('.rv-thumbs');
+    box.innerHTML = '';
+    box.hidden = !shots.length;
+    shots.forEach(function (src, i) {
+      var t = document.createElement('div');
+      t.className = 'rv-thumb';
+      t.innerHTML = '<img alt="screenshot ' + (i + 1) + '"><button type="button" aria-label="Remove screenshot ' + (i + 1) + '">×</button>';
+      t.querySelector('img').src = src;
+      t.querySelector('img').addEventListener('click', function () { zoom(src); });
+      t.querySelector('button').addEventListener('click', function () {
+        shots.splice(i, 1);
+        n.images = shots.length ? shots : undefined;
+        save(); thumbs();
+      });
+      box.appendChild(t);
+    });
+  }
+  function shrink(blob, width, quality) {   // an image as a JPEG at most `width` pixels wide
+    return new Promise(function (ok, ko) {
+      var img = new Image(), url = URL.createObjectURL(blob);
+      img.onload = function () {
+        var k = Math.min(1, width / img.naturalWidth), c = document.createElement('canvas');
+        c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        ok(c.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = ko;
+      img.src = url;
+    });
+  }
+  noteBox.addEventListener('paste', function (e) {   // an image goes to the screenshots, text stays plain text
+    e.preventDefault();
+    var n = notes[current];
+    var files = [].filter.call(e.clipboardData.files || [], function (f) { return /^image\//.test(f.type); });
+    Promise.all(files.map(function (b) { return shrink(b, 900, 0.72); })).then(function (srcs) {
+      if (!srcs.length || !n) return;
+      n.images = (n.images || []).concat(srcs);
+      save(); thumbs(); keepInView(); show();
+    });
+    var text = e.clipboardData.getData('text/plain');
+    if (text) document.execCommand('insertText', false, text);
+  });
+  noteBox.addEventListener('drop', function (e) { e.preventDefault(); });   // no images inside the text
+
+  // part: zoom
+  // A tap on a screenshot, in the sheet or in the export, shows it as large as the screen allows.
+  var lens = document.createElement('dialog');
+  lens.className = 'rv-zoom';
+  lens.innerHTML = '<button type="button" aria-label="Close">×</button><img alt="screenshot">';
+  document.body.appendChild(lens);
+  lens.addEventListener('click', function () { lens.close(); });
+  function zoom(src) { lens.querySelector('img').src = src; lens.showModal(); }
+
+  // part: export
+  // The comments as one text, for a person and for an agent: a title, a YAML block that says which
+  // page, version and source they are on, then one Markdown section per comment, in page order.
+  // The text can be edited before it is copied. Copy copies the text only, short enough for a
+  // chat message; each screenshot has a Copy of its own, to paste after it. Close review ends the
+  // review here too, so a long page need not be scrolled back to its top.
+  function yaml(s) { return JSON.stringify(String(s)); }   // a JSON string is a YAML string
+  function flat(s) { return s.replace(/\s+/g, ' '); }
+  function quoted(s) { return flat(s).trim(); }
+  function fence(s) {
+    var f = '~~~';
+    while (s.indexOf(f) >= 0) f += '~';
+    return f + 'text\n' + s.trim() + '\n' + f;
+  }
+  function shotName(i, k) { return 'review-v' + page.version + '-' + (i + 1) + '-' + (k + 1) + '.jpg'; }
+  function exportText() {
+    // a chat shows a pasted text as Markdown: a yaml fence is a tidy box under the title
+    var out = ['# Review of “' + page.title + '”, version ' + page.version, '',
+      '```yaml',
+      'format: nimib-review/3',
+      'title: ' + yaml(page.title),
+      'page: ' + yaml(location.origin + location.pathname),
+      'source: ' + yaml(page.source),
+      'version: ' + page.version,
+      'exported: ' + yaml(new Date().toISOString()),
+      'comments: ' + notes.length,
+      '```', ''];
+    notes.forEach(function (n, i) {
+      var where = !n.quote ? 'On the whole page'
+                : n.section && n.section.title ? 'In “' + n.section.title + '”' + (n.section.id ? ' (#' + n.section.id + ')' : '')
+                : 'At the top';
+      out.push('## ' + (i + 1) + '. ' + where, '');
+      if (n.quote) {
+        out.push('> ' + quoted(n.quote), '');
+        out.push('Around it: “…' + flat(n.prefix) + '⟦' + flat(n.quote) + '⟧' + flat(n.suffix) + '…”', '');
+        if (n.found === false) out.push('(Not found on the page any more.)', '');
+      }
+      // a comment kept from version 6 or before may still have a kind of its own
+      if (n.kind === 'cut' || (n.kind === 'replace' && !(n.replacement || '').trim())) out.push('Remove these words.', '');
+      else if (n.kind === 'replace') out.push('Replace with:', '', fence(n.replacement), '');
+      if (n.text) out.push(n.text, '');
+      if (n.images) out.push('Screenshots: ' + n.images.map(function (src, k) { return shotName(i, k); }).join(', '), '');
+    });
+    return out.join('\n');
+  }
+  var box = document.createElement('dialog');
+  box.className = 'rv-sheet rv-export';
+  box.innerHTML =
+    '<form method="dialog"><p class="rv-where">Export: edit it if you like, then copy it</p>' +
+    '<textarea rows="12" spellcheck="false"></textarea><div class="rv-shotlist"></div>' +
+    '<div class="rv-actions"><button value="history" class="rv-left">History</button>' +
+    '<button value="leave">Close review</button><button value="close">Close</button>' +
+    '<button value="copy" class="rv-save" autofocus>Copy</button></div></form>';
+  document.body.appendChild(box);
+  var area = box.querySelector('textarea');
+  function openExport() {
+    if (current >= 0) leave();
+    area.value = exportText();
+    shotList();
+    noZoom(true);
+    box.showModal();
+  }
+  box.addEventListener('close', function () { noZoom(false); });
+  function allShots() {
+    var all = [];
+    notes.forEach(function (n, i) { (n.images || []).forEach(function (src, k) { all.push({ name: shotName(i, k), src: src }); }); });
+    return all;
+  }
+  function shotList() {   // each screenshot, with its own Copy: paste it in the chat after the text
+    var list = box.querySelector('.rv-shotlist');
+    var canCopy = !!(navigator.clipboard && window.ClipboardItem);
+    list.innerHTML = '';
+    var all = allShots();
+    list.hidden = !all.length;
+    all.forEach(function (shot) {
+      var row = document.createElement('div');
+      row.className = 'rv-shot';
+      row.innerHTML = '<img alt=""><span></span><button type="button">Copy image</button>';
+      row.querySelector('img').src = shot.src;
+      row.querySelector('img').addEventListener('click', function () { zoom(shot.src); });
+      row.querySelector('span').textContent = shot.name;
+      var b = row.querySelector('button');
+      b.hidden = !canCopy;
+      b.addEventListener('click', function () {
+        copied(b, navigator.clipboard.write([new ClipboardItem({ 'image/png': png(shot.src) })]));
+      });
+      list.appendChild(row);
+    });
+  }
+  function png(src) {   // the clipboard takes PNG images everywhere, JPEG not always
+    return new Promise(function (ok, ko) {
+      var img = new Image();
+      img.onload = function () {
+        var c = document.createElement('canvas');
+        c.width = img.naturalWidth; c.height = img.naturalHeight;
+        c.getContext('2d').drawImage(img, 0, 0);
+        c.toBlob(ok, 'image/png');
+      };
+      img.onerror = ko;
+      img.src = src;
+    });
+  }
+  function copied(button, promise) {
+    var label = button.textContent;
+    return promise.then(function () {
+      button.textContent = 'Copied ✓';
+      setTimeout(function () { button.textContent = label; }, 1500);
+    }, function () { button.textContent = 'Blocked'; });
+  }
+  box.querySelector('form').addEventListener('submit', function (e) {
+    var act = e.submitter && e.submitter.value;
+    if (act === 'copy') {
+      e.preventDefault();
+      var button = e.submitter;
+      var fallback = function () { area.select(); document.execCommand('copy'); };
+      copied(button, navigator.clipboard ? navigator.clipboard.writeText(area.value).catch(fallback)
+                                         : Promise.resolve().then(fallback));
+    } else if (act === 'history') {
+      e.preventDefault();
+      box.close();
+      openHistory();
+    } else if (act === 'leave') {   // the end of a review: back to reading, from the bottom of the page too
+      setMode(false);
+    }
+  });
+
+  // part: history
+  // The versions of the page, each with the comments this browser keeps on it: open one, clear
+  // its comments, or clear every comment of the review mode in this browser. Back to Export from
+  // here. Clearing asks twice, with a second tap (confirm() is blocked inside an artifact).
+  var versions = [];
+  try { versions = JSON.parse(page.versions || '[]'); } catch (e) {}
+  var hist = document.createElement('dialog');
+  hist.className = 'rv-sheet rv-history';
+  hist.innerHTML =
+    '<form method="dialog"><p class="rv-where">History: the versions of this page</p>' +
+    '<ol class="rv-versions"></ol>' +
+    '<div class="rv-actions"><button value="wipe" class="rv-left rv-danger">Clear everything</button>' +
+    '<button value="export">Export</button><button value="close" class="rv-save" autofocus>Close</button></div></form>';
+  document.body.appendChild(hist);
+  function stored() {   // the versions of this page that have comments in this browser
+    var found = {};
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i), m = k.match(/@v(\d+)$/);
+        if (m && k.indexOf(PREFIX + page.page + '@v') === 0) found[m[1]] = read(k).length;
+      }
+    } catch (e) {}
+    return found;
+  }
+  function twice(button, label, act) {   // the first tap asks, the second does
+    if (button.dataset.sure === 'yes') { act(); return; }
+    button.dataset.sure = 'yes';
+    button.textContent = label;
+  }
+  function openHistory() {
+    var list = hist.querySelector('.rv-versions'), counts = stored();
+    var all = versions.slice();
+    if (!all.some(function (v) { return v.n == page.version; })) all.push({ n: +page.version, date: '', href: '' });
+    Object.keys(counts).forEach(function (n) {
+      if (!all.some(function (v) { return v.n == n; })) all.push({ n: +n, date: '', href: '' });
+    });
+    all.sort(function (a, b) { return b.n - a.n; });   // the newest first
+    list.innerHTML = '';
+    all.forEach(function (v) {
+      var li = document.createElement('li'), n = counts[v.n] || 0, here = v.n == page.version;
+      var name = here || !v.href ? '<b>v' + v.n + '</b>' : '<a href="' + v.href + '"><b>v' + v.n + '</b></a>';
+      li.innerHTML = name + ' <span class="rv-date"></span> <span class="rv-n"></span>' +
+        '<button type="button" class="rv-danger">Clear</button>';
+      li.querySelector('.rv-date').textContent = (v.date || '') + (here ? ' · this one' : '');
+      li.querySelector('.rv-n').textContent = n ? n + (n === 1 ? ' comment' : ' comments') : '';
+      var b = li.querySelector('button');
+      b.hidden = !n;
+      b.addEventListener('click', function () {
+        twice(b, 'Delete ' + n + '?', function () {
+          try { localStorage.removeItem(PREFIX + page.page + '@v' + v.n); } catch (e) {}
+          if (here) { notes = []; leave(); drawAll(); show(); }
+          openHistory();
+        });
+      });
+      list.appendChild(li);
+    });
+    var wipe = hist.querySelector('[value="wipe"]');
+    wipe.dataset.sure = ''; wipe.textContent = 'Clear everything';
+    if (!hist.open) hist.showModal();
+  }
+  hist.querySelector('form').addEventListener('submit', function (e) {
+    var act = e.submitter && e.submitter.value;
+    if (act === 'wipe') {
+      e.preventDefault();
+      twice(e.submitter, 'Delete every comment?', function () {
+        try {
+          Object.keys(localStorage).forEach(function (k) { if (k.indexOf(PREFIX) === 0) localStorage.removeItem(k); });
+        } catch (err) {}
+        notes = []; leave(); drawAll(); show();
+        openHistory();
+      });
+    } else if (act === 'export') {
+      e.preventDefault();
+      hist.close();
+      openExport();
+    }
+  });
+
+  var wasOn = false;
+  try { wasOn = localStorage.getItem(MODE) === '1'; } catch (e) {}
+  setMode(wasOn);
+})();
+});
+</script>
+<h1>The cloakroom of the future</h1>
+<figure class="prompt"><figcaption><span class="prompt-who">Pietro</span> asked Claude, 25 Nov 2026</figcaption><blockquote><p>At compute Paris I have met Henrik, author of a popular library for parallelizing R code. Can you
+explain some of the concepts about that, when it makes sense using Nim? I know only the basics of
+R, I know it has a functional connection but not more than that. Here are a couple of references
+https://arxiv.org/html/2601.17578v1 https://www.futureverse.org/ build and merge an explainer as usual with nimib and publish on Claude artifacts.
+Be playful and go wild!</p>
+</blockquote></figure>
+<div class="lede"><p>Henrik Bengtsson's <strong>futureverse</strong> lets an R programmer write <code>lapply(xs, slow)</code>, add one word,
+and have it run on all the cores of a laptop, on a few machines, or on a supercomputer, with
+nothing else changed. This page explains the ideas behind it for someone who knows Nim and only a
+little R. The best way to understand a design is to build it, so we build a toy futureverse
+in Nim (264 lines), and every example on this page runs on it when the page is built.</p>
+</div>
+<div class="tldr"><span class="tldr-label">The short version</span><ul>
+<li><strong>A future</strong> is a coat-check ticket: you hand in some work, get a ticket at once, and collect
+the value later. Nim has the same idea in <a href="https://github.com/status-im/nim-taskpools">taskpools</a> (<code>spawn</code>/<code>sync</code>) and
+in <code>std/asyncdispatch</code> (for waiting rather than computing).</li>
+<li><strong>The big idea</strong> is a split of roles: the <em>developer</em> says <strong>what</strong> may run concurrently, the
+<em>end-user</em> says <strong>how and where</strong> with <code>plan()</code>. The code never names a backend.</li>
+<li><strong>The hard part</strong> is making parallel code behave like sequential code: the same random numbers
+on any number of workers, output and errors arriving in order, progress bars. Our toy does all
+of it on threads (via <a href="https://github.com/Araq/malebolgia">malebolgia</a>) and on worker processes.</li>
+<li><strong>futurize()</strong>, the newest piece, rewrites a plain map into a parallel one. In Nim that is
+just a macro, and we write it: <code>xs.mapIt(it * it) |&gt; futurize(seed = 1)</code>.</li>
+<li><strong>In Nim</strong> you need all this less often (compiled loops are fast, and threads share memory),
+but the split of roles, the seeds and the relaying are worth borrowing.</li>
+</ul>
+</div>
+<h2>Just enough R</h2>
+<p>R is a language for statistics. Two things about it matter here. It is <strong>functional</strong>: functions
+are values, and the usual way to loop is to hand a function to a <em>map</em>, <code>lapply(xs, f)</code>, which
+applies <code>f</code> to every element of <code>xs</code> and gives back the list of results. And an R session runs
+your code on <strong>one thread</strong>: to use more cores, R starts more R processes and ships the work to
+them. The little R this page uses, next to its Nim:</p>
+<div id="tabella-19705ac5" class="tabella">
+<style>
+:where(.tabella):not(#_) { overflow-x: var(--tb-container-overflow-x, auto); overflow-y: var(--tb-container-overflow-y, auto); width: var(--tb-container-width, auto);
+  height: var(--tb-container-height, auto); padding: var(--tb-container-padding-y, 0px) var(--tb-container-padding-x, 0px); }
+:where(.tabella):not(#_) table, :where(.tabella):not(#_) thead, :where(.tabella):not(#_) tbody, :where(.tabella):not(#_) tfoot, :where(.tabella):not(#_) tr, :where(.tabella):not(#_) td, :where(.tabella):not(#_) th { border-style: none; }
+:where(.tabella):not(#_) .tb_table { display: table; border-collapse: collapse; line-height: normal;
+  margin-left: var(--tb-table-margin-left, auto); margin-right: var(--tb-table-margin-right, auto); width: var(--tb-table-width, auto);
+  color: var(--tb-table-font-color, #333333); font-family: var(--tb-table-font-names, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif); font-size: var(--tb-table-font-size, 16px);
+  background-color: var(--tb-table-background-color, #FFFFFF); table-layout: var(--tb-table-layout, auto);
+  font-weight: var(--tb-table-font-weight, normal); font-style: var(--tb-table-font-style, normal);
+  border-top: var(--tb-table-border-top-width, 2px) var(--tb-table-border-top-style, solid) var(--tb-table-border-top-color, #A8A8A8);
+  border-bottom: var(--tb-table-border-bottom-width, 2px) var(--tb-table-border-bottom-style, solid) var(--tb-table-border-bottom-color, #A8A8A8);
+  border-left: var(--tb-table-border-left-width, 2px) var(--tb-table-border-left-style, none) var(--tb-table-border-left-color, #D3D3D3);
+  border-right: var(--tb-table-border-right-width, 2px) var(--tb-table-border-right-style, none) var(--tb-table-border-right-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_caption { caption-side: top; padding: 4px 5px; color: var(--tb-table-font-color, #333333); font-style: italic; }
+:where(.tabella):not(#_) .tb_heading { background-color: var(--tb-heading-background-color, var(--tb-table-background-color, #FFFFFF)); text-align: var(--tb-heading-align, center); color: var(--tb-heading-color, var(--tb-table-font-color, #333333)); }
+:where(.tabella):not(#_) .tb_heading th { border-left: var(--tb-heading-border-lr-width, 1px) var(--tb-heading-border-lr-style, none) var(--tb-heading-border-lr-color, #D3D3D3);
+  border-right: var(--tb-heading-border-lr-width, 1px) var(--tb-heading-border-lr-style, none) var(--tb-heading-border-lr-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_title { font-size: var(--tb-heading-title-font-size, 125%); font-weight: var(--tb-heading-title-font-weight, initial);
+  padding: var(--tb-heading-padding, 4px) var(--tb-heading-padding-horizontal, 5px); }
+:where(.tabella):not(#_) .tb_subtitle { font-size: var(--tb-heading-subtitle-font-size, 85%); font-weight: var(--tb-heading-subtitle-font-weight, normal); padding: 0 var(--tb-heading-padding-horizontal, 5px) var(--tb-heading-padding, 4px) var(--tb-heading-padding-horizontal, 5px); }
+:where(.tabella):not(#_) .tb_heading_last { border-bottom: var(--tb-heading-border-bottom-width, 2px) var(--tb-heading-border-bottom-style, solid) var(--tb-heading-border-bottom-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_col_headings th { background-color: var(--tb-column-labels-background-color, var(--tb-table-background-color, #FFFFFF)); color: var(--tb-column-labels-color, var(--tb-table-font-color, #333333));
+  font-size: var(--tb-column-labels-font-size, 100%); font-weight: var(--tb-column-labels-font-weight, normal);
+  text-transform: var(--tb-column-labels-text-transform, inherit); vertical-align: bottom;
+  padding: var(--tb-column-labels-padding, 5px) var(--tb-column-labels-padding-horizontal, 5px); overflow-x: hidden; }
+:where(.tabella):not(#_) .tb_col_headings_last th { border-bottom: var(--tb-column-labels-border-bottom-width, 2px) var(--tb-column-labels-border-bottom-style, solid) var(--tb-column-labels-border-bottom-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_heading + .tb_col_headings th, :where(.tabella):not(#_) thead > .tb_col_headings:first-child th {
+  border-top: var(--tb-column-labels-border-top-width, 2px) var(--tb-column-labels-border-top-style, none) var(--tb-column-labels-border-top-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_col_headings th:first-child { border-left: var(--tb-column-labels-border-lr-width, 1px) var(--tb-column-labels-border-lr-style, none) var(--tb-column-labels-border-lr-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_col_headings th:last-child { border-right: var(--tb-column-labels-border-lr-width, 1px) var(--tb-column-labels-border-lr-style, none) var(--tb-column-labels-border-lr-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_col_headings th + th { border-left: var(--tb-column-labels-vlines-width, 1px) var(--tb-column-labels-vlines-style, none) var(--tb-column-labels-vlines-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_spanner { display: inline-block; width: 100%; padding-bottom: 4px;
+  border-bottom: 2px solid var(--tb-column-labels-border-bottom-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_spanner_empty { border-bottom: none; }
+:where(.tabella):not(#_) .tb_group_heading { background-color: var(--tb-row-group-background-color, var(--tb-table-background-color, #FFFFFF)); color: var(--tb-row-group-color, inherit); font-weight: var(--tb-row-group-font-weight, initial);
+  font-size: var(--tb-row-group-font-size, 100%); text-transform: var(--tb-row-group-text-transform, inherit);
+  padding: var(--tb-row-group-padding, 8px) var(--tb-row-group-padding-horizontal, 5px); text-align: left;
+  border-top: var(--tb-row-group-border-top-width, 2px) var(--tb-row-group-border-top-style, solid) var(--tb-row-group-border-top-color, var(--tb-row-group-border-color, #D3D3D3));
+  border-bottom: var(--tb-row-group-border-bottom-width, 2px) var(--tb-row-group-border-bottom-style, solid) var(--tb-row-group-border-bottom-color, var(--tb-row-group-border-color, #D3D3D3));
+  border-left: var(--tb-row-group-border-left-width, 1px) var(--tb-row-group-border-left-style, none) var(--tb-row-group-border-left-color, #D3D3D3);
+  border-right: var(--tb-row-group-border-right-width, 1px) var(--tb-row-group-border-right-style, none) var(--tb-row-group-border-right-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_row { padding: var(--tb-data-row-padding, 8px) var(--tb-data-row-padding-horizontal, 5px); margin: 10px;
+  border-top: var(--tb-table-body-hlines-width, 1px) var(--tb-table-body-hlines-style, solid) var(--tb-table-body-hlines-color, #D3D3D3); vertical-align: middle; overflow-x: hidden; }
+:where(.tabella):not(#_) tbody { border-top: var(--tb-table-body-border-top-width, 2px) var(--tb-table-body-border-top-style, none) var(--tb-table-body-border-top-color, #D3D3D3);
+  border-bottom: var(--tb-table-body-border-bottom-width, 2px) var(--tb-table-body-border-bottom-style, none) var(--tb-table-body-border-bottom-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_stub { background-color: var(--tb-stub-background-color, transparent); color: var(--tb-stub-color, inherit); font-weight: var(--tb-stub-font-weight, initial); text-align: left;
+  font-size: var(--tb-stub-font-size, 100%); text-transform: var(--tb-stub-text-transform, inherit);
+  border-right: var(--tb-stub-border-width, 2px) var(--tb-stub-border-style, solid) var(--tb-stub-border-color, var(--tb-table-body-hlines-color, #D3D3D3)); }
+:where(.tabella):not(#_) tbody tr:first-child .tb_row { border-top: none; }
+:where(.tabella):not(#_) .tb_indent_1 { text-indent: var(--tb-stub-indent-length, 1em); } :where(.tabella):not(#_) .tb_indent_2 { text-indent: calc(2 * var(--tb-stub-indent-length, 1em)); }
+:where(.tabella):not(#_) .tb_indent_3 { text-indent: calc(3 * var(--tb-stub-indent-length, 1em)); } :where(.tabella):not(#_) .tb_indent_4 { text-indent: calc(4 * var(--tb-stub-indent-length, 1em)); }
+:where(.tabella):not(#_) .tb_indent_5 { text-indent: calc(5 * var(--tb-stub-indent-length, 1em)); }
+:where(.tabella):not(#_) .tb_stub.tb_stub_level { border-right: none; vertical-align: top; }
+:where(.tabella):not(#_) .tb_stub_row_group { font-size: var(--tb-stub-row-group-font-size, 100%); font-weight: var(--tb-stub-row-group-font-weight, initial);
+  text-transform: var(--tb-stub-row-group-text-transform, inherit); vertical-align: top;
+  border-right: var(--tb-stub-row-group-border-width, 2px) var(--tb-stub-row-group-border-style, solid) var(--tb-stub-row-group-border-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_no_data { color: var(--tb-table-font-color, #333333); font-style: italic; }
+:where(.tabella):not(#_) sup, :where(.tabella):not(#_) sub { line-height: 0; }
+:where(.tabella):not(#_) .tb_supsub { display: inline-flex; flex-direction: column; font-size: 70%; line-height: 1.05;
+  vertical-align: -0.4em; text-align: left; }
+:where(.tabella):not(#_) .tb_supsub sup, :where(.tabella):not(#_) .tb_supsub sub { font-size: inherit; vertical-align: baseline; line-height: inherit; }
+:where(.tabella):not(#_) .tb_frac { white-space: nowrap; } :where(.tabella):not(#_) .tb_frac sup, :where(.tabella):not(#_) .tb_frac sub { font-size: 70%; }
+:where(.tabella):not(#_) .tb_striped { background-color: var(--tb-row-striping-background-color, rgba(128,128,128,0.05)); }
+:where(.tabella):not(#_) .tb_summary_row { background-color: var(--tb-summary-row-background-color, transparent); color: var(--tb-summary-row-color, inherit); text-transform: var(--tb-summary-row-text-transform, inherit);
+  padding: var(--tb-summary-row-padding, 8px) var(--tb-summary-row-padding-horizontal, 5px); vertical-align: middle; }
+:where(.tabella):not(#_) .tb_first_summary_row { border-top: var(--tb-summary-row-border-width, 2px) var(--tb-summary-row-border-style, solid) var(--tb-summary-row-border-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_last_summary_row_top { border-bottom: var(--tb-summary-row-border-width, 2px) var(--tb-summary-row-border-style, solid) var(--tb-summary-row-border-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_grand_summary_row { background-color: var(--tb-grand-summary-row-background-color, transparent); color: var(--tb-grand-summary-row-color, inherit); text-transform: var(--tb-grand-summary-row-text-transform, inherit);
+  padding: var(--tb-grand-summary-row-padding, 8px) var(--tb-grand-summary-row-padding-horizontal, 5px); vertical-align: middle; }
+:where(.tabella):not(#_) .tb_first_grand_summary_row { border-top: var(--tb-grand-summary-row-border-width, 6px) var(--tb-grand-summary-row-border-style, double) var(--tb-grand-summary-row-border-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_last_grand_summary_row_top { border-bottom: var(--tb-grand-summary-row-border-width, 6px) var(--tb-grand-summary-row-border-style, double) var(--tb-grand-summary-row-border-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_left { text-align: left; } :where(.tabella):not(#_) .tb_center { text-align: center; } :where(.tabella):not(#_) .tb_right { text-align: right; font-variant-numeric: tabular-nums; }
+:where(.tabella):not(#_) td.tb_right { white-space: nowrap; }
+:where(.tabella):not(#_) .tb_sticky_stub .tb_stub:not(.tb_stub_level), :where(.tabella):not(#_) .tb_sticky_stub .tb_stubhead { position: sticky; left: 0; z-index: 1; }
+:where(.tabella):not(#_) .tb_sticky_stub .tb_stub:not(.tb_stub_level):not(.tb_striped), :where(.tabella):not(#_) .tb_sticky_stub .tb_stubhead { background-color: var(--tb-stub-background-color, var(--tb-table-background-color, #FFFFFF)); }
+:where(.tabella):not(#_) .tb_footnotes { color: var(--tb-table-font-color, #333333); background-color: var(--tb-footnotes-background-color, var(--tb-table-background-color, #FFFFFF)); }
+:where(.tabella):not(#_) .tb_sourcenotes { color: var(--tb-table-font-color, #333333); background-color: var(--tb-source-notes-background-color, var(--tb-table-background-color, #FFFFFF)); }
+:where(.tabella):not(#_) .tb_footnote { font-size: var(--tb-footnotes-font-size, 90%); padding: var(--tb-footnotes-padding, 4px) var(--tb-footnotes-padding-horizontal, 5px); text-align: left;
+  border-left: var(--tb-footnotes-border-lr-width, 2px) var(--tb-footnotes-border-lr-style, none) var(--tb-footnotes-border-lr-color, #D3D3D3);
+  border-right: var(--tb-footnotes-border-lr-width, 2px) var(--tb-footnotes-border-lr-style, none) var(--tb-footnotes-border-lr-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_footnotes:not(:has(+ .tb_footnotes)) .tb_footnote { border-bottom: var(--tb-footnotes-border-bottom-width, 2px) var(--tb-footnotes-border-bottom-style, none) var(--tb-footnotes-border-bottom-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_sourcenote { font-size: var(--tb-source-notes-font-size, 90%); padding: var(--tb-source-notes-padding, 4px) var(--tb-source-notes-padding-horizontal, 5px); text-align: left;
+  border-left: var(--tb-source-notes-border-lr-width, 2px) var(--tb-source-notes-border-lr-style, none) var(--tb-source-notes-border-lr-color, #D3D3D3);
+  border-right: var(--tb-source-notes-border-lr-width, 2px) var(--tb-source-notes-border-lr-style, none) var(--tb-source-notes-border-lr-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_sourcenotes:last-child .tb_sourcenote { border-bottom: var(--tb-source-notes-border-bottom-width, 2px) var(--tb-source-notes-border-bottom-style, none) var(--tb-source-notes-border-bottom-color, #D3D3D3); }
+:where(.tabella):not(#_) tfoot tr:first-child td { padding-top: 8px; }
+:where(.tabella):not(#_) .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
+:where(.tabella):not(#_) .tb_nanoplot text { font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace; stroke-width: 0.15em; paint-order: stroke; stroke-linejoin: round; cursor: default; }
+:where(.tabella):not(#_) .tb_nanoplot .vert-line:hover rect { fill: var(--tb-guide); fill-opacity: 40%; stroke: #FFFFFF60; }
+:where(.tabella):not(#_) .tb_nanoplot .vert-line:hover text, :where(.tabella):not(#_) .tb_nanoplot .horizontal-line:hover text, :where(.tabella):not(#_) .tb_nanoplot .ref-line:hover text, :where(.tabella):not(#_) .tb_nanoplot .boxplot-line:hover text { stroke: white; fill: #212427; }
+:where(.tabella):not(#_) .tb_nanoplot .ref-line:hover rect { stroke: #FFFFFF60; }
+:where(.tabella):not(#_) .tb_nanoplot .ref-line:hover line { stroke: #FF0000; }
+:where(.tabella):not(#_) .tb_nanoplot .y-axis-line:hover rect { fill: #EDEDED; fill-opacity: 60%; stroke: #FFFFFF60; }
+:where(.tabella):not(#_) .tb_nanoplot .y-axis-line:hover text { stroke: white; stroke-width: 0.20em; fill: #1A1C1F; }
+:where(.tabella):not(#_) .tb_nanoplot_static .vert-line text, :where(.tabella):not(#_) .tb_nanoplot_static .horizontal-line text, :where(.tabella):not(#_) .tb_nanoplot_static .ref-line text, :where(.tabella):not(#_) .tb_nanoplot_static .boxplot-line text { stroke: white; fill: #212427; }
+:where(.tabella):not(#_) .tb_nanoplot_static .y-axis-line rect { fill: #EDEDED; fill-opacity: 60%; }
+:where(.tabella):not(#_) .tb_nanoplot_static .y-axis-line text { stroke: white; stroke-width: 0.20em; fill: #1A1C1F; }
+:where(.tabella.tb_css_theme) { --tb-table-font-color: var(--ink, #1C1C1C); --tb-table-font-names: var(--font, system-ui, sans-serif); --tb-table-background-color: var(--paper, #FFFFFF); --tb-table-border-top-width: 3px; --tb-table-border-top-color: var(--ink, #1C1C1C); --tb-table-border-bottom-width: 3px; --tb-table-border-bottom-color: var(--ink, #1C1C1C); --tb-heading-border-bottom-color: var(--primary, var(--ink, #1C1C1C)); --tb-column-labels-font-weight: bold; --tb-column-labels-border-bottom-color: var(--ink, #1C1C1C); --tb-row-group-background-color: var(--shade, color-mix(in oklab, var(--ink, #1C1C1C) 4%, var(--paper, #FFFFFF))); --tb-row-group-border-color: var(--ink, #1C1C1C); --tb-table-body-hlines-color: var(--line, color-mix(in oklab, var(--ink, #1C1C1C) 14%, var(--paper, #FFFFFF))); --tb-row-striping-background-color: var(--shade, color-mix(in oklab, var(--ink, #1C1C1C) 4%, var(--paper, #FFFFFF))); --tb-summary-row-border-width: 1px; --tb-summary-row-border-color: var(--ink, #1C1C1C); --tb-grand-summary-row-border-width: 4px; --tb-grand-summary-row-border-color: var(--ink, #1C1C1C); }
+</style>
+<table class="tb_table" aria-labelledby="tabella-19705ac5-title">
+<thead>
+<tr class="tb_heading"><th colspan="3" id="tabella-19705ac5-title" class="tb_title tb_heading_last">R and Nim, side by side</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_left" scope="col" id="nim">Nim</th><th class="tb_col_heading tb_left" scope="col" id="what">what it does</th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><th scope="row" class="tb_row tb_left tb_stub"><code>xs &lt;- 1:8</code></th><td class="tb_row tb_left"><code>let xs = toSeq(1..8)</code></td><td class="tb_row tb_left">a vector of 1 to 8</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><code>f &lt;- function(x) x^2</code></th><td class="tb_row tb_left"><code>proc f(x: int): int = x*x</code></td><td class="tb_row tb_left">a function is a value</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><code>lapply(xs, f)</code></th><td class="tb_row tb_left"><code>xs.map(f)</code></td><td class="tb_row tb_left">map f over xs</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><code>purrr::map(xs, f)</code></th><td class="tb_row tb_left"><code>xs.map(f)</code></td><td class="tb_row tb_left">the same, from the tidyverse</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><code>xs |&gt; f()</code></th><td class="tb_row tb_left"><code>xs.f()</code></td><td class="tb_row tb_left">the pipe: <code>x |&gt; f(y)</code> is <code>f(x, y)</code></td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><code>message(&quot;hi&quot;)</code></th><td class="tb_row tb_left"><code>stderr.writeLine &quot;hi&quot;</code></td><td class="tb_row tb_left">a message, which R can catch</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub"><code>set.seed(42)</code></th><td class="tb_row tb_left"><code>randomize(42)</code></td><td class="tb_row tb_left">seed the random numbers</td></tr>
+</tbody>
+</table>
+</div>
+<aside class="note r"><span class="note-label">Meanwhile, in R</span><p>The futureverse is a family of packages: <strong>future</strong> (the core, 2015), <strong>future.apply</strong>
+(parallel <code>lapply</code> and friends), <strong>furrr</strong> (parallel purrr, by Davis Vaughan), <strong>doFuture</strong>
+(for <code>foreach</code>), <strong>progressr</strong> (progress bars), <strong>parallelly</strong> (how many cores may I use?),
+backends such as <strong>future.mirai</strong> and <strong>future.batchtools</strong>, and since this year
+<strong>futurize</strong>, the subject of the <a href="https://arxiv.org/html/2601.17578v1">paper Pietro sent</a>. The design is in the
+<a href="https://doi.org/10.32614/RJ-2021-048">R Journal paper of 2021</a>.</p>
+</aside>
+<h2>A future is a coat-check ticket</h2>
+<p>At a Paris cloakroom you hand over your coat, get a numbered ticket at once, and go to the
+talk. Later you hand back the ticket and get your coat. A <strong>future</strong> is that ticket, for a
+computation: creating it is quick, the work happens somewhere else, and asking for its <strong>value</strong>
+waits only if the work is not done yet.</p>
+<figure class="steps"><ol><li><span class="step-icon">🧥</span><span class="step-title"><code>f &lt;- future(expr)</code></span><span class="step-what">hand in the work, get a ticket at once</span></li><li><span class="step-icon">🎟️</span><span class="step-title"><code>resolved(f)</code></span><span class="step-what">peek: is my coat ready? (never waits)</span></li><li><span class="step-icon">🧥</span><span class="step-title"><code>value(f)</code></span><span class="step-what">collect it, waiting if needed; errors come back here</span></li></ol><figcaption>The three verbs of the future package: <code>future()</code>, <code>resolved()</code>, <code>value()</code>.</figcaption></figure>
+<figure class="rcode"><figcaption>R</figcaption><pre><code class="language-r"><span class="hljs-title function_">library</span>(future)
+<span class="hljs-title function_">plan</span>(multisession)               <span class="hljs-comment"># more on this in N° 2</span>
+a &lt;- <span class="hljs-title function_">future</span>({ <span class="hljs-title function_">Sys.sleep</span>(<span class="hljs-number">1</span>); <span class="hljs-number">3</span>^<span class="hljs-number">2</span> })
+b &lt;- <span class="hljs-title function_">future</span>({ <span class="hljs-title function_">Sys.sleep</span>(<span class="hljs-number">1</span>); <span class="hljs-number">4</span>^<span class="hljs-number">2</span> })
+<span class="hljs-title function_">value</span>(a) + <span class="hljs-title function_">value</span>(b)              <span class="hljs-comment"># about 1 second, not 2</span></code></pre><pre class="nb-output">[1] 25</pre></figure>
+<p>Nim has futures too. With <a href="https://github.com/status-im/nim-taskpools">taskpools</a> (Status's thread pool) the ticket is
+a <code>Flowvar</code> and <code>sync</code> collects it. This runs as the page is built, on 4 threads:</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">proc</span> slowCube(x: <span class="hljs-built_in">int</span>): <span class="hljs-built_in">int</span> =
+  sleep <span class="hljs-number">100</span>
+  x * x * x
+
+<span class="hljs-keyword">var</span> tp = <span class="hljs-type">Taskpool</span>.<span class="hljs-keyword">new</span>(numThreads = <span class="hljs-number">4</span>)
+<span class="hljs-keyword">let</span> t0 = getMonoTime()
+<span class="hljs-keyword">let</span> a = tp.spawn slowCube(<span class="hljs-number">3</span>)       <span class="hljs-comment"># a ticket, at once</span>
+<span class="hljs-keyword">let</span> b = tp.spawn slowCube(<span class="hljs-number">4</span>)
+<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;two tickets after &quot;</span>, (getMonoTime() - t0).inMilliseconds, <span class="hljs-string">&quot; ms&quot;</span>
+<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;a + b = &quot;</span>, sync(a) + sync(b), <span class="hljs-string">&quot; after &quot;</span>, (getMonoTime() - t0).inMilliseconds, <span class="hljs-string">&quot; ms&quot;</span>
+tp.shutdown()</code></pre>
+<pre class="nb-output">two tickets after 0 ms
+a + b = 91 after 100 ms
+</pre>
+<p>And Nim's standard library has <code>Future[T]</code> in <code>std/asyncdispatch</code>. Same ticket, different
+cloakroom: these futures run on <strong>one</strong> thread, and are for <em>waiting</em> (on the network, on a
+timer) rather than for computing. Three waits of 300, 100 and 200 ms take 300 ms together:</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">let</span> s0 = getMonoTime()
+<span class="hljs-keyword">proc</span> fetch(name: <span class="hljs-built_in">string</span>; ms: <span class="hljs-built_in">int</span>): <span class="hljs-type">Future</span>[<span class="hljs-built_in">string</span>] {.async.} =
+  <span class="hljs-keyword">await</span> sleepAsync(ms)             <span class="hljs-comment"># waiting, not working: the thread is free meanwhile</span>
+  <span class="hljs-keyword">return</span> name &amp; <span class="hljs-string">&quot; ready after &quot;</span> &amp; $(getMonoTime() - s0).inMilliseconds &amp; <span class="hljs-string">&quot; ms&quot;</span>
+
+<span class="hljs-keyword">for</span> s <span class="hljs-keyword">in</span> waitFor all(@[fetch(<span class="hljs-string">&quot;coat&quot;</span>, <span class="hljs-number">300</span>), fetch(<span class="hljs-string">&quot;hat&quot;</span>, <span class="hljs-number">100</span>), fetch(<span class="hljs-string">&quot;scarf&quot;</span>, <span class="hljs-number">200</span>)]):
+  <span class="hljs-keyword">echo</span> s</code></pre>
+<pre class="nb-output">coat ready after 300 ms
+hat ready after 100 ms
+scarf ready after 200 ms
+</pre>
+<aside class="note aside"><span class="note-label">Aside</span><p>Henrik's paper makes this distinction in its first footnote: <strong>concurrent</strong> describes the logical
+structure (&quot;these can happen in any order&quot;), <strong>parallel</strong> the physical execution (&quot;these happen
+at the same time, on different cores&quot;). A future is a concurrency idea; the backend decides
+whether it becomes parallelism. Futures themselves are old: Baker and Hewitt named them in 1977.</p>
+</aside>
+<h2>plan(): who stands behind the counter</h2>
+<p>Here is the idea that makes the futureverse more than a thread pool. A package author writing
+<code>future()</code> or a parallel map <strong>never says where it runs</strong>. The person <em>using</em> the code picks
+that, once, with <code>plan()</code>:</p>
+<figure class="rcode"><figcaption>R</figcaption><pre><code class="language-r"><span class="hljs-title function_">plan</span>(sequential)                              <span class="hljs-comment"># one attendant: no parallelism (the default)</span>
+<span class="hljs-title function_">plan</span>(multisession, workers = <span class="hljs-number">4</span>)               <span class="hljs-comment"># 4 R processes on this machine</span>
+<span class="hljs-title function_">plan</span>(multicore)                               <span class="hljs-comment"># forked R processes (Linux, macOS)</span>
+<span class="hljs-title function_">plan</span>(cluster, workers = <span class="hljs-title function_">c</span>(<span class="hljs-string">"</span><span class="hljs-string">n1"</span>, <span class="hljs-string">"</span><span class="hljs-string">n2"</span>))        <span class="hljs-comment"># R processes on other machines, over SSH</span>
+<span class="hljs-title function_">plan</span>(future.mirai::mirai_multisession)        <span class="hljs-comment"># mirai's fast workers</span>
+<span class="hljs-title function_">plan</span>(future.batchtools::batchtools_slurm)     <span class="hljs-comment"># jobs on an HPC scheduler</span></code></pre></figure>
+<p>The same <code>lapply(...) |&gt; futurize()</code> then runs on a laptop, on a lab's machines, or as Slurm jobs
+on a cluster. The paper calls this <strong>separation of concerns</strong>: the developer decides <em>what</em>,
+the end-user decides <em>how and where</em>. A rule follows from it: <strong>packages must never call
+<code>plan()</code></strong>, because that would take the choice away from the user (the paper found CRAN packages
+that do it anyway).</p>
+<p>Our toy, <code>fv</code>, has three plans. A task is a plain Nim proc; here are the four the page uses,
+from <code>examples/tasks.nim</code>:</p>
+<figure class="snippet"><figcaption>from <code>examples/tasks.nim</code></figcaption><pre><code class="hljs nim"><span class="hljs-keyword">proc</span> slowSquare*(x: <span class="hljs-built_in">int</span>): <span class="hljs-built_in">int</span> =
+  <span class="hljs-comment">## The paper's slow_fcn: 50 ms of &quot;work&quot;, then x².</span>
+  sleep <span class="hljs-number">50</span>
+  x * x
+
+<span class="hljs-keyword">proc</span> chatty*(x: <span class="hljs-built_in">int</span>): <span class="hljs-built_in">float</span> =
+  <span class="hljs-comment">## Talks while it works: the output is relayed, in order, to the main thread.</span>
+  say <span class="hljs-string">&quot;x = &quot;</span>, x
+  sqrt(x.<span class="hljs-built_in">float</span>)
+
+<span class="hljs-keyword">proc</span> noisy*(x: <span class="hljs-built_in">int</span>): <span class="hljs-built_in">float</span> =
+  <span class="hljs-comment">## Uses random numbers: the mean of x draws from a normal distribution.</span>
+  <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-number">1</span> .. x: <span class="hljs-literal">result</span> += gauss()
+  <span class="hljs-literal">result</span> /= x.<span class="hljs-built_in">float</span>
+
+<span class="hljs-keyword">proc</span> fragile*(x: <span class="hljs-built_in">int</span>): <span class="hljs-built_in">int</span> =
+  <span class="hljs-comment">## Fails on 3.</span>
+  <span class="hljs-keyword">if</span> x == <span class="hljs-number">3</span>: <span class="hljs-keyword">raise</span> newException(<span class="hljs-type">ValueError</span>, <span class="hljs-string">&quot;I don't like 3&quot;</span>)
+  x * <span class="hljs-number">10</span></code></pre></figure>
+<p><code>futureMap(xs, f)</code> is the parallel map (R's <code>future_lapply</code>). It runs on whatever plan is
+current. Eight elements of 50 ms each:</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">let</span> xs = toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">8</span>)
+<span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> [sequential(), threads(<span class="hljs-number">4</span>), processes(<span class="hljs-number">4</span>)]:
+  plan p
+  <span class="hljs-keyword">let</span> t = getMonoTime()
+  <span class="hljs-keyword">let</span> ys = futureMap(xs, slowSquare)
+  <span class="hljs-keyword">echo</span> plan(), <span class="hljs-string">&quot;: &quot;</span>, ys, <span class="hljs-string">&quot; in &quot;</span>, (getMonoTime() - t).inMilliseconds, <span class="hljs-string">&quot; ms&quot;</span></code></pre>
+<pre class="nb-output">sequential: @[1, 4, 9, 16, 25, 36, 49, 64] in 401 ms
+threads(4): @[1, 4, 9, 16, 25, 36, 49, 64] in 100 ms
+processes(4): @[1, 4, 9, 16, 25, 36, 49, 64] in 114 ms
+</pre>
+<p>Same code, same answer, a quarter of the time. <code>processes(4)</code> starts <strong>four copies of this very
+program</strong>, which is the Nim version of R's <code>multisession</code>. It is not much slower than threads
+here, because starting a compiled program takes a millisecond or two, not the second or so an R
+session takes. How it works: the program is started again with <code>--fv-worker slowSquare</code>, and
+<code>fvServe()</code>, the first line of the program, turns it into a worker that reads elements as JSON
+lines on stdin and writes results on stdout.</p>
+<aside class="note nim"><span class="note-label">Nim</span><p><strong>R ships code; Nim ships only data.</strong> An R worker is an empty R session, so the future package
+sends it the expression, the functions it calls and the data they use. A Nim worker is the same
+compiled binary, so it already has all the code: only the name of the task and the elements
+travel. That is also why a task must be <strong>registered</strong> (<code>registerTask slowSquare</code>): the worker
+looks it up by name.</p>
+</aside>
+<p>How many workers? R's <strong>parallelly</strong> answers with <code>availableCores()</code>, which is not the number of
+cores of the machine but the number <em>you may use</em>: it reads cgroup quotas (containers), HPC
+scheduler allocations and a list of environment variables, so a job does not grab all 128
+cores of a shared server. <code>fv</code> has a tiny version of it:</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;countProcessors() = &quot;</span>, countProcessors(), <span class="hljs-string">&quot;  (the machine)&quot;</span>
+<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;availableCores()  = &quot;</span>, availableCores(), <span class="hljs-string">&quot;  (cgroup quota and FV_AVAILABLECORES)&quot;</span></code></pre>
+<pre class="nb-output">countProcessors() = 4  (the machine)
+availableCores()  = 4  (cgroup quota and FV_AVAILABLECORES)
+</pre>
+<aside class="note aside"><span class="note-label">Aside</span><p>On this build machine the two agree. In a container limited to 2 CPUs, <code>countProcessors()</code>
+would still say the host's count and every thread pool sized from it would oversubscribe.
+<code>std/cpuinfo</code> could grow an <code>availableCores</code> that reads the cgroup quota: a small, useful
+Nim PR.</p>
+</aside>
+<h2>Globals: what is in the coat pockets</h2>
+<p>Look at a task that uses a variable it did not get as an argument:</p>
+<figure class="rcode"><figcaption>R</figcaption><pre><code class="language-r">rate &lt;- <span class="hljs-number">1.2</span>
+f &lt;- <span class="hljs-keyword">function</span>(x) x * rate          <span class="hljs-comment"># 'rate' is a global of f</span>
+ys &lt;- <span class="hljs-title function_">lapply</span>(<span class="hljs-number">1</span>:<span class="hljs-number">4</span>, f) |&gt; <span class="hljs-title function_">futurize</span>() <span class="hljs-comment"># the worker must get 'rate' too</span></code></pre></figure>
+<p>A worker process does not have <code>rate</code>. So before sending a future, the future package reads the
+code of the expression (static analysis, with the <strong>globals</strong> package), finds every name it uses
+that is not defined inside it, and ships those values along: the coat <em>and</em> what is in its
+pockets. This is clever and mostly invisible, and it is where most surprises live (an object
+that cannot be copied to another process, like a database connection, breaks).</p>
+<p>In Nim, a thread backend does not ship anything: threads share memory. The danger is the
+opposite one, two threads touching the same data. Nim's compiler checks it: a proc run on
+another thread must be <code>gcsafe</code>, so it may not read a global that holds garbage-collected
+memory. This snippet does not compile, and the compiler names the global:</p>
+<pre><code class="hljs nim"><span class="hljs-keyword">var</span> rates = @[<span class="hljs-number">1.0</span>, <span class="hljs-number">1.2</span>, <span class="hljs-number">1.5</span>]       <span class="hljs-comment"># a global seq: memory owned by the main thread</span>
+
+<span class="hljs-keyword">proc</span> f(x: <span class="hljs-built_in">int</span>): <span class="hljs-built_in">float</span> {.gcsafe.} =
+  x.<span class="hljs-built_in">float</span> * rates[x <span class="hljs-keyword">mod</span> <span class="hljs-number">3</span>]</code></pre><pre class="nb-output err">snippet.nim(3, 6) Error: 'f' is not GC-safe as it accesses 'rates' which is a global using GC'ed memory</pre>
+<p>So &quot;detect the globals&quot; is a job of the Nim compiler, not of a library, and it is done before
+the program runs instead of while it runs. The fix is the one R does for you: pass the data as
+an argument (or make it a <code>const</code>, which is compiled in). The processes plan sits in between:
+a worker process re-runs the program's top-level code up to <code>fvServe()</code>, so a global computed
+there exists in the worker too, recomputed, not shipped.</p>
+<details class="fold"><summary>The same check, through <code>futurize</code> (N° 7): a local variable can't sneak in</summary><pre><code class="hljs nim"><span class="hljs-keyword">import</span> std/sequtils, fv
+<span class="hljs-keyword">proc</span> main() =
+  <span class="hljs-keyword">let</span> rate = <span class="hljs-number">3</span>
+  <span class="hljs-keyword">echo</span> toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">4</span>).mapIt(it * rate) |&gt; futurize()
+main()</code></pre><pre class="nb-output err">snippet.nim(4, 31) Error: illegal capture 'rate' because 'fvIt' has the calling convention: &lt;nimcall&gt;</pre></details>
+<h2>Random numbers: the same dice, whoever rolls them</h2>
+<p>Statisticians parallelize resampling all the time (bootstraps, permutation tests,
+simulations), so random numbers are central. Two things go wrong when you run them in parallel
+naively. Results change with the number of workers, because each worker's generator hands out
+numbers in a different order. And workers seeded carelessly can produce overlapping or
+correlated streams.</p>
+<p>The futureverse fixes both with <code>seed = TRUE</code>: every <em>element</em> gets its own stream (L'Ecuyer's
+MRG32k3a generator, whose streams are provably far apart), chosen from the element's position.
+The result then depends only on the seed, never on the plan. <code>fv</code> does the same with a simpler
+trick: element <code>i</code> seeds its own generator from <code>splitmix64(seed, i)</code>.</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> [sequential(), threads(<span class="hljs-number">3</span>), processes(<span class="hljs-number">4</span>)]:
+  plan p
+  <span class="hljs-keyword">let</span> ys = futureMap(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>), noisy, seed = <span class="hljs-number">42</span>)
+  <span class="hljs-keyword">echo</span> ($plan()).alignLeft(<span class="hljs-number">14</span>), ys.mapIt(it.formatFloat(ffDecimal, <span class="hljs-number">3</span>)).join(<span class="hljs-string">&quot;  &quot;</span>)</code></pre>
+<pre class="nb-output">sequential    0.931  0.458  -0.305  -0.989  0.564  0.533
+threads(3)    0.931  0.458  -0.305  -0.989  0.564  0.533
+processes(4)  0.931  0.458  -0.305  -0.989  0.564  0.533
+</pre>
+<p>Identical, to the last bit. And if a task uses random numbers <em>without</em> a seed, you get the futureverse's famous warning, rather than silently unreproducible results:</p>
+<pre><code class="nohighlight nim hljs">plan threads(<span class="hljs-number">4</span>)
+<span class="hljs-keyword">discard</span> futureMap(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>), noisy)</code></pre>
+<pre class="nb-output">Warning: UNRELIABLE VALUE: element 1 used random numbers without a seed. Pass a seed to get the same numbers on every plan.
+</pre>
+<aside class="note r"><span class="note-label">Meanwhile, in R</span><p>R prints <code>UNRELIABLE VALUE: Future (‘&lt;none&gt;’) unexpectedly generated random numbers without specifying argument 'seed'.</code> For <code>replicate()</code>, which is nearly always used for resampling,
+futurize turns <code>seed = TRUE</code> on by itself.</p>
+</aside>
+<h2>Output and errors come back as if nothing happened</h2>
+<p>Run a map in parallel with most tools and the side effects get lost or scrambled. In R,
+<code>parallel::mclapply</code> drops messages and warnings, and returns errors as values; the paper notes
+that many users assume it behaves like <code>lapply</code> and are not aware. In Nim, <code>echo</code> from threads
+just interleaves. Here malebolgia spawns eight tasks that print as they finish (the larger x,
+the shorter the sleep):</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">proc</span> rawChatty(x: <span class="hljs-built_in">int</span>) =
+  sleep (<span class="hljs-number">9</span> - x) * <span class="hljs-number">15</span>
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;x = &quot;</span>, x
+
+<span class="hljs-keyword">var</span> m = createMaster()
+m.awaitAll:
+  <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> <span class="hljs-number">1.</span>.<span class="hljs-number">8</span>:
+    m.spawn rawChatty(x)</code></pre>
+<pre class="nb-output">x = 7
+x = 6
+x = 8
+x = 5
+x = 4
+x = 3
+x = 2
+x = 1
+</pre>
+<p>The futureverse instead <strong>captures</strong> standard output, messages and warnings on the worker and
+<strong>relays</strong> them in the main session, in the order a sequential run would show them, after each
+future is collected. They are real R conditions again on arrival, so <code>suppressMessages()</code> around
+the parallel call still works. <code>fv</code> does it with <code>say</code>: each element's lines are kept with its
+result, and the main thread echoes them in element order:</p>
+<pre><code class="nohighlight nim hljs">plan processes(<span class="hljs-number">4</span>)
+<span class="hljs-keyword">echo</span> futureMap(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">4</span>), chatty)</code></pre>
+<pre class="nb-output">x = 1
+x = 2
+x = 3
+x = 4
+@[1.0, 1.4142135623730951, 1.7320508075688772, 2.0]
+</pre>
+<p>Errors too: the first failing element (in order) raises its exception on the main thread, where
+an ordinary <code>try</code> catches it, with its own type:</p>
+<pre><code class="nohighlight nim hljs">plan threads(<span class="hljs-number">4</span>)
+<span class="hljs-keyword">try</span>:
+  <span class="hljs-keyword">echo</span> futureMap(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">8</span>), fragile)
+<span class="hljs-keyword">except</span> <span class="hljs-type">ValueError</span> <span class="hljs-keyword">as</span> e:
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;caught a ValueError from a worker: &quot;</span>, e.msg</code></pre>
+<pre class="nb-output">caught a ValueError from a worker: I don't like 3
+</pre>
+<aside class="note careful"><span class="note-label">Careful</span><p><code>fv</code> cannot pass the exception <em>object</em> across: under Nim's ORC memory manager a ref belongs to
+the thread that made it (a first version did pass it, and crashed with a segfault in the cycle
+collector). So only the name and message travel, and <code>fv</code> makes a new exception of the same type
+for the common ones. R serializes the whole condition object, class and all. A Nim library done
+properly could move the exception with <code>std/isolation</code>.</p>
+</aside>
+<h2>Progress from far away</h2>
+<p>Long maps want a progress bar, and the bar must be in the main session while the work is in the
+workers. Henrik's <strong>progressr</strong> solves it the R way: <code>p()</code> in the task <em>signals a condition</em>,
+and the future backends relay those near-live, as they happen, not at the end. <code>fv</code> takes a
+shortcut, <code>progress = true</code> ticks once per element from whichever thread finished it:</p>
+<pre><code class="nohighlight nim hljs">plan threads(<span class="hljs-number">4</span>)
+<span class="hljs-keyword">discard</span> futureMap(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">20</span>), slowSquare, progress = <span class="hljs-literal">true</span>)</code></pre>
+<pre class="nb-output">progress |█·········| 2/20
+progress |██········| 4/20
+progress |███·······| 6/20
+progress |████······| 8/20
+progress |█████·····| 10/20
+progress |██████····| 12/20
+progress |███████···| 14/20
+progress |████████··| 16/20
+progress |█████████·| 18/20
+progress |██████████| 20/20
+</pre>
+<p>The paper plans a <code>progressify()</code> that injects the <code>p()</code> calls itself, so that
+<code>lapply(xs, slow) |&gt; progressify() |&gt; futurize()</code> gets a bar with no other change. Which brings
+us to the macro.</p>
+<h2>futurize: one magic word, and in Nim it's a macro</h2>
+<p>Before futurize, parallelizing meant switching function: <code>lapply</code> becomes
+<code>future.apply::future_lapply</code>, <code>purrr::map</code> becomes <code>furrr::future_map</code>, <code>foreach() %do%</code>
+becomes <code>%dofuture%</code>, each with its own way of passing options. <a href="https://github.com/futureverse/futurize">futurize</a>
+keeps the code you wrote and adds one word:</p>
+<figure class="rcode"><figcaption>R</figcaption><pre><code class="language-r">ys &lt;- <span class="hljs-title function_">lapply</span>(xs, slow_fcn) |&gt; <span class="hljs-title function_">futurize</span>()
+ys &lt;- <span class="hljs-title function_">map</span>(xs, rnorm, n = <span class="hljs-number">10</span>) |&gt; <span class="hljs-title function_">futurize</span>(seed = <span class="hljs-literal">TRUE</span>)
+b  &lt;- <span class="hljs-title function_">boot</span>(bigcity, ratio, R = <span class="hljs-number">999</span>, stype = <span class="hljs-string">"</span><span class="hljs-string">w"</span>) |&gt; <span class="hljs-title function_">futurize</span>()</code></pre></figure>
+<p>It works because R is lazy: <code>futurize()</code> receives its argument <em>unevaluated</em>, as a piece of
+code (with <code>substitute()</code>), finds which map it is (<code>base::lapply</code>? <code>purrr::map</code>?), and rewrites
+it into the parallel version before running it. The paper calls this <strong>transpiling</strong>. It also
+unwraps <code>{ }</code>, <code>local()</code>, <code>suppressMessages()</code> to find the map inside, and knows the parallel
+switches of domain packages (boot, caret, glmnet, lme4, mgcv, tm) so you don't have to.</p>
+<p>Nim does code-as-data at compile time: a <strong>macro</strong> receives its argument unevaluated, as a syntax
+tree. So the Nim futurize is a macro that recognizes <code>map(xs, f)</code> and <code>xs.mapIt(expr)</code> from
+<code>std/sequtils</code> and rewrites them into <code>futureMap</code>. Nim does not have R's <code>|&gt;</code>, but a macro can be
+an operator, so we add that too, in five lines:</p>
+<pre><code class="nohighlight nim hljs">plan threads(<span class="hljs-number">4</span>)
+<span class="hljs-keyword">let</span> squares = toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">8</span>).mapIt(it * it + <span class="hljs-number">1</span>) |&gt; futurize(seed = <span class="hljs-number">1</span>)
+<span class="hljs-keyword">echo</span> squares
+<span class="hljs-keyword">echo</span> toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">8</span>).map(slowSquare) |&gt; futurize()</code></pre>
+<pre class="nb-output">@[2, 5, 10, 17, 26, 37, 50, 65]
+@[1, 4, 9, 16, 25, 36, 49, 64]
+</pre>
+<p>Like <code>futurize(eval = FALSE)</code>, <code>transpiled</code> shows what the macro writes:</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">echo</span> transpiled(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">8</span>).mapIt(it * it + <span class="hljs-number">1</span>), seed = <span class="hljs-number">1</span>)</code></pre>
+<pre class="nb-output">block:
+  proc fvIt_1040196665(it: typeof(toSeq(1 .. 8)[0])): auto {.nimcall, gcsafe.} =
+    it * it + 1
+
+  futureMap(toSeq(1 .. 8), fvIt_1040196665, seed = 1)
+</pre>
+<p>Note the <code>{.nimcall, gcsafe.}</code> that the macro adds to the generated proc. It is what gives the
+compiler error at the end of N° 3: a local variable can't be captured by a proc that runs
+somewhere else. And R's <code>futurize(FALSE)</code>, which turns every futurize off for debugging, is a
+compile-time switch here: build with <code>-d:futurizeOff</code> and each futurize becomes the plain map.</p>
+<aside class="note r"><span class="note-label">Meanwhile, in R</span><p>One difference of philosophy. In R, only the <strong>end-user</strong> may switch futurization off, and
+packages must never do it. In Nim the end-user of a library is whoever compiles the program,
+so a <code>-d:</code> define is the natural place for that switch, and for the plan too, if you want it
+fixed at compile time.</p>
+</aside>
+<h2>So, does Nim need a futureverse?</h2>
+<p>Partly. Many of the problems the futureverse solves come from R: an interpreter with one thread,
+where parallel means processes, and processes mean shipping code and data. In Nim a slow loop is
+often fast enough once compiled, and threads share memory with compiler checks. But some of the
+ideas have no good Nim equivalent yet:</p>
+<div id="tabella-e064b8d3" class="tabella">
+<table class="tb_table" aria-labelledby="tabella-e064b8d3-title">
+<thead>
+<tr class="tb_heading"><th colspan="3" id="tabella-e064b8d3-title" class="tb_title tb_heading_last">When the futureverse's ideas make sense in Nim</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_left" scope="col" id="r">R futureverse</th><th class="tb_col_heading tb_left" scope="col" id="nim">Nim today</th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><th scope="row" class="tb_row tb_left tb_stub">Many CPU-heavy elements</th><td class="tb_row tb_left"><code>plan(multisession)</code> + a parallel map</td><td class="tb_row tb_left">threads: <a href="https://github.com/Araq/malebolgia">malebolgia</a>, <a href="https://github.com/status-im/nim-taskpools">taskpools</a>, weave. Try plain compiled code first.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Waiting on network or disk</th><td class="tb_row tb_left">futures, or <code>promises</code> in Shiny</td><td class="tb_row tb_left"><code>std/asyncdispatch</code> or chronos, on one thread</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Code that may crash, leak, or call a C library that isn't thread-safe</th><td class="tb_row tb_left"><code>multisession</code>, <code>callr</code></td><td class="tb_row tb_left">processes: <code>std/osproc</code>, or <code>fv</code>'s <code>processes</code> (the binary is its own worker)</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">A cluster, an HPC scheduler</th><td class="tb_row tb_left"><code>future.batchtools</code>, <code>future.mirai</code>, <code>cluster</code></td><td class="tb_row tb_left">nothing ready-made. A Slurm job array of the same binary is the closest.</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">The user picks the backend</th><td class="tb_row tb_left"><code>plan()</code>, never inside a package</td><td class="tb_row tb_left">mostly compile-time (<code>-d:ThreadPoolSize</code>); a library that creates its own pool takes the choice away</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Same random numbers on any plan</th><td class="tb_row tb_left"><code>seed = TRUE</code> (L'Ecuyer streams)</td><td class="tb_row tb_left">by hand: one seeded <code>Rand</code> per element, as <code>fv</code> does</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Output and errors as in a sequential run</th><td class="tb_row tb_left">built in, relayed</td><td class="tb_row tb_left">by hand; <code>echo</code> from threads interleaves</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">How many cores may I use?</th><td class="tb_row tb_left"><code>parallelly::availableCores()</code></td><td class="tb_row tb_left"><code>countProcessors()</code> ignores cgroup quotas</td></tr>
+</tbody>
+</table>
+</div>
+<p>What a Nim programmer can take from Henrik, in order of how cheap it is:</p>
+<ol>
+<li><strong>Seed per element, not per worker.</strong> Free, and it makes parallel results reproducible.</li>
+<li><strong>Relay, don't print.</strong> Keep a task's output and errors with its result, and show them in
+order. Debugging a parallel program becomes debugging a sequential one.</li>
+<li><strong>Don't own the pool.</strong> A library should take the executor from its caller (malebolgia's
+<code>Master</code> passed down is close to this), the way packages leave <code>plan()</code> to the user.</li>
+<li><strong>Respect the machine's limits</strong>: an <code>availableCores</code> in the standard library.</li>
+<li><strong>A test suite for backends.</strong> The futureverse has <code>future.tests</code>, which every backend must
+pass to be called compliant. That is how &quot;any backend works&quot; stays true.</li>
+<li><strong>The macro.</strong> <code>futurize</code> is a 264-line toy here; a real one would know more maps
+(<code>collect</code>, <code>for</code> loops with <code>||</code>), and a Nim cluster backend would be a fun project.</li>
+</ol>
+<h2>Questions for Henrik, next time in Paris</h2>
+<ul>
+<li>futurize works on R code at run time; would you have wanted it at compile time, like a macro?</li>
+<li>Which backend do people actually use on HPC today: batchtools or mirai?</li>
+<li>Structured concurrency (the paper's future work, and malebolgia's only mode): will futures
+launched by a map always be cancelled when one fails?</li>
+<li>What is the strangest thing someone parallelized with futures?</li>
+</ul>
+<details class="fold"><summary>How the toy is built: <code>fv.nim</code>, and its limits</summary><ul>
+<li><strong>Threads</strong>: malebolgia's <code>awaitAll</code>/<code>spawn</code>. Each of the n workers gets elements w, w+n,
+w+2n, ... (R's futures chunk elements too; <code>chunk_size</code> and <code>scheduling</code> tune it). Results go
+into a preallocated array through a pointer, so no locks.</li>
+<li><strong>Processes</strong>: the running binary, started n times with <code>--fv-worker &lt;task&gt;</code>, elements as
+JSON lines over pipes (<code>std/json</code>, <code>std/osproc</code>). All elements are sent before any result is
+read, which is fine for small inputs and would deadlock on big ones.</li>
+<li><strong>Not done</strong>: lazy futures (<code>future(lazy = TRUE)</code>), <code>resolved()</code>, cancellation, timeouts,
+remote machines, nested plans (R's <code>plan(list(cluster, multicore))</code>), warnings as a kind of
+their own, and moving exception objects. Toy, remember.</li>
+<li>Everything on this page was run when the page was built: the timings are real, from a
+4-core cloud machine.</li>
+</ul>
+</details>
+<details class="source" id="fv-source"><summary><code>fv.nim</code> <span class="src-lines">289 lines</span></summary><pre><code class="hljs nim"><span class="hljs-comment">## fv: a toy &quot;futureverse&quot; for Nim, to explain Henrik Bengtsson's R futureverse by building it.</span>
+<span class="hljs-comment">##</span>
+<span class="hljs-comment">## - `plan(sequential())`, `plan(threads(4))`, `plan(processes(4))`: the end-user picks HOW and WHERE.</span>
+<span class="hljs-comment">## - `futureMap(xs, f)`: the developer says WHAT can run concurrently (R: future.apply / furrr).</span>
+<span class="hljs-comment">## - `xs.map(f).futurize(seed = 42)`: a macro that rewrites a sequential map (R: futurize).</span>
+<span class="hljs-comment">## - Inside a task: `say` (output, relayed in order), `gauss`/`dice` (random numbers, reproducible</span>
+<span class="hljs-comment">##   per element with `seed`), exceptions (re-raised on the main thread), `progress = true`.</span>
+<span class="hljs-comment">##</span>
+<span class="hljs-comment">## Threads come from malebolgia (structured: every spawn is awaited inside `awaitAll`).</span>
+<span class="hljs-comment">## Processes are copies of the running program, started with `--fv-worker &lt;task&gt;`: a program that</span>
+<span class="hljs-comment">## uses `processes` must call `registerTask f` for its tasks and then `fvServe()`, before anything else.</span>
+<span class="hljs-keyword">import</span> std/[atomics, isolation, json, locks, macros, os, osproc, random, sequtils, streams, strutils, tables]
+<span class="hljs-keyword">import</span> malebolgia
+<span class="hljs-keyword">export</span> isolation   <span class="hljs-comment"># malebolgia's spawn needs `isolate` where futureMap is instantiated</span>
+
+<span class="hljs-keyword">type</span>
+  <span class="hljs-type">BackendKind</span>* = <span class="hljs-keyword">enum</span> bkSequential = <span class="hljs-string">&quot;sequential&quot;</span>, bkThreads = <span class="hljs-string">&quot;threads&quot;</span>, bkProcesses = <span class="hljs-string">&quot;processes&quot;</span>
+  <span class="hljs-type">Plan</span>* = <span class="hljs-keyword">object</span>
+    kind*: <span class="hljs-type">BackendKind</span>
+    workers*: <span class="hljs-built_in">int</span>
+  <span class="hljs-type">RelayedError</span>* = <span class="hljs-keyword">object</span> <span class="hljs-keyword">of</span> <span class="hljs-type">CatchableError</span>
+    <span class="hljs-comment">## An exception raised by a task whose type fv does not rebuild: its name and message.</span>
+    origName*: <span class="hljs-built_in">string</span>
+  <span class="hljs-type">Outcome</span>[<span class="hljs-type">U</span>] = <span class="hljs-keyword">object</span>        <span class="hljs-comment">## what one element left behind</span>
+    value: <span class="hljs-type">U</span>
+    log: <span class="hljs-built_in">seq</span>[<span class="hljs-built_in">string</span>]
+    errName, errMsg: <span class="hljs-built_in">string</span>   <span class="hljs-comment">## an exception: only its name and message cross a thread or a process</span>
+    rngUsed: <span class="hljs-built_in">bool</span>
+  <span class="hljs-type">Ctx</span> = <span class="hljs-keyword">object</span>               <span class="hljs-comment">## the per-element context, one per thread</span>
+    active: <span class="hljs-built_in">bool</span>
+    log: <span class="hljs-built_in">seq</span>[<span class="hljs-built_in">string</span>]
+    rng: <span class="hljs-type">Rand</span>
+    rngUsed: <span class="hljs-built_in">bool</span>
+
+<span class="hljs-keyword">var</span>
+  ctx {.threadvar.}: <span class="hljs-type">Ctx</span>
+  currentPlan = <span class="hljs-type">Plan</span>(kind: bkSequential, workers: <span class="hljs-number">1</span>)
+  progressLock: <span class="hljs-type">Lock</span>
+  progressDone: <span class="hljs-type">Atomic</span>[<span class="hljs-built_in">int</span>]
+  progressTotal: <span class="hljs-built_in">int</span>
+initLock progressLock
+
+<span class="hljs-comment"># ------------------------------------------------------------------------------- how many cores?</span>
+<span class="hljs-keyword">proc</span> availableCores*(): <span class="hljs-built_in">int</span> =
+  <span class="hljs-comment">## Like parallelly::availableCores(): the cores this program may use, not the cores the</span>
+  <span class="hljs-comment">## machine has. Honours `FV_AVAILABLECORES` and a Linux cgroup CPU quota (containers, CI).</span>
+  <span class="hljs-literal">result</span> = countProcessors()
+  <span class="hljs-keyword">if</span> existsEnv(<span class="hljs-string">&quot;FV_AVAILABLECORES&quot;</span>):
+    <span class="hljs-keyword">return</span> max(<span class="hljs-number">1</span>, getEnv(<span class="hljs-string">&quot;FV_AVAILABLECORES&quot;</span>).parseInt)
+  <span class="hljs-keyword">try</span>:
+    <span class="hljs-keyword">let</span> q = readFile(<span class="hljs-string">&quot;/sys/fs/cgroup/cpu.max&quot;</span>).splitWhitespace
+    <span class="hljs-keyword">if</span> q.len == <span class="hljs-number">2</span> <span class="hljs-keyword">and</span> q[<span class="hljs-number">0</span>] != <span class="hljs-string">&quot;max&quot;</span>:
+      <span class="hljs-literal">result</span> = min(<span class="hljs-literal">result</span>, max(<span class="hljs-number">1</span>, (q[<span class="hljs-number">0</span>].parseInt + q[<span class="hljs-number">1</span>].parseInt - <span class="hljs-number">1</span>) <span class="hljs-keyword">div</span> q[<span class="hljs-number">1</span>].parseInt))
+  <span class="hljs-keyword">except</span> <span class="hljs-type">IOError</span>, <span class="hljs-type">ValueError</span>: <span class="hljs-keyword">discard</span>
+  <span class="hljs-literal">result</span> = max(<span class="hljs-number">1</span>, <span class="hljs-literal">result</span>)
+
+<span class="hljs-comment"># ------------------------------------------------------------------------------- the plan</span>
+<span class="hljs-keyword">proc</span> sequential*(): <span class="hljs-type">Plan</span> = <span class="hljs-type">Plan</span>(kind: bkSequential, workers: <span class="hljs-number">1</span>)
+<span class="hljs-keyword">proc</span> threads*(workers = <span class="hljs-number">0</span>): <span class="hljs-type">Plan</span> =
+  <span class="hljs-comment">## Threads of this process (malebolgia's pool, at most `ThreadPoolSize` of them).</span>
+  <span class="hljs-type">Plan</span>(kind: bkThreads, workers: min(<span class="hljs-keyword">if</span> workers &gt; <span class="hljs-number">0</span>: workers <span class="hljs-keyword">else</span>: availableCores(), <span class="hljs-type">ThreadPoolSize</span>))
+<span class="hljs-keyword">proc</span> processes*(workers = <span class="hljs-number">0</span>): <span class="hljs-type">Plan</span> =
+  <span class="hljs-comment">## Copies of this program, talking JSON over pipes (R's `multisession`, without R).</span>
+  <span class="hljs-type">Plan</span>(kind: bkProcesses, workers: <span class="hljs-keyword">if</span> workers &gt; <span class="hljs-number">0</span>: workers <span class="hljs-keyword">else</span>: availableCores())
+
+<span class="hljs-keyword">proc</span> plan*(p: <span class="hljs-type">Plan</span>) = currentPlan = p
+<span class="hljs-keyword">proc</span> plan*(): <span class="hljs-type">Plan</span> = currentPlan
+<span class="hljs-keyword">proc</span> `$`*(p: <span class="hljs-type">Plan</span>): <span class="hljs-built_in">string</span> =
+  <span class="hljs-keyword">if</span> p.kind == bkSequential: <span class="hljs-string">&quot;sequential&quot;</span> <span class="hljs-keyword">else</span>: $p.kind &amp; <span class="hljs-string">&quot;(&quot;</span> &amp; $p.workers &amp; <span class="hljs-string">&quot;)&quot;</span>
+
+<span class="hljs-keyword">template</span> withPlan*(p: <span class="hljs-type">Plan</span>; body: <span class="hljs-built_in">untyped</span>) =
+  <span class="hljs-comment">## Use a plan for a block only, then put the previous one back (R: `with(plan(...), local = TRUE)`).</span>
+  <span class="hljs-keyword">let</span> saved = plan()
+  plan(p)
+  <span class="hljs-keyword">try</span>: body
+  <span class="hljs-keyword">finally</span>: plan(saved)
+
+<span class="hljs-comment"># ------------------------------------------------------------------------------- inside a task</span>
+<span class="hljs-keyword">proc</span> say*(args: <span class="hljs-built_in">varargs</span>[<span class="hljs-built_in">string</span>, `$`]) =
+  <span class="hljs-comment">## Output from a task. It is captured and relayed by the main thread, in element order, as if</span>
+  <span class="hljs-comment">## the map ran sequentially (R relays cat(), message() and warning() the same way).</span>
+  <span class="hljs-keyword">let</span> s = args.join(<span class="hljs-string">&quot;&quot;</span>)
+  <span class="hljs-keyword">if</span> ctx.active: ctx.log.add s <span class="hljs-keyword">else</span>: <span class="hljs-keyword">echo</span> s
+
+<span class="hljs-keyword">proc</span> gauss*(): <span class="hljs-built_in">float</span> =
+  <span class="hljs-comment">## A standard normal random number from the element's own stream.</span>
+  ctx.rngUsed = <span class="hljs-literal">true</span>
+  ctx.rng.gauss()
+
+<span class="hljs-keyword">proc</span> dice*(): <span class="hljs-built_in">int</span> =
+  <span class="hljs-comment">## A roll of a six-sided die, from the element's own stream.</span>
+  ctx.rngUsed = <span class="hljs-literal">true</span>
+  ctx.rng.rand(<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>)
+
+<span class="hljs-keyword">proc</span> mix(seed, i: <span class="hljs-built_in">int</span>): <span class="hljs-built_in">int64</span> =
+  <span class="hljs-comment">## splitmix64 of (seed, i): one independent-looking stream per element, whatever runs it.</span>
+  <span class="hljs-keyword">var</span> z = <span class="hljs-keyword">cast</span>[<span class="hljs-built_in">uint64</span>](seed) + <span class="hljs-number">0x9E3779B97F4A7C15'</span>u64 * <span class="hljs-built_in">uint64</span>(i + <span class="hljs-number">1</span>)
+  z = (z <span class="hljs-keyword">xor</span> (z <span class="hljs-keyword">shr</span> <span class="hljs-number">30</span>)) * <span class="hljs-number">0xBF58476D1CE4E5B9'</span>u64
+  z = (z <span class="hljs-keyword">xor</span> (z <span class="hljs-keyword">shr</span> <span class="hljs-number">27</span>)) * <span class="hljs-number">0x94D049BB133111EB'</span>u64
+  <span class="hljs-keyword">cast</span>[<span class="hljs-built_in">int64</span>](z <span class="hljs-keyword">xor</span> (z <span class="hljs-keyword">shr</span> <span class="hljs-number">31</span>))
+
+<span class="hljs-keyword">proc</span> runOne[<span class="hljs-type">T</span>, <span class="hljs-type">U</span>](f: <span class="hljs-keyword">proc</span>(x: <span class="hljs-type">T</span>): <span class="hljs-type">U</span> {.nimcall, gcsafe.}; x: <span class="hljs-type">T</span>; i, seed: <span class="hljs-built_in">int</span>; o: <span class="hljs-keyword">var</span> <span class="hljs-type">Outcome</span>[<span class="hljs-type">U</span>]) =
+  <span class="hljs-comment">## Evaluate one element: set up its context, call f, keep what it left behind.</span>
+  ctx = <span class="hljs-type">Ctx</span>(active: <span class="hljs-literal">true</span>)
+  ctx.rng = <span class="hljs-keyword">if</span> seed &gt;= <span class="hljs-number">0</span>: initRand(mix(seed, i)) <span class="hljs-keyword">else</span>: initRand()   <span class="hljs-comment"># no seed: from the clock</span>
+  <span class="hljs-keyword">try</span>:
+    o.value = f(x)
+  <span class="hljs-keyword">except</span> <span class="hljs-type">CatchableError</span>:
+    <span class="hljs-keyword">let</span> e = getCurrentException()
+    (o.errName, o.errMsg) = ($e.name, e.msg)
+  o.log = move ctx.log
+  o.rngUsed = ctx.rngUsed
+  ctx.active = <span class="hljs-literal">false</span>
+
+<span class="hljs-keyword">proc</span> tick() {.gcsafe.} =
+  <span class="hljs-comment">## One more element done: draw the progress bar when a new tenth is reached.</span>
+  <span class="hljs-keyword">let</span> done = progressDone.fetchAdd(<span class="hljs-number">1</span>) + <span class="hljs-number">1</span>
+  {.<span class="hljs-keyword">cast</span>(gcsafe).}:
+    <span class="hljs-keyword">let</span> total = progressTotal
+    <span class="hljs-keyword">if</span> total &gt; <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> done * <span class="hljs-number">10</span> <span class="hljs-keyword">div</span> total != (done - <span class="hljs-number">1</span>) * <span class="hljs-number">10</span> <span class="hljs-keyword">div</span> total:
+      withLock progressLock:
+        <span class="hljs-keyword">let</span> tenths = done * <span class="hljs-number">10</span> <span class="hljs-keyword">div</span> total
+        <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;progress |&quot;</span>, <span class="hljs-string">&quot;█&quot;</span>.repeat(tenths), <span class="hljs-string">&quot;·&quot;</span>.repeat(<span class="hljs-number">10</span> - tenths), <span class="hljs-string">&quot;| &quot;</span>, done, <span class="hljs-string">&quot;/&quot;</span>, total
+
+<span class="hljs-comment"># ------------------------------------------------------------------------------- processes</span>
+<span class="hljs-keyword">type</span> <span class="hljs-type">Entry</span> = <span class="hljs-keyword">object</span>
+  name: <span class="hljs-built_in">string</span>
+  run: <span class="hljs-keyword">proc</span>(x: <span class="hljs-type">JsonNode</span>; i, seed: <span class="hljs-built_in">int</span>): <span class="hljs-type">JsonNode</span> {.closure.}
+
+<span class="hljs-keyword">var</span> registry: <span class="hljs-type">Table</span>[<span class="hljs-built_in">string</span>, <span class="hljs-type">Entry</span>]
+<span class="hljs-keyword">var</span> names: <span class="hljs-type">Table</span>[<span class="hljs-built_in">pointer</span>, <span class="hljs-built_in">string</span>]
+
+<span class="hljs-keyword">proc</span> registerImpl[<span class="hljs-type">T</span>, <span class="hljs-type">U</span>](name: <span class="hljs-built_in">string</span>; f: <span class="hljs-keyword">proc</span>(x: <span class="hljs-type">T</span>): <span class="hljs-type">U</span> {.nimcall, gcsafe.}) =
+  names[<span class="hljs-keyword">cast</span>[<span class="hljs-built_in">pointer</span>](f)] = name
+  registry[name] = <span class="hljs-type">Entry</span>(name: name, run: <span class="hljs-keyword">proc</span>(x: <span class="hljs-type">JsonNode</span>; i, seed: <span class="hljs-built_in">int</span>): <span class="hljs-type">JsonNode</span> =
+    <span class="hljs-keyword">var</span> o: <span class="hljs-type">Outcome</span>[<span class="hljs-type">U</span>]
+    runOne(f, x.to(<span class="hljs-type">T</span>), i, seed, o)
+    <span class="hljs-literal">result</span> = %*{<span class="hljs-string">&quot;i&quot;</span>: i, <span class="hljs-string">&quot;log&quot;</span>: o.log, <span class="hljs-string">&quot;rng&quot;</span>: o.rngUsed}
+    <span class="hljs-keyword">if</span> o.errName.len &gt; <span class="hljs-number">0</span>: <span class="hljs-literal">result</span>[<span class="hljs-string">&quot;err&quot;</span>] = %*{<span class="hljs-string">&quot;name&quot;</span>: o.errName, <span class="hljs-string">&quot;msg&quot;</span>: o.errMsg}
+    <span class="hljs-keyword">else</span>: <span class="hljs-literal">result</span>[<span class="hljs-string">&quot;v&quot;</span>] = %o.value)
+
+<span class="hljs-keyword">template</span> registerTask*(f: <span class="hljs-built_in">typed</span>) =
+  <span class="hljs-comment">## Make `f` callable by worker processes (they look it up by name).</span>
+  registerImpl(astToStr(f), f)
+
+<span class="hljs-keyword">proc</span> fvServe*() =
+  <span class="hljs-comment">## If this program was started as a worker (`--fv-worker &lt;task&gt;`), serve: read one JSON element</span>
+  <span class="hljs-comment">## per line on stdin, answer one JSON line on stdout, then quit. Otherwise do nothing.</span>
+  <span class="hljs-keyword">if</span> paramCount() &gt;= <span class="hljs-number">2</span> <span class="hljs-keyword">and</span> paramStr(<span class="hljs-number">1</span>) == <span class="hljs-string">&quot;--fv-worker&quot;</span>:
+    <span class="hljs-keyword">let</span> e = registry[paramStr(<span class="hljs-number">2</span>)]
+    <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> <span class="hljs-literal">stdin</span>.lines:
+      <span class="hljs-keyword">let</span> j = parseJson(line)
+      <span class="hljs-literal">stdout</span>.writeLine $e.run(j[<span class="hljs-string">&quot;x&quot;</span>], j[<span class="hljs-string">&quot;i&quot;</span>].getInt, j[<span class="hljs-string">&quot;seed&quot;</span>].getInt)
+      <span class="hljs-literal">stdout</span>.flushFile
+    quit <span class="hljs-number">0</span>
+
+<span class="hljs-keyword">proc</span> mapProcesses[<span class="hljs-type">T</span>, <span class="hljs-type">U</span>](xs: openArray[<span class="hljs-type">T</span>]; f: <span class="hljs-keyword">proc</span>(x: <span class="hljs-type">T</span>): <span class="hljs-type">U</span> {.nimcall, gcsafe.}; seed, workers: <span class="hljs-built_in">int</span>;
+                        progress: <span class="hljs-built_in">bool</span>; outs: <span class="hljs-keyword">var</span> <span class="hljs-built_in">seq</span>[<span class="hljs-type">Outcome</span>[<span class="hljs-type">U</span>]]) =
+  <span class="hljs-keyword">let</span> key = <span class="hljs-keyword">cast</span>[<span class="hljs-built_in">pointer</span>](f)
+  <span class="hljs-keyword">if</span> key <span class="hljs-keyword">notin</span> names:
+    <span class="hljs-keyword">raise</span> newException(<span class="hljs-type">ValueError</span>, <span class="hljs-string">&quot;processes need `registerTask f` and `fvServe()` at the top of the program&quot;</span>)
+  <span class="hljs-keyword">let</span> n = min(workers, xs.len)
+  <span class="hljs-keyword">var</span> ps: <span class="hljs-built_in">seq</span>[<span class="hljs-type">Process</span>]
+  <span class="hljs-keyword">for</span> w <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; n:
+    ps.add startProcess(getAppFilename(), args = [<span class="hljs-string">&quot;--fv-worker&quot;</span>, names[key]], options = {})
+  <span class="hljs-keyword">for</span> i, x <span class="hljs-keyword">in</span> xs:     <span class="hljs-comment"># element i goes to worker i mod n; all input is sent before any is read</span>
+    ps[i <span class="hljs-keyword">mod</span> n].inputStream.writeLine $(%*{<span class="hljs-string">&quot;i&quot;</span>: i, <span class="hljs-string">&quot;x&quot;</span>: %x, <span class="hljs-string">&quot;seed&quot;</span>: seed})
+  <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> ps: p.inputStream.close
+  <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> ps:
+    <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> p.outputStream.lines:
+      <span class="hljs-keyword">let</span> j = parseJson(line)
+      <span class="hljs-keyword">let</span> i = j[<span class="hljs-string">&quot;i&quot;</span>].getInt
+      outs[i].log = j[<span class="hljs-string">&quot;log&quot;</span>].to(<span class="hljs-built_in">seq</span>[<span class="hljs-built_in">string</span>])
+      outs[i].rngUsed = j[<span class="hljs-string">&quot;rng&quot;</span>].getBool
+      <span class="hljs-keyword">if</span> j.hasKey(<span class="hljs-string">&quot;err&quot;</span>):
+        (outs[i].errName, outs[i].errMsg) = (j[<span class="hljs-string">&quot;err&quot;</span>][<span class="hljs-string">&quot;name&quot;</span>].getStr, j[<span class="hljs-string">&quot;err&quot;</span>][<span class="hljs-string">&quot;msg&quot;</span>].getStr)
+      <span class="hljs-keyword">else</span>:
+        outs[i].value = j[<span class="hljs-string">&quot;v&quot;</span>].to(<span class="hljs-type">U</span>)
+      <span class="hljs-keyword">if</span> progress: tick()
+    <span class="hljs-keyword">discard</span> p.waitForExit
+    p.close
+
+<span class="hljs-comment"># ------------------------------------------------------------------------------- the map</span>
+<span class="hljs-keyword">proc</span> relayError(name, msg: <span class="hljs-built_in">string</span>) =
+  <span class="hljs-comment">## Raise again, on the main thread, an exception a task raised. The object itself can't cross</span>
+  <span class="hljs-comment">## (under ORC a ref belongs to the thread that made it), so fv makes a new one of the same</span>
+  <span class="hljs-comment">## type for the common types of the standard library, and a RelayedError for the others.</span>
+  <span class="hljs-keyword">template</span> re(<span class="hljs-type">T</span>: typedesc) = <span class="hljs-keyword">raise</span> newException(<span class="hljs-type">T</span>, msg)
+  <span class="hljs-keyword">case</span> name
+  <span class="hljs-keyword">of</span> <span class="hljs-string">&quot;ValueError&quot;</span>: re <span class="hljs-type">ValueError</span>
+  <span class="hljs-keyword">of</span> <span class="hljs-string">&quot;KeyError&quot;</span>: re <span class="hljs-type">KeyError</span>
+  <span class="hljs-keyword">of</span> <span class="hljs-string">&quot;IOError&quot;</span>: re <span class="hljs-type">IOError</span>
+  <span class="hljs-keyword">of</span> <span class="hljs-string">&quot;OSError&quot;</span>: re <span class="hljs-type">OSError</span>
+  <span class="hljs-keyword">of</span> <span class="hljs-string">&quot;ArithmeticError&quot;</span>, <span class="hljs-string">&quot;DivByZeroDefect&quot;</span>: re <span class="hljs-type">ArithmeticError</span>
+  <span class="hljs-keyword">else</span>:
+    <span class="hljs-keyword">let</span> e = newException(<span class="hljs-type">RelayedError</span>, <span class="hljs-string">&quot;[&quot;</span> &amp; name &amp; <span class="hljs-string">&quot;] &quot;</span> &amp; msg)
+    e.origName = name
+    <span class="hljs-keyword">raise</span> e
+
+<span class="hljs-keyword">proc</span> runChunk[<span class="hljs-type">T</span>, <span class="hljs-type">U</span>](f: <span class="hljs-keyword">proc</span>(x: <span class="hljs-type">T</span>): <span class="hljs-type">U</span> {.nimcall, gcsafe.}; xs: <span class="hljs-keyword">ptr</span> <span class="hljs-type">UncheckedArray</span>[<span class="hljs-type">T</span>];
+                    outs: <span class="hljs-keyword">ptr</span> <span class="hljs-type">UncheckedArray</span>[<span class="hljs-type">Outcome</span>[<span class="hljs-type">U</span>]]; lo, hi, step, seed: <span class="hljs-built_in">int</span>; progress: <span class="hljs-built_in">bool</span>) {.gcsafe.} =
+  <span class="hljs-keyword">var</span> i = lo
+  <span class="hljs-keyword">while</span> i &lt; hi:
+    runOne(f, xs[i], i, seed, outs[i])
+    <span class="hljs-keyword">if</span> progress: tick()
+    i += step
+
+<span class="hljs-keyword">proc</span> futureMap*[<span class="hljs-type">T</span>, <span class="hljs-type">U</span>](xs: openArray[<span class="hljs-type">T</span>]; f: <span class="hljs-keyword">proc</span>(x: <span class="hljs-type">T</span>): <span class="hljs-type">U</span> {.nimcall, gcsafe.};
+                      seed = -<span class="hljs-number">1</span>; progress = <span class="hljs-literal">false</span>): <span class="hljs-built_in">seq</span>[<span class="hljs-type">U</span>] =
+  <span class="hljs-comment">## `xs.map(f)`, evaluated by the current plan. Output from `say` is relayed in element order;</span>
+  <span class="hljs-comment">## the first exception (in element order) is raised again here; with `seed` set, the random</span>
+  <span class="hljs-comment">## numbers of element i depend only on (seed, i), so every plan gives the same result.</span>
+  <span class="hljs-keyword">var</span> outs = newSeq[<span class="hljs-type">Outcome</span>[<span class="hljs-type">U</span>]](xs.len)
+  progressDone.store(<span class="hljs-number">0</span>)
+  progressTotal = <span class="hljs-keyword">if</span> progress: xs.len <span class="hljs-keyword">else</span>: <span class="hljs-number">0</span>
+  <span class="hljs-keyword">let</span> p = plan()
+  <span class="hljs-keyword">if</span> xs.len &gt; <span class="hljs-number">0</span>:
+    <span class="hljs-keyword">case</span> p.kind
+    <span class="hljs-keyword">of</span> bkSequential:
+      runChunk(f, <span class="hljs-keyword">cast</span>[<span class="hljs-keyword">ptr</span> <span class="hljs-type">UncheckedArray</span>[<span class="hljs-type">T</span>]](unsafeAddr xs[<span class="hljs-number">0</span>]), <span class="hljs-keyword">cast</span>[<span class="hljs-keyword">ptr</span> <span class="hljs-type">UncheckedArray</span>[<span class="hljs-type">Outcome</span>[<span class="hljs-type">U</span>]]](<span class="hljs-keyword">addr</span> outs[<span class="hljs-number">0</span>]),
+               <span class="hljs-number">0</span>, xs.len, <span class="hljs-number">1</span>, seed, progress)
+    <span class="hljs-keyword">of</span> bkThreads:
+      <span class="hljs-keyword">var</span> m = createMaster()
+      <span class="hljs-keyword">let</span> px = <span class="hljs-keyword">cast</span>[<span class="hljs-keyword">ptr</span> <span class="hljs-type">UncheckedArray</span>[<span class="hljs-type">T</span>]](unsafeAddr xs[<span class="hljs-number">0</span>])
+      <span class="hljs-keyword">let</span> po = <span class="hljs-keyword">cast</span>[<span class="hljs-keyword">ptr</span> <span class="hljs-type">UncheckedArray</span>[<span class="hljs-type">Outcome</span>[<span class="hljs-type">U</span>]]](<span class="hljs-keyword">addr</span> outs[<span class="hljs-number">0</span>])
+      m.awaitAll:
+        <span class="hljs-keyword">for</span> w <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; min(p.workers, xs.len):     <span class="hljs-comment"># worker w takes elements w, w+n, w+2n, ...</span>
+          m.spawn runChunk(f, px, po, w, xs.len, min(p.workers, xs.len), seed, progress)
+    <span class="hljs-keyword">of</span> bkProcesses:
+      mapProcesses(xs, f, seed, p.workers, progress, outs)
+  progressTotal = <span class="hljs-number">0</span>
+  <span class="hljs-literal">result</span> = newSeq[<span class="hljs-type">U</span>](xs.len)
+  <span class="hljs-keyword">var</span> warned = <span class="hljs-literal">false</span>
+  <span class="hljs-keyword">for</span> i <span class="hljs-keyword">in</span> <span class="hljs-number">0</span> ..&lt; outs.len:          <span class="hljs-comment"># relay, in order, as if it had run sequentially</span>
+    <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> outs[i].log: <span class="hljs-keyword">echo</span> line
+    <span class="hljs-keyword">if</span> outs[i].errName.len &gt; <span class="hljs-number">0</span>: relayError(outs[i].errName, outs[i].errMsg)
+    <span class="hljs-keyword">if</span> outs[i].rngUsed <span class="hljs-keyword">and</span> seed &lt; <span class="hljs-number">0</span> <span class="hljs-keyword">and</span> <span class="hljs-keyword">not</span> warned:
+      <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;Warning: UNRELIABLE VALUE: element &quot;</span>, i + <span class="hljs-number">1</span>, <span class="hljs-string">&quot; used random numbers without a seed. &quot;</span>,
+           <span class="hljs-string">&quot;Pass a seed to get the same numbers on every plan.&quot;</span>
+      warned = <span class="hljs-literal">true</span>
+    <span class="hljs-literal">result</span>[i] = move outs[i].value
+
+<span class="hljs-comment"># ------------------------------------------------------------------------------- futurize</span>
+<span class="hljs-keyword">proc</span> rewrite(call: <span class="hljs-type">NimNode</span>; opts: <span class="hljs-built_in">seq</span>[<span class="hljs-type">NimNode</span>]): <span class="hljs-type">NimNode</span> =
+  <span class="hljs-comment">## The transpiler: `map(xs, f)` and `xs.mapIt(expr)`, from std/sequtils, become `futureMap`.</span>
+  <span class="hljs-keyword">let</span> n = <span class="hljs-keyword">if</span> call.kind <span class="hljs-keyword">in</span> {nnkPar, nnkStmtListExpr} <span class="hljs-keyword">and</span> call.len == <span class="hljs-number">1</span>: call[<span class="hljs-number">0</span>] <span class="hljs-keyword">else</span>: call
+  <span class="hljs-keyword">var</span> fn, xs, arg: <span class="hljs-type">NimNode</span>
+  <span class="hljs-keyword">if</span> n.kind <span class="hljs-keyword">in</span> nnkCallKinds <span class="hljs-keyword">and</span> n.len == <span class="hljs-number">2</span> <span class="hljs-keyword">and</span> n[<span class="hljs-number">0</span>].kind == nnkDotExpr:   <span class="hljs-comment"># xs.map(f)</span>
+    (fn, xs, arg) = (n[<span class="hljs-number">0</span>][<span class="hljs-number">1</span>], n[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>], n[<span class="hljs-number">1</span>])
+  <span class="hljs-keyword">elif</span> n.kind <span class="hljs-keyword">in</span> nnkCallKinds <span class="hljs-keyword">and</span> n.len == <span class="hljs-number">3</span>:                            <span class="hljs-comment"># map(xs, f)</span>
+    (fn, xs, arg) = (n[<span class="hljs-number">0</span>], n[<span class="hljs-number">1</span>], n[<span class="hljs-number">2</span>])
+  <span class="hljs-keyword">else</span>:
+    error(<span class="hljs-string">&quot;futurize: expected map(xs, f) or xs.mapIt(expr), got &quot;</span> &amp; n.repr, n)
+  <span class="hljs-keyword">if</span> fn.eqIdent(<span class="hljs-string">&quot;map&quot;</span>):
+    <span class="hljs-literal">result</span> = newCall(<span class="hljs-string">bindSym&quot;futureMap&quot;</span>, xs, arg)
+  <span class="hljs-keyword">elif</span> fn.eqIdent(<span class="hljs-string">&quot;mapIt&quot;</span>):
+    <span class="hljs-keyword">let</span> it = <span class="hljs-string">ident&quot;it&quot;</span>
+    <span class="hljs-keyword">let</span> anon = genSym(nskProc, <span class="hljs-string">&quot;fvIt&quot;</span>)
+    <span class="hljs-literal">result</span> = quote <span class="hljs-keyword">do</span>:
+      <span class="hljs-keyword">block</span>:
+        <span class="hljs-keyword">proc</span> `anon`(`it`: typeof(`xs`[<span class="hljs-number">0</span>])): <span class="hljs-built_in">auto</span> {.nimcall, gcsafe.} = `arg`
+        futureMap(`xs`, `anon`)
+    <span class="hljs-keyword">let</span> callNode = <span class="hljs-literal">result</span>[<span class="hljs-number">1</span>][<span class="hljs-number">1</span>]
+    <span class="hljs-keyword">for</span> o <span class="hljs-keyword">in</span> opts: callNode.add o
+    <span class="hljs-keyword">return</span>
+  <span class="hljs-keyword">else</span>:
+    error(<span class="hljs-string">&quot;futurize: no transpiler for &quot;</span> &amp; fn.repr &amp; <span class="hljs-string">&quot; (known: map, mapIt)&quot;</span>, n)
+  <span class="hljs-keyword">for</span> o <span class="hljs-keyword">in</span> opts: <span class="hljs-literal">result</span>.add o
+
+<span class="hljs-keyword">macro</span> futurize*(call: <span class="hljs-built_in">untyped</span>; opts: <span class="hljs-built_in">varargs</span>[<span class="hljs-built_in">untyped</span>]): <span class="hljs-built_in">untyped</span> =
+  <span class="hljs-comment">## `xs.map(f).futurize()`, `xs.mapIt(it * it).futurize(seed = 1)`: run a sequential map with</span>
+  <span class="hljs-comment">## the current plan. Compile with `-d:futurizeOff` and every futurize is the plain map again.</span>
+  <span class="hljs-keyword">when</span> <span class="hljs-keyword">defined</span>(futurizeOff):
+    <span class="hljs-literal">result</span> = call
+  <span class="hljs-keyword">else</span>:
+    <span class="hljs-literal">result</span> = rewrite(call, toSeq(opts))
+
+<span class="hljs-keyword">macro</span> transpiled*(call: <span class="hljs-built_in">untyped</span>; opts: <span class="hljs-built_in">varargs</span>[<span class="hljs-built_in">untyped</span>]): <span class="hljs-built_in">string</span> =
+  <span class="hljs-comment">## What futurize turns `call` into, as source (R: `futurize(eval = FALSE)`).</span>
+  newLit(rewrite(call, toSeq(opts)).repr)
+
+<span class="hljs-keyword">macro</span> `|&gt;`*(lhs, rhs: <span class="hljs-built_in">untyped</span>): <span class="hljs-built_in">untyped</span> =
+  <span class="hljs-comment">## R's native pipe: `x |&gt; f(y)` is `f(x, y)`. So `xs.mapIt(it * 2) |&gt; futurize(seed = 1)` reads</span>
+  <span class="hljs-comment">## like the R original, and the map reaches the macro unevaluated, as R's `substitute()` sees it.</span>
+  <span class="hljs-keyword">if</span> rhs.kind <span class="hljs-keyword">in</span> nnkCallKinds:
+    <span class="hljs-literal">result</span> = rhs.copyNimTree
+    <span class="hljs-literal">result</span>.insert(<span class="hljs-number">1</span>, lhs)
+  <span class="hljs-keyword">else</span>:
+    <span class="hljs-literal">result</span> = newCall(rhs, lhs)</code></pre></details>
+<details class="source"><summary><code>examples/tasks.nim</code> <span class="src-lines">28 lines</span></summary><pre><code class="hljs nim"><span class="hljs-comment">## The tasks of the page: plain Nim procs, registered so that worker processes can run them too.</span>
+<span class="hljs-keyword">import</span> std/[math, os]
+<span class="hljs-keyword">import</span> ../fv
+
+<span class="hljs-keyword">proc</span> slowSquare*(x: <span class="hljs-built_in">int</span>): <span class="hljs-built_in">int</span> =
+  <span class="hljs-comment">## The paper's slow_fcn: 50 ms of &quot;work&quot;, then x².</span>
+  sleep <span class="hljs-number">50</span>
+  x * x
+
+<span class="hljs-keyword">proc</span> chatty*(x: <span class="hljs-built_in">int</span>): <span class="hljs-built_in">float</span> =
+  <span class="hljs-comment">## Talks while it works: the output is relayed, in order, to the main thread.</span>
+  say <span class="hljs-string">&quot;x = &quot;</span>, x
+  sqrt(x.<span class="hljs-built_in">float</span>)
+
+<span class="hljs-keyword">proc</span> noisy*(x: <span class="hljs-built_in">int</span>): <span class="hljs-built_in">float</span> =
+  <span class="hljs-comment">## Uses random numbers: the mean of x draws from a normal distribution.</span>
+  <span class="hljs-keyword">for</span> _ <span class="hljs-keyword">in</span> <span class="hljs-number">1</span> .. x: <span class="hljs-literal">result</span> += gauss()
+  <span class="hljs-literal">result</span> /= x.<span class="hljs-built_in">float</span>
+
+<span class="hljs-keyword">proc</span> fragile*(x: <span class="hljs-built_in">int</span>): <span class="hljs-built_in">int</span> =
+  <span class="hljs-comment">## Fails on 3.</span>
+  <span class="hljs-keyword">if</span> x == <span class="hljs-number">3</span>: <span class="hljs-keyword">raise</span> newException(<span class="hljs-type">ValueError</span>, <span class="hljs-string">&quot;I don't like 3&quot;</span>)
+  x * <span class="hljs-number">10</span>
+
+registerTask slowSquare
+registerTask chatty
+registerTask noisy
+registerTask fragile</code></pre></details>
+<hr />
+<p>Sources: Henrik Bengtsson, <a href="https://arxiv.org/html/2601.17578v1"><em>A Unified Approach to Concurrent, Parallel Map-Reduce in R using
+Futures</em></a> (arXiv 2601.17578, January 2026) and <a href="https://doi.org/10.32614/RJ-2021-048"><em>A Unifying Framework for Parallel and
+Distributed Processing in R using Futures</em></a> (The R Journal, 2021); the
+<a href="https://github.com/futureverse/future">future</a> and <a href="https://github.com/futureverse/futurize">futurize</a> sources and vignettes; the
+<a href="https://www.futureverse.org/">futureverse site</a>. Nim: <a href="https://github.com/Araq/malebolgia">malebolgia</a>, <a href="https://github.com/status-im/nim-taskpools">taskpools</a>,
+Nim 2.2.4. Page made with <a href="https://github.com/pietroppeter/nimib">nimib</a>, tables with
+<a href="https://pietroppeter.github.io/tabelline/">tabelline</a>.</p>
+</main>
+<footer>
+<div class="nb-box">
+ <span><span class="nb-small">made with <a href="https://pietroppeter.github.io/nimib/">nimib 🐳</a></span></span>
+ <span></span>
+ <span><button class="nb-small" id="show" onclick="toggleSourceDisplay()">Show Source</button></span>
+</div>
+</footer>
+<section id="source">
+<pre><code class="nohighlight nim hljs"><span class="hljs-comment">## The cloakroom of the future: Henrik Bengtsson's R futureverse, explained to a Nim programmer,</span>
+<span class="hljs-comment">## by building a toy version of it (fv.nim) and running it on this page.</span>
+<span class="hljs-comment">## Build: sh deps.sh &amp;&amp; nim r index.nim (from this folder; writes ../index.html). Needs libpcre3.</span>
+<span class="hljs-keyword">import</span> std/[os, strformat, strutils, sequtils, monotimes, times, osproc]
+<span class="hljs-keyword">import</span> fv, examples/tasks
+fvServe()    <span class="hljs-comment"># when this page is started as a worker process of the processes plan, serve and quit</span>
+
+<span class="hljs-keyword">import</span> nimib
+<span class="hljs-keyword">import</span> tabelline, tabelline/nimib
+<span class="hljs-keyword">import</span> malebolgia, taskpools
+<span class="hljs-keyword">import</span> std/asyncdispatch
+<span class="hljs-keyword">import</span> lib/[style, blocks]
+<span class="hljs-keyword">import</span> review          <span class="hljs-comment"># tabelline's review mode, from claude-artifacts shared/review (unchanged copy)</span>
+
+nbInit
+nb.doc.filename = currentSourcePath().parentDir.parentDir / <span class="hljs-string">&quot;index.html&quot;</span>
+nb.title = <span class="hljs-string">&quot;The cloakroom of the future: R's futureverse, explained in Nim&quot;</span>
+nb.useExplainerStyle
+nbReview(tpage = <span class="hljs-string">&quot;futureverse-nim&quot;</span>, tsource = <span class="hljs-string">&quot;futureverse-nim/src/index.nim&quot;</span>)
+
+<span class="hljs-keyword">const</span>
+  paper = <span class="hljs-string">&quot;https://arxiv.org/html/2601.17578v1&quot;</span>
+  rjournal = <span class="hljs-string">&quot;https://doi.org/10.32614/RJ-2021-048&quot;</span>
+  site = <span class="hljs-string">&quot;https://www.futureverse.org/&quot;</span>
+  futureRepo = <span class="hljs-string">&quot;https://github.com/futureverse/future&quot;</span>
+  futurizeRepo = <span class="hljs-string">&quot;https://github.com/futureverse/futurize&quot;</span>
+  malebolgiaRepo = <span class="hljs-string">&quot;https://github.com/Araq/malebolgia&quot;</span>
+  taskpoolsRepo = <span class="hljs-string">&quot;https://github.com/status-im/nim-taskpools&quot;</span>
+  fvSrc = <span class="hljs-string">&quot;#fv-source&quot;</span>
+  checkArgs = <span class="hljs-string">&quot;-p:&quot;</span> &amp; quoteShell(currentSourcePath().parentDir) &amp; <span class="hljs-string">&quot; -p:&quot;</span> &amp;
+    quoteShell(getEnv(<span class="hljs-string">&quot;FV_DEPS&quot;</span>, currentSourcePath().parentDir / <span class="hljs-string">&quot;deps&quot;</span>) / <span class="hljs-string">&quot;malebolgia&quot;</span> / <span class="hljs-string">&quot;src&quot;</span>)
+
+<span class="hljs-keyword">let</span> fvLines = lineCount(<span class="hljs-string">&quot;fv.nim&quot;</span>)
+
+nbText: <span class="hljs-string">&quot;# The cloakroom of the future&quot;</span>
+
+nbPrompt(<span class="hljs-string">&quot;Pietro&quot;</span>, <span class="hljs-string">&quot;25 Nov 2026&quot;</span>, &amp;<span class="hljs-string">&quot;&quot;&quot;
+At compute Paris I have met Henrik, author of a popular library for parallelizing R code. Can you
+explain some of the concepts about that, when it makes sense using Nim? I know only the basics of
+R, I know it has a functional connection but not more than that. Here are a couple of references
+{paper} {site} build and merge an explainer as usual with nimib and publish on Claude artifacts.
+Be playful and go wild!
+&quot;&quot;&quot;</span>)
+
+nbLede: &amp;<span class="hljs-string">&quot;&quot;&quot;
+Henrik Bengtsson's **futureverse** lets an R programmer write `lapply(xs, slow)`, add one word,
+and have it run on all the cores of a laptop, on a few machines, or on a supercomputer, with
+nothing else changed. This page explains the ideas behind it for someone who knows Nim and only a
+little R. The best way to understand a design is to build it, so we build a toy futureverse
+in Nim ({fvLines} lines), and every example on this page runs on it when the page is built.
+&quot;&quot;&quot;</span>
+
+nbTldr: &amp;<span class="hljs-string">&quot;&quot;&quot;
+- **A future** is a coat-check ticket: you hand in some work, get a ticket at once, and collect
+  the value later. Nim has the same idea in [taskpools]({taskpoolsRepo}) (`spawn`/`sync`) and
+  in `std/asyncdispatch` (for waiting rather than computing).
+- **The big idea** is a split of roles: the *developer* says **what** may run concurrently, the
+  *end-user* says **how and where** with `plan()`. The code never names a backend.
+- **The hard part** is making parallel code behave like sequential code: the same random numbers
+  on any number of workers, output and errors arriving in order, progress bars. Our toy does all
+  of it on threads (via [malebolgia]({malebolgiaRepo})) and on worker processes.
+- **futurize()**, the newest piece, rewrites a plain map into a parallel one. In Nim that is
+  just a macro, and we write it: `xs.mapIt(it * it) |&gt; futurize(seed = 1)`.
+- **In Nim** you need all this less often (compiled loops are fast, and threads share memory),
+  but the split of roles, the seeds and the relaying are worth borrowing.
+&quot;&quot;&quot;</span>
+
+<span class="hljs-comment"># ============================================================================================ 0</span>
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+## Just enough R
+
+R is a language for statistics. Two things about it matter here. It is **functional**: functions
+are values, and the usual way to loop is to hand a function to a *map*, `lapply(xs, f)`, which
+applies `f` to every element of `xs` and gives back the list of results. And an R session runs
+your code on **one thread**: to use more cores, R starts more R processes and ships the work to
+them. The little R this page uses, next to its Nim:
+&quot;&quot;&quot;</span>
+
+nbTable toTableData(@[
+  (r: <span class="hljs-string">&quot;`xs &lt;- 1:8`&quot;</span>, nim: <span class="hljs-string">&quot;`let xs = toSeq(1..8)`&quot;</span>, what: <span class="hljs-string">&quot;a vector of 1 to 8&quot;</span>),
+  (r: <span class="hljs-string">&quot;`f &lt;- function(x) x^2`&quot;</span>, nim: <span class="hljs-string">&quot;`proc f(x: int): int = x*x`&quot;</span>, what: <span class="hljs-string">&quot;a function is a value&quot;</span>),
+  (r: <span class="hljs-string">&quot;`lapply(xs, f)`&quot;</span>, nim: <span class="hljs-string">&quot;`xs.map(f)`&quot;</span>, what: <span class="hljs-string">&quot;map f over xs&quot;</span>),
+  (r: <span class="hljs-string">&quot;`purrr::map(xs, f)`&quot;</span>, nim: <span class="hljs-string">&quot;`xs.map(f)`&quot;</span>, what: <span class="hljs-string">&quot;the same, from the tidyverse&quot;</span>),
+  (r: <span class="hljs-string">&quot;`xs |&gt; f()`&quot;</span>, nim: <span class="hljs-string">&quot;`xs.f()`&quot;</span>, what: <span class="hljs-string">&quot;the pipe: `x |&gt; f(y)` is `f(x, y)`&quot;</span>),
+  (r: <span class="hljs-string">&quot;`message(</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">hi</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">)`&quot;</span>, nim: <span class="hljs-string">&quot;`stderr.writeLine </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">hi</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">`&quot;</span>, what: <span class="hljs-string">&quot;a message, which R can catch&quot;</span>),
+  (r: <span class="hljs-string">&quot;`set.seed(42)`&quot;</span>, nim: <span class="hljs-string">&quot;`randomize(42)`&quot;</span>, what: <span class="hljs-string">&quot;seed the random numbers&quot;</span>),
+]), rownameCol = <span class="hljs-string">&quot;r&quot;</span>:
+  tabHeader <span class="hljs-string">&quot;R and Nim, side by side&quot;</span>
+  colsLabel:
+    r: <span class="hljs-string">&quot;R&quot;</span>
+    nim: <span class="hljs-string">&quot;Nim&quot;</span>
+    what: <span class="hljs-string">&quot;what it does&quot;</span>
+  fmtMarkdown [<span class="hljs-string">&quot;r&quot;</span>, <span class="hljs-string">&quot;nim&quot;</span>, <span class="hljs-string">&quot;what&quot;</span>]
+
+nbNote(nkR, &amp;<span class="hljs-string">&quot;&quot;&quot;
+The futureverse is a family of packages: **future** (the core, 2015), **future.apply**
+(parallel `lapply` and friends), **furrr** (parallel purrr, by Davis Vaughan), **doFuture**
+(for `foreach`), **progressr** (progress bars), **parallelly** (how many cores may I use?),
+backends such as **future.mirai** and **future.batchtools**, and since this year
+**futurize**, the subject of the [paper Pietro sent]({paper}). The design is in the
+[R Journal paper of 2021]({rjournal}).
+&quot;&quot;&quot;</span>)
+
+<span class="hljs-comment"># ============================================================================================ 1</span>
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+## A future is a coat-check ticket
+
+At a Paris cloakroom you hand over your coat, get a numbered ticket at once, and go to the
+talk. Later you hand back the ticket and get your coat. A **future** is that ticket, for a
+computation: creating it is quick, the work happens somewhere else, and asking for its **value**
+waits only if the work is not done yet.
+&quot;&quot;&quot;</span>
+
+nbSteps(<span class="hljs-string">&quot;The three verbs of the future package: `future()`, `resolved()`, `value()`.&quot;</span>, @[
+  (icon: <span class="hljs-string">&quot;🧥&quot;</span>, title: <span class="hljs-string">&quot;`f &lt;- future(expr)`&quot;</span>, what: <span class="hljs-string">&quot;hand in the work, get a ticket at once&quot;</span>),
+  (icon: <span class="hljs-string">&quot;🎟️&quot;</span>, title: <span class="hljs-string">&quot;`resolved(f)`&quot;</span>, what: <span class="hljs-string">&quot;peek: is my coat ready? (never waits)&quot;</span>),
+  (icon: <span class="hljs-string">&quot;🧥&quot;</span>, title: <span class="hljs-string">&quot;`value(f)`&quot;</span>, what: <span class="hljs-string">&quot;collect it, waiting if needed; errors come back here&quot;</span>),
+])
+
+nbR(<span class="hljs-string">&quot;&quot;&quot;
+library(future)
+plan(multisession)               # more on this in N° 2
+a &lt;- future({ Sys.sleep(1); 3^2 })
+b &lt;- future({ Sys.sleep(1); 4^2 })
+value(a) + value(b)              # about 1 second, not 2
+&quot;&quot;&quot;</span>, <span class="hljs-string">&quot;[1] 25&quot;</span>)
+
+nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
+Nim has futures too. With [taskpools]({taskpoolsRepo}) (Status's thread pool) the ticket is
+a `Flowvar` and `sync` collects it. This runs as the page is built, on 4 threads:
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">proc</span> slowCube(x: <span class="hljs-built_in">int</span>): <span class="hljs-built_in">int</span> =
+    sleep <span class="hljs-number">100</span>
+    x * x * x
+
+  <span class="hljs-keyword">var</span> tp = <span class="hljs-type">Taskpool</span>.<span class="hljs-keyword">new</span>(numThreads = <span class="hljs-number">4</span>)
+  <span class="hljs-keyword">let</span> t0 = getMonoTime()
+  <span class="hljs-keyword">let</span> a = tp.spawn slowCube(<span class="hljs-number">3</span>)       <span class="hljs-comment"># a ticket, at once</span>
+  <span class="hljs-keyword">let</span> b = tp.spawn slowCube(<span class="hljs-number">4</span>)
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;two tickets after &quot;</span>, (getMonoTime() - t0).inMilliseconds, <span class="hljs-string">&quot; ms&quot;</span>
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;a + b = &quot;</span>, sync(a) + sync(b), <span class="hljs-string">&quot; after &quot;</span>, (getMonoTime() - t0).inMilliseconds, <span class="hljs-string">&quot; ms&quot;</span>
+  tp.shutdown()
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+And Nim's standard library has `Future[T]` in `std/asyncdispatch`. Same ticket, different
+cloakroom: these futures run on **one** thread, and are for *waiting* (on the network, on a
+timer) rather than for computing. Three waits of 300, 100 and 200 ms take 300 ms together:
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">let</span> s0 = getMonoTime()
+  <span class="hljs-keyword">proc</span> fetch(name: <span class="hljs-built_in">string</span>; ms: <span class="hljs-built_in">int</span>): <span class="hljs-type">Future</span>[<span class="hljs-built_in">string</span>] {.async.} =
+    <span class="hljs-keyword">await</span> sleepAsync(ms)             <span class="hljs-comment"># waiting, not working: the thread is free meanwhile</span>
+    <span class="hljs-keyword">return</span> name &amp; <span class="hljs-string">&quot; ready after &quot;</span> &amp; $(getMonoTime() - s0).inMilliseconds &amp; <span class="hljs-string">&quot; ms&quot;</span>
+
+  <span class="hljs-keyword">for</span> s <span class="hljs-keyword">in</span> waitFor all(@[fetch(<span class="hljs-string">&quot;coat&quot;</span>, <span class="hljs-number">300</span>), fetch(<span class="hljs-string">&quot;hat&quot;</span>, <span class="hljs-number">100</span>), fetch(<span class="hljs-string">&quot;scarf&quot;</span>, <span class="hljs-number">200</span>)]):
+    <span class="hljs-keyword">echo</span> s
+
+nbNote(nkAside, &amp;<span class="hljs-string">&quot;&quot;&quot;
+Henrik's paper makes this distinction in its first footnote: **concurrent** describes the logical
+structure (&quot;these can happen in any order&quot;), **parallel** the physical execution (&quot;these happen
+at the same time, on different cores&quot;). A future is a concurrency idea; the backend decides
+whether it becomes parallelism. Futures themselves are old: Baker and Hewitt named them in 1977.
+&quot;&quot;&quot;</span>)
+
+<span class="hljs-comment"># ============================================================================================ 2</span>
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+## plan(): who stands behind the counter
+
+Here is the idea that makes the futureverse more than a thread pool. A package author writing
+`future()` or a parallel map **never says where it runs**. The person *using* the code picks
+that, once, with `plan()`:
+&quot;&quot;&quot;</span>
+
+nbR(<span class="hljs-string">&quot;&quot;&quot;
+plan(sequential)                              # one attendant: no parallelism (the default)
+plan(multisession, workers = 4)               # 4 R processes on this machine
+plan(multicore)                               # forked R processes (Linux, macOS)
+plan(cluster, workers = c(&quot;n1&quot;, &quot;n2&quot;))        # R processes on other machines, over SSH
+plan(future.mirai::mirai_multisession)        # mirai's fast workers
+plan(future.batchtools::batchtools_slurm)     # jobs on an HPC scheduler
+&quot;&quot;&quot;</span>)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+The same `lapply(...) |&gt; futurize()` then runs on a laptop, on a lab's machines, or as Slurm jobs
+on a cluster. The paper calls this **separation of concerns**: the developer decides *what*,
+the end-user decides *how and where*. A rule follows from it: **packages must never call
+`plan()`**, because that would take the choice away from the user (the paper found CRAN packages
+that do it anyway).
+
+Our toy, `fv`, has three plans. A task is a plain Nim proc; here are the four the page uses,
+from `examples/tasks.nim`:
+&quot;&quot;&quot;</span>
+
+nbSnippet(<span class="hljs-string">&quot;examples/tasks.nim&quot;</span>, [<span class="hljs-string">&quot;proc slowSquare*&quot;</span>, <span class="hljs-string">&quot;proc chatty*&quot;</span>, <span class="hljs-string">&quot;proc noisy*&quot;</span>, <span class="hljs-string">&quot;proc fragile*&quot;</span>])
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+`futureMap(xs, f)` is the parallel map (R's `future_lapply`). It runs on whatever plan is
+current. Eight elements of 50 ms each:
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">let</span> xs = toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">8</span>)
+  <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> [sequential(), threads(<span class="hljs-number">4</span>), processes(<span class="hljs-number">4</span>)]:
+    plan p
+    <span class="hljs-keyword">let</span> t = getMonoTime()
+    <span class="hljs-keyword">let</span> ys = futureMap(xs, slowSquare)
+    <span class="hljs-keyword">echo</span> plan(), <span class="hljs-string">&quot;: &quot;</span>, ys, <span class="hljs-string">&quot; in &quot;</span>, (getMonoTime() - t).inMilliseconds, <span class="hljs-string">&quot; ms&quot;</span>
+
+nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
+Same code, same answer, a quarter of the time. `processes(4)` starts **four copies of this very
+program**, which is the Nim version of R's `multisession`. It is not much slower than threads
+here, because starting a compiled program takes a millisecond or two, not the second or so an R
+session takes. How it works: the program is started again with `--fv-worker slowSquare`, and
+`fvServe()`, the first line of the program, turns it into a worker that reads elements as JSON
+lines on stdin and writes results on stdout.
+&quot;&quot;&quot;</span>
+
+nbNote(nkNim, &amp;<span class="hljs-string">&quot;&quot;&quot;
+**R ships code; Nim ships only data.** An R worker is an empty R session, so the future package
+sends it the expression, the functions it calls and the data they use. A Nim worker is the same
+compiled binary, so it already has all the code: only the name of the task and the elements
+travel. That is also why a task must be **registered** (`registerTask slowSquare`): the worker
+looks it up by name.
+&quot;&quot;&quot;</span>)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+How many workers? R's **parallelly** answers with `availableCores()`, which is not the number of
+cores of the machine but the number *you may use*: it reads cgroup quotas (containers), HPC
+scheduler allocations and a list of environment variables, so a job does not grab all 128
+cores of a shared server. `fv` has a tiny version of it:
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;countProcessors() = &quot;</span>, countProcessors(), <span class="hljs-string">&quot;  (the machine)&quot;</span>
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;availableCores()  = &quot;</span>, availableCores(), <span class="hljs-string">&quot;  (cgroup quota and FV_AVAILABLECORES)&quot;</span>
+
+nbNote(nkAside, <span class="hljs-string">&quot;&quot;&quot;
+On this build machine the two agree. In a container limited to 2 CPUs, `countProcessors()`
+would still say the host's count and every thread pool sized from it would oversubscribe.
+`std/cpuinfo` could grow an `availableCores` that reads the cgroup quota: a small, useful
+Nim PR.
+&quot;&quot;&quot;</span>)
+
+<span class="hljs-comment"># ============================================================================================ 3</span>
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+## Globals: what is in the coat pockets
+
+Look at a task that uses a variable it did not get as an argument:
+&quot;&quot;&quot;</span>
+
+nbR(<span class="hljs-string">&quot;&quot;&quot;
+rate &lt;- 1.2
+f &lt;- function(x) x * rate          # 'rate' is a global of f
+ys &lt;- lapply(1:4, f) |&gt; futurize() # the worker must get 'rate' too
+&quot;&quot;&quot;</span>)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+A worker process does not have `rate`. So before sending a future, the future package reads the
+code of the expression (static analysis, with the **globals** package), finds every name it uses
+that is not defined inside it, and ships those values along: the coat *and* what is in its
+pockets. This is clever and mostly invisible, and it is where most surprises live (an object
+that cannot be copied to another process, like a database connection, breaks).
+
+In Nim, a thread backend does not ship anything: threads share memory. The danger is the
+opposite one, two threads touching the same data. Nim's compiler checks it: a proc run on
+another thread must be `gcsafe`, so it may not read a global that holds garbage-collected
+memory. This snippet does not compile, and the compiler names the global:
+&quot;&quot;&quot;</span>
+
+nbCompileError(<span class="hljs-string">&quot;&quot;&quot;
+var rates = @[1.0, 1.2, 1.5]       # a global seq: memory owned by the main thread
+
+proc f(x: int): float {.gcsafe.} =
+  x.float * rates[x mod 3]
+&quot;&quot;&quot;</span>, targs = checkArgs)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+So &quot;detect the globals&quot; is a job of the Nim compiler, not of a library, and it is done before
+the program runs instead of while it runs. The fix is the one R does for you: pass the data as
+an argument (or make it a `const`, which is compiled in). The processes plan sits in between:
+a worker process re-runs the program's top-level code up to `fvServe()`, so a global computed
+there exists in the worker too, recomputed, not shipped.
+&quot;&quot;&quot;</span>
+
+nbCompileError(<span class="hljs-string">&quot;&quot;&quot;
+import std/sequtils, fv
+proc main() =
+  let rate = 3
+  echo toSeq(1..4).mapIt(it * rate) |&gt; futurize()
+main()
+&quot;&quot;&quot;</span>, targs = checkArgs, tcmd = <span class="hljs-string">&quot;c --compileOnly&quot;</span>, tfold = <span class="hljs-string">&quot;The same check, through `futurize` (N° 7): a local variable can't sneak in&quot;</span>)
+
+<span class="hljs-comment"># ============================================================================================ 4</span>
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+## Random numbers: the same dice, whoever rolls them
+
+Statisticians parallelize resampling all the time (bootstraps, permutation tests,
+simulations), so random numbers are central. Two things go wrong when you run them in parallel
+naively. Results change with the number of workers, because each worker's generator hands out
+numbers in a different order. And workers seeded carelessly can produce overlapping or
+correlated streams.
+
+The futureverse fixes both with `seed = TRUE`: every *element* gets its own stream (L'Ecuyer's
+MRG32k3a generator, whose streams are provably far apart), chosen from the element's position.
+The result then depends only on the seed, never on the plan. `fv` does the same with a simpler
+trick: element `i` seeds its own generator from `splitmix64(seed, i)`.
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> [sequential(), threads(<span class="hljs-number">3</span>), processes(<span class="hljs-number">4</span>)]:
+    plan p
+    <span class="hljs-keyword">let</span> ys = futureMap(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>), noisy, seed = <span class="hljs-number">42</span>)
+    <span class="hljs-keyword">echo</span> ($plan()).alignLeft(<span class="hljs-number">14</span>), ys.mapIt(it.formatFloat(ffDecimal, <span class="hljs-number">3</span>)).join(<span class="hljs-string">&quot;  &quot;</span>)
+
+<span class="hljs-keyword">block</span>:   <span class="hljs-comment"># the claim below, checked at build time</span>
+  <span class="hljs-keyword">var</span> draws: <span class="hljs-built_in">seq</span>[<span class="hljs-built_in">seq</span>[<span class="hljs-built_in">float</span>]]
+  <span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> [sequential(), threads(<span class="hljs-number">3</span>), processes(<span class="hljs-number">4</span>)]:
+    withPlan p: draws.add futureMap(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>), noisy, seed = <span class="hljs-number">42</span>)
+  doAssert draws[<span class="hljs-number">0</span>] == draws[<span class="hljs-number">1</span>] <span class="hljs-keyword">and</span> draws[<span class="hljs-number">1</span>] == draws[<span class="hljs-number">2</span>]
+nbText: <span class="hljs-string">&quot;Identical, to the last bit. And if a task uses random numbers *without* a seed, you get the futureverse's famous warning, rather than silently unreproducible results:&quot;</span>
+
+nbCode:
+  plan threads(<span class="hljs-number">4</span>)
+  <span class="hljs-keyword">discard</span> futureMap(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>), noisy)
+
+nbNote(nkR, <span class="hljs-string">&quot;&quot;&quot;
+R prints `UNRELIABLE VALUE: Future (‘&lt;none&gt;’) unexpectedly generated random numbers without
+specifying argument 'seed'.` For `replicate()`, which is nearly always used for resampling,
+futurize turns `seed = TRUE` on by itself.
+&quot;&quot;&quot;</span>)
+
+<span class="hljs-comment"># ============================================================================================ 5</span>
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+## Output and errors come back as if nothing happened
+
+Run a map in parallel with most tools and the side effects get lost or scrambled. In R,
+`parallel::mclapply` drops messages and warnings, and returns errors as values; the paper notes
+that many users assume it behaves like `lapply` and are not aware. In Nim, `echo` from threads
+just interleaves. Here malebolgia spawns eight tasks that print as they finish (the larger x,
+the shorter the sleep):
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">proc</span> rawChatty(x: <span class="hljs-built_in">int</span>) =
+    sleep (<span class="hljs-number">9</span> - x) * <span class="hljs-number">15</span>
+    <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;x = &quot;</span>, x
+
+  <span class="hljs-keyword">var</span> m = createMaster()
+  m.awaitAll:
+    <span class="hljs-keyword">for</span> x <span class="hljs-keyword">in</span> <span class="hljs-number">1.</span>.<span class="hljs-number">8</span>:
+      m.spawn rawChatty(x)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+The futureverse instead **captures** standard output, messages and warnings on the worker and
+**relays** them in the main session, in the order a sequential run would show them, after each
+future is collected. They are real R conditions again on arrival, so `suppressMessages()` around
+the parallel call still works. `fv` does it with `say`: each element's lines are kept with its
+result, and the main thread echoes them in element order:
+&quot;&quot;&quot;</span>
+
+nbCode:
+  plan processes(<span class="hljs-number">4</span>)
+  <span class="hljs-keyword">echo</span> futureMap(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">4</span>), chatty)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+Errors too: the first failing element (in order) raises its exception on the main thread, where
+an ordinary `try` catches it, with its own type:
+&quot;&quot;&quot;</span>
+
+nbCode:
+  plan threads(<span class="hljs-number">4</span>)
+  <span class="hljs-keyword">try</span>:
+    <span class="hljs-keyword">echo</span> futureMap(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">8</span>), fragile)
+  <span class="hljs-keyword">except</span> <span class="hljs-type">ValueError</span> <span class="hljs-keyword">as</span> e:
+    <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;caught a ValueError from a worker: &quot;</span>, e.msg
+
+nbNote(nkCareful, <span class="hljs-string">&quot;&quot;&quot;
+`fv` cannot pass the exception *object* across: under Nim's ORC memory manager a ref belongs to
+the thread that made it (a first version did pass it, and crashed with a segfault in the cycle
+collector). So only the name and message travel, and `fv` makes a new exception of the same type
+for the common ones. R serializes the whole condition object, class and all. A Nim library done
+properly could move the exception with `std/isolation`.
+&quot;&quot;&quot;</span>)
+
+<span class="hljs-comment"># ============================================================================================ 6</span>
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+## Progress from far away
+
+Long maps want a progress bar, and the bar must be in the main session while the work is in the
+workers. Henrik's **progressr** solves it the R way: `p()` in the task *signals a condition*,
+and the future backends relay those near-live, as they happen, not at the end. `fv` takes a
+shortcut, `progress = true` ticks once per element from whichever thread finished it:
+&quot;&quot;&quot;</span>
+
+nbCode:
+  plan threads(<span class="hljs-number">4</span>)
+  <span class="hljs-keyword">discard</span> futureMap(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">20</span>), slowSquare, progress = <span class="hljs-literal">true</span>)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+The paper plans a `progressify()` that injects the `p()` calls itself, so that
+`lapply(xs, slow) |&gt; progressify() |&gt; futurize()` gets a bar with no other change. Which brings
+us to the macro.
+&quot;&quot;&quot;</span>
+
+<span class="hljs-comment"># ============================================================================================ 7</span>
+nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
+## futurize: one magic word, and in Nim it's a macro
+
+Before futurize, parallelizing meant switching function: `lapply` becomes
+`future.apply::future_lapply`, `purrr::map` becomes `furrr::future_map`, `foreach() %do%`
+becomes `%dofuture%`, each with its own way of passing options. [futurize]({futurizeRepo})
+keeps the code you wrote and adds one word:
+&quot;&quot;&quot;</span>
+
+nbR(<span class="hljs-string">&quot;&quot;&quot;
+ys &lt;- lapply(xs, slow_fcn) |&gt; futurize()
+ys &lt;- map(xs, rnorm, n = 10) |&gt; futurize(seed = TRUE)
+b  &lt;- boot(bigcity, ratio, R = 999, stype = &quot;w&quot;) |&gt; futurize()
+&quot;&quot;&quot;</span>)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+It works because R is lazy: `futurize()` receives its argument *unevaluated*, as a piece of
+code (with `substitute()`), finds which map it is (`base::lapply`? `purrr::map`?), and rewrites
+it into the parallel version before running it. The paper calls this **transpiling**. It also
+unwraps `{ }`, `local()`, `suppressMessages()` to find the map inside, and knows the parallel
+switches of domain packages (boot, caret, glmnet, lme4, mgcv, tm) so you don't have to.
+
+Nim does code-as-data at compile time: a **macro** receives its argument unevaluated, as a syntax
+tree. So the Nim futurize is a macro that recognizes `map(xs, f)` and `xs.mapIt(expr)` from
+`std/sequtils` and rewrites them into `futureMap`. Nim does not have R's `|&gt;`, but a macro can be
+an operator, so we add that too, in five lines:
+&quot;&quot;&quot;</span>
+
+nbCode:
+  plan threads(<span class="hljs-number">4</span>)
+  <span class="hljs-keyword">let</span> squares = toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">8</span>).mapIt(it * it + <span class="hljs-number">1</span>) |&gt; futurize(seed = <span class="hljs-number">1</span>)
+  <span class="hljs-keyword">echo</span> squares
+  <span class="hljs-keyword">echo</span> toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">8</span>).map(slowSquare) |&gt; futurize()
+
+nbText: <span class="hljs-string">&quot;Like `futurize(eval = FALSE)`, `transpiled` shows what the macro writes:&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">echo</span> transpiled(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">8</span>).mapIt(it * it + <span class="hljs-number">1</span>), seed = <span class="hljs-number">1</span>)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+Note the `{.nimcall, gcsafe.}` that the macro adds to the generated proc. It is what gives the
+compiler error at the end of N° 3: a local variable can't be captured by a proc that runs
+somewhere else. And R's `futurize(FALSE)`, which turns every futurize off for debugging, is a
+compile-time switch here: build with `-d:futurizeOff` and each futurize becomes the plain map.
+&quot;&quot;&quot;</span>
+
+nbNote(nkR, <span class="hljs-string">&quot;&quot;&quot;
+One difference of philosophy. In R, only the **end-user** may switch futurization off, and
+packages must never do it. In Nim the end-user of a library is whoever compiles the program,
+so a `-d:` define is the natural place for that switch, and for the plan too, if you want it
+fixed at compile time.
+&quot;&quot;&quot;</span>)
+
+<span class="hljs-comment"># ============================================================================================ 8</span>
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+## So, does Nim need a futureverse?
+
+Partly. Many of the problems the futureverse solves come from R: an interpreter with one thread,
+where parallel means processes, and processes mean shipping code and data. In Nim a slow loop is
+often fast enough once compiled, and threads share memory with compiler checks. But some of the
+ideas have no good Nim equivalent yet:
+&quot;&quot;&quot;</span>
+
+nbTable toTableData(@[
+  (need: <span class="hljs-string">&quot;Many CPU-heavy elements&quot;</span>, r: <span class="hljs-string">&quot;`plan(multisession)` + a parallel map&quot;</span>,
+   nim: <span class="hljs-string">&quot;threads: [malebolgia](https://github.com/Araq/malebolgia), [taskpools](https://github.com/status-im/nim-taskpools), weave. Try plain compiled code first.&quot;</span>),
+  (need: <span class="hljs-string">&quot;Waiting on network or disk&quot;</span>, r: <span class="hljs-string">&quot;futures, or `promises` in Shiny&quot;</span>,
+   nim: <span class="hljs-string">&quot;`std/asyncdispatch` or chronos, on one thread&quot;</span>),
+  (need: <span class="hljs-string">&quot;Code that may crash, leak, or call a C library that isn't thread-safe&quot;</span>, r: <span class="hljs-string">&quot;`multisession`, `callr`&quot;</span>,
+   nim: <span class="hljs-string">&quot;processes: `std/osproc`, or `fv`'s `processes` (the binary is its own worker)&quot;</span>),
+  (need: <span class="hljs-string">&quot;A cluster, an HPC scheduler&quot;</span>, r: <span class="hljs-string">&quot;`future.batchtools`, `future.mirai`, `cluster`&quot;</span>,
+   nim: <span class="hljs-string">&quot;nothing ready-made. A Slurm job array of the same binary is the closest.&quot;</span>),
+  (need: <span class="hljs-string">&quot;The user picks the backend&quot;</span>, r: <span class="hljs-string">&quot;`plan()`, never inside a package&quot;</span>,
+   nim: <span class="hljs-string">&quot;mostly compile-time (`-d:ThreadPoolSize`); a library that creates its own pool takes the choice away&quot;</span>),
+  (need: <span class="hljs-string">&quot;Same random numbers on any plan&quot;</span>, r: <span class="hljs-string">&quot;`seed = TRUE` (L'Ecuyer streams)&quot;</span>,
+   nim: <span class="hljs-string">&quot;by hand: one seeded `Rand` per element, as `fv` does&quot;</span>),
+  (need: <span class="hljs-string">&quot;Output and errors as in a sequential run&quot;</span>, r: <span class="hljs-string">&quot;built in, relayed&quot;</span>,
+   nim: <span class="hljs-string">&quot;by hand; `echo` from threads interleaves&quot;</span>),
+  (need: <span class="hljs-string">&quot;How many cores may I use?&quot;</span>, r: <span class="hljs-string">&quot;`parallelly::availableCores()`&quot;</span>,
+   nim: <span class="hljs-string">&quot;`countProcessors()` ignores cgroup quotas&quot;</span>),
+]), rownameCol = <span class="hljs-string">&quot;need&quot;</span>:
+  tabHeader <span class="hljs-string">&quot;When the futureverse's ideas make sense in Nim&quot;</span>
+  colsLabel:
+    need: <span class="hljs-string">&quot;you need&quot;</span>
+    r: <span class="hljs-string">&quot;R futureverse&quot;</span>
+    nim: <span class="hljs-string">&quot;Nim today&quot;</span>
+  fmtMarkdown [<span class="hljs-string">&quot;need&quot;</span>, <span class="hljs-string">&quot;r&quot;</span>, <span class="hljs-string">&quot;nim&quot;</span>]
+
+nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
+What a Nim programmer can take from Henrik, in order of how cheap it is:
+
+1. **Seed per element, not per worker.** Free, and it makes parallel results reproducible.
+2. **Relay, don't print.** Keep a task's output and errors with its result, and show them in
+   order. Debugging a parallel program becomes debugging a sequential one.
+3. **Don't own the pool.** A library should take the executor from its caller (malebolgia's
+   `Master` passed down is close to this), the way packages leave `plan()` to the user.
+4. **Respect the machine's limits**: an `availableCores` in the standard library.
+5. **A test suite for backends.** The futureverse has `future.tests`, which every backend must
+   pass to be called compliant. That is how &quot;any backend works&quot; stays true.
+6. **The macro.** `futurize` is a {fvLines}-line toy here; a real one would know more maps
+   (`collect`, `for` loops with `||`), and a Nim cluster backend would be a fun project.
+&quot;&quot;&quot;</span>
+
+<span class="hljs-comment"># ============================================================================================ 9</span>
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+## Questions for Henrik, next time in Paris
+
+- futurize works on R code at run time; would you have wanted it at compile time, like a macro?
+- Which backend do people actually use on HPC today: batchtools or mirai?
+- Structured concurrency (the paper's future work, and malebolgia's only mode): will futures
+  launched by a map always be cancelled when one fails?
+- What is the strangest thing someone parallelized with futures?
+&quot;&quot;&quot;</span>
+
+nbFold(<span class="hljs-string">&quot;How the toy is built: `fv.nim`, and its limits&quot;</span>, &amp;<span class="hljs-string">&quot;&quot;&quot;
+- **Threads**: malebolgia's `awaitAll`/`spawn`. Each of the n workers gets elements w, w+n,
+  w+2n, ... (R's futures chunk elements too; `chunk_size` and `scheduling` tune it). Results go
+  into a preallocated array through a pointer, so no locks.
+- **Processes**: the running binary, started n times with `--fv-worker &lt;task&gt;`, elements as
+  JSON lines over pipes (`std/json`, `std/osproc`). All elements are sent before any result is
+  read, which is fine for small inputs and would deadlock on big ones.
+- **Not done**: lazy futures (`future(lazy = TRUE)`), `resolved()`, cancellation, timeouts,
+  remote machines, nested plans (R's `plan(list(cluster, multicore))`), warnings as a kind of
+  their own, and moving exception objects. Toy, remember.
+- Everything on this page was run when the page was built: the timings are real, from a
+  {countProcessors()}-core cloud machine.
+&quot;&quot;&quot;</span>)
+
+nbSource(<span class="hljs-string">&quot;fv.nim&quot;</span>, tanchor = <span class="hljs-string">&quot;fv-source&quot;</span>)
+nbSource(<span class="hljs-string">&quot;examples/tasks.nim&quot;</span>)
+
+nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
+---
+Sources: Henrik Bengtsson, [*A Unified Approach to Concurrent, Parallel Map-Reduce in R using
+Futures*]({paper}) (arXiv 2601.17578, January 2026) and [*A Unifying Framework for Parallel and
+Distributed Processing in R using Futures*]({rjournal}) (The R Journal, 2021); the
+[future]({futureRepo}) and [futurize]({futurizeRepo}) sources and vignettes; the
+[futureverse site]({site}). Nim: [malebolgia]({malebolgiaRepo}), [taskpools]({taskpoolsRepo}),
+Nim 2.2.4. Page made with [nimib](https://github.com/pietroppeter/nimib), tables with
+[tabelline](https://pietroppeter.github.io/tabelline/).
+&quot;&quot;&quot;</span>
+
+nbSave
+</code></pre>
+</section>
+  
+<script>
+  function toggleSourceDisplay() {
+    var btn = document.getElementById("show")
+    var source = document.getElementById("source");
+    if (btn.innerHTML=="Show Source") {
+      btn.innerHTML = "Hide Source";
+      source.style.display = "block";
+    } else {
+      btn.innerHTML = "Show Source";
+      source.style.display = "none";
+    }
+  }
+</script>
+  
+<!-- claude-artifacts:backlink -->
+<style>
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#ca-backlink{all:initial;position:fixed;z-index:2147483647;left:max(10px,env(safe-area-inset-left,0px));bottom:max(10px,env(safe-area-inset-bottom,0px));
+font:500 12px/1 system-ui,-apple-system,"Segoe UI",sans-serif;color:#1f1a22;background:rgba(251,250,252,.96);
+border:1px solid rgba(0,0,0,.14);border-radius:999px;padding:6px 10px;text-decoration:none;box-shadow:0 1px 3px rgba(0,0,0,.12);
+-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);cursor:pointer}
+#ca-backlink:hover,#ca-backlink:focus-visible{text-decoration:underline}
+@media (prefers-color-scheme:dark){#ca-backlink{color:#ece6ef;background:rgba(23,19,26,.94);border-color:rgba(255,255,255,.18)}}
+@media print{#ca-backlink{display:none}}
+body.rv-on #ca-backlink{display:none}
+</style>
+<a id="ca-backlink" href="https://pietroppeter.github.io/claude-artifacts/" title="All Claude artifacts">&larr; Claude artifacts</a>
+<!-- /claude-artifacts:backlink -->
+</body>
