@@ -6,7 +6,10 @@ when the page is built. A [nimib](https://github.com/pietroppeter/nimib) page; t
 [tabelline](https://pietroppeter.github.io/tabelline/).
 
 - `index.nim`: the page, writes `../index.html`. Build from this folder:
-  `sh deps.sh && nim r -d:nimibQuiet index.nim` (Nim 2.2.4, and `libpcre3`). `deps.sh` pins nimib,
+  `sh deps.sh && sh deps-r.sh && nim r -d:nimibQuiet index.nim` (Nim 2.2.4, `libpcre3`, and R with
+  `Rscript` on the PATH, e.g. `apt-get install r-base-core`; built with R 4.3.3). The R blocks run at
+  build time too (`nbR` in `lib/blocks.nim`): `deps-r.sh` installs future, futurize, future.apply,
+  progressr, progressify and parallelly from CRAN into `$FV_RLIB` (default `./deps/Rlib`). `deps.sh` pins nimib,
   tabelline, malebolgia, taskpools and their dependencies into `$FV_DEPS` (default `./deps`, not committed).
   The page calls `fvServe()` before `nbInit`: the `processes` plan starts the page binary itself as its workers.
 - `fv.nim`: the toy. `plan(sequential() | threads(n) | processes(n))`, `futureMap(xs, f, seed, progress)`,

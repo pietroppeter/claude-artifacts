@@ -114,6 +114,8 @@ section.playground{margin:1.2rem 0;background:var(--card);border:2px solid var(-
 .pg-die.moved{border-color:var(--careful);background:var(--careful-soft)}
 .pg-verdict{margin:.3rem 0 0;font-weight:700}
 @media (prefers-reduced-motion: reduce){.pg-bar{transition:none}}
+/* R's <- must read as <-, not as an arrow glyph */
+body code, body pre > code, body pre.nb-output{font-variant-ligatures:none}
 /* the cloakroom: steps as tickets */
 figure.steps{margin:1.2rem 0}
 figure.steps ol{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.6rem}
