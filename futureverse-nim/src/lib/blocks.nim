@@ -185,3 +185,43 @@ template nbR*(tcode: string; toutput = "") =
   ## R code, shown and not run (there is no R here); `toutput` is the output the paper or the
   ## futureverse docs print for it. Highlighted after the build by tools/codeblocks.py.
   nb.add newNbR(code = tcode, output = toutput)
+
+type Stop* = tuple[date, what: string]   ## what: Markdown
+
+newNbBlock(NbTimeline):
+  caption: string
+  stops: seq[Stop]
+  toHtml:
+    var s = &"""<figure class="timeline"><figcaption>{inlineMd(blk.caption)}</figcaption><ol>"""
+    for st in blk.stops:
+      s.add &"""<li><span class="tl-date">{esc(st.date)}</span><span class="tl-what">{inlineMd(st.what)}</span></li>"""
+    s & "</ol></figure>"
+
+template nbTimeline*(tcaption: string; tstops: seq[Stop]) =
+  ## Dates in glowing digits, one per stop, oldest first.
+  nb.add newNbTimeline(caption = tcaption, stops = tstops)
+
+const playgroundJs = staticRead("playground.js")
+
+newNbBlock(NbPlayground):
+  toHtml:
+    """<section class="playground" id="pg">
+<div class="pg-controls">
+  <label class="pg-slider">workers <output id="pg-n">3</output>
+    <input type="range" id="pg-workers" min="1" max="8" value="3" aria-label="number of workers"></label>
+  <div class="pg-seed" role="group" aria-label="how random numbers are seeded">
+    <button type="button" id="pg-elem" aria-pressed="true">seed per element</button>
+    <button type="button" id="pg-work" aria-pressed="false">seed per worker</button>
+  </div>
+</div>
+<div class="pg-lanes" id="pg-lanes"></div>
+<p class="pg-time" id="pg-time"></p>
+<div class="pg-dice-label">the 12 dice, in element order (outlined: different from 1 worker)</div>
+<div class="pg-dice" id="pg-dice"></div>
+<p class="pg-verdict" id="pg-verdict"></p>
+<noscript><p>This playground needs JavaScript.</p></noscript>
+</section><script>""" & playgroundJs & "</script>"
+
+template nbPlayground*() =
+  ## The plan playground: drag the number of workers, flip how seeds are chosen.
+  nb.add newNbPlayground()

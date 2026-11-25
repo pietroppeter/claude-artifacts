@@ -1,13 +1,13 @@
 <!DOCTYPE html>
 <html lang="en-us">
 <head>
-  <title>The cloakroom of the future: R's futureverse, explained in Nim</title>
+  <title>Back to the futureverse: R's futures, explained in Nim</title>
   <meta content="text/html; charset=utf-8" http-equiv="content-type">
   <meta content="width=device-width, initial-scale=1" name="viewport">
   <meta content="nimib 0.4.3" name="generator">
   <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Source+Sans+3:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"><style>:root{--paper:#f6f0e4;--card:#fffdf8;--ink:#2a1d1f;--muted:#6d5f5a;--line:#dccfbd;--bordeaux:#7b1e34;--bordeaux-soft:#f3dfe2;--brass:#b0851f;--brass-soft:#f6ebcd;--rblue:#2766b0;--rblue-soft:#e1ebf7;--careful:#a33a1c;--careful-soft:#f8e1d8;--link:#7b1e34;--code-bg:#fffdf8;--out-bg:#2a1d1f;--out-ink:#f6f0e4;--err-ink:#ffb7a3;--kw:#7b1e34;--str:#3d6b2a;--num:#9a5a00;--com:#8b7f76;--type:#2766b0;--surface:#fffdf8;--shade:#ece3d3;--secondary:#b0851f;--secondary-soft:#f6ebcd;--primary-text:#7b1e34;--neutral-1:#ece3d3;--serif:"DM Serif Display", Georgia, serif;--font:"Source Sans 3", system-ui, sans-serif;--mono:"JetBrains Mono", ui-monospace, monospace;}html{-webkit-text-size-adjust:100%}
+<link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Source+Sans+3:ital,wght@0,400;0,700;1,400&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet"><style>:root{--paper:#f6f0e4;--card:#fffdf8;--ink:#2a1d1f;--muted:#6d5f5a;--line:#dccfbd;--bordeaux:#7b1e34;--bordeaux-soft:#f3dfe2;--brass:#b0851f;--brass-soft:#f6ebcd;--panel:#1f1a1b;--glow:#ffb000;--rblue:#2766b0;--rblue-soft:#e1ebf7;--careful:#a33a1c;--careful-soft:#f8e1d8;--link:#7b1e34;--code-bg:#fffdf8;--out-bg:#2a1d1f;--out-ink:#f6f0e4;--err-ink:#ffb7a3;--kw:#7b1e34;--str:#3d6b2a;--num:#9a5a00;--com:#8b7f76;--type:#2766b0;--surface:#fffdf8;--shade:#ece3d3;--secondary:#b0851f;--secondary-soft:#f6ebcd;--primary-text:#7b1e34;--neutral-1:#ece3d3;--serif:"DM Serif Display", Georgia, serif;--font:"Source Sans 3", system-ui, sans-serif;--mono:"JetBrains Mono", ui-monospace, monospace;}html{-webkit-text-size-adjust:100%}
 body{margin:0 auto;max-width:44rem;padding:1rem max(1rem,env(safe-area-inset-right)) 3rem max(1rem,env(safe-area-inset-left));
   background:var(--paper);color:var(--ink);font:400 17.5px/1.6 var(--font);counter-reset:ticket}
 h1{font:400 2.15rem/1.12 var(--serif);margin:1.2rem 0 .4rem;color:var(--bordeaux)}
@@ -69,6 +69,34 @@ details.source > summary{cursor:pointer;padding:.55rem .8rem;min-height:44px;box
 details.source > summary code{font-weight:400}
 details.source .src-lines{font-weight:400;color:var(--muted);font-size:.85rem}
 details.source pre{margin:0;border:0;border-top:1px solid var(--line);border-radius:0}
+/* the time-travel log: dates in amber digits */
+figure.timeline{margin:1.2rem 0;background:var(--panel);border-radius:8px;padding:.7rem .8rem;color:var(--paper)}
+figure.timeline figcaption{font:700 .75rem/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:#bfb3a6;margin-bottom:.55rem}
+figure.timeline ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:.5rem}
+figure.timeline li{border:1px solid #4a3f3f;border-radius:5px;padding:.4rem .5rem;background:#2b2425}
+figure.timeline .tl-date{display:block;font:600 1.05rem/1.2 var(--mono);color:var(--glow);text-shadow:0 0 6px rgba(255,176,0,.55);letter-spacing:.06em}
+figure.timeline .tl-what{display:block;font-size:.88rem;line-height:1.35}
+/* the plan playground */
+section.playground{margin:1.2rem 0;background:var(--card);border:2px solid var(--bordeaux);border-radius:8px;padding:.7rem .8rem}
+.pg-controls{display:flex;flex-wrap:wrap;gap:.6rem 1rem;align-items:center}
+.pg-slider{flex:1 1 12rem;display:flex;flex-direction:column;font-weight:700;font-size:.9rem;color:var(--bordeaux)}
+.pg-slider output{font:600 1.05rem var(--mono);color:var(--ink)}
+.pg-slider input{width:100%;min-height:44px;accent-color:var(--bordeaux);touch-action:manipulation}
+.pg-seed{display:flex;gap:.4rem;flex-wrap:wrap}
+.pg-seed button{font:700 .88rem var(--font);min-height:44px;padding:0 .8rem;border:2px solid var(--bordeaux);border-radius:22px;background:var(--card);color:var(--bordeaux);cursor:pointer}
+.pg-seed button[aria-pressed=true]{background:var(--bordeaux);color:var(--card)}
+.pg-lanes{margin:.7rem 0 .3rem}
+.pg-lane{display:flex;align-items:center;gap:.4rem;margin:.22rem 0}
+.pg-who{flex:none;width:1.8rem;font:12.5px var(--mono);color:var(--muted)}
+.pg-bar{display:flex;gap:2px;transition:width .25s}
+.pg-task{min-width:0;height:1.6rem;display:flex;align-items:center;justify-content:center;background:var(--brass-soft);border:1px solid var(--brass);border-radius:3px;font:12.5px var(--mono);overflow:hidden}
+.pg-time{margin:.3rem 0 .6rem;font-size:.92rem}
+.pg-dice-label{font-size:.78rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.pg-dice{display:flex;flex-wrap:wrap;gap:.15rem;font-size:1.9rem;line-height:1.1;margin:.2rem 0}
+.pg-die{padding:0 .1rem;border:2px solid transparent;border-radius:6px}
+.pg-die.moved{border-color:var(--careful);background:var(--careful-soft)}
+.pg-verdict{margin:.3rem 0 0;font-weight:700}
+@media (prefers-reduced-motion: reduce){.pg-bar{transition:none}}
 /* the cloakroom: steps as tickets */
 figure.steps{margin:1.2rem 0}
 figure.steps ol{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.6rem}
@@ -225,13 +253,13 @@ figcaption {
 <header>
 <div class="nb-box">
  <span><a href=".">🏡</a></span>
- <span><code>The cloakroom of the future: R's futureverse, explained in Nim</code></span>
+ <span><code>Back to the futureverse: R's futures, explained in Nim</code></span>
  <span><a href="https://github.com/pietroppeter/claude-artifacts"><svg aria-hidden="true" width="1.2em" height="1.2em" style="vertical-align: middle;" preserveAspectRatio="xMidYMid meet" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59c.4.07.55-.17.55-.38c0-.19-.01-.82-.01-1.49c-2.01.37-2.53-.49-2.69-.94c-.09-.23-.48-.94-.82-1.13c-.28-.15-.68-.52-.01-.53c.63-.01 1.08.58 1.23.82c.72 1.21 1.87.87 2.33.66c.07-.52.28-.87.51-1.07c-1.78-.2-3.64-.89-3.64-3.95c0-.87.31-1.59.82-2.15c-.08-.2-.36-1.02.08-2.12c0 0 .67-.21 2.2.82c.64-.18 1.32-.27 2-.27c.68 0 1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82c.44 1.1.16 1.92.08 2.12c.51.56.82 1.27.82 2.15c0 3.07-1.87 3.75-3.65 3.95c.29.25.54.73.54 1.48c0 1.07-.01 1.93-.01 2.2c0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z" fill="#000"></path></svg></a></span>
 </div>
 <hr>
 </header>
 <main>
-<div id="review" hidden data-page="futureverse-nim" data-version="1" data-title="The cloakroom of the future: R's futureverse, explained in Nim" data-source="futureverse-nim/src/index.nim" data-versions=""></div><script>
+<div id="review" hidden data-page="futureverse-nim" data-version="1" data-title="Back to the futureverse: R's futures, explained in Nim" data-source="futureverse-nim/src/index.nim" data-versions=""></div><script>
 document.addEventListener('DOMContentLoaded', function () {
 // Review mode for a nimib page: open it with the Review button, select text, comment on it, keep
 // the comments in this browser, export them as Markdown with a YAML block for a coding agent.
@@ -822,18 +850,19 @@ document.addEventListener('DOMContentLoaded', function () {
 })();
 });
 </script>
-<h1>The cloakroom of the future</h1>
+<h1>Back to the futureverse</h1>
 <figure class="prompt"><figcaption><span class="prompt-who">Pietro</span> asked Claude, 25 Nov 2026</figcaption><blockquote><p>At compute Paris I have met Henrik, author of a popular library for parallelizing R code. Can you
 explain some of the concepts about that, when it makes sense using Nim? I know only the basics of
 R, I know it has a functional connection but not more than that. Here are a couple of references
 https://arxiv.org/html/2601.17578v1 https://www.futureverse.org/ build and merge an explainer as usual with nimib and publish on Claude artifacts.
 Be playful and go wild!</p>
 </blockquote></figure>
-<div class="lede"><p>Henrik Bengtsson's <strong>futureverse</strong> lets an R programmer write <code>lapply(xs, slow)</code>, add one word,
+<div class="lede"><p>Henrik Bengtsson's <strong>futureverse</strong> (&quot;you keep your code, and you decide where it runs&quot;) lets an R programmer write <code>lapply(xs, slow)</code>, add one word,
 and have it run on all the cores of a laptop, on a few machines, or on a supercomputer, with
 nothing else changed. This page explains the ideas behind it for someone who knows Nim and only a
 little R. The best way to understand a design is to build it, so we build a toy futureverse
-in Nim (264 lines), and every example on this page runs on it when the page is built.</p>
+in Nim (285 lines), and every example on this page runs on it when the page is built.
+Fasten your seatbelt: we travel through a cloakroom, a few time machines and a macro.</p>
 </div>
 <div class="tldr"><span class="tldr-label">The short version</span><ul>
 <li><strong>A future</strong> is a coat-check ticket: you hand in some work, get a ticket at once, and collect
@@ -976,9 +1005,13 @@ them. The little R this page uses, next to its Nim:</p>
 (parallel <code>lapply</code> and friends), <strong>furrr</strong> (parallel purrr, by Davis Vaughan), <strong>doFuture</strong>
 (for <code>foreach</code>), <strong>progressr</strong> (progress bars), <strong>parallelly</strong> (how many cores may I use?),
 backends such as <strong>future.mirai</strong> and <strong>future.batchtools</strong>, and since this year
-<strong>futurize</strong>, the subject of the <a href="https://arxiv.org/html/2601.17578v1">paper Pietro sent</a>. The design is in the
-<a href="https://doi.org/10.32614/RJ-2021-048">R Journal paper of 2021</a>.</p>
+<strong>futurize</strong> (the subject of the <a href="https://arxiv.org/html/2601.17578v1">paper Pietro sent</a>) and its sibling <strong>progressify</strong>.
+The design is in the <a href="https://doi.org/10.32614/RJ-2021-048">R Journal paper of 2021</a>. And it is not niche: according to
+<a href="https://www.futureverse.org/">futureverse.org</a>, as of November 2026 about 1,300 CRAN packages depend on future
+directly or indirectly (5.1% of CRAN), among them Seurat, mlr3, targets and shiny, and in eleven
+years it has had no breaking update.</p>
 </aside>
+<figure class="timeline"><figcaption>The futureverse's time-travel log</figcaption><ol><li><span class="tl-date">1977</span><span class="tl-what">Baker and Hewitt name <em>futures</em></span></li><li><span class="tl-date">JUN 2015</span><span class="tl-what">first release of future on CRAN</span></li><li><span class="tl-date">2021</span><span class="tl-what">the design in The R Journal</span></li><li><span class="tl-date">JUN 2025</span><span class="tl-what">ten years of future</span></li><li><span class="tl-date">JAN 2026</span><span class="tl-what">futurize: one magic word</span></li><li><span class="tl-date">NOV 2026</span><span class="tl-what">Henrik meets Pietro at Compute Paris</span></li></ol></figure>
 <h2>A future is a coat-check ticket</h2>
 <p>At a Paris cloakroom you hand over your coat, get a numbered ticket at once, and go to the
 talk. Later you hand back the ticket and get your coat. A <strong>future</strong> is that ticket, for a
@@ -986,7 +1019,7 @@ computation: creating it is quick, the work happens somewhere else, and asking f
 waits only if the work is not done yet.</p>
 <figure class="steps"><ol><li><span class="step-icon">🧥</span><span class="step-title"><code>f &lt;- future(expr)</code></span><span class="step-what">hand in the work, get a ticket at once</span></li><li><span class="step-icon">🎟️</span><span class="step-title"><code>resolved(f)</code></span><span class="step-what">peek: is my coat ready? (never waits)</span></li><li><span class="step-icon">🧥</span><span class="step-title"><code>value(f)</code></span><span class="step-what">collect it, waiting if needed; errors come back here</span></li></ol><figcaption>The three verbs of the future package: <code>future()</code>, <code>resolved()</code>, <code>value()</code>.</figcaption></figure>
 <figure class="rcode"><figcaption>R</figcaption><pre><code class="language-r"><span class="hljs-title function_">library</span>(future)
-<span class="hljs-title function_">plan</span>(multisession)               <span class="hljs-comment"># more on this in N° 2</span>
+<span class="hljs-title function_">plan</span>(multisession)               <span class="hljs-comment"># more on this in N° 3</span>
 a &lt;- <span class="hljs-title function_">future</span>({ <span class="hljs-title function_">Sys.sleep</span>(<span class="hljs-number">1</span>); <span class="hljs-number">3</span>^<span class="hljs-number">2</span> })
 b &lt;- <span class="hljs-title function_">future</span>({ <span class="hljs-title function_">Sys.sleep</span>(<span class="hljs-number">1</span>); <span class="hljs-number">4</span>^<span class="hljs-number">2</span> })
 <span class="hljs-title function_">value</span>(a) + <span class="hljs-title function_">value</span>(b)              <span class="hljs-comment"># about 1 second, not 2</span></code></pre><pre class="nb-output">[1] 25</pre></figure>
@@ -1023,7 +1056,9 @@ scarf ready after 200 ms
 <aside class="note aside"><span class="note-label">Aside</span><p>Henrik's paper makes this distinction in its first footnote: <strong>concurrent</strong> describes the logical
 structure (&quot;these can happen in any order&quot;), <strong>parallel</strong> the physical execution (&quot;these happen
 at the same time, on different cores&quot;). A future is a concurrency idea; the backend decides
-whether it becomes parallelism. Futures themselves are old: Baker and Hewitt named them in 1977.</p>
+whether it becomes parallelism. That is why futures are not only about speed: Shiny apps use
+them to stay responsive while a slow computation runs in the background, which is exactly the
+job of Nim's async futures above.</p>
 </aside>
 <h2>plan(): who stands behind the counter</h2>
 <p>Here is the idea that makes the futureverse more than a thread pool. A package author writing
@@ -1033,13 +1068,19 @@ that, once, with <code>plan()</code>:</p>
 <span class="hljs-title function_">plan</span>(multisession, workers = <span class="hljs-number">4</span>)               <span class="hljs-comment"># 4 R processes on this machine</span>
 <span class="hljs-title function_">plan</span>(multicore)                               <span class="hljs-comment"># forked R processes (Linux, macOS)</span>
 <span class="hljs-title function_">plan</span>(cluster, workers = <span class="hljs-title function_">c</span>(<span class="hljs-string">"</span><span class="hljs-string">n1"</span>, <span class="hljs-string">"</span><span class="hljs-string">n2"</span>))        <span class="hljs-comment"># R processes on other machines, over SSH</span>
-<span class="hljs-title function_">plan</span>(future.mirai::mirai_multisession)        <span class="hljs-comment"># mirai's fast workers</span>
-<span class="hljs-title function_">plan</span>(future.batchtools::batchtools_slurm)     <span class="hljs-comment"># jobs on an HPC scheduler</span></code></pre></figure>
+<span class="hljs-title function_">plan</span>(future.callr::callr)                     <span class="hljs-comment"># a fresh R process per future</span>
+<span class="hljs-title function_">plan</span>(future.mirai::mirai_multisession)        <span class="hljs-comment"># mirai's low-latency workers</span>
+<span class="hljs-title function_">plan</span>(future.batchtools::batchtools_slurm)     <span class="hljs-comment"># jobs on an HPC scheduler (also LSF, SGE, PBS)</span>
+<span class="hljs-title function_">plan</span>(future.p2p::cluster, cluster = <span class="hljs-string">"</span><span class="hljs-string">alice/friends"</span>)  <span class="hljs-comment"># a prototype: your friends' laptops</span></code></pre></figure>
 <p>The same <code>lapply(...) |&gt; futurize()</code> then runs on a laptop, on a lab's machines, or as Slurm jobs
 on a cluster. The paper calls this <strong>separation of concerns</strong>: the developer decides <em>what</em>,
 the end-user decides <em>how and where</em>. A rule follows from it: <strong>packages must never call
 <code>plan()</code></strong>, because that would take the choice away from the user (the paper found CRAN packages
-that do it anyway).</p>
+that do it anyway; Henrik has a blog post titled <em>Setting Future Plans in R Functions, and Why
+You Probably Shouldn't</em>). And every backend must pass the conformance tests of <strong>future.tests</strong>
+before it may call itself one, so, in the site's words, &quot;switching backend never changes your
+results, only where they are computed&quot;. Roads? Where this code is going, it doesn't need to
+know the roads.</p>
 <p>Our toy, <code>fv</code>, has three plans. A task is a plain Nim proc; here are the four the page uses,
 from <code>examples/tasks.nim</code>:</p>
 <figure class="snippet"><figcaption>from <code>examples/tasks.nim</code></figcaption><pre><code class="hljs nim"><span class="hljs-keyword">proc</span> slowSquare*(x: <span class="hljs-built_in">int</span>): <span class="hljs-built_in">int</span> =
@@ -1071,7 +1112,7 @@ current. Eight elements of 50 ms each:</p>
   <span class="hljs-keyword">echo</span> plan(), <span class="hljs-string">&quot;: &quot;</span>, ys, <span class="hljs-string">&quot; in &quot;</span>, (getMonoTime() - t).inMilliseconds, <span class="hljs-string">&quot; ms&quot;</span></code></pre>
 <pre class="nb-output">sequential: @[1, 4, 9, 16, 25, 36, 49, 64] in 401 ms
 threads(4): @[1, 4, 9, 16, 25, 36, 49, 64] in 100 ms
-processes(4): @[1, 4, 9, 16, 25, 36, 49, 64] in 114 ms
+processes(4): @[1, 4, 9, 16, 25, 36, 49, 64] in 110 ms
 </pre>
 <p>Same code, same answer, a quarter of the time. <code>processes(4)</code> starts <strong>four copies of this very
 program</strong>, which is the Nim version of R's <code>multisession</code>. It is not much slower than threads
@@ -1079,6 +1120,78 @@ here, because starting a compiled program takes a millisecond or two, not the se
 session takes. How it works: the program is started again with <code>--fv-worker slowSquare</code>, and
 <code>fvServe()</code>, the first line of the program, turns it into a worker that reads elements as JSON
 lines on stdin and writes results on stdout.</p>
+<p>Why a quarter, and not exactly? Drag the number of workers in this playground. Twelve tasks of
+different lengths are dealt to the workers the way <code>fv</code> deals them (element i to worker
+i mod n), and the longest lane sets the wall time. The dice are for N° 5; leave them for now.</p>
+<section class="playground" id="pg">
+<div class="pg-controls">
+  <label class="pg-slider">workers <output id="pg-n">3</output>
+    <input type="range" id="pg-workers" min="1" max="8" value="3" aria-label="number of workers"></label>
+  <div class="pg-seed" role="group" aria-label="how random numbers are seeded">
+    <button type="button" id="pg-elem" aria-pressed="true">seed per element</button>
+    <button type="button" id="pg-work" aria-pressed="false">seed per worker</button>
+  </div>
+</div>
+<div class="pg-lanes" id="pg-lanes"></div>
+<p class="pg-time" id="pg-time"></p>
+<div class="pg-dice-label">the 12 dice, in element order (outlined: different from 1 worker)</div>
+<div class="pg-dice" id="pg-dice"></div>
+<p class="pg-verdict" id="pg-verdict"></p>
+<noscript><p>This playground needs JavaScript.</p></noscript>
+</section><script>{
+  // 12 tasks of different lengths (in "seconds"); element i goes to worker i mod n, like fv's threads.
+  const dur = [3, 1, 2, 4, 2, 1, 3, 2, 1, 4, 2, 1];
+  const $ = id => document.getElementById(id);
+  let perElement = true;
+  // a small seeded generator (mulberry32) and fv's splitmix-style mixing of (seed, i)
+  const rng = s => () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const mix = (seed, i) => Math.imul(seed ^ (i + 1) * 0x9E3779B1, 0x85EBCA6B) ^ (i * 0xC2B2AE35);
+  const die = r => 1 + Math.floor(r() * 6);
+  function roll(n) {
+    const out = new Array(dur.length);
+    if (perElement) { dur.forEach((_, i) => out[i] = die(rng(mix(42, i)))); return out; }
+    for (let w = 0; w < n; w++) {           // one stream per worker, used in the worker's order
+      const r = rng(mix(42, 1000 + w));
+      for (let i = w; i < dur.length; i += n) out[i] = die(r);
+    }
+    return out;
+  }
+  const faces = ["", "⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+  function draw() {
+    const n = +$("pg-workers").value;
+    $("pg-n").textContent = n;
+    const total = dur.reduce((a, b) => a + b, 0);
+    let lanes = "", wall = 0;
+    for (let w = 0; w < n; w++) {
+      let row = "", t = 0;
+      for (let i = w; i < dur.length; i += n) {
+        row += `<span class="pg-task" style="flex:${dur[i]} 0 0">${i + 1}</span>`; t += dur[i];
+      }
+      wall = Math.max(wall, t);
+      lanes += `<div class="pg-lane"><span class="pg-who">w${w + 1}</span><div class="pg-bar" style="width:${(t / total * 100).toFixed(1)}%">${row}</div></div>`;
+    }
+    $("pg-lanes").innerHTML = lanes;
+    $("pg-time").innerHTML = `wall time <b>${wall} s</b> instead of ${total} s: ${(total / wall).toFixed(1)}× faster` +
+      (n > 1 && wall > Math.ceil(total / n) ? ` (an ideal split would take ${Math.ceil(total / n)} s: the longest lane decides)` : "");
+    const base = roll(1), now = roll(n);
+    $("pg-dice").innerHTML = now.map((d, i) => `<span class="pg-die${d !== base[i] ? " moved" : ""}" title="element ${i + 1}">${faces[d]}</span>`).join("");
+    const moved = now.filter((d, i) => d !== base[i]).length;
+    $("pg-verdict").textContent = perElement
+      ? "Same dice for any number of workers: each element has its own stream."
+      : moved ? `${moved} of 12 dice changed: the results depend on how many workers you had.` : "Same as 1 worker, but only by luck of this plan: try another.";
+  }
+  function seedMode(e) {
+    perElement = e;
+    $("pg-elem").setAttribute("aria-pressed", e); $("pg-work").setAttribute("aria-pressed", !e);
+    draw();
+  }
+  $("pg-workers").addEventListener("input", draw);
+  $("pg-elem").addEventListener("click", () => seedMode(true));
+  $("pg-work").addEventListener("click", () => seedMode(false));
+  draw();
+}
+</script>
 <aside class="note nim"><span class="note-label">Nim</span><p><strong>R ships code; Nim ships only data.</strong> An R worker is an empty R session, so the future package
 sends it the expression, the functions it calls and the data they use. A Nim worker is the same
 compiled binary, so it already has all the code: only the name of the task and the elements
@@ -1097,7 +1210,8 @@ availableCores()  = 4  (cgroup quota and FV_AVAILABLECORES)
 <aside class="note aside"><span class="note-label">Aside</span><p>On this build machine the two agree. In a container limited to 2 CPUs, <code>countProcessors()</code>
 would still say the host's count and every thread pool sized from it would oversubscribe.
 <code>std/cpuinfo</code> could grow an <code>availableCores</code> that reads the cgroup quota: a small, useful
-Nim PR.</p>
+Nim PR. (Henrik's blog has a post for R that applies to Nim word for word: <em>Please avoid
+detectCores() in your R packages</em>.)</p>
 </aside>
 <h2>Globals: what is in the coat pockets</h2>
 <p>Look at a task that uses a variable it did not get as an argument:</p>
@@ -1122,12 +1236,12 @@ the program runs instead of while it runs. The fix is the one R does for you: pa
 an argument (or make it a <code>const</code>, which is compiled in). The processes plan sits in between:
 a worker process re-runs the program's top-level code up to <code>fvServe()</code>, so a global computed
 there exists in the worker too, recomputed, not shipped.</p>
-<details class="fold"><summary>The same check, through <code>futurize</code> (N° 7): a local variable can't sneak in</summary><pre><code class="hljs nim"><span class="hljs-keyword">import</span> std/sequtils, fv
+<details class="fold"><summary>The same check, through <code>futurize</code> (N° 8): a local variable can't sneak in</summary><pre><code class="hljs nim"><span class="hljs-keyword">import</span> std/sequtils, fv
 <span class="hljs-keyword">proc</span> main() =
   <span class="hljs-keyword">let</span> rate = <span class="hljs-number">3</span>
   <span class="hljs-keyword">echo</span> toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">4</span>).mapIt(it * rate) |&gt; futurize()
 main()</code></pre><pre class="nb-output err">snippet.nim(4, 31) Error: illegal capture 'rate' because 'fvIt' has the calling convention: &lt;nimcall&gt;</pre></details>
-<h2>Random numbers: the same dice, whoever rolls them</h2>
+<h2>Random numbers: no time paradoxes</h2>
 <p>Statisticians parallelize resampling all the time (bootstraps, permutation tests,
 simulations), so random numbers are central. Two things go wrong when you run them in parallel
 naively. Results change with the number of workers, because each worker's generator hands out
@@ -1135,8 +1249,11 @@ numbers in a different order. And workers seeded carelessly can produce overlapp
 correlated streams.</p>
 <p>The futureverse fixes both with <code>seed = TRUE</code>: every <em>element</em> gets its own stream (L'Ecuyer's
 MRG32k3a generator, whose streams are provably far apart), chosen from the element's position.
-The result then depends only on the seed, never on the plan. <code>fv</code> does the same with a simpler
-trick: element <code>i</code> seeds its own generator from <code>splitmix64(seed, i)</code>.</p>
+The result then depends only on the seed, never on the plan: change the past (how many workers,
+which machine) and the future stays the same. <code>fv</code> does the same with a simpler
+trick: element <code>i</code> seeds its own generator from <code>splitmix64(seed, i)</code>. Go back to the playground
+in N° 3 and press <strong>seed per worker</strong>: drag the slider and dice change, because each worker draws
+from its own stream in its own order. Press <strong>seed per element</strong> and they never move.</p>
 <pre><code class="nohighlight nim hljs"><span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> [sequential(), threads(<span class="hljs-number">3</span>), processes(<span class="hljs-number">4</span>)]:
   plan p
   <span class="hljs-keyword">let</span> ys = futureMap(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>), noisy, seed = <span class="hljs-number">42</span>)
@@ -1222,10 +1339,24 @@ progress |████████··| 16/20
 progress |█████████·| 18/20
 progress |██████████| 20/20
 </pre>
-<p>The paper plans a <code>progressify()</code> that injects the <code>p()</code> calls itself, so that
-<code>lapply(xs, slow) |&gt; progressify() |&gt; futurize()</code> gets a bar with no other change. Which brings
-us to the macro.</p>
-<h2>futurize: one magic word, and in Nim it's a macro</h2>
+<p>The paper listed a <code>progressify()</code> as future work; by now it has shipped. It injects the <code>p()</code>
+calls itself, so <code>lapply(xs, slow) |&gt; progressify() |&gt; futurize()</code> gets a bar with no other
+change. <code>fv</code> has one too, a macro that the futurize macro unwraps (one of each is enough):</p>
+<pre><code class="nohighlight nim hljs">plan threads(<span class="hljs-number">4</span>)
+<span class="hljs-keyword">discard</span> toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">10</span>).map(slowSquare) |&gt; progressify() |&gt; futurize()</code></pre>
+<pre class="nb-output">progress |█·········| 1/10
+progress |████······| 4/10
+progress |███·······| 3/10
+progress |██········| 2/10
+progress |█████·····| 5/10
+progress |██████····| 6/10
+progress |███████···| 7/10
+progress |████████··| 8/10
+progress |█████████·| 9/10
+progress |██████████| 10/10
+</pre>
+<p>Which brings us to the macros.</p>
+<h2>futurize: where we're going, we don't need future_lapply</h2>
 <p>Before futurize, parallelizing meant switching function: <code>lapply</code> becomes
 <code>future.apply::future_lapply</code>, <code>purrr::map</code> becomes <code>furrr::future_map</code>, <code>foreach() %do%</code>
 becomes <code>%dofuture%</code>, each with its own way of passing options. <a href="https://github.com/futureverse/futurize">futurize</a>
@@ -1237,7 +1368,8 @@ b  &lt;- <span class="hljs-title function_">boot</span>(bigcity, ratio, R = <spa
 code (with <code>substitute()</code>), finds which map it is (<code>base::lapply</code>? <code>purrr::map</code>?), and rewrites
 it into the parallel version before running it. The paper calls this <strong>transpiling</strong>. It also
 unwraps <code>{ }</code>, <code>local()</code>, <code>suppressMessages()</code> to find the map inside, and knows the parallel
-switches of domain packages (boot, caret, glmnet, lme4, mgcv, tm) so you don't have to.</p>
+switches of domain packages so you don't have to: the site counts 51 of them on CRAN and
+Bioconductor, from boot and glmnet to DESeq2 and SingleCellExperiment.</p>
 <p>Nim does code-as-data at compile time: a <strong>macro</strong> receives its argument unevaluated, as a syntax
 tree. So the Nim futurize is a macro that recognizes <code>map(xs, f)</code> and <code>xs.mapIt(expr)</code> from
 <code>std/sequtils</code> and rewrites them into <code>futureMap</code>. Nim does not have R's <code>|&gt;</code>, but a macro can be
@@ -1252,13 +1384,13 @@ an operator, so we add that too, in five lines:</p>
 <p>Like <code>futurize(eval = FALSE)</code>, <code>transpiled</code> shows what the macro writes:</p>
 <pre><code class="nohighlight nim hljs"><span class="hljs-keyword">echo</span> transpiled(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">8</span>).mapIt(it * it + <span class="hljs-number">1</span>), seed = <span class="hljs-number">1</span>)</code></pre>
 <pre class="nb-output">block:
-  proc fvIt_1040196665(it: typeof(toSeq(1 .. 8)[0])): auto {.nimcall, gcsafe.} =
+  proc fvIt_1040197170(it: typeof(toSeq(1 .. 8)[0])): auto {.nimcall, gcsafe.} =
     it * it + 1
 
-  futureMap(toSeq(1 .. 8), fvIt_1040196665, seed = 1)
+  futureMap(toSeq(1 .. 8), fvIt_1040197170, seed = 1)
 </pre>
 <p>Note the <code>{.nimcall, gcsafe.}</code> that the macro adds to the generated proc. It is what gives the
-compiler error at the end of N° 3: a local variable can't be captured by a proc that runs
+compiler error at the end of N° 4: a local variable can't be captured by a proc that runs
 somewhere else. And R's <code>futurize(FALSE)</code>, which turns every futurize off for debugging, is a
 compile-time switch here: build with <code>-d:futurizeOff</code> and each futurize becomes the plain map.</p>
 <aside class="note r"><span class="note-label">Meanwhile, in R</span><p>One difference of philosophy. In R, only the <strong>end-user</strong> may switch futurization off, and
@@ -1299,16 +1431,18 @@ order. Debugging a parallel program becomes debugging a sequential one.</li>
 <li><strong>Respect the machine's limits</strong>: an <code>availableCores</code> in the standard library.</li>
 <li><strong>A test suite for backends.</strong> The futureverse has <code>future.tests</code>, which every backend must
 pass to be called compliant. That is how &quot;any backend works&quot; stays true.</li>
-<li><strong>The macro.</strong> <code>futurize</code> is a 264-line toy here; a real one would know more maps
+<li><strong>The macro.</strong> <code>futurize</code> is a 285-line toy here; a real one would know more maps
 (<code>collect</code>, <code>for</code> loops with <code>||</code>), and a Nim cluster backend would be a fun project.</li>
 </ol>
 <h2>Questions for Henrik, next time in Paris</h2>
 <ul>
 <li>futurize works on R code at run time; would you have wanted it at compile time, like a macro?</li>
 <li>Which backend do people actually use on HPC today: batchtools or mirai?</li>
-<li>Structured concurrency (the paper's future work, and malebolgia's only mode): will futures
-launched by a map always be cancelled when one fails?</li>
-<li>What is the strangest thing someone parallelized with futures?</li>
+<li>Futures can be cancelled since future 1.49 (2025). Structured concurrency, malebolgia's only
+mode, is still future work in the paper: will the futures of a map always be cancelled when
+one of them fails?</li>
+<li>What is the strangest thing someone parallelized with futures? And has future.p2p run on a
+group of friends' laptops yet?</li>
 </ul>
 <details class="fold"><summary>How the toy is built: <code>fv.nim</code>, and its limits</summary><ul>
 <li><strong>Threads</strong>: malebolgia's <code>awaitAll</code>/<code>spawn</code>. Each of the n workers gets elements w, w+n,
@@ -1320,11 +1454,15 @@ read, which is fine for small inputs and would deadlock on big ones.</li>
 <li><strong>Not done</strong>: lazy futures (<code>future(lazy = TRUE)</code>), <code>resolved()</code>, cancellation, timeouts,
 remote machines, nested plans (R's <code>plan(list(cluster, multicore))</code>), warnings as a kind of
 their own, and moving exception objects. Toy, remember.</li>
+<li><strong>Where R is going next</strong> (the <a href="https://www.futureverse.org/roadmap.html">roadmap</a>): restarting futures whose
+worker died, resource declarations (memory, run time, GPUs) so a future goes only where it
+fits, <code>availableMemory()</code> and <code>availableTime()</code> in parallelly, shared memory between local
+workers. Each would make a nice Nim experiment.</li>
 <li>Everything on this page was run when the page was built: the timings are real, from a
 4-core cloud machine.</li>
 </ul>
 </details>
-<details class="source" id="fv-source"><summary><code>fv.nim</code> <span class="src-lines">289 lines</span></summary><pre><code class="hljs nim"><span class="hljs-comment">## fv: a toy &quot;futureverse&quot; for Nim, to explain Henrik Bengtsson's R futureverse by building it.</span>
+<details class="source" id="fv-source"><summary><code>fv.nim</code> <span class="src-lines">312 lines</span></summary><pre><code class="hljs nim"><span class="hljs-comment">## fv: a toy &quot;futureverse&quot; for Nim, to explain Henrik Bengtsson's R futureverse by building it.</span>
 <span class="hljs-comment">##</span>
 <span class="hljs-comment">## - `plan(sequential())`, `plan(threads(4))`, `plan(processes(4))`: the end-user picks HOW and WHERE.</span>
 <span class="hljs-comment">## - `futureMap(xs, f)`: the developer says WHAT can run concurrently (R: future.apply / furrr).</span>
@@ -1567,9 +1705,24 @@ initLock progressLock
     <span class="hljs-literal">result</span>[i] = move outs[i].value
 
 <span class="hljs-comment"># ------------------------------------------------------------------------------- futurize</span>
+<span class="hljs-keyword">proc</span> pipe(lhs, rhs: <span class="hljs-type">NimNode</span>): <span class="hljs-type">NimNode</span> =
+  <span class="hljs-comment">## `lhs |&gt; rhs`: insert lhs as the first argument of the call rhs.</span>
+  <span class="hljs-keyword">if</span> rhs.kind <span class="hljs-keyword">in</span> nnkCallKinds:
+    <span class="hljs-literal">result</span> = rhs.copyNimTree
+    <span class="hljs-literal">result</span>.insert(<span class="hljs-number">1</span>, lhs)
+  <span class="hljs-keyword">else</span>:
+    <span class="hljs-literal">result</span> = newCall(rhs, lhs)
+
 <span class="hljs-keyword">proc</span> rewrite(call: <span class="hljs-type">NimNode</span>; opts: <span class="hljs-built_in">seq</span>[<span class="hljs-type">NimNode</span>]): <span class="hljs-type">NimNode</span> =
   <span class="hljs-comment">## The transpiler: `map(xs, f)` and `xs.mapIt(expr)`, from std/sequtils, become `futureMap`.</span>
-  <span class="hljs-keyword">let</span> n = <span class="hljs-keyword">if</span> call.kind <span class="hljs-keyword">in</span> {nnkPar, nnkStmtListExpr} <span class="hljs-keyword">and</span> call.len == <span class="hljs-number">1</span>: call[<span class="hljs-number">0</span>] <span class="hljs-keyword">else</span>: call
+  <span class="hljs-comment">## It unwraps `( )` and a `progressify(...)` (which becomes `progress = true`).</span>
+  <span class="hljs-keyword">var</span> n = <span class="hljs-keyword">if</span> call.kind <span class="hljs-keyword">in</span> {nnkPar, nnkStmtListExpr} <span class="hljs-keyword">and</span> call.len == <span class="hljs-number">1</span>: call[<span class="hljs-number">0</span>] <span class="hljs-keyword">else</span>: call
+  <span class="hljs-keyword">var</span> opts = opts
+  <span class="hljs-keyword">if</span> n.kind == nnkInfix <span class="hljs-keyword">and</span> n[<span class="hljs-number">0</span>].eqIdent(<span class="hljs-string">&quot;|&gt;&quot;</span>):   <span class="hljs-comment"># an inner pipe reaches the macro unexpanded</span>
+    n = pipe(n[<span class="hljs-number">1</span>], n[<span class="hljs-number">2</span>])
+  <span class="hljs-keyword">if</span> n.kind <span class="hljs-keyword">in</span> nnkCallKinds <span class="hljs-keyword">and</span> n.len == <span class="hljs-number">2</span> <span class="hljs-keyword">and</span> n[<span class="hljs-number">0</span>].eqIdent(<span class="hljs-string">&quot;progressify&quot;</span>):
+    n = n[<span class="hljs-number">1</span>]
+    opts.add nnkExprEqExpr.newTree(<span class="hljs-string">ident&quot;progress&quot;</span>, newLit(<span class="hljs-literal">true</span>))
   <span class="hljs-keyword">var</span> fn, xs, arg: <span class="hljs-type">NimNode</span>
   <span class="hljs-keyword">if</span> n.kind <span class="hljs-keyword">in</span> nnkCallKinds <span class="hljs-keyword">and</span> n.len == <span class="hljs-number">2</span> <span class="hljs-keyword">and</span> n[<span class="hljs-number">0</span>].kind == nnkDotExpr:   <span class="hljs-comment"># xs.map(f)</span>
     (fn, xs, arg) = (n[<span class="hljs-number">0</span>][<span class="hljs-number">1</span>], n[<span class="hljs-number">0</span>][<span class="hljs-number">0</span>], n[<span class="hljs-number">1</span>])
@@ -1601,6 +1754,18 @@ initLock progressLock
   <span class="hljs-keyword">else</span>:
     <span class="hljs-literal">result</span> = rewrite(call, toSeq(opts))
 
+<span class="hljs-keyword">macro</span> progressify*(call: <span class="hljs-built_in">untyped</span>): <span class="hljs-built_in">untyped</span> =
+  <span class="hljs-comment">## `xs.map(f) |&gt; progressify()`: the same map, with a progress bar, run sequentially (R's</span>
+  <span class="hljs-comment">## progressify package). Before a futurize, `|&gt; progressify() |&gt; futurize()`, it is unwrapped</span>
+  <span class="hljs-comment">## by futurize instead, and the bar comes from the workers.</span>
+  <span class="hljs-keyword">let</span> m = rewrite(call, @[nnkExprEqExpr.newTree(<span class="hljs-string">ident&quot;progress&quot;</span>, newLit(<span class="hljs-literal">true</span>))])
+  <span class="hljs-literal">result</span> = quote <span class="hljs-keyword">do</span>:
+    <span class="hljs-keyword">block</span>:
+      <span class="hljs-keyword">let</span> saved = plan()
+      plan(sequential())
+      <span class="hljs-keyword">try</span>: `m`
+      <span class="hljs-keyword">finally</span>: plan(saved)
+
 <span class="hljs-keyword">macro</span> transpiled*(call: <span class="hljs-built_in">untyped</span>; opts: <span class="hljs-built_in">varargs</span>[<span class="hljs-built_in">untyped</span>]): <span class="hljs-built_in">string</span> =
   <span class="hljs-comment">## What futurize turns `call` into, as source (R: `futurize(eval = FALSE)`).</span>
   newLit(rewrite(call, toSeq(opts)).repr)
@@ -1608,11 +1773,7 @@ initLock progressLock
 <span class="hljs-keyword">macro</span> `|&gt;`*(lhs, rhs: <span class="hljs-built_in">untyped</span>): <span class="hljs-built_in">untyped</span> =
   <span class="hljs-comment">## R's native pipe: `x |&gt; f(y)` is `f(x, y)`. So `xs.mapIt(it * 2) |&gt; futurize(seed = 1)` reads</span>
   <span class="hljs-comment">## like the R original, and the map reaches the macro unevaluated, as R's `substitute()` sees it.</span>
-  <span class="hljs-keyword">if</span> rhs.kind <span class="hljs-keyword">in</span> nnkCallKinds:
-    <span class="hljs-literal">result</span> = rhs.copyNimTree
-    <span class="hljs-literal">result</span>.insert(<span class="hljs-number">1</span>, lhs)
-  <span class="hljs-keyword">else</span>:
-    <span class="hljs-literal">result</span> = newCall(rhs, lhs)</code></pre></details>
+  pipe(lhs, rhs)</code></pre></details>
 <details class="source"><summary><code>examples/tasks.nim</code> <span class="src-lines">28 lines</span></summary><pre><code class="hljs nim"><span class="hljs-comment">## The tasks of the page: plain Nim procs, registered so that worker processes can run them too.</span>
 <span class="hljs-keyword">import</span> std/[math, os]
 <span class="hljs-keyword">import</span> ../fv
@@ -1646,7 +1807,8 @@ registerTask fragile</code></pre></details>
 Futures</em></a> (arXiv 2601.17578, January 2026) and <a href="https://doi.org/10.32614/RJ-2021-048"><em>A Unifying Framework for Parallel and
 Distributed Processing in R using Futures</em></a> (The R Journal, 2021); the
 <a href="https://github.com/futureverse/future">future</a> and <a href="https://github.com/futureverse/futurize">futurize</a> sources and vignettes; the
-<a href="https://www.futureverse.org/">futureverse site</a>. Nim: <a href="https://github.com/Araq/malebolgia">malebolgia</a>, <a href="https://github.com/status-im/nim-taskpools">taskpools</a>,
+<a href="https://www.futureverse.org/">futureverse site</a> (home, backends, packages, roadmap, blog) and its
+<a href="https://www.futureverse.org/demo.html">in-browser demo</a>; the <a href="https://github.com/futureverse/progressify">progressify</a> README. Nim: <a href="https://github.com/Araq/malebolgia">malebolgia</a>, <a href="https://github.com/status-im/nim-taskpools">taskpools</a>,
 Nim 2.2.4. Page made with <a href="https://github.com/pietroppeter/nimib">nimib</a>, tables with
 <a href="https://pietroppeter.github.io/tabelline/">tabelline</a>.</p>
 </main>
@@ -1674,7 +1836,7 @@ fvServe()    <span class="hljs-comment"># when this page is started as a worker 
 
 nbInit
 nb.doc.filename = currentSourcePath().parentDir.parentDir / <span class="hljs-string">&quot;index.html&quot;</span>
-nb.title = <span class="hljs-string">&quot;The cloakroom of the future: R's futureverse, explained in Nim&quot;</span>
+nb.title = <span class="hljs-string">&quot;Back to the futureverse: R's futures, explained in Nim&quot;</span>
 nb.useExplainerStyle
 nbReview(tpage = <span class="hljs-string">&quot;futureverse-nim&quot;</span>, tsource = <span class="hljs-string">&quot;futureverse-nim/src/index.nim&quot;</span>)
 
@@ -1692,7 +1854,7 @@ nbReview(tpage = <span class="hljs-string">&quot;futureverse-nim&quot;</span>, t
 
 <span class="hljs-keyword">let</span> fvLines = lineCount(<span class="hljs-string">&quot;fv.nim&quot;</span>)
 
-nbText: <span class="hljs-string">&quot;# The cloakroom of the future&quot;</span>
+nbText: <span class="hljs-string">&quot;# Back to the futureverse&quot;</span>
 
 nbPrompt(<span class="hljs-string">&quot;Pietro&quot;</span>, <span class="hljs-string">&quot;25 Nov 2026&quot;</span>, &amp;<span class="hljs-string">&quot;&quot;&quot;
 At compute Paris I have met Henrik, author of a popular library for parallelizing R code. Can you
@@ -1703,11 +1865,12 @@ Be playful and go wild!
 &quot;&quot;&quot;</span>)
 
 nbLede: &amp;<span class="hljs-string">&quot;&quot;&quot;
-Henrik Bengtsson's **futureverse** lets an R programmer write `lapply(xs, slow)`, add one word,
+Henrik Bengtsson's **futureverse** (&quot;you keep your code, and you decide where it runs&quot;) lets an R programmer write `lapply(xs, slow)`, add one word,
 and have it run on all the cores of a laptop, on a few machines, or on a supercomputer, with
 nothing else changed. This page explains the ideas behind it for someone who knows Nim and only a
 little R. The best way to understand a design is to build it, so we build a toy futureverse
 in Nim ({fvLines} lines), and every example on this page runs on it when the page is built.
+Fasten your seatbelt: we travel through a cloakroom, a few time machines and a macro.
 &quot;&quot;&quot;</span>
 
 nbTldr: &amp;<span class="hljs-string">&quot;&quot;&quot;
@@ -1757,9 +1920,21 @@ The futureverse is a family of packages: **future** (the core, 2015), **future.a
 (parallel `lapply` and friends), **furrr** (parallel purrr, by Davis Vaughan), **doFuture**
 (for `foreach`), **progressr** (progress bars), **parallelly** (how many cores may I use?),
 backends such as **future.mirai** and **future.batchtools**, and since this year
-**futurize**, the subject of the [paper Pietro sent]({paper}). The design is in the
-[R Journal paper of 2021]({rjournal}).
+**futurize** (the subject of the [paper Pietro sent]({paper})) and its sibling **progressify**.
+The design is in the [R Journal paper of 2021]({rjournal}). And it is not niche: according to
+[futureverse.org]({site}), as of November 2026 about 1,300 CRAN packages depend on future
+directly or indirectly (5.1% of CRAN), among them Seurat, mlr3, targets and shiny, and in eleven
+years it has had no breaking update.
 &quot;&quot;&quot;</span>)
+
+nbTimeline(<span class="hljs-string">&quot;The futureverse's time-travel log&quot;</span>, @[
+  (date: <span class="hljs-string">&quot;1977&quot;</span>, what: <span class="hljs-string">&quot;Baker and Hewitt name *futures*&quot;</span>),
+  (date: <span class="hljs-string">&quot;JUN 2015&quot;</span>, what: <span class="hljs-string">&quot;first release of future on CRAN&quot;</span>),
+  (date: <span class="hljs-string">&quot;2021&quot;</span>, what: <span class="hljs-string">&quot;the design in The R Journal&quot;</span>),
+  (date: <span class="hljs-string">&quot;JUN 2025&quot;</span>, what: <span class="hljs-string">&quot;ten years of future&quot;</span>),
+  (date: <span class="hljs-string">&quot;JAN 2026&quot;</span>, what: <span class="hljs-string">&quot;futurize: one magic word&quot;</span>),
+  (date: <span class="hljs-string">&quot;NOV 2026&quot;</span>, what: <span class="hljs-string">&quot;Henrik meets Pietro at Compute Paris&quot;</span>),
+])
 
 <span class="hljs-comment"># ============================================================================================ 1</span>
 nbText: <span class="hljs-string">&quot;&quot;&quot;
@@ -1779,7 +1954,7 @@ nbSteps(<span class="hljs-string">&quot;The three verbs of the future package: `
 
 nbR(<span class="hljs-string">&quot;&quot;&quot;
 library(future)
-plan(multisession)               # more on this in N° 2
+plan(multisession)               # more on this in N° 3
 a &lt;- future({ Sys.sleep(1); 3^2 })
 b &lt;- future({ Sys.sleep(1); 4^2 })
 value(a) + value(b)              # about 1 second, not 2
@@ -1822,7 +1997,9 @@ nbNote(nkAside, &amp;<span class="hljs-string">&quot;&quot;&quot;
 Henrik's paper makes this distinction in its first footnote: **concurrent** describes the logical
 structure (&quot;these can happen in any order&quot;), **parallel** the physical execution (&quot;these happen
 at the same time, on different cores&quot;). A future is a concurrency idea; the backend decides
-whether it becomes parallelism. Futures themselves are old: Baker and Hewitt named them in 1977.
+whether it becomes parallelism. That is why futures are not only about speed: Shiny apps use
+them to stay responsive while a slow computation runs in the background, which is exactly the
+job of Nim's async futures above.
 &quot;&quot;&quot;</span>)
 
 <span class="hljs-comment"># ============================================================================================ 2</span>
@@ -1839,8 +2016,10 @@ plan(sequential)                              # one attendant: no parallelism (t
 plan(multisession, workers = 4)               # 4 R processes on this machine
 plan(multicore)                               # forked R processes (Linux, macOS)
 plan(cluster, workers = c(&quot;n1&quot;, &quot;n2&quot;))        # R processes on other machines, over SSH
-plan(future.mirai::mirai_multisession)        # mirai's fast workers
-plan(future.batchtools::batchtools_slurm)     # jobs on an HPC scheduler
+plan(future.callr::callr)                     # a fresh R process per future
+plan(future.mirai::mirai_multisession)        # mirai's low-latency workers
+plan(future.batchtools::batchtools_slurm)     # jobs on an HPC scheduler (also LSF, SGE, PBS)
+plan(future.p2p::cluster, cluster = &quot;alice/friends&quot;)  # a prototype: your friends' laptops
 &quot;&quot;&quot;</span>)
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
@@ -1848,7 +2027,11 @@ The same `lapply(...) |&gt; futurize()` then runs on a laptop, on a lab's machin
 on a cluster. The paper calls this **separation of concerns**: the developer decides *what*,
 the end-user decides *how and where*. A rule follows from it: **packages must never call
 `plan()`**, because that would take the choice away from the user (the paper found CRAN packages
-that do it anyway).
+that do it anyway; Henrik has a blog post titled *Setting Future Plans in R Functions, and Why
+You Probably Shouldn't*). And every backend must pass the conformance tests of **future.tests**
+before it may call itself one, so, in the site's words, &quot;switching backend never changes your
+results, only where they are computed&quot;. Roads? Where this code is going, it doesn't need to
+know the roads.
 
 Our toy, `fv`, has three plans. A task is a plain Nim proc; here are the four the page uses,
 from `examples/tasks.nim`:
@@ -1878,6 +2061,14 @@ session takes. How it works: the program is started again with `--fv-worker slow
 lines on stdin and writes results on stdout.
 &quot;&quot;&quot;</span>
 
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+Why a quarter, and not exactly? Drag the number of workers in this playground. Twelve tasks of
+different lengths are dealt to the workers the way `fv` deals them (element i to worker
+i mod n), and the longest lane sets the wall time. The dice are for N° 5; leave them for now.
+&quot;&quot;&quot;</span>
+
+nbPlayground()
+
 nbNote(nkNim, &amp;<span class="hljs-string">&quot;&quot;&quot;
 **R ships code; Nim ships only data.** An R worker is an empty R session, so the future package
 sends it the expression, the functions it calls and the data they use. A Nim worker is the same
@@ -1901,7 +2092,8 @@ nbNote(nkAside, <span class="hljs-string">&quot;&quot;&quot;
 On this build machine the two agree. In a container limited to 2 CPUs, `countProcessors()`
 would still say the host's count and every thread pool sized from it would oversubscribe.
 `std/cpuinfo` could grow an `availableCores` that reads the cgroup quota: a small, useful
-Nim PR.
+Nim PR. (Henrik's blog has a post for R that applies to Nim word for word: *Please avoid
+detectCores() in your R packages*.)
 &quot;&quot;&quot;</span>)
 
 <span class="hljs-comment"># ============================================================================================ 3</span>
@@ -1951,11 +2143,11 @@ proc main() =
   let rate = 3
   echo toSeq(1..4).mapIt(it * rate) |&gt; futurize()
 main()
-&quot;&quot;&quot;</span>, targs = checkArgs, tcmd = <span class="hljs-string">&quot;c --compileOnly&quot;</span>, tfold = <span class="hljs-string">&quot;The same check, through `futurize` (N° 7): a local variable can't sneak in&quot;</span>)
+&quot;&quot;&quot;</span>, targs = checkArgs, tcmd = <span class="hljs-string">&quot;c --compileOnly&quot;</span>, tfold = <span class="hljs-string">&quot;The same check, through `futurize` (N° 8): a local variable can't sneak in&quot;</span>)
 
 <span class="hljs-comment"># ============================================================================================ 4</span>
 nbText: <span class="hljs-string">&quot;&quot;&quot;
-## Random numbers: the same dice, whoever rolls them
+## Random numbers: no time paradoxes
 
 Statisticians parallelize resampling all the time (bootstraps, permutation tests,
 simulations), so random numbers are central. Two things go wrong when you run them in parallel
@@ -1965,8 +2157,11 @@ correlated streams.
 
 The futureverse fixes both with `seed = TRUE`: every *element* gets its own stream (L'Ecuyer's
 MRG32k3a generator, whose streams are provably far apart), chosen from the element's position.
-The result then depends only on the seed, never on the plan. `fv` does the same with a simpler
-trick: element `i` seeds its own generator from `splitmix64(seed, i)`.
+The result then depends only on the seed, never on the plan: change the past (how many workers,
+which machine) and the future stays the same. `fv` does the same with a simpler
+trick: element `i` seeds its own generator from `splitmix64(seed, i)`. Go back to the playground
+in N° 3 and press **seed per worker**: drag the slider and dice change, because each worker draws
+from its own stream in its own order. Press **seed per element** and they never move.
 &quot;&quot;&quot;</span>
 
 nbCode:
@@ -2060,14 +2255,20 @@ nbCode:
   <span class="hljs-keyword">discard</span> futureMap(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">20</span>), slowSquare, progress = <span class="hljs-literal">true</span>)
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
-The paper plans a `progressify()` that injects the `p()` calls itself, so that
-`lapply(xs, slow) |&gt; progressify() |&gt; futurize()` gets a bar with no other change. Which brings
-us to the macro.
+The paper listed a `progressify()` as future work; by now it has shipped. It injects the `p()`
+calls itself, so `lapply(xs, slow) |&gt; progressify() |&gt; futurize()` gets a bar with no other
+change. `fv` has one too, a macro that the futurize macro unwraps (one of each is enough):
 &quot;&quot;&quot;</span>
+
+nbCode:
+  plan threads(<span class="hljs-number">4</span>)
+  <span class="hljs-keyword">discard</span> toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">10</span>).map(slowSquare) |&gt; progressify() |&gt; futurize()
+
+nbText: <span class="hljs-string">&quot;Which brings us to the macros.&quot;</span>
 
 <span class="hljs-comment"># ============================================================================================ 7</span>
 nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
-## futurize: one magic word, and in Nim it's a macro
+## futurize: where we're going, we don't need future_lapply
 
 Before futurize, parallelizing meant switching function: `lapply` becomes
 `future.apply::future_lapply`, `purrr::map` becomes `furrr::future_map`, `foreach() %do%`
@@ -2086,7 +2287,8 @@ It works because R is lazy: `futurize()` receives its argument *unevaluated*, as
 code (with `substitute()`), finds which map it is (`base::lapply`? `purrr::map`?), and rewrites
 it into the parallel version before running it. The paper calls this **transpiling**. It also
 unwraps `{ }`, `local()`, `suppressMessages()` to find the map inside, and knows the parallel
-switches of domain packages (boot, caret, glmnet, lme4, mgcv, tm) so you don't have to.
+switches of domain packages so you don't have to: the site counts 51 of them on CRAN and
+Bioconductor, from boot and glmnet to DESeq2 and SingleCellExperiment.
 
 Nim does code-as-data at compile time: a **macro** receives its argument unevaluated, as a syntax
 tree. So the Nim futurize is a macro that recognizes `map(xs, f)` and `xs.mapIt(expr)` from
@@ -2107,7 +2309,7 @@ nbCode:
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 Note the `{.nimcall, gcsafe.}` that the macro adds to the generated proc. It is what gives the
-compiler error at the end of N° 3: a local variable can't be captured by a proc that runs
+compiler error at the end of N° 4: a local variable can't be captured by a proc that runs
 somewhere else. And R's `futurize(FALSE)`, which turns every futurize off for debugging, is a
 compile-time switch here: build with `-d:futurizeOff` and each futurize becomes the plain map.
 &quot;&quot;&quot;</span>
@@ -2175,9 +2377,11 @@ nbText: <span class="hljs-string">&quot;&quot;&quot;
 
 - futurize works on R code at run time; would you have wanted it at compile time, like a macro?
 - Which backend do people actually use on HPC today: batchtools or mirai?
-- Structured concurrency (the paper's future work, and malebolgia's only mode): will futures
-  launched by a map always be cancelled when one fails?
-- What is the strangest thing someone parallelized with futures?
+- Futures can be cancelled since future 1.49 (2025). Structured concurrency, malebolgia's only
+  mode, is still future work in the paper: will the futures of a map always be cancelled when
+  one of them fails?
+- What is the strangest thing someone parallelized with futures? And has future.p2p run on a
+  group of friends' laptops yet?
 &quot;&quot;&quot;</span>
 
 nbFold(<span class="hljs-string">&quot;How the toy is built: `fv.nim`, and its limits&quot;</span>, &amp;<span class="hljs-string">&quot;&quot;&quot;
@@ -2190,6 +2394,10 @@ nbFold(<span class="hljs-string">&quot;How the toy is built: `fv.nim`, and its l
 - **Not done**: lazy futures (`future(lazy = TRUE)`), `resolved()`, cancellation, timeouts,
   remote machines, nested plans (R's `plan(list(cluster, multicore))`), warnings as a kind of
   their own, and moving exception objects. Toy, remember.
+- **Where R is going next** (the [roadmap]({site}roadmap.html)): restarting futures whose
+  worker died, resource declarations (memory, run time, GPUs) so a future goes only where it
+  fits, `availableMemory()` and `availableTime()` in parallelly, shared memory between local
+  workers. Each would make a nice Nim experiment.
 - Everything on this page was run when the page was built: the timings are real, from a
   {countProcessors()}-core cloud machine.
 &quot;&quot;&quot;</span>)
@@ -2203,7 +2411,8 @@ Sources: Henrik Bengtsson, [*A Unified Approach to Concurrent, Parallel Map-Redu
 Futures*]({paper}) (arXiv 2601.17578, January 2026) and [*A Unifying Framework for Parallel and
 Distributed Processing in R using Futures*]({rjournal}) (The R Journal, 2021); the
 [future]({futureRepo}) and [futurize]({futurizeRepo}) sources and vignettes; the
-[futureverse site]({site}). Nim: [malebolgia]({malebolgiaRepo}), [taskpools]({taskpoolsRepo}),
+[futureverse site]({site}) (home, backends, packages, roadmap, blog) and its
+[in-browser demo]({site}demo.html); the [progressify](https://github.com/futureverse/progressify) README. Nim: [malebolgia]({malebolgiaRepo}), [taskpools]({taskpoolsRepo}),
 Nim 2.2.4. Page made with [nimib](https://github.com/pietroppeter/nimib), tables with
 [tabelline](https://pietroppeter.github.io/tabelline/).
 &quot;&quot;&quot;</span>

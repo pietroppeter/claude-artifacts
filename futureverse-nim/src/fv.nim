@@ -241,9 +241,24 @@ proc futureMap*[T, U](xs: openArray[T]; f: proc(x: T): U {.nimcall, gcsafe.};
     result[i] = move outs[i].value
 
 # ------------------------------------------------------------------------------- futurize
+proc pipe(lhs, rhs: NimNode): NimNode =
+  ## `lhs |> rhs`: insert lhs as the first argument of the call rhs.
+  if rhs.kind in nnkCallKinds:
+    result = rhs.copyNimTree
+    result.insert(1, lhs)
+  else:
+    result = newCall(rhs, lhs)
+
 proc rewrite(call: NimNode; opts: seq[NimNode]): NimNode =
   ## The transpiler: `map(xs, f)` and `xs.mapIt(expr)`, from std/sequtils, become `futureMap`.
-  let n = if call.kind in {nnkPar, nnkStmtListExpr} and call.len == 1: call[0] else: call
+  ## It unwraps `( )` and a `progressify(...)` (which becomes `progress = true`).
+  var n = if call.kind in {nnkPar, nnkStmtListExpr} and call.len == 1: call[0] else: call
+  var opts = opts
+  if n.kind == nnkInfix and n[0].eqIdent("|>"):   # an inner pipe reaches the macro unexpanded
+    n = pipe(n[1], n[2])
+  if n.kind in nnkCallKinds and n.len == 2 and n[0].eqIdent("progressify"):
+    n = n[1]
+    opts.add nnkExprEqExpr.newTree(ident"progress", newLit(true))
   var fn, xs, arg: NimNode
   if n.kind in nnkCallKinds and n.len == 2 and n[0].kind == nnkDotExpr:   # xs.map(f)
     (fn, xs, arg) = (n[0][1], n[0][0], n[1])
@@ -275,6 +290,18 @@ macro futurize*(call: untyped; opts: varargs[untyped]): untyped =
   else:
     result = rewrite(call, toSeq(opts))
 
+macro progressify*(call: untyped): untyped =
+  ## `xs.map(f) |> progressify()`: the same map, with a progress bar, run sequentially (R's
+  ## progressify package). Before a futurize, `|> progressify() |> futurize()`, it is unwrapped
+  ## by futurize instead, and the bar comes from the workers.
+  let m = rewrite(call, @[nnkExprEqExpr.newTree(ident"progress", newLit(true))])
+  result = quote do:
+    block:
+      let saved = plan()
+      plan(sequential())
+      try: `m`
+      finally: plan(saved)
+
 macro transpiled*(call: untyped; opts: varargs[untyped]): string =
   ## What futurize turns `call` into, as source (R: `futurize(eval = FALSE)`).
   newLit(rewrite(call, toSeq(opts)).repr)
@@ -282,8 +309,4 @@ macro transpiled*(call: untyped; opts: varargs[untyped]): string =
 macro `|>`*(lhs, rhs: untyped): untyped =
   ## R's native pipe: `x |> f(y)` is `f(x, y)`. So `xs.mapIt(it * 2) |> futurize(seed = 1)` reads
   ## like the R original, and the map reaches the macro unevaluated, as R's `substitute()` sees it.
-  if rhs.kind in nnkCallKinds:
-    result = rhs.copyNimTree
-    result.insert(1, lhs)
-  else:
-    result = newCall(rhs, lhs)
+  pipe(lhs, rhs)
