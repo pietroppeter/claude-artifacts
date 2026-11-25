@@ -132,7 +132,7 @@ nbSteps("The three verbs of the future package: `future()`, `resolved()`, `value
 
 nbR("""
 library(future)
-plan(multisession)               # more on this in N° 2
+plan(multisession)               # more on this in N° 3
 a <- future({ Sys.sleep(1); 3^2 })
 b <- future({ Sys.sleep(1); 4^2 })
 value(a) + value(b)              # about 1 second, not 2
@@ -239,6 +239,14 @@ session takes. How it works: the program is started again with `--fv-worker slow
 lines on stdin and writes results on stdout.
 """
 
+nbText: """
+Why a quarter, and not exactly? Drag the number of workers in this playground. Twelve tasks of
+different lengths are dealt to the workers the way `fv` deals them (element i to worker
+i mod n), and the longest lane sets the wall time. The dice are for N° 5; leave them for now.
+"""
+
+nbPlayground()
+
 nbNote(nkNim, &"""
 **R ships code; Nim ships only data.** An R worker is an empty R session, so the future package
 sends it the expression, the functions it calls and the data they use. A Nim worker is the same
@@ -313,7 +321,7 @@ proc main() =
   let rate = 3
   echo toSeq(1..4).mapIt(it * rate) |> futurize()
 main()
-""", targs = checkArgs, tcmd = "c --compileOnly", tfold = "The same check, through `futurize` (N° 7): a local variable can't sneak in")
+""", targs = checkArgs, tcmd = "c --compileOnly", tfold = "The same check, through `futurize` (N° 8): a local variable can't sneak in")
 
 # ============================================================================================ 4
 nbText: """
@@ -329,7 +337,9 @@ The futureverse fixes both with `seed = TRUE`: every *element* gets its own stre
 MRG32k3a generator, whose streams are provably far apart), chosen from the element's position.
 The result then depends only on the seed, never on the plan: change the past (how many workers,
 which machine) and the future stays the same. `fv` does the same with a simpler
-trick: element `i` seeds its own generator from `splitmix64(seed, i)`.
+trick: element `i` seeds its own generator from `splitmix64(seed, i)`. Go back to the playground
+in N° 3 and press **seed per worker**: drag the slider and dice change, because each worker draws
+from its own stream in its own order. Press **seed per element** and they never move.
 """
 
 nbCode:
@@ -477,7 +487,7 @@ nbCode:
 
 nbText: """
 Note the `{.nimcall, gcsafe.}` that the macro adds to the generated proc. It is what gives the
-compiler error at the end of N° 3: a local variable can't be captured by a proc that runs
+compiler error at the end of N° 4: a local variable can't be captured by a proc that runs
 somewhere else. And R's `futurize(FALSE)`, which turns every futurize off for debugging, is a
 compile-time switch here: build with `-d:futurizeOff` and each futurize becomes the plain map.
 """

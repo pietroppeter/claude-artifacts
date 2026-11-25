@@ -200,3 +200,28 @@ newNbBlock(NbTimeline):
 template nbTimeline*(tcaption: string; tstops: seq[Stop]) =
   ## Dates in glowing digits, one per stop, oldest first.
   nb.add newNbTimeline(caption = tcaption, stops = tstops)
+
+const playgroundJs = staticRead("playground.js")
+
+newNbBlock(NbPlayground):
+  toHtml:
+    """<section class="playground" id="pg">
+<div class="pg-controls">
+  <label class="pg-slider">workers <output id="pg-n">3</output>
+    <input type="range" id="pg-workers" min="1" max="8" value="3" aria-label="number of workers"></label>
+  <div class="pg-seed" role="group" aria-label="how random numbers are seeded">
+    <button type="button" id="pg-elem" aria-pressed="true">seed per element</button>
+    <button type="button" id="pg-work" aria-pressed="false">seed per worker</button>
+  </div>
+</div>
+<div class="pg-lanes" id="pg-lanes"></div>
+<p class="pg-time" id="pg-time"></p>
+<div class="pg-dice-label">the 12 dice, in element order (outlined: different from 1 worker)</div>
+<div class="pg-dice" id="pg-dice"></div>
+<p class="pg-verdict" id="pg-verdict"></p>
+<noscript><p>This playground needs JavaScript.</p></noscript>
+</section><script>""" & playgroundJs & "</script>"
+
+template nbPlayground*() =
+  ## The plan playground: drag the number of workers, flip how seeds are chosen.
+  nb.add newNbPlayground()

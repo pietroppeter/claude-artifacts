@@ -76,6 +76,27 @@ figure.timeline ol{list-style:none;margin:0;padding:0;display:grid;grid-template
 figure.timeline li{border:1px solid #4a3f3f;border-radius:5px;padding:.4rem .5rem;background:#2b2425}
 figure.timeline .tl-date{display:block;font:600 1.05rem/1.2 var(--mono);color:var(--glow);text-shadow:0 0 6px rgba(255,176,0,.55);letter-spacing:.06em}
 figure.timeline .tl-what{display:block;font-size:.88rem;line-height:1.35}
+/* the plan playground */
+section.playground{margin:1.2rem 0;background:var(--card);border:2px solid var(--bordeaux);border-radius:8px;padding:.7rem .8rem}
+.pg-controls{display:flex;flex-wrap:wrap;gap:.6rem 1rem;align-items:center}
+.pg-slider{flex:1 1 12rem;display:flex;flex-direction:column;font-weight:700;font-size:.9rem;color:var(--bordeaux)}
+.pg-slider output{font:600 1.05rem var(--mono);color:var(--ink)}
+.pg-slider input{width:100%;min-height:44px;accent-color:var(--bordeaux);touch-action:manipulation}
+.pg-seed{display:flex;gap:.4rem;flex-wrap:wrap}
+.pg-seed button{font:700 .88rem var(--font);min-height:44px;padding:0 .8rem;border:2px solid var(--bordeaux);border-radius:22px;background:var(--card);color:var(--bordeaux);cursor:pointer}
+.pg-seed button[aria-pressed=true]{background:var(--bordeaux);color:var(--card)}
+.pg-lanes{margin:.7rem 0 .3rem}
+.pg-lane{display:flex;align-items:center;gap:.4rem;margin:.22rem 0}
+.pg-who{flex:none;width:1.8rem;font:12.5px var(--mono);color:var(--muted)}
+.pg-bar{display:flex;gap:2px;transition:width .25s}
+.pg-task{min-width:0;height:1.6rem;display:flex;align-items:center;justify-content:center;background:var(--brass-soft);border:1px solid var(--brass);border-radius:3px;font:12.5px var(--mono);overflow:hidden}
+.pg-time{margin:.3rem 0 .6rem;font-size:.92rem}
+.pg-dice-label{font-size:.78rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.pg-dice{display:flex;flex-wrap:wrap;gap:.15rem;font-size:1.9rem;line-height:1.1;margin:.2rem 0}
+.pg-die{padding:0 .1rem;border:2px solid transparent;border-radius:6px}
+.pg-die.moved{border-color:var(--careful);background:var(--careful-soft)}
+.pg-verdict{margin:.3rem 0 0;font-weight:700}
+@media (prefers-reduced-motion: reduce){.pg-bar{transition:none}}
 /* the cloakroom: steps as tickets */
 figure.steps{margin:1.2rem 0}
 figure.steps ol{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.6rem}
@@ -998,7 +1019,7 @@ computation: creating it is quick, the work happens somewhere else, and asking f
 waits only if the work is not done yet.</p>
 <figure class="steps"><ol><li><span class="step-icon">🧥</span><span class="step-title"><code>f &lt;- future(expr)</code></span><span class="step-what">hand in the work, get a ticket at once</span></li><li><span class="step-icon">🎟️</span><span class="step-title"><code>resolved(f)</code></span><span class="step-what">peek: is my coat ready? (never waits)</span></li><li><span class="step-icon">🧥</span><span class="step-title"><code>value(f)</code></span><span class="step-what">collect it, waiting if needed; errors come back here</span></li></ol><figcaption>The three verbs of the future package: <code>future()</code>, <code>resolved()</code>, <code>value()</code>.</figcaption></figure>
 <figure class="rcode"><figcaption>R</figcaption><pre><code class="language-r"><span class="hljs-title function_">library</span>(future)
-<span class="hljs-title function_">plan</span>(multisession)               <span class="hljs-comment"># more on this in N° 2</span>
+<span class="hljs-title function_">plan</span>(multisession)               <span class="hljs-comment"># more on this in N° 3</span>
 a &lt;- <span class="hljs-title function_">future</span>({ <span class="hljs-title function_">Sys.sleep</span>(<span class="hljs-number">1</span>); <span class="hljs-number">3</span>^<span class="hljs-number">2</span> })
 b &lt;- <span class="hljs-title function_">future</span>({ <span class="hljs-title function_">Sys.sleep</span>(<span class="hljs-number">1</span>); <span class="hljs-number">4</span>^<span class="hljs-number">2</span> })
 <span class="hljs-title function_">value</span>(a) + <span class="hljs-title function_">value</span>(b)              <span class="hljs-comment"># about 1 second, not 2</span></code></pre><pre class="nb-output">[1] 25</pre></figure>
@@ -1091,7 +1112,7 @@ current. Eight elements of 50 ms each:</p>
   <span class="hljs-keyword">echo</span> plan(), <span class="hljs-string">&quot;: &quot;</span>, ys, <span class="hljs-string">&quot; in &quot;</span>, (getMonoTime() - t).inMilliseconds, <span class="hljs-string">&quot; ms&quot;</span></code></pre>
 <pre class="nb-output">sequential: @[1, 4, 9, 16, 25, 36, 49, 64] in 401 ms
 threads(4): @[1, 4, 9, 16, 25, 36, 49, 64] in 100 ms
-processes(4): @[1, 4, 9, 16, 25, 36, 49, 64] in 108 ms
+processes(4): @[1, 4, 9, 16, 25, 36, 49, 64] in 110 ms
 </pre>
 <p>Same code, same answer, a quarter of the time. <code>processes(4)</code> starts <strong>four copies of this very
 program</strong>, which is the Nim version of R's <code>multisession</code>. It is not much slower than threads
@@ -1099,6 +1120,78 @@ here, because starting a compiled program takes a millisecond or two, not the se
 session takes. How it works: the program is started again with <code>--fv-worker slowSquare</code>, and
 <code>fvServe()</code>, the first line of the program, turns it into a worker that reads elements as JSON
 lines on stdin and writes results on stdout.</p>
+<p>Why a quarter, and not exactly? Drag the number of workers in this playground. Twelve tasks of
+different lengths are dealt to the workers the way <code>fv</code> deals them (element i to worker
+i mod n), and the longest lane sets the wall time. The dice are for N° 5; leave them for now.</p>
+<section class="playground" id="pg">
+<div class="pg-controls">
+  <label class="pg-slider">workers <output id="pg-n">3</output>
+    <input type="range" id="pg-workers" min="1" max="8" value="3" aria-label="number of workers"></label>
+  <div class="pg-seed" role="group" aria-label="how random numbers are seeded">
+    <button type="button" id="pg-elem" aria-pressed="true">seed per element</button>
+    <button type="button" id="pg-work" aria-pressed="false">seed per worker</button>
+  </div>
+</div>
+<div class="pg-lanes" id="pg-lanes"></div>
+<p class="pg-time" id="pg-time"></p>
+<div class="pg-dice-label">the 12 dice, in element order (outlined: different from 1 worker)</div>
+<div class="pg-dice" id="pg-dice"></div>
+<p class="pg-verdict" id="pg-verdict"></p>
+<noscript><p>This playground needs JavaScript.</p></noscript>
+</section><script>{
+  // 12 tasks of different lengths (in "seconds"); element i goes to worker i mod n, like fv's threads.
+  const dur = [3, 1, 2, 4, 2, 1, 3, 2, 1, 4, 2, 1];
+  const $ = id => document.getElementById(id);
+  let perElement = true;
+  // a small seeded generator (mulberry32) and fv's splitmix-style mixing of (seed, i)
+  const rng = s => () => { s |= 0; s = s + 0x6D2B79F5 | 0; let t = Math.imul(s ^ s >>> 15, 1 | s);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t; return ((t ^ t >>> 14) >>> 0) / 4294967296; };
+  const mix = (seed, i) => Math.imul(seed ^ (i + 1) * 0x9E3779B1, 0x85EBCA6B) ^ (i * 0xC2B2AE35);
+  const die = r => 1 + Math.floor(r() * 6);
+  function roll(n) {
+    const out = new Array(dur.length);
+    if (perElement) { dur.forEach((_, i) => out[i] = die(rng(mix(42, i)))); return out; }
+    for (let w = 0; w < n; w++) {           // one stream per worker, used in the worker's order
+      const r = rng(mix(42, 1000 + w));
+      for (let i = w; i < dur.length; i += n) out[i] = die(r);
+    }
+    return out;
+  }
+  const faces = ["", "⚀", "⚁", "⚂", "⚃", "⚄", "⚅"];
+  function draw() {
+    const n = +$("pg-workers").value;
+    $("pg-n").textContent = n;
+    const total = dur.reduce((a, b) => a + b, 0);
+    let lanes = "", wall = 0;
+    for (let w = 0; w < n; w++) {
+      let row = "", t = 0;
+      for (let i = w; i < dur.length; i += n) {
+        row += `<span class="pg-task" style="flex:${dur[i]} 0 0">${i + 1}</span>`; t += dur[i];
+      }
+      wall = Math.max(wall, t);
+      lanes += `<div class="pg-lane"><span class="pg-who">w${w + 1}</span><div class="pg-bar" style="width:${(t / total * 100).toFixed(1)}%">${row}</div></div>`;
+    }
+    $("pg-lanes").innerHTML = lanes;
+    $("pg-time").innerHTML = `wall time <b>${wall} s</b> instead of ${total} s: ${(total / wall).toFixed(1)}× faster` +
+      (n > 1 && wall > Math.ceil(total / n) ? ` (an ideal split would take ${Math.ceil(total / n)} s: the longest lane decides)` : "");
+    const base = roll(1), now = roll(n);
+    $("pg-dice").innerHTML = now.map((d, i) => `<span class="pg-die${d !== base[i] ? " moved" : ""}" title="element ${i + 1}">${faces[d]}</span>`).join("");
+    const moved = now.filter((d, i) => d !== base[i]).length;
+    $("pg-verdict").textContent = perElement
+      ? "Same dice for any number of workers: each element has its own stream."
+      : moved ? `${moved} of 12 dice changed: the results depend on how many workers you had.` : "Same as 1 worker, but only by luck of this plan: try another.";
+  }
+  function seedMode(e) {
+    perElement = e;
+    $("pg-elem").setAttribute("aria-pressed", e); $("pg-work").setAttribute("aria-pressed", !e);
+    draw();
+  }
+  $("pg-workers").addEventListener("input", draw);
+  $("pg-elem").addEventListener("click", () => seedMode(true));
+  $("pg-work").addEventListener("click", () => seedMode(false));
+  draw();
+}
+</script>
 <aside class="note nim"><span class="note-label">Nim</span><p><strong>R ships code; Nim ships only data.</strong> An R worker is an empty R session, so the future package
 sends it the expression, the functions it calls and the data they use. A Nim worker is the same
 compiled binary, so it already has all the code: only the name of the task and the elements
@@ -1143,7 +1236,7 @@ the program runs instead of while it runs. The fix is the one R does for you: pa
 an argument (or make it a <code>const</code>, which is compiled in). The processes plan sits in between:
 a worker process re-runs the program's top-level code up to <code>fvServe()</code>, so a global computed
 there exists in the worker too, recomputed, not shipped.</p>
-<details class="fold"><summary>The same check, through <code>futurize</code> (N° 7): a local variable can't sneak in</summary><pre><code class="hljs nim"><span class="hljs-keyword">import</span> std/sequtils, fv
+<details class="fold"><summary>The same check, through <code>futurize</code> (N° 8): a local variable can't sneak in</summary><pre><code class="hljs nim"><span class="hljs-keyword">import</span> std/sequtils, fv
 <span class="hljs-keyword">proc</span> main() =
   <span class="hljs-keyword">let</span> rate = <span class="hljs-number">3</span>
   <span class="hljs-keyword">echo</span> toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">4</span>).mapIt(it * rate) |&gt; futurize()
@@ -1158,7 +1251,9 @@ correlated streams.</p>
 MRG32k3a generator, whose streams are provably far apart), chosen from the element's position.
 The result then depends only on the seed, never on the plan: change the past (how many workers,
 which machine) and the future stays the same. <code>fv</code> does the same with a simpler
-trick: element <code>i</code> seeds its own generator from <code>splitmix64(seed, i)</code>.</p>
+trick: element <code>i</code> seeds its own generator from <code>splitmix64(seed, i)</code>. Go back to the playground
+in N° 3 and press <strong>seed per worker</strong>: drag the slider and dice change, because each worker draws
+from its own stream in its own order. Press <strong>seed per element</strong> and they never move.</p>
 <pre><code class="nohighlight nim hljs"><span class="hljs-keyword">for</span> p <span class="hljs-keyword">in</span> [sequential(), threads(<span class="hljs-number">3</span>), processes(<span class="hljs-number">4</span>)]:
   plan p
   <span class="hljs-keyword">let</span> ys = futureMap(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>), noisy, seed = <span class="hljs-number">42</span>)
@@ -1250,9 +1345,9 @@ change. <code>fv</code> has one too, a macro that the futurize macro unwraps (on
 <pre><code class="nohighlight nim hljs">plan threads(<span class="hljs-number">4</span>)
 <span class="hljs-keyword">discard</span> toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">10</span>).map(slowSquare) |&gt; progressify() |&gt; futurize()</code></pre>
 <pre class="nb-output">progress |█·········| 1/10
-progress |██········| 2/10
-progress |███·······| 3/10
 progress |████······| 4/10
+progress |███·······| 3/10
+progress |██········| 2/10
 progress |█████·····| 5/10
 progress |██████····| 6/10
 progress |███████···| 7/10
@@ -1295,7 +1390,7 @@ an operator, so we add that too, in five lines:</p>
   futureMap(toSeq(1 .. 8), fvIt_1040197170, seed = 1)
 </pre>
 <p>Note the <code>{.nimcall, gcsafe.}</code> that the macro adds to the generated proc. It is what gives the
-compiler error at the end of N° 3: a local variable can't be captured by a proc that runs
+compiler error at the end of N° 4: a local variable can't be captured by a proc that runs
 somewhere else. And R's <code>futurize(FALSE)</code>, which turns every futurize off for debugging, is a
 compile-time switch here: build with <code>-d:futurizeOff</code> and each futurize becomes the plain map.</p>
 <aside class="note r"><span class="note-label">Meanwhile, in R</span><p>One difference of philosophy. In R, only the <strong>end-user</strong> may switch futurization off, and
@@ -1859,7 +1954,7 @@ nbSteps(<span class="hljs-string">&quot;The three verbs of the future package: `
 
 nbR(<span class="hljs-string">&quot;&quot;&quot;
 library(future)
-plan(multisession)               # more on this in N° 2
+plan(multisession)               # more on this in N° 3
 a &lt;- future({ Sys.sleep(1); 3^2 })
 b &lt;- future({ Sys.sleep(1); 4^2 })
 value(a) + value(b)              # about 1 second, not 2
@@ -1966,6 +2061,14 @@ session takes. How it works: the program is started again with `--fv-worker slow
 lines on stdin and writes results on stdout.
 &quot;&quot;&quot;</span>
 
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+Why a quarter, and not exactly? Drag the number of workers in this playground. Twelve tasks of
+different lengths are dealt to the workers the way `fv` deals them (element i to worker
+i mod n), and the longest lane sets the wall time. The dice are for N° 5; leave them for now.
+&quot;&quot;&quot;</span>
+
+nbPlayground()
+
 nbNote(nkNim, &amp;<span class="hljs-string">&quot;&quot;&quot;
 **R ships code; Nim ships only data.** An R worker is an empty R session, so the future package
 sends it the expression, the functions it calls and the data they use. A Nim worker is the same
@@ -2040,7 +2143,7 @@ proc main() =
   let rate = 3
   echo toSeq(1..4).mapIt(it * rate) |&gt; futurize()
 main()
-&quot;&quot;&quot;</span>, targs = checkArgs, tcmd = <span class="hljs-string">&quot;c --compileOnly&quot;</span>, tfold = <span class="hljs-string">&quot;The same check, through `futurize` (N° 7): a local variable can't sneak in&quot;</span>)
+&quot;&quot;&quot;</span>, targs = checkArgs, tcmd = <span class="hljs-string">&quot;c --compileOnly&quot;</span>, tfold = <span class="hljs-string">&quot;The same check, through `futurize` (N° 8): a local variable can't sneak in&quot;</span>)
 
 <span class="hljs-comment"># ============================================================================================ 4</span>
 nbText: <span class="hljs-string">&quot;&quot;&quot;
@@ -2056,7 +2159,9 @@ The futureverse fixes both with `seed = TRUE`: every *element* gets its own stre
 MRG32k3a generator, whose streams are provably far apart), chosen from the element's position.
 The result then depends only on the seed, never on the plan: change the past (how many workers,
 which machine) and the future stays the same. `fv` does the same with a simpler
-trick: element `i` seeds its own generator from `splitmix64(seed, i)`.
+trick: element `i` seeds its own generator from `splitmix64(seed, i)`. Go back to the playground
+in N° 3 and press **seed per worker**: drag the slider and dice change, because each worker draws
+from its own stream in its own order. Press **seed per element** and they never move.
 &quot;&quot;&quot;</span>
 
 nbCode:
@@ -2204,7 +2309,7 @@ nbCode:
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 Note the `{.nimcall, gcsafe.}` that the macro adds to the generated proc. It is what gives the
-compiler error at the end of N° 3: a local variable can't be captured by a proc that runs
+compiler error at the end of N° 4: a local variable can't be captured by a proc that runs
 somewhere else. And R's `futurize(FALSE)`, which turns every futurize off for debugging, is a
 compile-time switch here: build with `-d:futurizeOff` and each futurize becomes the plain map.
 &quot;&quot;&quot;</span>

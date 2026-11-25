@@ -93,6 +93,27 @@ figure.timeline ol{list-style:none;margin:0;padding:0;display:grid;grid-template
 figure.timeline li{border:1px solid #4a3f3f;border-radius:5px;padding:.4rem .5rem;background:#2b2425}
 figure.timeline .tl-date{display:block;font:600 1.05rem/1.2 var(--mono);color:var(--glow);text-shadow:0 0 6px rgba(255,176,0,.55);letter-spacing:.06em}
 figure.timeline .tl-what{display:block;font-size:.88rem;line-height:1.35}
+/* the plan playground */
+section.playground{margin:1.2rem 0;background:var(--card);border:2px solid var(--bordeaux);border-radius:8px;padding:.7rem .8rem}
+.pg-controls{display:flex;flex-wrap:wrap;gap:.6rem 1rem;align-items:center}
+.pg-slider{flex:1 1 12rem;display:flex;flex-direction:column;font-weight:700;font-size:.9rem;color:var(--bordeaux)}
+.pg-slider output{font:600 1.05rem var(--mono);color:var(--ink)}
+.pg-slider input{width:100%;min-height:44px;accent-color:var(--bordeaux);touch-action:manipulation}
+.pg-seed{display:flex;gap:.4rem;flex-wrap:wrap}
+.pg-seed button{font:700 .88rem var(--font);min-height:44px;padding:0 .8rem;border:2px solid var(--bordeaux);border-radius:22px;background:var(--card);color:var(--bordeaux);cursor:pointer}
+.pg-seed button[aria-pressed=true]{background:var(--bordeaux);color:var(--card)}
+.pg-lanes{margin:.7rem 0 .3rem}
+.pg-lane{display:flex;align-items:center;gap:.4rem;margin:.22rem 0}
+.pg-who{flex:none;width:1.8rem;font:12.5px var(--mono);color:var(--muted)}
+.pg-bar{display:flex;gap:2px;transition:width .25s}
+.pg-task{min-width:0;height:1.6rem;display:flex;align-items:center;justify-content:center;background:var(--brass-soft);border:1px solid var(--brass);border-radius:3px;font:12.5px var(--mono);overflow:hidden}
+.pg-time{margin:.3rem 0 .6rem;font-size:.92rem}
+.pg-dice-label{font-size:.78rem;font-weight:700;letter-spacing:.05em;text-transform:uppercase;color:var(--muted)}
+.pg-dice{display:flex;flex-wrap:wrap;gap:.15rem;font-size:1.9rem;line-height:1.1;margin:.2rem 0}
+.pg-die{padding:0 .1rem;border:2px solid transparent;border-radius:6px}
+.pg-die.moved{border-color:var(--careful);background:var(--careful-soft)}
+.pg-verdict{margin:.3rem 0 0;font-weight:700}
+@media (prefers-reduced-motion: reduce){.pg-bar{transition:none}}
 /* the cloakroom: steps as tickets */
 figure.steps{margin:1.2rem 0}
 figure.steps ol{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.6rem}
