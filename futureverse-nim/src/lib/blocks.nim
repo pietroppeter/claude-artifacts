@@ -185,3 +185,18 @@ template nbR*(tcode: string; toutput = "") =
   ## R code, shown and not run (there is no R here); `toutput` is the output the paper or the
   ## futureverse docs print for it. Highlighted after the build by tools/codeblocks.py.
   nb.add newNbR(code = tcode, output = toutput)
+
+type Stop* = tuple[date, what: string]   ## what: Markdown
+
+newNbBlock(NbTimeline):
+  caption: string
+  stops: seq[Stop]
+  toHtml:
+    var s = &"""<figure class="timeline"><figcaption>{inlineMd(blk.caption)}</figcaption><ol>"""
+    for st in blk.stops:
+      s.add &"""<li><span class="tl-date">{esc(st.date)}</span><span class="tl-what">{inlineMd(st.what)}</span></li>"""
+    s & "</ol></figure>"
+
+template nbTimeline*(tcaption: string; tstops: seq[Stop]) =
+  ## Dates in glowing digits, one per stop, oldest first.
+  nb.add newNbTimeline(caption = tcaption, stops = tstops)

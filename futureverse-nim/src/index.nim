@@ -14,7 +14,7 @@ import review          # tabelline's review mode, from claude-artifacts shared/r
 
 nbInit
 nb.doc.filename = currentSourcePath().parentDir.parentDir / "index.html"
-nb.title = "The cloakroom of the future: R's futureverse, explained in Nim"
+nb.title = "Back to the futureverse: R's futures, explained in Nim"
 nb.useExplainerStyle
 nbReview(tpage = "futureverse-nim", tsource = "futureverse-nim/src/index.nim")
 
@@ -32,7 +32,7 @@ const
 
 let fvLines = lineCount("fv.nim")
 
-nbText: "# The cloakroom of the future"
+nbText: "# Back to the futureverse"
 
 nbPrompt("Pietro", "25 Nov 2026", &"""
 At compute Paris I have met Henrik, author of a popular library for parallelizing R code. Can you
@@ -43,11 +43,12 @@ Be playful and go wild!
 """)
 
 nbLede: &"""
-Henrik Bengtsson's **futureverse** lets an R programmer write `lapply(xs, slow)`, add one word,
+Henrik Bengtsson's **futureverse** ("you keep your code, and you decide where it runs") lets an R programmer write `lapply(xs, slow)`, add one word,
 and have it run on all the cores of a laptop, on a few machines, or on a supercomputer, with
 nothing else changed. This page explains the ideas behind it for someone who knows Nim and only a
 little R. The best way to understand a design is to build it, so we build a toy futureverse
 in Nim ({fvLines} lines), and every example on this page runs on it when the page is built.
+Fasten your seatbelt: we travel through a cloakroom, a few time machines and a macro.
 """
 
 nbTldr: &"""
@@ -97,9 +98,21 @@ The futureverse is a family of packages: **future** (the core, 2015), **future.a
 (parallel `lapply` and friends), **furrr** (parallel purrr, by Davis Vaughan), **doFuture**
 (for `foreach`), **progressr** (progress bars), **parallelly** (how many cores may I use?),
 backends such as **future.mirai** and **future.batchtools**, and since this year
-**futurize**, the subject of the [paper Pietro sent]({paper}). The design is in the
-[R Journal paper of 2021]({rjournal}).
+**futurize** (the subject of the [paper Pietro sent]({paper})) and its sibling **progressify**.
+The design is in the [R Journal paper of 2021]({rjournal}). And it is not niche: according to
+[futureverse.org]({site}), as of November 2026 about 1,300 CRAN packages depend on future
+directly or indirectly (5.1% of CRAN), among them Seurat, mlr3, targets and shiny, and in eleven
+years it has had no breaking update.
 """)
+
+nbTimeline("The futureverse's time-travel log", @[
+  (date: "1977", what: "Baker and Hewitt name *futures*"),
+  (date: "JUN 2015", what: "first release of future on CRAN"),
+  (date: "2021", what: "the design in The R Journal"),
+  (date: "JUN 2025", what: "ten years of future"),
+  (date: "JAN 2026", what: "futurize: one magic word"),
+  (date: "NOV 2026", what: "Henrik meets Pietro at Compute Paris"),
+])
 
 # ============================================================================================ 1
 nbText: """
@@ -162,7 +175,9 @@ nbNote(nkAside, &"""
 Henrik's paper makes this distinction in its first footnote: **concurrent** describes the logical
 structure ("these can happen in any order"), **parallel** the physical execution ("these happen
 at the same time, on different cores"). A future is a concurrency idea; the backend decides
-whether it becomes parallelism. Futures themselves are old: Baker and Hewitt named them in 1977.
+whether it becomes parallelism. That is why futures are not only about speed: Shiny apps use
+them to stay responsive while a slow computation runs in the background, which is exactly the
+job of Nim's async futures above.
 """)
 
 # ============================================================================================ 2
@@ -179,8 +194,10 @@ plan(sequential)                              # one attendant: no parallelism (t
 plan(multisession, workers = 4)               # 4 R processes on this machine
 plan(multicore)                               # forked R processes (Linux, macOS)
 plan(cluster, workers = c("n1", "n2"))        # R processes on other machines, over SSH
-plan(future.mirai::mirai_multisession)        # mirai's fast workers
-plan(future.batchtools::batchtools_slurm)     # jobs on an HPC scheduler
+plan(future.callr::callr)                     # a fresh R process per future
+plan(future.mirai::mirai_multisession)        # mirai's low-latency workers
+plan(future.batchtools::batchtools_slurm)     # jobs on an HPC scheduler (also LSF, SGE, PBS)
+plan(future.p2p::cluster, cluster = "alice/friends")  # a prototype: your friends' laptops
 """)
 
 nbText: """
@@ -188,7 +205,11 @@ The same `lapply(...) |> futurize()` then runs on a laptop, on a lab's machines,
 on a cluster. The paper calls this **separation of concerns**: the developer decides *what*,
 the end-user decides *how and where*. A rule follows from it: **packages must never call
 `plan()`**, because that would take the choice away from the user (the paper found CRAN packages
-that do it anyway).
+that do it anyway; Henrik has a blog post titled *Setting Future Plans in R Functions, and Why
+You Probably Shouldn't*). And every backend must pass the conformance tests of **future.tests**
+before it may call itself one, so, in the site's words, "switching backend never changes your
+results, only where they are computed". Roads? Where this code is going, it doesn't need to
+know the roads.
 
 Our toy, `fv`, has three plans. A task is a plain Nim proc; here are the four the page uses,
 from `examples/tasks.nim`:
@@ -241,7 +262,8 @@ nbNote(nkAside, """
 On this build machine the two agree. In a container limited to 2 CPUs, `countProcessors()`
 would still say the host's count and every thread pool sized from it would oversubscribe.
 `std/cpuinfo` could grow an `availableCores` that reads the cgroup quota: a small, useful
-Nim PR.
+Nim PR. (Henrik's blog has a post for R that applies to Nim word for word: *Please avoid
+detectCores() in your R packages*.)
 """)
 
 # ============================================================================================ 3
@@ -295,7 +317,7 @@ main()
 
 # ============================================================================================ 4
 nbText: """
-## Random numbers: the same dice, whoever rolls them
+## Random numbers: no time paradoxes
 
 Statisticians parallelize resampling all the time (bootstraps, permutation tests,
 simulations), so random numbers are central. Two things go wrong when you run them in parallel
@@ -305,7 +327,8 @@ correlated streams.
 
 The futureverse fixes both with `seed = TRUE`: every *element* gets its own stream (L'Ecuyer's
 MRG32k3a generator, whose streams are provably far apart), chosen from the element's position.
-The result then depends only on the seed, never on the plan. `fv` does the same with a simpler
+The result then depends only on the seed, never on the plan: change the past (how many workers,
+which machine) and the future stays the same. `fv` does the same with a simpler
 trick: element `i` seeds its own generator from `splitmix64(seed, i)`.
 """
 
@@ -400,14 +423,20 @@ nbCode:
   discard futureMap(toSeq(1..20), slowSquare, progress = true)
 
 nbText: """
-The paper plans a `progressify()` that injects the `p()` calls itself, so that
-`lapply(xs, slow) |> progressify() |> futurize()` gets a bar with no other change. Which brings
-us to the macro.
+The paper listed a `progressify()` as future work; by now it has shipped. It injects the `p()`
+calls itself, so `lapply(xs, slow) |> progressify() |> futurize()` gets a bar with no other
+change. `fv` has one too, a macro that the futurize macro unwraps (one of each is enough):
 """
+
+nbCode:
+  plan threads(4)
+  discard toSeq(1..10).map(slowSquare) |> progressify() |> futurize()
+
+nbText: "Which brings us to the macros."
 
 # ============================================================================================ 7
 nbText: &"""
-## futurize: one magic word, and in Nim it's a macro
+## futurize: where we're going, we don't need future_lapply
 
 Before futurize, parallelizing meant switching function: `lapply` becomes
 `future.apply::future_lapply`, `purrr::map` becomes `furrr::future_map`, `foreach() %do%`
@@ -426,7 +455,8 @@ It works because R is lazy: `futurize()` receives its argument *unevaluated*, as
 code (with `substitute()`), finds which map it is (`base::lapply`? `purrr::map`?), and rewrites
 it into the parallel version before running it. The paper calls this **transpiling**. It also
 unwraps `{ }`, `local()`, `suppressMessages()` to find the map inside, and knows the parallel
-switches of domain packages (boot, caret, glmnet, lme4, mgcv, tm) so you don't have to.
+switches of domain packages so you don't have to: the site counts 51 of them on CRAN and
+Bioconductor, from boot and glmnet to DESeq2 and SingleCellExperiment.
 
 Nim does code-as-data at compile time: a **macro** receives its argument unevaluated, as a syntax
 tree. So the Nim futurize is a macro that recognizes `map(xs, f)` and `xs.mapIt(expr)` from
@@ -515,9 +545,11 @@ nbText: """
 
 - futurize works on R code at run time; would you have wanted it at compile time, like a macro?
 - Which backend do people actually use on HPC today: batchtools or mirai?
-- Structured concurrency (the paper's future work, and malebolgia's only mode): will futures
-  launched by a map always be cancelled when one fails?
-- What is the strangest thing someone parallelized with futures?
+- Futures can be cancelled since future 1.49 (2025). Structured concurrency, malebolgia's only
+  mode, is still future work in the paper: will the futures of a map always be cancelled when
+  one of them fails?
+- What is the strangest thing someone parallelized with futures? And has future.p2p run on a
+  group of friends' laptops yet?
 """
 
 nbFold("How the toy is built: `fv.nim`, and its limits", &"""
@@ -530,6 +562,10 @@ nbFold("How the toy is built: `fv.nim`, and its limits", &"""
 - **Not done**: lazy futures (`future(lazy = TRUE)`), `resolved()`, cancellation, timeouts,
   remote machines, nested plans (R's `plan(list(cluster, multicore))`), warnings as a kind of
   their own, and moving exception objects. Toy, remember.
+- **Where R is going next** (the [roadmap]({site}roadmap.html)): restarting futures whose
+  worker died, resource declarations (memory, run time, GPUs) so a future goes only where it
+  fits, `availableMemory()` and `availableTime()` in parallelly, shared memory between local
+  workers. Each would make a nice Nim experiment.
 - Everything on this page was run when the page was built: the timings are real, from a
   {countProcessors()}-core cloud machine.
 """)
@@ -543,7 +579,8 @@ Sources: Henrik Bengtsson, [*A Unified Approach to Concurrent, Parallel Map-Redu
 Futures*]({paper}) (arXiv 2601.17578, January 2026) and [*A Unifying Framework for Parallel and
 Distributed Processing in R using Futures*]({rjournal}) (The R Journal, 2021); the
 [future]({futureRepo}) and [futurize]({futurizeRepo}) sources and vignettes; the
-[futureverse site]({site}). Nim: [malebolgia]({malebolgiaRepo}), [taskpools]({taskpoolsRepo}),
+[futureverse site]({site}) (home, backends, packages, roadmap, blog) and its
+[in-browser demo]({site}demo.html); the [progressify](https://github.com/futureverse/progressify) README. Nim: [malebolgia]({malebolgiaRepo}), [taskpools]({taskpoolsRepo}),
 Nim 2.2.4. Page made with [nimib](https://github.com/pietroppeter/nimib), tables with
 [tabelline](https://pietroppeter.github.io/tabelline/).
 """

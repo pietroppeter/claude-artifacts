@@ -1,6 +1,7 @@
 ## The style module of the futureverse explainer: every colour and CSS rule, from named tokens.
 ## The motif is a Paris cloakroom (le vestiaire), where a future is a numbered ticket: cream
 ## card stock, bordeaux ink, brass. Sections are numbered like tickets (N° 1, N° 2, ...).
+## A hint of time travel: the timeline's dates glow in amber digits on a dark panel.
 ## R's own blue marks the R side of a comparison. Fonts: DM Serif Display, Source Sans 3,
 ## JetBrains Mono.
 import std/json
@@ -13,7 +14,7 @@ const
   tokens = {
     "--paper": "#f6f0e4", "--card": "#fffdf8", "--ink": "#2a1d1f", "--muted": "#6d5f5a", "--line": "#dccfbd",
     "--bordeaux": "#7b1e34", "--bordeaux-soft": "#f3dfe2", "--brass": "#b0851f", "--brass-soft": "#f6ebcd",
-    "--rblue": "#2766b0", "--rblue-soft": "#e1ebf7", "--careful": "#a33a1c", "--careful-soft": "#f8e1d8",
+    "--panel": "#1f1a1b", "--glow": "#ffb000", "--rblue": "#2766b0", "--rblue-soft": "#e1ebf7", "--careful": "#a33a1c", "--careful-soft": "#f8e1d8",
     "--link": "#7b1e34", "--code-bg": "#fffdf8", "--out-bg": "#2a1d1f", "--out-ink": "#f6f0e4", "--err-ink": "#ffb7a3",
     "--kw": "#7b1e34", "--str": "#3d6b2a", "--num": "#9a5a00", "--com": "#8b7f76", "--type": "#2766b0",
     # the names the review mode (shared/review, tabelline's) reads, from this page's own
@@ -85,6 +86,13 @@ details.source > summary{cursor:pointer;padding:.55rem .8rem;min-height:44px;box
 details.source > summary code{font-weight:400}
 details.source .src-lines{font-weight:400;color:var(--muted);font-size:.85rem}
 details.source pre{margin:0;border:0;border-top:1px solid var(--line);border-radius:0}
+/* the time-travel log: dates in amber digits */
+figure.timeline{margin:1.2rem 0;background:var(--panel);border-radius:8px;padding:.7rem .8rem;color:var(--paper)}
+figure.timeline figcaption{font:700 .75rem/1 var(--font);letter-spacing:.08em;text-transform:uppercase;color:#bfb3a6;margin-bottom:.55rem}
+figure.timeline ol{list-style:none;margin:0;padding:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:.5rem}
+figure.timeline li{border:1px solid #4a3f3f;border-radius:5px;padding:.4rem .5rem;background:#2b2425}
+figure.timeline .tl-date{display:block;font:600 1.05rem/1.2 var(--mono);color:var(--glow);text-shadow:0 0 6px rgba(255,176,0,.55);letter-spacing:.06em}
+figure.timeline .tl-what{display:block;font-size:.88rem;line-height:1.35}
 /* the cloakroom: steps as tickets */
 figure.steps{margin:1.2rem 0}
 figure.steps ol{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.6rem}
