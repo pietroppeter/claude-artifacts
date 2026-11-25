@@ -177,14 +177,40 @@ template nbSteps*(tcaption: string; tsteps: seq[Step]) =
 newNbBlock(NbR):
   code: string
   output: string
+  label: string
   toHtml:
     let o = if blk.output.len > 0: &"""<pre class="nb-output">{esc(blk.output)}</pre>""" else: ""
-    &"""<figure class="rcode"><figcaption>R</figcaption><pre><code class="language-r">{esc(blk.code.strip)}</code></pre>{o}</figure>"""
+    &"""<figure class="rcode"><figcaption>{esc(blk.label)}</figcaption><pre><code class="language-r">{esc(blk.code.strip)}</code></pre>{o}</figure>"""
 
-template nbR*(tcode: string; toutput = "") =
-  ## R code, shown and not run (there is no R here); `toutput` is the output the paper or the
-  ## futureverse docs print for it. Highlighted after the build by tools/codeblocks.py.
-  nb.add newNbR(code = tcode, output = toutput)
+proc rLib*(): string = getEnv("FV_RLIB", currentSourcePath().parentDir.parentDir / "deps" / "Rlib")
+
+proc unCarriage(s: string): string =
+  ## A text progress bar redraws its line with \r: keep every frame that shows something, one per
+  ## line (an output without \r is left as it is).
+  if '\r' notin s: return s.strip(leading = false)
+  var lines: seq[string]
+  for line in s.splitLines:
+    for frame in line.split('\r'):
+      if frame.strip.len > 0: lines.add frame.strip(leading = false)
+  lines.join("\n")
+
+proc runR*(code, setup: string): string =
+  ## Run R code with Rscript (R packages from deps-r.sh), after a `setup` that is not shown;
+  ## stdout and stderr (messages, warnings) together, as R would show them in a console.
+  let dir = getTempDir() / "fv-r"
+  createDir dir
+  let f = dir / "block.R"
+  writeFile(f, ".libPaths(\"" & rLib() & "\")\noptions(warn = 1, progressr.enable = TRUE, width = 72)\n" &
+    "suppressPackageStartupMessages({ library(future); library(futurize) })\n" & setup.strip & "\n" & code.strip & "\n")
+  let (o, ex) = execCmdEx("Rscript " & quoteShell(f) & " 2>&1")
+  doAssert ex == 0, "R block failed:\n" & code & "\n" & o
+  o.unCarriage
+
+template nbR*(tcode: string; tsetup = ""; trun = true) =
+  ## R code, run now with Rscript (`trun = false`: only shown, labelled so); `tsetup` runs first
+  ## and is not shown. Highlighted after the build by tools/codeblocks.py.
+  nb.add newNbR(code = tcode, output = (if trun: runR(tcode, tsetup) else: ""),
+                label = (if trun: "R, run when the page was built" else: "R, not run here"))
 
 type Stop* = tuple[date, what: string]   ## what: Markdown
 

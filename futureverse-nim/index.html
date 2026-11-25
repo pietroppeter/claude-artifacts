@@ -97,6 +97,8 @@ section.playground{margin:1.2rem 0;background:var(--card);border:2px solid var(-
 .pg-die.moved{border-color:var(--careful);background:var(--careful-soft)}
 .pg-verdict{margin:.3rem 0 0;font-weight:700}
 @media (prefers-reduced-motion: reduce){.pg-bar{transition:none}}
+/* R's <- must read as <-, not as an arrow glyph */
+body code, body pre > code, body pre.nb-output{font-variant-ligatures:none}
 /* the cloakroom: steps as tickets */
 figure.steps{margin:1.2rem 0}
 figure.steps ol{list-style:none;padding:0;margin:0;display:grid;grid-template-columns:repeat(auto-fit,minmax(9.5rem,1fr));gap:.6rem}
@@ -885,6 +887,8 @@ are values, and the usual way to loop is to hand a function to a <em>map</em>, <
 applies <code>f</code> to every element of <code>xs</code> and gives back the list of results. And an R session runs
 your code on <strong>one thread</strong>: to use more cores, R starts more R processes and ships the work to
 them. The little R this page uses, next to its Nim:</p>
+<p>The R on this page runs too: every blue block labelled <em>run</em> was run by <code>Rscript</code> when the page
+was built, and shows its real output (R version 4.3.3 (2024-02-29); future 1.82.0, futurize 1.2.0, future.apply 1.21.0, progressr 1.1.0, progressify 0.5.0, parallelly 1.50.0).</p>
 <div id="tabella-19705ac5" class="tabella">
 <style>
 :where(.tabella):not(#_) { overflow-x: var(--tb-container-overflow-x, auto); overflow-y: var(--tb-container-overflow-y, auto); width: var(--tb-container-width, auto);
@@ -1018,11 +1022,16 @@ talk. Later you hand back the ticket and get your coat. A <strong>future</strong
 computation: creating it is quick, the work happens somewhere else, and asking for its <strong>value</strong>
 waits only if the work is not done yet.</p>
 <figure class="steps"><ol><li><span class="step-icon">🧥</span><span class="step-title"><code>f &lt;- future(expr)</code></span><span class="step-what">hand in the work, get a ticket at once</span></li><li><span class="step-icon">🎟️</span><span class="step-title"><code>resolved(f)</code></span><span class="step-what">peek: is my coat ready? (never waits)</span></li><li><span class="step-icon">🧥</span><span class="step-title"><code>value(f)</code></span><span class="step-what">collect it, waiting if needed; errors come back here</span></li></ol><figcaption>The three verbs of the future package: <code>future()</code>, <code>resolved()</code>, <code>value()</code>.</figcaption></figure>
-<figure class="rcode"><figcaption>R</figcaption><pre><code class="language-r"><span class="hljs-title function_">library</span>(future)
-<span class="hljs-title function_">plan</span>(multisession)               <span class="hljs-comment"># more on this in N° 3</span>
+<figure class="rcode"><figcaption>R, run when the page was built</figcaption><pre><code class="language-r"><span class="hljs-title function_">library</span>(future)
+<span class="hljs-title function_">plan</span>(multisession, workers = <span class="hljs-number">2</span>)  <span class="hljs-comment"># more on this in N° 3</span>
+t0 &lt;- <span class="hljs-title function_">Sys.time</span>()
 a &lt;- <span class="hljs-title function_">future</span>({ <span class="hljs-title function_">Sys.sleep</span>(<span class="hljs-number">1</span>); <span class="hljs-number">3</span>^<span class="hljs-number">2</span> })
 b &lt;- <span class="hljs-title function_">future</span>({ <span class="hljs-title function_">Sys.sleep</span>(<span class="hljs-number">1</span>); <span class="hljs-number">4</span>^<span class="hljs-number">2</span> })
-<span class="hljs-title function_">value</span>(a) + <span class="hljs-title function_">value</span>(b)              <span class="hljs-comment"># about 1 second, not 2</span></code></pre><pre class="nb-output">[1] 25</pre></figure>
+<span class="hljs-title function_">resolved</span>(a)                      <span class="hljs-comment"># not yet: still in the cloakroom</span>
+<span class="hljs-title function_">value</span>(a) + <span class="hljs-title function_">value</span>(b)
+<span class="hljs-title function_">Sys.time</span>() - t0                  <span class="hljs-comment"># about 1 second, not 2</span></code></pre><pre class="nb-output">[1] FALSE
+[1] 25
+Time difference of 1.131305 secs</pre></figure>
 <p>Nim has futures too. With <a href="https://github.com/status-im/nim-taskpools">taskpools</a> (Status's thread pool) the ticket is
 a <code>Flowvar</code> and <code>sync</code> collects it. This runs as the page is built, on 4 threads:</p>
 <pre><code class="nohighlight nim hljs"><span class="hljs-keyword">proc</span> slowCube(x: <span class="hljs-built_in">int</span>): <span class="hljs-built_in">int</span> =
@@ -1064,7 +1073,7 @@ job of Nim's async futures above.</p>
 <p>Here is the idea that makes the futureverse more than a thread pool. A package author writing
 <code>future()</code> or a parallel map <strong>never says where it runs</strong>. The person <em>using</em> the code picks
 that, once, with <code>plan()</code>:</p>
-<figure class="rcode"><figcaption>R</figcaption><pre><code class="language-r"><span class="hljs-title function_">plan</span>(sequential)                              <span class="hljs-comment"># one attendant: no parallelism (the default)</span>
+<figure class="rcode"><figcaption>R, not run here</figcaption><pre><code class="language-r"><span class="hljs-title function_">plan</span>(sequential)                              <span class="hljs-comment"># one attendant: no parallelism (the default)</span>
 <span class="hljs-title function_">plan</span>(multisession, workers = <span class="hljs-number">4</span>)               <span class="hljs-comment"># 4 R processes on this machine</span>
 <span class="hljs-title function_">plan</span>(multicore)                               <span class="hljs-comment"># forked R processes (Linux, macOS)</span>
 <span class="hljs-title function_">plan</span>(cluster, workers = <span class="hljs-title function_">c</span>(<span class="hljs-string">"</span><span class="hljs-string">n1"</span>, <span class="hljs-string">"</span><span class="hljs-string">n2"</span>))        <span class="hljs-comment"># R processes on other machines, over SSH</span>
@@ -1114,12 +1123,25 @@ current. Eight elements of 50 ms each:</p>
 threads(4): @[1, 4, 9, 16, 25, 36, 49, 64] in 100 ms
 processes(4): @[1, 4, 9, 16, 25, 36, 49, 64] in 110 ms
 </pre>
+<p>The same in R, on the same machine. Starting the 4 R sessions is timed apart from the map:</p>
+<figure class="rcode"><figcaption>R, run when the page was built</figcaption><pre><code class="language-r">slow_square &lt;- <span class="hljs-keyword">function</span>(x) { <span class="hljs-title function_">Sys.sleep</span>(<span class="hljs-number">0.05</span>); x^<span class="hljs-number">2</span> }
+t0 &lt;- <span class="hljs-title function_">Sys.time</span>(); <span class="hljs-title function_">plan</span>(multisession, workers = <span class="hljs-number">4</span>)
+<span class="hljs-title function_">cat</span>(<span class="hljs-string">"</span><span class="hljs-string">starting 4 R sessions:"</span>, <span class="hljs-title function_">round</span>(<span class="hljs-number">1000</span> * <span class="hljs-title function_">as.numeric</span>(<span class="hljs-title function_">Sys.time</span>() - t0, units = <span class="hljs-string">"</span><span class="hljs-string">secs"</span>)), <span class="hljs-string">"</span><span class="hljs-string">ms\n"</span>)
+<span class="hljs-keyword">for</span> (p <span class="hljs-keyword">in</span> <span class="hljs-title function_">c</span>(<span class="hljs-string">"</span><span class="hljs-string">sequential"</span>, <span class="hljs-string">"</span><span class="hljs-string">multisession"</span>)) {
+  <span class="hljs-keyword">if</span> (p == <span class="hljs-string">"</span><span class="hljs-string">sequential"</span>) <span class="hljs-title function_">plan</span>(sequential) <span class="hljs-keyword">else</span> <span class="hljs-title function_">plan</span>(multisession, workers = <span class="hljs-number">4</span>)
+  t0 &lt;- <span class="hljs-title function_">Sys.time</span>()
+  ys &lt;- <span class="hljs-title function_">lapply</span>(<span class="hljs-number">1</span>:<span class="hljs-number">8</span>, slow_square) |&gt; <span class="hljs-title function_">futurize</span>()
+  <span class="hljs-title function_">cat</span>(p, <span class="hljs-string">"</span><span class="hljs-string">: "</span>, <span class="hljs-title function_">unlist</span>(ys), <span class="hljs-string">"</span><span class="hljs-string"> in "</span>, <span class="hljs-title function_">round</span>(<span class="hljs-number">1000</span> * <span class="hljs-title function_">as.numeric</span>(<span class="hljs-title function_">Sys.time</span>() - t0, units = <span class="hljs-string">"</span><span class="hljs-string">secs"</span>)), <span class="hljs-string">"</span><span class="hljs-string"> ms\n"</span>, sep = <span class="hljs-string">"</span><span class="hljs-string"> "</span>)
+}</code></pre><pre class="nb-output">starting 4 R sessions: 706 ms
+sequential :  1 4 9 16 25 36 49 64  in  450  ms
+multisession :  1 4 9 16 25 36 49 64  in  257  ms</pre></figure>
 <p>Same code, same answer, a quarter of the time. <code>processes(4)</code> starts <strong>four copies of this very
 program</strong>, which is the Nim version of R's <code>multisession</code>. It is not much slower than threads
 here, because starting a compiled program takes a millisecond or two, not the second or so an R
 session takes. How it works: the program is started again with <code>--fv-worker slowSquare</code>, and
 <code>fvServe()</code>, the first line of the program, turns it into a worker that reads elements as JSON
-lines on stdin and writes results on stdout.</p>
+lines on stdin and writes results on stdout. R pays a few hundred milliseconds to start its
+sessions, once, and then some overhead per future for shipping code and data both ways.</p>
 <p>Why a quarter, and not exactly? Drag the number of workers in this playground. Twelve tasks of
 different lengths are dealt to the workers the way <code>fv</code> deals them (element i to worker
 i mod n), and the longest lane sets the wall time. The dice are for N° 5; leave them for now.</p>
@@ -1215,9 +1237,13 @@ detectCores() in your R packages</em>.)</p>
 </aside>
 <h2>Globals: what is in the coat pockets</h2>
 <p>Look at a task that uses a variable it did not get as an argument:</p>
-<figure class="rcode"><figcaption>R</figcaption><pre><code class="language-r">rate &lt;- <span class="hljs-number">1.2</span>
+<figure class="rcode"><figcaption>R, run when the page was built</figcaption><pre><code class="language-r">rate &lt;- <span class="hljs-number">1.2</span>
 f &lt;- <span class="hljs-keyword">function</span>(x) x * rate          <span class="hljs-comment"># 'rate' is a global of f</span>
-ys &lt;- <span class="hljs-title function_">lapply</span>(<span class="hljs-number">1</span>:<span class="hljs-number">4</span>, f) |&gt; <span class="hljs-title function_">futurize</span>() <span class="hljs-comment"># the worker must get 'rate' too</span></code></pre></figure>
+ys &lt;- <span class="hljs-title function_">lapply</span>(<span class="hljs-number">1</span>:<span class="hljs-number">4</span>, f) |&gt; <span class="hljs-title function_">futurize</span>() <span class="hljs-comment"># the worker must get 'rate' too</span>
+<span class="hljs-title function_">unlist</span>(ys)
+fu &lt;- <span class="hljs-title function_">future</span>(<span class="hljs-title function_">f</span>(<span class="hljs-number">2</span>))                 <span class="hljs-comment"># what went in the coat pockets?</span>
+<span class="hljs-title function_">names</span>(fu$globals)</code></pre><pre class="nb-output">[1] 1.2 2.4 3.6 4.8
+[1] &quot;f&quot;    &quot;rate&quot;</pre></figure>
 <p>A worker process does not have <code>rate</code>. So before sending a future, the future package reads the
 code of the expression (static analysis, with the <strong>globals</strong> package), finds every name it uses
 that is not defined inside it, and ships those values along: the coat <em>and</em> what is in its
@@ -1267,8 +1293,17 @@ processes(4)  0.931  0.458  -0.305  -0.989  0.564  0.533
 <span class="hljs-keyword">discard</span> futureMap(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>), noisy)</code></pre>
 <pre class="nb-output">Warning: UNRELIABLE VALUE: element 1 used random numbers without a seed. Pass a seed to get the same numbers on every plan.
 </pre>
-<aside class="note r"><span class="note-label">Meanwhile, in R</span><p>R prints <code>UNRELIABLE VALUE: Future (‘&lt;none&gt;’) unexpectedly generated random numbers without specifying argument 'seed'.</code> For <code>replicate()</code>, which is nearly always used for resampling,
-futurize turns <code>seed = TRUE</code> on by itself.</p>
+<p>And the original, in R: same seed, different plans, identical numbers; then no seed, and the real warning:</p>
+<figure class="rcode"><figcaption>R, run when the page was built</figcaption><pre><code class="language-r">xs &lt;- <span class="hljs-number">1</span>:<span class="hljs-number">4</span>
+<span class="hljs-title function_">plan</span>(sequential);                a &lt;- <span class="hljs-title function_">lapply</span>(xs, \(i) <span class="hljs-title function_">rnorm</span>(<span class="hljs-number">1</span>)) |&gt; <span class="hljs-title function_">futurize</span>(seed = <span class="hljs-number">42</span>)
+<span class="hljs-title function_">plan</span>(multisession, workers = <span class="hljs-number">3</span>); b &lt;- <span class="hljs-title function_">lapply</span>(xs, \(i) <span class="hljs-title function_">rnorm</span>(<span class="hljs-number">1</span>)) |&gt; <span class="hljs-title function_">futurize</span>(seed = <span class="hljs-number">42</span>)
+<span class="hljs-title function_">identical</span>(a, b)
+ys &lt;- <span class="hljs-title function_">lapply</span>(<span class="hljs-number">1</span>:<span class="hljs-number">2</span>, \(i) <span class="hljs-title function_">rnorm</span>(<span class="hljs-number">1</span>)) |&gt; <span class="hljs-title function_">futurize</span>()</code></pre><pre class="nb-output">[1] TRUE
+Warning: UNRELIABLE VALUE: One of the 'future.apply' iterations ('fz:base::lapply-1') unexpectedly generated random numbers without declaring so. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, use 'futurize(rng = TRUE)'. This ensures that proper, parallel-safe random numbers are produced. To disable this check, use 'futurize(rng = NA)'. [future 'fz:base::lapply-1' (c9dc25ac7d5c88f1ef53052891213f53-5); on c9dc25ac7d5c88f1ef53052891213f53@vm&lt;8938&gt;]
+Warning: UNRELIABLE VALUE: One of the 'future.apply' iterations ('fz:base::lapply-2') unexpectedly generated random numbers without declaring so. There is a risk that those random numbers are not statistically sound and the overall results might be invalid. To fix this, use 'futurize(rng = TRUE)'. This ensures that proper, parallel-safe random numbers are produced. To disable this check, use 'futurize(rng = NA)'. [future 'fz:base::lapply-2' (c9dc25ac7d5c88f1ef53052891213f53-6); on c9dc25ac7d5c88f1ef53052891213f53@vm&lt;8938&gt;]</pre></figure>
+<aside class="note r"><span class="note-label">Meanwhile, in R</span><p>The warning names the option <code>rng</code>: futurize 1.2.0 calls it that, where the paper says <code>seed</code>;
+both work. For <code>replicate()</code>, which is nearly always used for resampling, futurize turns it on
+by itself (look for <code>future.seed = TRUE</code> in N° 8).</p>
 </aside>
 <h2>Output and errors come back as if nothing happened</h2>
 <p>Run a map in parallel with most tools and the side effects get lost or scrambled. In R,
@@ -1306,6 +1341,15 @@ x = 3
 x = 4
 @[1.0, 1.4142135623730951, 1.7320508075688772, 2.0]
 </pre>
+<p>The paper's R example, with <code>vapply</code> (base R) in place of purrr's <code>map_dbl</code>. The messages are made on two worker processes, and arrive in order:</p>
+<figure class="rcode"><figcaption>R, run when the page was built</figcaption><pre><code class="language-r">ys &lt;- <span class="hljs-title function_">vapply</span>(<span class="hljs-number">1</span>:<span class="hljs-number">4</span>, \(x) { <span class="hljs-title function_">message</span>(<span class="hljs-string">"</span><span class="hljs-string">x = "</span>, x); <span class="hljs-title function_">sqrt</span>(x) }, <span class="hljs-title function_">numeric</span>(<span class="hljs-number">1</span>)) |&gt; <span class="hljs-title function_">futurize</span>()
+ys
+ys &lt;- <span class="hljs-title function_">vapply</span>(<span class="hljs-number">1</span>:<span class="hljs-number">4</span>, \(x) { <span class="hljs-title function_">message</span>(<span class="hljs-string">"</span><span class="hljs-string">x = "</span>, x); <span class="hljs-title function_">sqrt</span>(x) }, <span class="hljs-title function_">numeric</span>(<span class="hljs-number">1</span>)) |&gt;
+  <span class="hljs-title function_">suppressMessages</span>() |&gt; <span class="hljs-title function_">futurize</span>()          <span class="hljs-comment"># still a message, so still suppressible</span></code></pre><pre class="nb-output">x = 1
+x = 2
+x = 3
+x = 4
+[1] 1.000000 1.414214 1.732051 2.000000</pre></figure>
 <p>Errors too: the first failing element (in order) raises its exception on the main thread, where
 an ordinary <code>try</code> catches it, with its own type:</p>
 <pre><code class="nohighlight nim hljs">plan threads(<span class="hljs-number">4</span>)
@@ -1315,6 +1359,11 @@ an ordinary <code>try</code> catches it, with its own type:</p>
   <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;caught a ValueError from a worker: &quot;</span>, e.msg</code></pre>
 <pre class="nb-output">caught a ValueError from a worker: I don't like 3
 </pre>
+<p>In R, note the first line: when one element fails, the others are cancelled.</p>
+<figure class="rcode"><figcaption>R, run when the page was built</figcaption><pre><code class="language-r"><span class="hljs-title function_">tryCatch</span>(
+  <span class="hljs-title function_">lapply</span>(<span class="hljs-number">1</span>:<span class="hljs-number">4</span>, \(x) <span class="hljs-keyword">if</span> (x == <span class="hljs-number">3</span>) <span class="hljs-title function_">stop</span>(<span class="hljs-string">"</span><span class="hljs-string">I don't like 3"</span>) <span class="hljs-keyword">else</span> x) |&gt; <span class="hljs-title function_">futurize</span>(),
+  error = \(e) <span class="hljs-title function_">cat</span>(<span class="hljs-string">"</span><span class="hljs-string">caught:"</span>, <span class="hljs-title function_">conditionMessage</span>(e), <span class="hljs-string">"</span><span class="hljs-string">\n"</span>))</code></pre><pre class="nb-output">Caught simpleError. Canceling all iterations ...
+caught: I don't like 3</pre></figure>
 <aside class="note careful"><span class="note-label">Careful</span><p><code>fv</code> cannot pass the exception <em>object</em> across: under Nim's ORC memory manager a ref belongs to
 the thread that made it (a first version did pass it, and crashed with a segfault in the cycle
 collector). So only the name and message travel, and <code>fv</code> makes a new exception of the same type
@@ -1345,9 +1394,9 @@ change. <code>fv</code> has one too, a macro that the futurize macro unwraps (on
 <pre><code class="nohighlight nim hljs">plan threads(<span class="hljs-number">4</span>)
 <span class="hljs-keyword">discard</span> toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">10</span>).map(slowSquare) |&gt; progressify() |&gt; futurize()</code></pre>
 <pre class="nb-output">progress |█·········| 1/10
-progress |████······| 4/10
-progress |███·······| 3/10
 progress |██········| 2/10
+progress |███·······| 3/10
+progress |████······| 4/10
 progress |█████·····| 5/10
 progress |██████····| 6/10
 progress |███████···| 7/10
@@ -1355,15 +1404,35 @@ progress |████████··| 8/10
 progress |█████████·| 9/10
 progress |██████████| 10/10
 </pre>
+<p>And R's, from two worker processes. In an interactive session <code>handlers(global = TRUE)</code> is
+enough; a script, like this page's build, wraps the call in <code>with_progress()</code>. Each line is one
+redraw of the bar:</p>
+<figure class="rcode"><figcaption>R, run when the page was built</figcaption><pre><code class="language-r"><span class="hljs-title function_">library</span>(progressr)
+<span class="hljs-title function_">handlers</span>(<span class="hljs-title function_">handler_txtprogressbar</span>(file = <span class="hljs-title function_">stdout</span>(), style = <span class="hljs-number">1</span>, width = <span class="hljs-number">20</span>))
+<span class="hljs-title function_">with_progress</span>({
+  ys &lt;- <span class="hljs-title function_">lapply</span>(<span class="hljs-number">1</span>:<span class="hljs-number">5</span>, \(x) { <span class="hljs-title function_">Sys.sleep</span>(<span class="hljs-number">0.2</span>); x }) |&gt; progressify::<span class="hljs-title function_">progressify</span>() |&gt; <span class="hljs-title function_">futurize</span>()
+})</code></pre><pre class="nb-output">====
+========
+============
+================
+====================</pre></figure>
 <p>Which brings us to the macros.</p>
 <h2>futurize: where we're going, we don't need future_lapply</h2>
 <p>Before futurize, parallelizing meant switching function: <code>lapply</code> becomes
 <code>future.apply::future_lapply</code>, <code>purrr::map</code> becomes <code>furrr::future_map</code>, <code>foreach() %do%</code>
 becomes <code>%dofuture%</code>, each with its own way of passing options. <a href="https://github.com/futureverse/futurize">futurize</a>
 keeps the code you wrote and adds one word:</p>
-<figure class="rcode"><figcaption>R</figcaption><pre><code class="language-r">ys &lt;- <span class="hljs-title function_">lapply</span>(xs, slow_fcn) |&gt; <span class="hljs-title function_">futurize</span>()
+<figure class="rcode"><figcaption>R, not run here</figcaption><pre><code class="language-r">ys &lt;- <span class="hljs-title function_">lapply</span>(xs, slow_fcn) |&gt; <span class="hljs-title function_">futurize</span>()
 ys &lt;- <span class="hljs-title function_">map</span>(xs, rnorm, n = <span class="hljs-number">10</span>) |&gt; <span class="hljs-title function_">futurize</span>(seed = <span class="hljs-literal">TRUE</span>)
 b  &lt;- <span class="hljs-title function_">boot</span>(bigcity, ratio, R = <span class="hljs-number">999</span>, stype = <span class="hljs-string">"</span><span class="hljs-string">w"</span>) |&gt; <span class="hljs-title function_">futurize</span>()</code></pre></figure>
+<p><code>futurize(eval = FALSE)</code> shows what it would run instead. Real output:</p>
+<figure class="rcode"><figcaption>R, run when the page was built</figcaption><pre><code class="language-r"><span class="hljs-title function_">lapply</span>(xs, slow_fcn) |&gt; <span class="hljs-title function_">futurize</span>(eval = <span class="hljs-literal">FALSE</span>)
+<span class="hljs-title function_">replicate</span>(<span class="hljs-number">100</span>, <span class="hljs-title function_">rnorm</span>(<span class="hljs-number">10</span>)) |&gt; <span class="hljs-title function_">futurize</span>(eval = <span class="hljs-literal">FALSE</span>)</code></pre><pre class="nb-output">future.apply::future_lapply(xs, slow_fcn, future.seed = FALSE, 
+    future.globals = TRUE, future.stdout = TRUE, future.conditions = &quot;condition&quot;, 
+    future.scheduling = 1, future.label = &quot;fz:base::lapply-%d&quot;)
+future.apply::future_replicate(100, rnorm(10), future.seed = TRUE, 
+    future.globals = TRUE, future.stdout = TRUE, future.conditions = &quot;condition&quot;, 
+    future.scheduling = 1, future.label = &quot;fz:base::replicate-%d&quot;)</pre></figure>
 <p>It works because R is lazy: <code>futurize()</code> receives its argument <em>unevaluated</em>, as a piece of
 code (with <code>substitute()</code>), finds which map it is (<code>base::lapply</code>? <code>purrr::map</code>?), and rewrites
 it into the parallel version before running it. The paper calls this <strong>transpiling</strong>. It also
@@ -1384,10 +1453,10 @@ an operator, so we add that too, in five lines:</p>
 <p>Like <code>futurize(eval = FALSE)</code>, <code>transpiled</code> shows what the macro writes:</p>
 <pre><code class="nohighlight nim hljs"><span class="hljs-keyword">echo</span> transpiled(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">8</span>).mapIt(it * it + <span class="hljs-number">1</span>), seed = <span class="hljs-number">1</span>)</code></pre>
 <pre class="nb-output">block:
-  proc fvIt_1040197170(it: typeof(toSeq(1 .. 8)[0])): auto {.nimcall, gcsafe.} =
+  proc fvIt_1040197180(it: typeof(toSeq(1 .. 8)[0])): auto {.nimcall, gcsafe.} =
     it * it + 1
 
-  futureMap(toSeq(1 .. 8), fvIt_1040197170, seed = 1)
+  futureMap(toSeq(1 .. 8), fvIt_1040197180, seed = 1)
 </pre>
 <p>Note the <code>{.nimcall, gcsafe.}</code> that the macro adds to the generated proc. It is what gives the
 compiler error at the end of N° 4: a local variable can't be captured by a proc that runs
@@ -1899,6 +1968,15 @@ your code on **one thread**: to use more cores, R starts more R processes and sh
 them. The little R this page uses, next to its Nim:
 &quot;&quot;&quot;</span>
 
+<span class="hljs-keyword">let</span> rVersions = runR(<span class="hljs-string">&quot;&quot;&quot;
+cat(R.version.string, &quot;; &quot;, paste(sapply(c(&quot;future&quot;, &quot;futurize&quot;, &quot;future.apply&quot;, &quot;progressr&quot;, &quot;progressify&quot;, &quot;parallelly&quot;),
+  \(p) paste(p, packageVersion(p))), collapse = &quot;, &quot;), sep = &quot;&quot;)&quot;&quot;&quot;</span>, <span class="hljs-string">&quot;&quot;</span>)
+
+nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
+The R on this page runs too: every blue block labelled *run* was run by `Rscript` when the page
+was built, and shows its real output ({rVersions}).
+&quot;&quot;&quot;</span>
+
 nbTable toTableData(@[
   (r: <span class="hljs-string">&quot;`xs &lt;- 1:8`&quot;</span>, nim: <span class="hljs-string">&quot;`let xs = toSeq(1..8)`&quot;</span>, what: <span class="hljs-string">&quot;a vector of 1 to 8&quot;</span>),
   (r: <span class="hljs-string">&quot;`f &lt;- function(x) x^2`&quot;</span>, nim: <span class="hljs-string">&quot;`proc f(x: int): int = x*x`&quot;</span>, what: <span class="hljs-string">&quot;a function is a value&quot;</span>),
@@ -1954,11 +2032,14 @@ nbSteps(<span class="hljs-string">&quot;The three verbs of the future package: `
 
 nbR(<span class="hljs-string">&quot;&quot;&quot;
 library(future)
-plan(multisession)               # more on this in N° 3
+plan(multisession, workers = 2)  # more on this in N° 3
+t0 &lt;- Sys.time()
 a &lt;- future({ Sys.sleep(1); 3^2 })
 b &lt;- future({ Sys.sleep(1); 4^2 })
-value(a) + value(b)              # about 1 second, not 2
-&quot;&quot;&quot;</span>, <span class="hljs-string">&quot;[1] 25&quot;</span>)
+resolved(a)                      # not yet: still in the cloakroom
+value(a) + value(b)
+Sys.time() - t0                  # about 1 second, not 2
+&quot;&quot;&quot;</span>)
 
 nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
 Nim has futures too. With [taskpools]({taskpoolsRepo}) (Status's thread pool) the ticket is
@@ -2020,7 +2101,7 @@ plan(future.callr::callr)                     # a fresh R process per future
 plan(future.mirai::mirai_multisession)        # mirai's low-latency workers
 plan(future.batchtools::batchtools_slurm)     # jobs on an HPC scheduler (also LSF, SGE, PBS)
 plan(future.p2p::cluster, cluster = &quot;alice/friends&quot;)  # a prototype: your friends' laptops
-&quot;&quot;&quot;</span>)
+&quot;&quot;&quot;</span>, trun = <span class="hljs-literal">false</span>)
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 The same `lapply(...) |&gt; futurize()` then runs on a laptop, on a lab's machines, or as Slurm jobs
@@ -2052,13 +2133,28 @@ nbCode:
     <span class="hljs-keyword">let</span> ys = futureMap(xs, slowSquare)
     <span class="hljs-keyword">echo</span> plan(), <span class="hljs-string">&quot;: &quot;</span>, ys, <span class="hljs-string">&quot; in &quot;</span>, (getMonoTime() - t).inMilliseconds, <span class="hljs-string">&quot; ms&quot;</span>
 
+nbText: <span class="hljs-string">&quot;The same in R, on the same machine. Starting the 4 R sessions is timed apart from the map:&quot;</span>
+
+nbR(<span class="hljs-string">&quot;&quot;&quot;
+slow_square &lt;- function(x) { Sys.sleep(0.05); x^2 }
+t0 &lt;- Sys.time(); plan(multisession, workers = 4)
+cat(&quot;starting 4 R sessions:&quot;, round(1000 * as.numeric(Sys.time() - t0, units = &quot;secs&quot;)), &quot;ms\n&quot;)
+for (p in c(&quot;sequential&quot;, &quot;multisession&quot;)) {
+  if (p == &quot;sequential&quot;) plan(sequential) else plan(multisession, workers = 4)
+  t0 &lt;- Sys.time()
+  ys &lt;- lapply(1:8, slow_square) |&gt; futurize()
+  cat(p, &quot;: &quot;, unlist(ys), &quot; in &quot;, round(1000 * as.numeric(Sys.time() - t0, units = &quot;secs&quot;)), &quot; ms\n&quot;, sep = &quot; &quot;)
+}
+&quot;&quot;&quot;</span>)
+
 nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
 Same code, same answer, a quarter of the time. `processes(4)` starts **four copies of this very
 program**, which is the Nim version of R's `multisession`. It is not much slower than threads
 here, because starting a compiled program takes a millisecond or two, not the second or so an R
 session takes. How it works: the program is started again with `--fv-worker slowSquare`, and
 `fvServe()`, the first line of the program, turns it into a worker that reads elements as JSON
-lines on stdin and writes results on stdout.
+lines on stdin and writes results on stdout. R pays a few hundred milliseconds to start its
+sessions, once, and then some overhead per future for shipping code and data both ways.
 &quot;&quot;&quot;</span>
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
@@ -2107,7 +2203,10 @@ nbR(<span class="hljs-string">&quot;&quot;&quot;
 rate &lt;- 1.2
 f &lt;- function(x) x * rate          # 'rate' is a global of f
 ys &lt;- lapply(1:4, f) |&gt; futurize() # the worker must get 'rate' too
-&quot;&quot;&quot;</span>)
+unlist(ys)
+fu &lt;- future(f(2))                 # what went in the coat pockets?
+names(fu$globals)
+&quot;&quot;&quot;</span>, tsetup = <span class="hljs-string">&quot;plan(multisession, workers = 2)&quot;</span>)
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 A worker process does not have `rate`. So before sending a future, the future package reads the
@@ -2181,10 +2280,20 @@ nbCode:
   plan threads(<span class="hljs-number">4</span>)
   <span class="hljs-keyword">discard</span> futureMap(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">6</span>), noisy)
 
+nbText: <span class="hljs-string">&quot;And the original, in R: same seed, different plans, identical numbers; then no seed, and the real warning:&quot;</span>
+
+nbR(<span class="hljs-string">&quot;&quot;&quot;
+xs &lt;- 1:4
+plan(sequential);                a &lt;- lapply(xs, \(i) rnorm(1)) |&gt; futurize(seed = 42)
+plan(multisession, workers = 3); b &lt;- lapply(xs, \(i) rnorm(1)) |&gt; futurize(seed = 42)
+identical(a, b)
+ys &lt;- lapply(1:2, \(i) rnorm(1)) |&gt; futurize()
+&quot;&quot;&quot;</span>)
+
 nbNote(nkR, <span class="hljs-string">&quot;&quot;&quot;
-R prints `UNRELIABLE VALUE: Future (‘&lt;none&gt;’) unexpectedly generated random numbers without
-specifying argument 'seed'.` For `replicate()`, which is nearly always used for resampling,
-futurize turns `seed = TRUE` on by itself.
+The warning names the option `rng`: futurize 1.2.0 calls it that, where the paper says `seed`;
+both work. For `replicate()`, which is nearly always used for resampling, futurize turns it on
+by itself (look for `future.seed = TRUE` in N° 8).
 &quot;&quot;&quot;</span>)
 
 <span class="hljs-comment"># ============================================================================================ 5</span>
@@ -2220,6 +2329,15 @@ nbCode:
   plan processes(<span class="hljs-number">4</span>)
   <span class="hljs-keyword">echo</span> futureMap(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">4</span>), chatty)
 
+nbText: <span class="hljs-string">&quot;The paper's R example, with `vapply` (base R) in place of purrr's `map_dbl`. The messages are made on two worker processes, and arrive in order:&quot;</span>
+
+nbR(<span class="hljs-string">&quot;&quot;&quot;
+ys &lt;- vapply(1:4, \(x) { message(&quot;x = &quot;, x); sqrt(x) }, numeric(1)) |&gt; futurize()
+ys
+ys &lt;- vapply(1:4, \(x) { message(&quot;x = &quot;, x); sqrt(x) }, numeric(1)) |&gt;
+  suppressMessages() |&gt; futurize()          # still a message, so still suppressible
+&quot;&quot;&quot;</span>, tsetup = <span class="hljs-string">&quot;plan(multisession, workers = 2)&quot;</span>)
+
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 Errors too: the first failing element (in order) raises its exception on the main thread, where
 an ordinary `try` catches it, with its own type:
@@ -2231,6 +2349,14 @@ nbCode:
     <span class="hljs-keyword">echo</span> futureMap(toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">8</span>), fragile)
   <span class="hljs-keyword">except</span> <span class="hljs-type">ValueError</span> <span class="hljs-keyword">as</span> e:
     <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;caught a ValueError from a worker: &quot;</span>, e.msg
+
+nbText: <span class="hljs-string">&quot;In R, note the first line: when one element fails, the others are cancelled.&quot;</span>
+
+nbR(<span class="hljs-string">&quot;&quot;&quot;
+tryCatch(
+  lapply(1:4, \(x) if (x == 3) stop(&quot;I don't like 3&quot;) else x) |&gt; futurize(),
+  error = \(e) cat(&quot;caught:&quot;, conditionMessage(e), &quot;\n&quot;))
+&quot;&quot;&quot;</span>, tsetup = <span class="hljs-string">&quot;plan(multisession, workers = 2)&quot;</span>)
 
 nbNote(nkCareful, <span class="hljs-string">&quot;&quot;&quot;
 `fv` cannot pass the exception *object* across: under Nim's ORC memory manager a ref belongs to
@@ -2264,6 +2390,20 @@ nbCode:
   plan threads(<span class="hljs-number">4</span>)
   <span class="hljs-keyword">discard</span> toSeq(<span class="hljs-number">1.</span>.<span class="hljs-number">10</span>).map(slowSquare) |&gt; progressify() |&gt; futurize()
 
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+And R's, from two worker processes. In an interactive session `handlers(global = TRUE)` is
+enough; a script, like this page's build, wraps the call in `with_progress()`. Each line is one
+redraw of the bar:
+&quot;&quot;&quot;</span>
+
+nbR(<span class="hljs-string">&quot;&quot;&quot;
+library(progressr)
+handlers(handler_txtprogressbar(file = stdout(), style = 1, width = 20))
+with_progress({
+  ys &lt;- lapply(1:5, \(x) { Sys.sleep(0.2); x }) |&gt; progressify::progressify() |&gt; futurize()
+})
+&quot;&quot;&quot;</span>, tsetup = <span class="hljs-string">&quot;plan(multisession, workers = 2); invisible(suppressMessages(loadNamespace('progressify')))&quot;</span>)
+
 nbText: <span class="hljs-string">&quot;Which brings us to the macros.&quot;</span>
 
 <span class="hljs-comment"># ============================================================================================ 7</span>
@@ -2280,7 +2420,14 @@ nbR(<span class="hljs-string">&quot;&quot;&quot;
 ys &lt;- lapply(xs, slow_fcn) |&gt; futurize()
 ys &lt;- map(xs, rnorm, n = 10) |&gt; futurize(seed = TRUE)
 b  &lt;- boot(bigcity, ratio, R = 999, stype = &quot;w&quot;) |&gt; futurize()
-&quot;&quot;&quot;</span>)
+&quot;&quot;&quot;</span>, trun = <span class="hljs-literal">false</span>)
+
+nbText: <span class="hljs-string">&quot;`futurize(eval = FALSE)` shows what it would run instead. Real output:&quot;</span>
+
+nbR(<span class="hljs-string">&quot;&quot;&quot;
+lapply(xs, slow_fcn) |&gt; futurize(eval = FALSE)
+replicate(100, rnorm(10)) |&gt; futurize(eval = FALSE)
+&quot;&quot;&quot;</span>, tsetup = <span class="hljs-string">&quot;xs &lt;- 1:3; slow_fcn &lt;- function(x) x^2&quot;</span>)
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 It works because R is lazy: `futurize()` receives its argument *unevaluated*, as a piece of

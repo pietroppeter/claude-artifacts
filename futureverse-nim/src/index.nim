@@ -77,6 +77,15 @@ your code on **one thread**: to use more cores, R starts more R processes and sh
 them. The little R this page uses, next to its Nim:
 """
 
+let rVersions = runR("""
+cat(R.version.string, "; ", paste(sapply(c("future", "futurize", "future.apply", "progressr", "progressify", "parallelly"),
+  \(p) paste(p, packageVersion(p))), collapse = ", "), sep = "")""", "")
+
+nbText: &"""
+The R on this page runs too: every blue block labelled *run* was run by `Rscript` when the page
+was built, and shows its real output ({rVersions}).
+"""
+
 nbTable toTableData(@[
   (r: "`xs <- 1:8`", nim: "`let xs = toSeq(1..8)`", what: "a vector of 1 to 8"),
   (r: "`f <- function(x) x^2`", nim: "`proc f(x: int): int = x*x`", what: "a function is a value"),
@@ -132,11 +141,14 @@ nbSteps("The three verbs of the future package: `future()`, `resolved()`, `value
 
 nbR("""
 library(future)
-plan(multisession)               # more on this in N° 3
+plan(multisession, workers = 2)  # more on this in N° 3
+t0 <- Sys.time()
 a <- future({ Sys.sleep(1); 3^2 })
 b <- future({ Sys.sleep(1); 4^2 })
-value(a) + value(b)              # about 1 second, not 2
-""", "[1] 25")
+resolved(a)                      # not yet: still in the cloakroom
+value(a) + value(b)
+Sys.time() - t0                  # about 1 second, not 2
+""")
 
 nbText: &"""
 Nim has futures too. With [taskpools]({taskpoolsRepo}) (Status's thread pool) the ticket is
@@ -198,7 +210,7 @@ plan(future.callr::callr)                     # a fresh R process per future
 plan(future.mirai::mirai_multisession)        # mirai's low-latency workers
 plan(future.batchtools::batchtools_slurm)     # jobs on an HPC scheduler (also LSF, SGE, PBS)
 plan(future.p2p::cluster, cluster = "alice/friends")  # a prototype: your friends' laptops
-""")
+""", trun = false)
 
 nbText: """
 The same `lapply(...) |> futurize()` then runs on a laptop, on a lab's machines, or as Slurm jobs
@@ -230,13 +242,28 @@ nbCode:
     let ys = futureMap(xs, slowSquare)
     echo plan(), ": ", ys, " in ", (getMonoTime() - t).inMilliseconds, " ms"
 
+nbText: "The same in R, on the same machine. Starting the 4 R sessions is timed apart from the map:"
+
+nbR("""
+slow_square <- function(x) { Sys.sleep(0.05); x^2 }
+t0 <- Sys.time(); plan(multisession, workers = 4)
+cat("starting 4 R sessions:", round(1000 * as.numeric(Sys.time() - t0, units = "secs")), "ms\n")
+for (p in c("sequential", "multisession")) {
+  if (p == "sequential") plan(sequential) else plan(multisession, workers = 4)
+  t0 <- Sys.time()
+  ys <- lapply(1:8, slow_square) |> futurize()
+  cat(p, ": ", unlist(ys), " in ", round(1000 * as.numeric(Sys.time() - t0, units = "secs")), " ms\n", sep = " ")
+}
+""")
+
 nbText: &"""
 Same code, same answer, a quarter of the time. `processes(4)` starts **four copies of this very
 program**, which is the Nim version of R's `multisession`. It is not much slower than threads
 here, because starting a compiled program takes a millisecond or two, not the second or so an R
 session takes. How it works: the program is started again with `--fv-worker slowSquare`, and
 `fvServe()`, the first line of the program, turns it into a worker that reads elements as JSON
-lines on stdin and writes results on stdout.
+lines on stdin and writes results on stdout. R pays a few hundred milliseconds to start its
+sessions, once, and then some overhead per future for shipping code and data both ways.
 """
 
 nbText: """
@@ -285,7 +312,10 @@ nbR("""
 rate <- 1.2
 f <- function(x) x * rate          # 'rate' is a global of f
 ys <- lapply(1:4, f) |> futurize() # the worker must get 'rate' too
-""")
+unlist(ys)
+fu <- future(f(2))                 # what went in the coat pockets?
+names(fu$globals)
+""", tsetup = "plan(multisession, workers = 2)")
 
 nbText: """
 A worker process does not have `rate`. So before sending a future, the future package reads the
@@ -359,10 +389,20 @@ nbCode:
   plan threads(4)
   discard futureMap(toSeq(1..6), noisy)
 
+nbText: "And the original, in R: same seed, different plans, identical numbers; then no seed, and the real warning:"
+
+nbR("""
+xs <- 1:4
+plan(sequential);                a <- lapply(xs, \(i) rnorm(1)) |> futurize(seed = 42)
+plan(multisession, workers = 3); b <- lapply(xs, \(i) rnorm(1)) |> futurize(seed = 42)
+identical(a, b)
+ys <- lapply(1:2, \(i) rnorm(1)) |> futurize()
+""")
+
 nbNote(nkR, """
-R prints `UNRELIABLE VALUE: Future (‘<none>’) unexpectedly generated random numbers without
-specifying argument 'seed'.` For `replicate()`, which is nearly always used for resampling,
-futurize turns `seed = TRUE` on by itself.
+The warning names the option `rng`: futurize 1.2.0 calls it that, where the paper says `seed`;
+both work. For `replicate()`, which is nearly always used for resampling, futurize turns it on
+by itself (look for `future.seed = TRUE` in N° 8).
 """)
 
 # ============================================================================================ 5
@@ -398,6 +438,15 @@ nbCode:
   plan processes(4)
   echo futureMap(toSeq(1..4), chatty)
 
+nbText: "The paper's R example, with `vapply` (base R) in place of purrr's `map_dbl`. The messages are made on two worker processes, and arrive in order:"
+
+nbR("""
+ys <- vapply(1:4, \(x) { message("x = ", x); sqrt(x) }, numeric(1)) |> futurize()
+ys
+ys <- vapply(1:4, \(x) { message("x = ", x); sqrt(x) }, numeric(1)) |>
+  suppressMessages() |> futurize()          # still a message, so still suppressible
+""", tsetup = "plan(multisession, workers = 2)")
+
 nbText: """
 Errors too: the first failing element (in order) raises its exception on the main thread, where
 an ordinary `try` catches it, with its own type:
@@ -409,6 +458,14 @@ nbCode:
     echo futureMap(toSeq(1..8), fragile)
   except ValueError as e:
     echo "caught a ValueError from a worker: ", e.msg
+
+nbText: "In R, note the first line: when one element fails, the others are cancelled."
+
+nbR("""
+tryCatch(
+  lapply(1:4, \(x) if (x == 3) stop("I don't like 3") else x) |> futurize(),
+  error = \(e) cat("caught:", conditionMessage(e), "\n"))
+""", tsetup = "plan(multisession, workers = 2)")
 
 nbNote(nkCareful, """
 `fv` cannot pass the exception *object* across: under Nim's ORC memory manager a ref belongs to
@@ -442,6 +499,20 @@ nbCode:
   plan threads(4)
   discard toSeq(1..10).map(slowSquare) |> progressify() |> futurize()
 
+nbText: """
+And R's, from two worker processes. In an interactive session `handlers(global = TRUE)` is
+enough; a script, like this page's build, wraps the call in `with_progress()`. Each line is one
+redraw of the bar:
+"""
+
+nbR("""
+library(progressr)
+handlers(handler_txtprogressbar(file = stdout(), style = 1, width = 20))
+with_progress({
+  ys <- lapply(1:5, \(x) { Sys.sleep(0.2); x }) |> progressify::progressify() |> futurize()
+})
+""", tsetup = "plan(multisession, workers = 2); invisible(suppressMessages(loadNamespace('progressify')))")
+
 nbText: "Which brings us to the macros."
 
 # ============================================================================================ 7
@@ -458,7 +529,14 @@ nbR("""
 ys <- lapply(xs, slow_fcn) |> futurize()
 ys <- map(xs, rnorm, n = 10) |> futurize(seed = TRUE)
 b  <- boot(bigcity, ratio, R = 999, stype = "w") |> futurize()
-""")
+""", trun = false)
+
+nbText: "`futurize(eval = FALSE)` shows what it would run instead. Real output:"
+
+nbR("""
+lapply(xs, slow_fcn) |> futurize(eval = FALSE)
+replicate(100, rnorm(10)) |> futurize(eval = FALSE)
+""", tsetup = "xs <- 1:3; slow_fcn <- function(x) x^2")
 
 nbText: """
 It works because R is lazy: `futurize()` receives its argument *unevaluated*, as a piece of
