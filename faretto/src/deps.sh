@@ -1,0 +1,23 @@
+#!/bin/sh
+# Fetches nimib, tabelline and their dependencies at pinned commits into
+# $FARETTO_DEPS (default ./deps, not committed); config.nims puts them on the path.
+set -e
+here=$(cd "$(dirname "$0")" && pwd)
+deps=${FARETTO_DEPS:-$here/deps}
+mkdir -p "$deps"
+while read -r name repo commit; do
+  d="$deps/$name"
+  if [ "$(git -C "$d" rev-parse HEAD 2>/dev/null)" != "$commit" ]; then
+    rm -rf "$d" && git init -q "$d"
+    git -C "$d" fetch -q --depth 1 "https://github.com/$repo" "$commit"
+    git -C "$d" checkout -q FETCH_HEAD
+  fi
+done <<DEPS
+tabelline pietroppeter/tabelline 47ba07b659481d408ad7be66e6bec7ef6b4c911f
+nanuq pietroppeter/nanuq f8d84e8f71613719c1befb633e8e5dac4a08ea5d
+nimib pietroppeter/nimib 7118b3a8fa112757b7d76ffcb5251a6478cbfcfd
+fusion nim-lang/fusion 0b0a0273b8df860cd54e3fcca7bb4c617244ac77
+markdown soasme/nim-markdown 5a7a7bafd1da23b25332316a7b888e6586f4177a
+parsetoml NimParsers/parsetoml d297f5a81be2472905d367aa675dcbbca6e7a5d2
+jsony treeform/jsony bb647e1ca21af25ffdc423bcb96feeeeae963ca2
+DEPS
