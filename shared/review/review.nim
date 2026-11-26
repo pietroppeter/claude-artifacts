@@ -1,9 +1,9 @@
 ## The review mode of a page: open it with **✎ Review**, select text, comment on it, and export
 ## the comments for a coding agent. One module for now, with its blocks, its styles and its
 ## script (`assets/review.js`), so it can move to nimib as it is.
-import std/[json, os, strutils, strformat]
+import std/[json, os, osproc, strutils, strformat, times, hashes]
 import nimib
-import stile
+import theme
 
 func esc(s: string): string = s.multiReplace(("&", "&amp;"), ("<", "&lt;"), (">", "&gt;"), ("\"", "&quot;"))
 func inline(md: string): string = markdownToHtml(md).strip.replace("<p>", "").replace("</p>", "")
@@ -29,6 +29,10 @@ body.rv-on .rv-only { display: block; }
 body.rv-on { padding-bottom: calc(4.6rem + env(safe-area-inset-bottom, 0px)); }
 mark.rv-mark { background: var(--secondary-soft); color: inherit; box-shadow: 0 2px 0 var(--secondary); cursor: pointer; }
 mark.rv-mark.rv-current { background: var(--secondary); }
+/* a comment already sent: still there, quieter, a dashed line under its words */
+mark.rv-mark.rv-sent { background: transparent; box-shadow: none; text-decoration: underline dashed var(--secondary); text-underline-offset: 3px; }
+mark.rv-mark.rv-sent.rv-current { background: var(--secondary-soft); }
+.rv-panel .rv-state { margin: 0 0 .3rem; color: var(--muted); font-size: .85rem; }
 .rv-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; display: flex; align-items: center; gap: .3rem;
   justify-content: center; padding: .45rem max(.5rem, env(safe-area-inset-right, 0px)) calc(.45rem + env(safe-area-inset-bottom, 0px)) max(.5rem, env(safe-area-inset-left, 0px));
   background: var(--surface); border-top: 3px solid var(--ink); font: 400 15px/1.2 var(--font); }
@@ -41,6 +45,8 @@ mark.rv-mark.rv-current { background: var(--secondary); }
 .rv-bar .rv-count { min-width: 3.2rem; text-align: center; color: var(--muted); font-size: .85rem; }
 .rv-bar .rv-add, .rv-sheet .rv-save { background: var(--ink); color: var(--paper); border-color: var(--ink); font-weight: 700; }
 .rv-bar .rv-add.rv-selected { background: var(--secondary); color: var(--ink); border-color: var(--ink); }
+/* border-box: a plain page may not set it, and its sheets would run past the screen's edge */
+dialog.rv-sheet, .rv-panel, .rv-sheet textarea, .rv-note { box-sizing: border-box; }
 dialog.rv-sheet { width: 100%; max-width: 40rem; margin: 0 auto auto; padding: 1rem max(1rem, env(safe-area-inset-right, 0px)) 1rem max(1rem, env(safe-area-inset-left, 0px));
   border: 0; border-bottom: 3px solid var(--ink); background: var(--surface); color: var(--ink); font: 400 16px/1.45 var(--font);
   max-height: 90vh; overflow-y: auto; }
@@ -50,7 +56,8 @@ dialog.rv-sheet::backdrop { background: color-mix(in oklab, var(--ink) 30%, tran
   background: var(--paper); border: 1px solid var(--line); border-radius: 0; padding: .5rem; }
 .rv-export textarea { font: 16px/1.45 var(--mono); white-space: pre-wrap; }   /* 16px: a phone zooms on smaller fields */
 .rv-sheet .rv-actions { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: flex-end; }
-.rv-sheet .rv-left { margin-right: auto; }
+.rv-sheet .rv-left { margin-right: auto; display: flex; gap: .4rem; }
+.rv-sheet .rv-break { flex-basis: 100%; height: 0; }   /* the export: History, Delete, Copy; then the two Close */
 .rv-sheet .rv-danger { color: var(--primary-text); }
 /* the comment's sheet: at the top, small, not modal: the bar and the page stay in reach */
 .rv-panel { position: fixed; top: 0; left: 0; right: 0; z-index: 60; max-width: 40rem; margin: 0 auto;
@@ -63,7 +70,9 @@ dialog.rv-sheet::backdrop { background: color-mix(in oklab, var(--ink) 30%, tran
 .rv-panel button { font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 0; cursor: pointer; }
 /* history: one line per version */
 .rv-versions { list-style: none; margin: 0 0 .8rem; padding: 0; }
-.rv-versions li { display: flex; align-items: center; gap: .5rem; min-height: 48px; border-bottom: 1px solid var(--shade); }
+.rv-versions li { display: flex; flex-wrap: wrap; align-items: center; gap: .5rem; min-height: 48px; padding: .3rem 0; border-bottom: 1px solid var(--shade); }
+.rv-versions .rv-old { display: flex; gap: .4rem; }
+.rv-versions .rv-old[hidden] { display: none; }
 .rv-versions a { color: var(--ink); }
 .rv-versions .rv-date { flex: 1; color: var(--muted); font-size: .9rem; }
 .rv-versions .rv-n { font-size: .85rem; }
@@ -91,30 +100,13 @@ dialog.rv-sheet[open] { animation: rv-down .2s ease-out; }
 .rv-shot { display: flex; align-items: center; gap: .5rem; font-size: .85rem; color: var(--muted); }
 .rv-shot img { height: 2.75rem; width: auto; border: 1px solid var(--line); }
 .rv-shot span { flex: 1; overflow-wrap: anywhere; }
-/* the strip of versions of the older versions of the post Review mode (nbVersions) */
-.versioni { margin: 1rem 0 1.4rem; font-size: .92rem; }
-.versioni ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .4rem; }
-.versioni li { border: 1px solid var(--line); background: var(--surface); }
-.versioni li > a, .versioni li > .voce { display: flex; align-items: center; min-height: 44px; padding: 0 .7rem; color: var(--ink); text-decoration: none; }
-.versioni li > a:hover b { text-decoration: underline; }
-.versioni li[aria-current] { border-color: var(--ink); box-shadow: inset 0 -3px 0 var(--ink); }
-.versioni .titolo { font-weight: 700; margin-right: .5rem; }
-.versioni li span span, .versioni li a span { color: var(--muted); margin-left: .35rem; }
-/* moving between versions: a short slide, the bar stays where it is */
-@view-transition { navigation: auto; }
-::view-transition-old(root) { animation: versione-out .22s ease-in both; }
-::view-transition-new(root) { animation: versione-in .26s ease-out both; }
-@keyframes versione-out { to { opacity: 0; transform: translateX(-1.5rem); } }
-@keyframes versione-in { from { opacity: 0; transform: translateX(1.5rem); } }
-.rv-bar { view-transition-name: rv-bar; }
-@media (prefers-reduced-motion: reduce) {
-  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
-}
 """
 
 const reviewQuaderno = """
 mark.rv-mark { background: var(--highlight); box-shadow: 0 2px 0 var(--red-pen); }
 mark.rv-mark.rv-current { background: var(--postit); box-shadow: 0 2px 0 var(--red-pen), 0 0 0 2px var(--red-pen); }
+mark.rv-mark.rv-sent { background: transparent; box-shadow: none; text-decoration-color: var(--red-pen); }
+mark.rv-mark.rv-sent.rv-current { background: var(--highlight); }
 .rv-bar { font-family: var(--font); }
 """
 
@@ -126,73 +118,103 @@ const reviewCss* = reviewRules & scoped(reviewQuaderno, "html[data-tema=\"quader
 const reviewJs* = staticRead(currentSourcePath().parentDir / "assets" / "review.js")
   ## The script, kept as a file of its own (`assets/review.js`) so it can be read and shown.
 
-func versionHref*(n, this, latest: int): string =
-  ## The link from the page of version `this` to version `n`, for a page that keeps its old
-  ## versions: the newest is the page itself, version `n` is kept in `vn/` beside it.
-  if n == this: ""
-  elif this == latest: &"v{n}/"
-  elif n == latest: "../"
-  else: &"../v{n}/"
+type ReviewVersion* = object
+  ## The version of a page: `number` (the commits that touched its source, `+` when the page was
+  ## built from uncommitted changes; outside git, a hash of the source), the last `commit`'s short
+  ## hash and its date, `updated` (both empty outside git).
+  number*, commit*, updated*: string
 
-func versionsJson*(dates: openArray[string], this: int): string =
-  ## The versions of a page for History: number, date and link from version `this`.
-  var all = newJArray()
-  for i, date in dates:
-    all.add %*{"n": i + 1, "date": date, "href": versionHref(i + 1, this, dates.len)}
-  $all
+proc reviewVersion*(commits: openArray[string], dirty = false, source = ""): ReviewVersion =
+  ## The version from `git log --format=%h|%cs -- <source>`, newest first: one line per commit.
+  ## No commits (outside git): the first 7 characters of a hash of the `source` text.
+  if commits.len == 0:
+    return ReviewVersion(number: toHex(hash(source)).toLowerAscii[^7 .. ^1])
+  let last = commits[0].split('|')
+  ReviewVersion(number: $commits.len & (if dirty: "+" else: ""), commit: last[0],
+                updated: (if last.len > 1: parse(last[1], "yyyy-MM-dd", utc()).format("d MMM yyyy") else: ""))
+
+proc repoRoot(file: string): string =
+  var dir = file.parentDir
+  while dir.len > 1 and not dirExists(dir / ".git") and not fileExists(dir / ".git"): dir = dir.parentDir
+  if dirExists(dir / ".git") or fileExists(dir / ".git"): dir else: ""
+
+proc gitVersion*(file: string): ReviewVersion =
+  ## The version of `file` (a notebook) from git, at build time; see `reviewVersion`.
+  let root = repoRoot(file)
+  if root.len > 0:
+    let rel = file.relativePath(root)
+    let (log, code) = execCmdEx("git log --format=%h%x7C%cs -- " & quoteShell(rel), workingDir = root)
+    if code == 0 and log.strip.len > 0:
+      let (status, _) = execCmdEx("git status --porcelain -- " & quoteShell(rel), workingDir = root)
+      return reviewVersion(log.strip.splitLines, dirty = status.strip.len > 0)
+  reviewVersion([], source = (if fileExists(file): readFile(file) else: file))
+
+func reviewTag*(page, title, source: string, v: ReviewVersion): string =
+  ## The settings the script reads: an empty `<div id="review">` with them as data attributes.
+  &"""<div id="review" hidden data-page="{esc(page)}" data-title="{esc(title)}" data-source="{esc(source)}" """ &
+    &"""data-version="{esc(v.number)}" data-commit="{esc(v.commit)}" data-updated="{esc(v.updated)}"></div>"""
 
 newNbBlock(NbReview):
   page: string
-  version: int
   title: string
   source: string
-  versions: string   ## JSON: `[{"n", "date", "href"}]`, for History
+  number: string
+  commit: string
+  updated: string
   script: string     ## the script's address, or "" to inline it
   toHtml:
-    &"""<div id="review" hidden data-page="{esc(blk.page)}" data-version="{blk.version}" """ &
-      &"""data-title="{esc(blk.title)}" data-source="{esc(blk.source)}" data-versions="{esc(blk.versions)}"></div>""" &
+    reviewTag(blk.page, blk.title, blk.source, ReviewVersion(number: blk.number, commit: blk.commit, updated: blk.updated)) &
       (if blk.script.len > 0: &"""<script src="{esc(blk.script)}" defer></script>"""
        else: "<script>\ndocument.addEventListener('DOMContentLoaded', function () {\n" & reviewJs & "});\n</script>")
 
-proc repoPath(file: string): string =
-  ## `file` from the root of its git repository, as the agent reading the export sees it.
-  var dir = file.parentDir
-  while dir.len > 1 and not dirExists(dir / ".git"): dir = dir.parentDir
-  if dirExists(dir / ".git"): file.relativePath(dir) else: file.extractFilename
+func `$`*(v: ReviewVersion): string =
+  &"version: {v.number}, commit: {v.commit}, updated: {v.updated}"
 
-proc review*(nb: var Nb, version = 1, page = "", title = "", source = "",
-             versions: openArray[string] = [], script = "") =
-  let source = if source.len > 0: source else: repoPath(nb.doc.thisFile.string)
-  let title = if title.len > 0: title else: nb.doc.context{"title"}.getStr
-  nb.doc.context["stylesheet"] = %(nb.doc.context["stylesheet"].getStr & "\n<style>\n" & reviewCss & "</style>")
-  nb.add newNbReview(page = (if page.len > 0: page else: source), version = version, title = title, source = source,
-                     versions = (if versions.len > 0: versionsJson(versions, version) else: ""), script = script)
+type ReviewSettings* = object
+  ## What the export names: `page` (the key the comments are kept under), `source` and `title`.
+  page*, source*, title*: string
 
-template nbReview*(tversion = 1, tpage = "", ttitle = "", tsource = "",
-                   tversions: openArray[string] = [], tscript = "") =
-  ## The review mode on this page. Reading is the default: the page shows one button,
-  ## **✎ Review** (beside `nbVersion`'s line, or under the title), that opens and closes it.
-  ## With no arguments, everything comes from the notebook: the source file (named in the
-  ## export, and the key the comments are kept under in the browser) and the page's title.
-  ## A page that changes in versions gives its `tversion`, and the dates of all of them
-  ## (`tversions`, oldest first) for History; `tpage` is the key when it must stay the same
-  ## across versions kept in different files. `tscript`: the address of `review.js` shared by
-  ## the site; empty, the script is inlined and the page stays one file. After `useTabelline`.
-  nb.review(tversion, tpage, ttitle, tsource, tversions, tscript)
+func `$`*(s: ReviewSettings): string =
+  &"page: {s.page}\nsource: {s.source}\ntitle: {s.title}"
+
+proc reviewSettings*(file, root: string, title: string, page = "", source = ""): ReviewSettings =
+  ## The settings `nbReview` writes for the notebook `file` in the repository at `root` ("" outside
+  ## git): the source is the file from the root, the page is the source; either can be given.
+  let source = if source.len > 0: source
+               elif root.len > 0: file.relativePath(root).replace('\\', '/')
+               else: file.extractFilename
+  ReviewSettings(page: (if page.len > 0: page else: source), source: source, title: title)
+
+proc review*(nb: var Nb, page = "", title = "", source = "", script = "", css = true) =
+  ## See `nbReview`. `css = false` leaves the styles out, for a site that puts `reviewCss` in
+  ## its shared style sheet.
+  let file = nb.doc.thisFile.string
+  let s = reviewSettings(file, repoRoot(file), (if title.len > 0: title else: nb.doc.context{"title"}.getStr),
+                         page, source)
+  let v = gitVersion(file)
+  if css:
+    nb.doc.context["stylesheet"] = %(nb.doc.context["stylesheet"].getStr & "\n<style>\n" & reviewCss & "</style>")
+  nb.add newNbReview(page = s.page, title = s.title, source = s.source,
+                     number = v.number, commit = v.commit, updated = v.updated, script = script)
+
+template nbReview*(tpage = "", ttitle = "", tsource = "", tscript = "") =
+  ## The review mode on this page. Reading is the default: the page shows its version, from git
+  ## (*Version 12 · updated 10 Nov 2026*), under its lede or title, and **✎ Review** beside it,
+  ## which opens and closes the review mode. With no arguments, everything comes from the
+  ## notebook: its source file (named in the export, and the key the comments are kept under in
+  ## the browser), its title and its version. `tpage` keeps the key when the file is renamed;
+  ## `tscript` is the address of a shared `review.js`: empty, the script is inlined and the page
+  ## stays one file.
+  nb.review(tpage, ttitle, tsource, tscript)
 
 newNbBlock(NbVersion):
-  version: int
-  updated: string
   toHtml:
-    &"""<p class="rv-enter"><span class="rv-version">Version {blk.version}""" &
-      (if blk.updated.len > 0: &""" · updated {esc(blk.updated)}""" else: "") & "</span></p>"
+    """<p class="rv-enter"></p>"""
 
-proc version*(nb: var Nb, version: int, updated = "") = nb.add newNbVersion(version = version, updated = updated)
-
-template nbVersion*(tversion: int, tupdated = "") =
-  ## The line under the lede of a page that changes in versions: its version, the day of its
-  ## last update when there was one, and **✎ Review** beside them when the page has the review mode.
-  nb.version(tversion, tupdated)
+template nbVersion*() =
+  ## Where the version line and **✎ Review** go, when not under the lede or the title: the
+  ## script writes them here.
+  nb.add newNbVersion()
 
 newNbBlock(NbInReview of NbContainer):
   toHtml:
@@ -204,31 +226,3 @@ template nbInReview*(body: untyped) =
   nb.withContainer(only):
     body
   nb.add only
-
-newNbBlock(NbVersions):
-  versions: seq[(string, string)]
-  this: int
-  toHtml:
-    # two boxes, the newest first: the newest and the one before it, or, on an older version,
-    # the newest and this one
-    let latest = blk.versions.len
-    var shown = @[latest]
-    let other = if blk.this == latest: latest - 1 else: blk.this
-    if other >= 1: shown.add other
-    var items = ""
-    for n in shown:
-      let (date, what) = blk.versions[n - 1]
-      let href = versionHref(n, blk.this, latest)
-      let inside = &"""<b>v{n}</b> <span>{inline(date)}</span>"""   # the whole box is the link
-      let box = if href.len > 0: &"""<a href="{href}">{inside}</a>""" else: &"""<span class="voce">{inside}</span>"""
-      let current = if n == blk.this: " aria-current=\"page\"" else: ""
-      items.add &"""<li{current} title="{esc(what)}">{box}</li>"""
-    &"""<nav class="versioni" aria-label="Versions of this page"><span class="titolo">Versions</span><ol>{items}</ol></nav>"""
-
-proc versions*(nb: var Nb, versions: openArray[(string, string)], this: int) =
-  nb.add newNbVersions(versions = @versions, this = this)
-
-template nbVersions*(tversions: openArray[(string, string)], tthis: int) =
-  ## The strip of versions that versions 1 to 6 of the post Review mode show under the title:
-  ## `(date, what changed)` for each, oldest first, and the number of this one.
-  nb.versions(tversions, tthis)

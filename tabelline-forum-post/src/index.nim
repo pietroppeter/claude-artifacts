@@ -10,14 +10,14 @@ const srcDir = currentSourcePath().parentDir
 nbInit
 nb.doc.filename = srcDir.parentDir / "index.html"
 nb.usePage("tabelline on the Nim forum", "The post that announced tabelline 0.1 on the Nim forum, and how it was written.")
-nbReview(tversion = 7, tpage = "tabelline-forum-post", tsource = "tabelline-forum-post/src/post.md")
+nbReview(tpage = "tabelline-forum-post", tsource = "tabelline-forum-post/src/post.md")
 
 nbTitle "10 November 2026", "tabelline on the Nim forum", """
 The post that announced [tabelline](https://pietroppeter.github.io/tabelline/) 0.1 on the Nim
 forum, as the forum shows it, then its source, and the review rounds that shaped it with
 **✎ Review**.
 """
-nbVersion 7, "10 November 2026, as posted"
+nbVersion()
 
 nbNote """
 **Posted** on 10 November 2026: [tabelline: beautiful display tables in Nim](https://forum.nim-lang.org/t/14280),

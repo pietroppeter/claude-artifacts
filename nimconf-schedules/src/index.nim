@@ -12,7 +12,7 @@ nbInit
 nb.doc.filename = srcDir.parentDir / "index.html"
 nb.usePage("Every NimConf, in tables",
            "Every schedule of NimConf, the online Nim conference, 2020 to 2026, as tables made with tabelline.")
-nbReview(tversion = 4, tsource = "nimconf-schedules/src/index.nim")
+nbReview(tsource = "nimconf-schedules/src/index.nim")
 
 let slots = readSlots(srcDir / "data" / "slots.tsv")
 let videos = readVideos(srcDir / "data" / "videos.tsv")
@@ -35,7 +35,7 @@ reached 0.1: from the simplest table to the two tracks of 2026, then where the d
 from, and the Nim code that downloaded it.
 """
 
-nbVersion 4, "10 November 2026, after the third review"
+nbVersion()
 nbEditions editions.mapIt(($it.year, it.day.rsplit(' ', 1)[0]))
 
 nbText: """
