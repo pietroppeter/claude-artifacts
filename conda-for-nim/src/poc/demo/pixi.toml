@@ -1,0 +1,11 @@
+[workspace]
+name = "nimib-via-pixi"
+channels = ["../channel", "conda-forge"]
+platforms = ["linux-64"]
+
+[dependencies]
+nim = ">=2.2"
+nim-nimib = ">=0.4"
+
+[tasks]
+page = "nim r --hints:off -d:nimibQuiet hello.nim"

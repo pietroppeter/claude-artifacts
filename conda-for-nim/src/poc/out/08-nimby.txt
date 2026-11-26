@@ -1,0 +1,13 @@
+$ cd . && rattler-build build --recipe-dir apps/nimby --output-dir channel -c conda-forge 2>&1 | grep -E 'Artifact:|libgcc .*RE of' | sed 's/^[ │╭╰─]*//'
+libgcc           ┆ >=16 (RE of [build: gcc_linux-64]) │
+libgcc        ┆ libgcc >=16 (RE of [build: gcc_linux-64]) ┆ 16.2.0  ┆ ha9f2e26_7 ┆ conda-forge ┆   1.01 MiB │
+libgcc           ┆ >=16 (RE of [build: gcc_linux-64]) │
+Artifact: ./channel/linux-64/nimby-0.2.4-hb0f4dca_0.conda (174.96 KiB)
+$ pixi global install -c ./channel -c conda-forge nimby
+(installed) nimby 0.2.4
+└── exposed       + nimby
+$ /tmp/w/pixi-home/bin/nimby --help | head -4
+Nimby 0.2.4
+Usage: nimby <subcommand> [options]
+  ~ Minimal package manager for Nim. ~
+    -g, --global Install packages in the global packages directory (~/.nimby unless NIMBY_HOME is set)

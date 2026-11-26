@@ -1,0 +1,35 @@
+$ cd ./demo && cat pixi.toml
+[workspace]
+name = "nimib-via-pixi"
+channels = ["../channel", "conda-forge"]
+platforms = ["linux-64"]
+
+[dependencies]
+nim = ">=2.2"
+nim-nimib = ">=0.4"
+
+[tasks]
+page = "nim r --hints:off -d:nimibQuiet hello.nim"
+$ cd ./demo && pixi run page 2>&1 | grep -v Warning
+Pixi task (page): nim r --hints:off -d:nimibQuiet hello.nim
+$ cd ./demo && grep -o 'no nimble involved' hello.html | head -1
+no nimble involved
+$ cd ./demo && pixi tree nim-nimib
+Installed for: linux-64
+└── nim-nimib 0.4.3 
+    ├── nim-activation 0.1.0 
+    ├── nim-fusion 1.2 
+    │   └── nim-activation 0.1.0  (*)
+    ├── nim-markdown 0.8.8 
+    │   └── nim-activation 0.1.0  (*)
+    ├── nim-parsetoml 0.7.2 
+    │   └── nim-activation 0.1.0  (*)
+    └── nim-jsony 1.1.6 
+        └── nim-activation 0.1.0  (*)
+$ cd ./demo && pixi run 'echo $NIMBLE_DIR; ls $NIMBLE_DIR/pkgs2'
+./demo/.pixi/envs/default/share/nimble
+fusion-1.2
+jsony-1.1.6
+markdown-0.8.8
+nimib-0.4.3
+parsetoml-0.7.2

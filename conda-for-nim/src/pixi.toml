@@ -1,0 +1,14 @@
+# This page builds in a pixi environment: Nim, gcc and pcre (for nimib's markdown) come from
+# conda-forge, nimib and tabelline from deps.sh. `pixi run page` from this folder.
+[workspace]
+name = "conda-for-nim-page"
+channels = ["conda-forge"]
+platforms = ["linux-64", "linux-aarch64", "osx-64"]
+
+[dependencies]
+nim = ">=2.2"
+git = "*"
+
+[tasks]
+deps = "sh deps.sh"
+page = { cmd = "nim r -d:nimibQuiet index.nim", depends-on = ["deps"] }

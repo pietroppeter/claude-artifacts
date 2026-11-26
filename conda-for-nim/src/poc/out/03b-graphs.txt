@@ -1,0 +1,2 @@
+$ cd . && nim r --hints:off nimforge.nim --out:graphs fidget2 | wc -l
+22

@@ -1,0 +1,32 @@
+$ cd . && rattler-build build --recipe-dir recipes --output-dir channel -c ./channel -c conda-forge 2>&1 | grep -E 'Artifact:|all tests passed' | sed 's/^[ │╭╰─]*//' | sort | uniq -c | sed 's/^ *1 //'
+Artifact: ./channel/noarch/nim-activation-0.1.0-h4616a5c_0.conda (2.49 KiB)
+Artifact: ./channel/noarch/nim-bumpy-1.1.3-h4616a5c_0.conda (6.85 KiB)
+Artifact: ./channel/noarch/nim-chroma-1.0.0-h4616a5c_0.conda (16.59 KiB)
+Artifact: ./channel/noarch/nim-crunchy-0.1.11-h4616a5c_0.conda (22.40 KiB)
+Artifact: ./channel/noarch/nim-flatty-0.4.0-h4616a5c_0.conda (8.70 KiB)
+Artifact: ./channel/noarch/nim-fusion-1.2-h4616a5c_0.conda (73.37 KiB)
+Artifact: ./channel/noarch/nim-jsony-1.1.6-h4616a5c_0.conda (7.64 KiB)
+Artifact: ./channel/noarch/nim-markdown-0.8.8-h4616a5c_0.conda (30.50 KiB)
+Artifact: ./channel/noarch/nim-nimib-0.4.3-h4616a5c_0.conda (23.79 KiB)
+Artifact: ./channel/noarch/nim-nimsimd-1.3.2-h4616a5c_0.conda (14.22 KiB)
+Artifact: ./channel/noarch/nim-parsetoml-0.7.2-h4616a5c_0.conda (16.28 KiB)
+Artifact: ./channel/noarch/nim-pixie-6.1.0-h4616a5c_0.conda (89.31 KiB)
+Artifact: ./channel/noarch/nim-vmath-3.0.0-h4616a5c_0.conda (17.93 KiB)
+Artifact: ./channel/noarch/nim-zippy-0.10.20-h4616a5c_0.conda (28.03 KiB)
+     14 all tests passed!
+$ cd . && ls channel/noarch
+nim-activation-0.1.0-h4616a5c_0.conda
+nim-bumpy-1.1.3-h4616a5c_0.conda
+nim-chroma-1.0.0-h4616a5c_0.conda
+nim-crunchy-0.1.11-h4616a5c_0.conda
+nim-flatty-0.4.0-h4616a5c_0.conda
+nim-fusion-1.2-h4616a5c_0.conda
+nim-jsony-1.1.6-h4616a5c_0.conda
+nim-markdown-0.8.8-h4616a5c_0.conda
+nim-nimib-0.4.3-h4616a5c_0.conda
+nim-nimsimd-1.3.2-h4616a5c_0.conda
+nim-parsetoml-0.7.2-h4616a5c_0.conda
+nim-pixie-6.1.0-h4616a5c_0.conda
+nim-vmath-3.0.0-h4616a5c_0.conda
+nim-zippy-0.10.20-h4616a5c_0.conda
+repodata.json
