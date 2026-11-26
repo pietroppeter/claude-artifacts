@@ -1,0 +1,32 @@
+# A compiled Nim app as a conda package: treeform's nimby, installed by conda. Yes, really.
+context:
+  version: "0.2.4"
+
+package:
+  name: nimby
+  version: ${{ version }}
+
+source:
+  git: https://github.com/treeform/nimby
+  rev: afe9c270d8498eade8ae9d50eb87879d61b4ac23   # 0.2.4 is not tagged yet
+
+build:
+  number: 0
+  script:
+    - nim c -d:release --hints:off --nimcache:$SRC_DIR/cache -o:$PREFIX/bin/nimby src/nimby.nim
+
+requirements:
+  build:
+    - nim >=2.0
+    - ${{ compiler('c') }}
+  run:
+    - git        # nimby shells out to git
+
+tests:
+  - script:
+      - nimby --help
+
+about:
+  homepage: https://github.com/treeform/nimby
+  license: MIT
+  summary: Nimby helps you manage many nim packages.

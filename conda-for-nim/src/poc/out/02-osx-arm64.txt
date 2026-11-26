@@ -1,0 +1,9 @@
+$ cd /tmp/w/hello && pixi workspace platform add osx-arm64 | tail -4
+Error:   × failed to solve requirements of environment 'default' for platform 'osx-
+  │ arm64'
+  ├─▶   × failed to solve the environment
+  │   
+  ╰─▶ Cannot solve the request because of: No candidates were found for nim
+      >=2.2.6,<3.
+      
+

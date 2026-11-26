@@ -1,0 +1,15 @@
+$ cd ./demo && grep -A13 '^- conda: .*nim-nimib-0.4.3' pixi.lock
+- conda: ./channel/noarch/nim-nimib-0.4.3-h4616a5c_0.conda
+  subdir: noarch
+  sha256: 92a94085428a8d2d4b0dae241bf1eb576ec7806138cbaccf1681887112e2c957
+  md5: 365eb4b258fc526dee13f9599e8d8dd2
+  depends:
+  - nim-activation
+  - nim-fusion >=1.2
+  - nim-markdown >=0.8.1
+  - nim-parsetoml >=0.7.0
+  - nim-jsony >=1.1.5
+  constrains:
+  - nim >=1.4.0
+  channel: file://./channel
+  license: MIT

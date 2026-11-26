@@ -1,0 +1,2 @@
+export _NIM_ACTIVATION_OLD_NIMBLE_DIR="${NIMBLE_DIR:-}"
+export NIMBLE_DIR="${CONDA_PREFIX}/share/nimble"

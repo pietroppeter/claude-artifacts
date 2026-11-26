@@ -1,0 +1,11 @@
+$ nimble --version | head -1
+nimble v0.18.2 compiled at 2025-04-22 02:13:48
+$ echo 'nimble install -y nimib@0.4.3, empty NIMBLE_DIR:  30.263 s'
+nimble install -y nimib@0.4.3, empty NIMBLE_DIR:  30.263 s
+$ echo 'pixi install, empty package cache:              8.127 s'
+pixi install, empty package cache:              8.127 s
+$ echo 'pixi install, warm package cache:               0.257 s'
+pixi install, warm package cache:               0.257 s
+$ du -sh ./demo/.pixi /tmp/w/cold
+849M	./demo/.pixi
+857M	/tmp/w/cold

@@ -1,0 +1,10 @@
+$ rattler-build build --recipe-dir feedstock --output-dir channel -c conda-forge   # 21 minutes
+Nim Compiler Version 2.4.2 [Linux: amd64]
+Info: Using the environment variable: NIMBLE_DIR='$PREFIX/share/nimble'
+nimble v0.26.2 compiled at 2026-11-26 15:25:12
+hello
+all tests passed!
+Artifact: ./channel/linux-64/nim-2.4.2-hb0f4dca_0.conda (24.12 MiB)
+$ pixi exec -c ./channel -c conda-forge --spec "nim==2.4.2" -- sh -c 'nim --version | head -1; echo $NIMBLE_DIR'
+Nim Compiler Version 2.4.2 [Linux: amd64]
+~/.cache/rattler/cache/cached-envs-v0/nim-e6a0e06aa71dfcd9/share/nimble

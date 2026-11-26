@@ -1,0 +1,43 @@
+# conda-forge's nim recipe (meta.yaml), moved to the v1 format, at 2.4.2, with one addition:
+# an activation script that points NIMBLE_DIR at the environment, so that Nim packages
+# installed by conda (in $PREFIX/share/nimble/pkgs2) are found by nim and by nimble.
+context:
+  version: "2.4.2"
+
+package:
+  name: nim
+  version: ${{ version }}
+
+source:
+  url: https://nim-lang.org/download/nim-${{ version }}.tar.xz
+  sha256: b28bf4da1fce46dba9d16685c981b3d5e98de8db1b60d66f279b0bd2af2d8211
+  target_directory: nim
+
+build:
+  number: 0
+  skip: win
+
+requirements:
+  build:
+    - ${{ compiler('c') }}
+    - ${{ compiler('cxx') }}
+    - rsync
+  run:
+    - ${{ compiler('c') }}     # nim calls the C compiler: it is a run dependency
+    - ${{ compiler('cxx') }}
+    - openssl >=3      # nimble, std/httpclient -d:ssl
+    - pcre             # std/re, nimgrep
+
+tests:
+  - script:
+      - nim --version
+      - nimble --version
+      - test "$NIMBLE_DIR" = "$CONDA_PREFIX/share/nimble"
+      - echo 'echo "hello"' > foo.nim
+      - nim c -r foo.nim
+
+about:
+  homepage: https://nim-lang.org/
+  license: MIT
+  license_file: nim/copying.txt
+  summary: Nim programming language, by Andreas Rumpf (araq@)

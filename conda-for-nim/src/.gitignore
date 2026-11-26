@@ -1,0 +1,11 @@
+deps/
+.pixi/
+pixi.lock
+poc/.tools/
+poc/.work/
+poc/channel/
+poc/packages.json
+poc/demo/.pixi/
+poc/demo/hello.html
+poc/zdemo/.pixi/
+poc/work/

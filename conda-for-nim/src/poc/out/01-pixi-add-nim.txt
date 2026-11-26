@@ -1,0 +1,12 @@
+$ cd /tmp/w/hello && pixi init --platform linux-64 . > /dev/null && pixi add nim
+Created /tmp/w/hello/pixi.toml
+Added nim >=2.2.6,<3
+$ cd /tmp/w/hello && pixi run nim c -r --hints:off hello.nim
+hello from Nim 2.2.6, installed by conda
+$ cd /tmp/w/hello && pixi run 'echo $GCC'
+x86_64-conda-linux-gnu-gcc
+$ cd /tmp/w/hello && pixi list | grep -E '^(nim|gcc_linux|sysroot|openssl|pcre) '
+Installed for: linux-64
+nim                       2.2.6       hecca717_0             12.16 MiB  conda  https://conda.anaconda.org/conda-forge
+openssl                   4.1.0       h781a0a9_0              3.13 MiB  conda  https://conda.anaconda.org/conda-forge
+pcre                      8.45        h9c3ff4c_0            253.30 KiB  conda  https://conda.anaconda.org/conda-forge
