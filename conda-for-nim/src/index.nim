@@ -34,6 +34,12 @@ const
 
 proc term(name: string): string = readFile("poc/out" / name)
 proc poc(path: string): string = readFile("poc" / path)
+proc between(path, a, b: string): string =
+  ## The part of a source file from the line holding `a` up to `b` (or to the end, when `b` is "").
+  let s = readFile(path)
+  let i = s.find(a)
+  let j = if b == "": s.len else: s.find(b, i)
+  s[s.rfind('\n', 0, i) + 1 ..< j]
 
 # ------------------------------------------------------------------ data for the race and the survey
 proc raceData(roots: openArray[string]): JsonNode =
@@ -273,6 +279,38 @@ fetch** and **one download** however deep the tree is, and the solve, which is t
 part, happens on your machine with nothing but metadata. That metadata was computed *once, when
 the package was built*: someone cloned and read the `.nimble` file, so that nobody else has to.
 """
+
+nbFold("How this interactive is built, with its source", """
+It takes three small pieces, and no framework.
+
+1. **The data comes from the PoC's own recipes.** At build time, `raceData` (in `index.nim`)
+   walks `poc/recipes/nim-*` and `poc/graphs/nim-*`. Those are the recipes nimforge wrote from
+   packages.json and from each package's `.nimble` file. From each `recipe.yaml`, it keeps the
+   version and the `nim-*` names listed under `run:`. Then, starting from each root (nimib,
+   pixie, fidget2), it collects the graph that can be reached and stores it as JSON:
+   `{pkg: {deps: {name: [deps]}, versions: {name: version}}}`.
+2. **A custom nimib block puts it on the page.** `nbRace` (in `lib/blocks.nim`) writes the
+   empty lanes and the buttons as HTML. It puts the JSON in a `<script type="application/json">`
+   tag, and inlines `lib/race.js`, which is read with `staticRead` when the page compiles.
+   Nothing is loaded from a CDN, so it works inside a claude.ai artifact too.
+3. **The script works out both stories in advance, as frames.**
+   - `levels` splits the graph by depth, breadth first.
+   - `clonePlan` makes one frame per round trip. The first is GET packages.json. Then, for each
+     level of the tree, there is one frame for `git ls-remote --tags` on the frontier, and one
+     frame for a clone that reads the `.nimble` files to find the next level.
+   - `indexPlan` makes three frames: GET repodata (every edge is known), a local solve, and one
+     download of everything.
+
+   Each frame holds the state of every package (unknown, known, busy or got) and the counters.
+   **Next round trip** moves both lanes forward by one frame, and `render` redraws them from it.
+   **Play** is a timer on the same step.
+
+So the race is a model, not a measurement. One press is one network round trip, and fetches made
+in parallel count as one. The measured times are in the bars below.
+""")
+nbFile("index.nim (the raceData proc)", "nim", between("index.nim", "proc raceData", "\nlet bio"), tfolded = true)
+nbFile("lib/blocks.nim (the nbRace block)", "nim", between("lib/blocks.nim", "const raceJs", ""), tfolded = true)
+nbFile("lib/race.js", "javascript", readFile("lib/race.js"), tfolded = true)
 
 nbNote(nkCareful, """
 Two honest footnotes. A real Nim solver may need *more* clones than this (atlas and nimble read

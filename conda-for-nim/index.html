@@ -1289,6 +1289,223 @@ parses code) from each package to find out the next level. Index-first pays <str
 fetch</strong> and <strong>one download</strong> however deep the tree is, and the solve, which is the clever
 part, happens on your machine with nothing but metadata. That metadata was computed <em>once, when
 the package was built</em>: someone cloned and read the <code>.nimble</code> file, so that nobody else has to.</p>
+<details class="fold"><summary>How this interactive is built, with its source</summary><p>It takes three small pieces, and no framework.</p>
+<ol>
+<li>
+<p><strong>The data comes from the PoC's own recipes.</strong> At build time, <code>raceData</code> (in <code>index.nim</code>)
+walks <code>poc/recipes/nim-*</code> and <code>poc/graphs/nim-*</code>. Those are the recipes nimforge wrote from
+packages.json and from each package's <code>.nimble</code> file. From each <code>recipe.yaml</code>, it keeps the
+version and the <code>nim-*</code> names listed under <code>run:</code>. Then, starting from each root (nimib,
+pixie, fidget2), it collects the graph that can be reached and stores it as JSON:
+<code>{pkg: {deps: {name: [deps]}, versions: {name: version}}}</code>.</p>
+</li>
+<li>
+<p><strong>A custom nimib block puts it on the page.</strong> <code>nbRace</code> (in <code>lib/blocks.nim</code>) writes the
+empty lanes and the buttons as HTML. It puts the JSON in a <code>&lt;script type=&quot;application/json&quot;&gt;</code>
+tag, and inlines <code>lib/race.js</code>, which is read with <code>staticRead</code> when the page compiles.
+Nothing is loaded from a CDN, so it works inside a claude.ai artifact too.</p>
+</li>
+<li>
+<p><strong>The script works out both stories in advance, as frames.</strong></p>
+<ul>
+<li><code>levels</code> splits the graph by depth, breadth first.</li>
+<li><code>clonePlan</code> makes one frame per round trip. The first is GET packages.json. Then, for each
+level of the tree, there is one frame for <code>git ls-remote --tags</code> on the frontier, and one
+frame for a clone that reads the <code>.nimble</code> files to find the next level.</li>
+<li><code>indexPlan</code> makes three frames: GET repodata (every edge is known), a local solve, and one
+download of everything.</li>
+</ul>
+<p>Each frame holds the state of every package (unknown, known, busy or got) and the counters.
+<strong>Next round trip</strong> moves both lanes forward by one frame, and <code>render</code> redraws them from it.
+<strong>Play</strong> is a timer on the same step.</p>
+</li>
+</ol>
+<p>So the race is a model, not a measurement. One press is one network round trip, and fetches made
+in parallel count as one. The measured times are in the bars below.</p>
+</details>
+<details class="source"><summary><code>index.nim (the raceData proc)</code> <span class="src-lines">28 lines</span></summary><pre><code class="hljs nim"><span class="hljs-keyword">proc</span> raceData(roots: openArray[<span class="hljs-built_in">string</span>]): <span class="hljs-type">JsonNode</span> =
+  <span class="hljs-comment">## The dependency graphs of the recipes nimforge wrote (poc/recipes), for the race.</span>
+  <span class="hljs-keyword">var</span> deps = initTable[<span class="hljs-built_in">string</span>, <span class="hljs-built_in">seq</span>[<span class="hljs-built_in">string</span>]]()
+  <span class="hljs-keyword">var</span> versions = initTable[<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span>]()
+  <span class="hljs-keyword">for</span> dir <span class="hljs-keyword">in</span> toSeq(walkDirs(<span class="hljs-string">&quot;poc/recipes/nim-*&quot;</span>)) &amp; toSeq(walkDirs(<span class="hljs-string">&quot;poc/graphs/nim-*&quot;</span>)):
+    <span class="hljs-keyword">let</span> name = dir.lastPathPart[<span class="hljs-string">&quot;nim-&quot;</span>.len .. ^<span class="hljs-number">1</span>]
+    <span class="hljs-keyword">if</span> name == <span class="hljs-string">&quot;activation&quot;</span>: <span class="hljs-keyword">continue</span>
+    <span class="hljs-keyword">var</span> inRun = <span class="hljs-literal">false</span>
+    deps[name] = @[]
+    <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> readFile(dir / <span class="hljs-string">&quot;recipe.yaml&quot;</span>).splitLines:
+      <span class="hljs-keyword">if</span> line.startsWith(<span class="hljs-string">&quot;  version: </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&quot;</span>): versions[name] = line.split('<span class="hljs-string">&quot;')[1]</span>
+      <span class="hljs-keyword">if</span> line.strip == <span class="hljs-string">&quot;run:&quot;</span>: inRun = <span class="hljs-literal">true</span>; <span class="hljs-keyword">continue</span>
+      <span class="hljs-keyword">if</span> inRun:
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> line.startsWith(<span class="hljs-string">&quot;    - &quot;</span>): inRun = <span class="hljs-literal">false</span>; <span class="hljs-keyword">continue</span>
+        <span class="hljs-keyword">let</span> d = line.strip[<span class="hljs-number">2.</span>.^<span class="hljs-number">1</span>].split(' <span class="hljs-string">')[0]</span>
+        <span class="hljs-keyword">if</span> d.startsWith(<span class="hljs-string">&quot;nim-&quot;</span>) <span class="hljs-keyword">and</span> d != <span class="hljs-string">&quot;nim-activation&quot;</span>: deps[name].add d[<span class="hljs-string">&quot;nim-&quot;</span>.len .. ^<span class="hljs-number">1</span>]
+  <span class="hljs-literal">result</span> = newJObject()
+  <span class="hljs-keyword">for</span> root <span class="hljs-keyword">in</span> roots:
+    <span class="hljs-keyword">var</span> g = newJObject()
+    <span class="hljs-keyword">var</span> v = newJObject()
+    <span class="hljs-keyword">var</span> todo = @[root]
+    <span class="hljs-keyword">while</span> todo.len &gt; <span class="hljs-number">0</span>:
+      <span class="hljs-keyword">let</span> n = todo.pop
+      <span class="hljs-keyword">if</span> g.hasKey(n): <span class="hljs-keyword">continue</span>
+      g[n] = %deps[n]
+      v[n] = %versions[n]
+      todo.add deps[n]
+    <span class="hljs-literal">result</span>[root] = %*{<span class="hljs-string">&quot;deps&quot;</span>: g, <span class="hljs-string">&quot;versions&quot;</span>: v}</code></pre></details>
+<details class="source"><summary><code>lib/blocks.nim (the nbRace block)</code> <span class="src-lines">22 lines</span></summary><pre><code class="hljs nim"><span class="hljs-keyword">const</span> raceJs = staticRead(<span class="hljs-string">&quot;race.js&quot;</span>)
+
+newNbBlock(<span class="hljs-type">NbRace</span>):
+  data: <span class="hljs-built_in">string</span>     <span class="hljs-comment">## JSON: {pkg: {deps: {name: [deps...]}, versions: {name: v}}}</span>
+  toHtml:
+    &amp;<span class="hljs-string">&quot;&quot;&quot;&lt;section class=&quot;race&quot; id=&quot;race&quot; aria-label=&quot;clone-first against index-first, step by step&quot;&gt;
+&lt;div class=&quot;rc-row&quot; role=&quot;group&quot; aria-label=&quot;what to install&quot;&gt;&lt;span class=&quot;rc-label&quot;&gt;install&lt;/span&gt;&lt;span id=&quot;rc-pkgs&quot;&gt;&lt;/span&gt;&lt;/div&gt;
+&lt;div class=&quot;rc-lane&quot; id=&quot;rc-clone&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;rc-lane conda&quot; id=&quot;rc-index&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;rc-row&quot;&gt;
+  &lt;button type=&quot;button&quot; class=&quot;rc-btn primary&quot; id=&quot;rc-step&quot;&gt;Next round trip ▸&lt;/button&gt;
+  &lt;button type=&quot;button&quot; class=&quot;rc-btn&quot; id=&quot;rc-play&quot;&gt;▶ Play&lt;/button&gt;
+  &lt;button type=&quot;button&quot; class=&quot;rc-btn&quot; id=&quot;rc-reset&quot;&gt;↺ Reset&lt;/button&gt;
+&lt;/div&gt;
+&lt;p class=&quot;rc-verdict&quot; id=&quot;rc-verdict&quot; aria-live=&quot;polite&quot;&gt;&lt;/p&gt;
+&lt;noscript&gt;&lt;p&gt;This explainer needs JavaScript.&lt;/p&gt;&lt;/noscript&gt;
+&lt;script type=&quot;application/json&quot; id=&quot;rc-data&quot;&gt;{blk.data}&lt;/script&gt;
+&lt;/section&gt;&lt;script&gt;{raceJs}&lt;/script&gt;&quot;&quot;&quot;</span>
+
+<span class="hljs-keyword">template</span> nbRace*(tdata: <span class="hljs-type">JsonNode</span>) =
+  <span class="hljs-comment">## The interactive: who knows the dependency graph, and when.</span>
+  nb.add newNbRace(data = $tdata)</code></pre></details>
+<details class="source"><summary><code>lib/race.js</code> <span class="src-lines">133 lines</span></summary><pre><code class="language-javascript"><span class="hljs-comment">// The race: who knows the dependency graph, and when.</span>
+<span class="hljs-comment">// Clone-first (nimble, atlas, nimby): the registry only maps names to git URLs, so the graph is</span>
+<span class="hljs-comment">// discovered level by level, by listing tags and cloning each package to read its .nimble file.</span>
+<span class="hljs-comment">// Index-first (conda, pixi): the channel's repodata already holds every edge, so one fetch gives</span>
+<span class="hljs-comment">// the whole graph, the solve is local, and every package is downloaded at once.</span>
+(<span class="hljs-keyword">function</span> () {
+  <span class="hljs-keyword">const</span> data = <span class="hljs-built_in">JSON</span>.parse(<span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"rc-data"</span>).textContent);
+  <span class="hljs-keyword">const</span> $ = (id) =&gt; <span class="hljs-built_in">document</span>.getElementById(id);
+  <span class="hljs-keyword">let</span> pkg = <span class="hljs-built_in">Object</span>.keys(data)[<span class="hljs-number">0</span>], step = <span class="hljs-number">0</span>, timer = <span class="hljs-literal">null</span>, plans = <span class="hljs-literal">null</span>;
+
+  <span class="hljs-keyword">function</span> levels(deps, root) {
+    <span class="hljs-keyword">const</span> depth = { [root]: <span class="hljs-number">0</span> }, q = [root];
+    <span class="hljs-keyword">while</span> (q.length) {
+      <span class="hljs-keyword">const</span> n = q.shift();
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> d <span class="hljs-keyword">of</span> deps[n] || []) <span class="hljs-keyword">if</span> (!(d <span class="hljs-keyword">in</span> depth)) { depth[d] = depth[n] + <span class="hljs-number">1</span>; q.push(d); }
+    }
+    <span class="hljs-keyword">const</span> out = [];
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> [n, l] <span class="hljs-keyword">of</span> <span class="hljs-built_in">Object</span>.entries(depth)) (out[l] = out[l] || []).push(n);
+    <span class="hljs-keyword">return</span> out;
+  }
+
+  <span class="hljs-comment">// Each plan is a list of frames: {log, st: {name: state}, m: {meter: value}}.</span>
+  <span class="hljs-keyword">function</span> clonePlan(deps, root) {
+    <span class="hljs-keyword">const</span> names = <span class="hljs-built_in">Object</span>.keys(deps), st = {}, m = { <span class="hljs-string">"round trips"</span>: <span class="hljs-number">0</span>, <span class="hljs-string">"git ops"</span>: <span class="hljs-number">0</span>, <span class="hljs-string">".nimble read"</span>: <span class="hljs-number">0</span> };
+    names.forEach((n) =&gt; (st[n] = <span class="hljs-string">"unknown"</span>));
+    <span class="hljs-keyword">const</span> frames = [{ log: <span class="hljs-string">"nothing known yet"</span>, st: { ...st }, m: { ...m } }];
+    <span class="hljs-keyword">const</span> snap = (log) =&gt; frames.push({ log, st: { ...st }, m: { ...m } });
+    m[<span class="hljs-string">"round trips"</span>]++; st[root] = <span class="hljs-string">"known"</span>;
+    snap(<span class="hljs-string">"GET packages.json (2.9 MB): "</span> + root + <span class="hljs-string">" → its git URL. No versions, no dependencies."</span>);
+    <span class="hljs-keyword">let</span> frontier = [root];
+    <span class="hljs-keyword">const</span> seen = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>([root]);
+    <span class="hljs-keyword">while</span> (frontier.length) {
+      m[<span class="hljs-string">"round trips"</span>]++; m[<span class="hljs-string">"git ops"</span>] += frontier.length;
+      frontier.forEach((n) =&gt; (st[n] = <span class="hljs-string">"busy"</span>));
+      snap(<span class="hljs-string">"git ls-remote --tags, "</span> + frontier.length + <span class="hljs-string">" repo"</span> + (frontier.length &gt; <span class="hljs-number">1</span> ? <span class="hljs-string">"s"</span> : <span class="hljs-string">""</span>) + <span class="hljs-string">" in parallel: which versions exist?"</span>);
+      m[<span class="hljs-string">"round trips"</span>]++; m[<span class="hljs-string">"git ops"</span>] += frontier.length; m[<span class="hljs-string">".nimble read"</span>] += frontier.length;
+      <span class="hljs-keyword">const</span> next = [];
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> n <span class="hljs-keyword">of</span> frontier) {
+        st[n] = <span class="hljs-string">"got"</span>;
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> d <span class="hljs-keyword">of</span> deps[n]) <span class="hljs-keyword">if</span> (!seen.has(d)) { seen.add(d); next.push(d); st[d] = <span class="hljs-string">"known"</span>; }
+      }
+      snap(<span class="hljs-string">"git clone at the tag, read "</span> + frontier.map((n) =&gt; n + <span class="hljs-string">".nimble"</span>).join(<span class="hljs-string">", "</span>) +
+        (next.length ? <span class="hljs-string">" → found "</span> + next.join(<span class="hljs-string">", "</span>) : <span class="hljs-string">" → no new dependencies"</span>));
+      frontier = next;
+    }
+    frames[frames.length - <span class="hljs-number">1</span>].done = <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">return</span> frames;
+  }
+
+  <span class="hljs-keyword">function</span> indexPlan(deps, root) {
+    <span class="hljs-keyword">const</span> names = <span class="hljs-built_in">Object</span>.keys(deps), st = {}, m = { <span class="hljs-string">"round trips"</span>: <span class="hljs-number">0</span>, <span class="hljs-string">"downloads"</span>: <span class="hljs-number">0</span>, <span class="hljs-string">".nimble read"</span>: <span class="hljs-number">0</span> };
+    names.forEach((n) =&gt; (st[n] = <span class="hljs-string">"unknown"</span>));
+    <span class="hljs-keyword">const</span> frames = [{ log: <span class="hljs-string">"nothing known yet"</span>, st: { ...st }, m: { ...m } }];
+    <span class="hljs-keyword">const</span> snap = (log) =&gt; frames.push({ log, st: { ...st }, m: { ...m } });
+    m[<span class="hljs-string">"round trips"</span>]++; names.forEach((n) =&gt; (st[n] = <span class="hljs-string">"known"</span>));
+    snap(<span class="hljs-string">"GET repodata (noarch + linux-64): every package, version and dependency edge is in it."</span>);
+    names.forEach((n) =&gt; (st[n] = <span class="hljs-string">"busy"</span>));
+    snap(<span class="hljs-string">"solve locally (resolvo, a SAT solver in Rust): no network. Picks "</span> + names.length + <span class="hljs-string">" packages."</span>);
+    m[<span class="hljs-string">"round trips"</span>]++; m[<span class="hljs-string">"downloads"</span>] = names.length; names.forEach((n) =&gt; (st[n] = <span class="hljs-string">"got"</span>));
+    snap(<span class="hljs-string">"download "</span> + names.length + <span class="hljs-string">" .conda files at once, hard-link them into the env. Done."</span>);
+    frames[frames.length - <span class="hljs-number">1</span>].done = <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">return</span> frames;
+  }
+
+  <span class="hljs-keyword">function</span> lane(el, title, sub, frames, versions, lv) {
+    <span class="hljs-keyword">const</span> f = frames[<span class="hljs-built_in">Math</span>.min(step, frames.length - <span class="hljs-number">1</span>)];
+    <span class="hljs-keyword">let</span> g = <span class="hljs-string">""</span>;
+    lv.forEach((names, i) =&gt; {
+      g += <span class="hljs-string">'&lt;div class="rc-level"&gt;&lt;span class="rc-level-n"&gt;'</span> + (i === <span class="hljs-number">0</span> ? <span class="hljs-string">"root"</span> : <span class="hljs-string">"dep "</span> + i) + <span class="hljs-string">"&lt;/span&gt;"</span>;
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> n <span class="hljs-keyword">of</span> names) {
+        <span class="hljs-keyword">const</span> s = f.st[n];
+        <span class="hljs-keyword">const</span> label = s === <span class="hljs-string">"unknown"</span> ? <span class="hljs-string">"?"</span> : s === <span class="hljs-string">"got"</span> ? n + <span class="hljs-string">" "</span> + versions[n] : n;
+        g += <span class="hljs-string">'&lt;span class="rc-node '</span> + s + <span class="hljs-string">'"&gt;'</span> + label + <span class="hljs-string">"&lt;/span&gt;"</span>;
+      }
+      g += <span class="hljs-string">"&lt;/div&gt;"</span>;
+    });
+    <span class="hljs-keyword">const</span> meters = <span class="hljs-built_in">Object</span>.entries(f.m).map(([k, v]) =&gt; <span class="hljs-string">"&lt;span&gt;&lt;b&gt;"</span> + v + <span class="hljs-string">"&lt;/b&gt; "</span> + k + <span class="hljs-string">"&lt;/span&gt;"</span>).join(<span class="hljs-string">""</span>);
+    el.innerHTML = <span class="hljs-string">"&lt;h4&gt;"</span> + title + <span class="hljs-string">'&lt;/h4&gt;&lt;p class="rc-sub"&gt;'</span> + sub + <span class="hljs-string">'&lt;/p&gt;&lt;div class="rc-meters"&gt;'</span> + meters +
+      <span class="hljs-string">'&lt;/div&gt;&lt;div class="rc-graph"&gt;'</span> + g + <span class="hljs-string">'&lt;/div&gt;&lt;p class="rc-log"&gt;'</span> + (f.done &amp;&amp; step &gt;= frames.length - <span class="hljs-number">1</span> ? <span class="hljs-string">"✓ "</span> : <span class="hljs-string">""</span>) + f.log + <span class="hljs-string">"&lt;/p&gt;"</span>;
+  }
+
+  <span class="hljs-keyword">function</span> render() {
+    <span class="hljs-keyword">const</span> d = data[pkg], lv = levels(d.deps, pkg);
+    lane($(<span class="hljs-string">"rc-clone"</span>), <span class="hljs-string">"Clone-first: nimble, atlas, nimby"</span>, <span class="hljs-string">"the registry maps names to git URLs; the graph lives in the .nimble files"</span>,
+      plans.clone, d.versions, lv);
+    lane($(<span class="hljs-string">"rc-index"</span>), <span class="hljs-string">"Index-first: conda, pixi"</span>, <span class="hljs-string">"the channel's repodata already holds every edge"</span>, plans.index, d.versions, lv);
+    <span class="hljs-keyword">const</span> last = <span class="hljs-built_in">Math</span>.max(plans.clone.length, plans.index.length) - <span class="hljs-number">1</span>;
+    $(<span class="hljs-string">"rc-step"</span>).disabled = step &gt;= last;
+    <span class="hljs-keyword">const</span> c = plans.clone[plans.clone.length - <span class="hljs-number">1</span>].m, i = plans.index[plans.index.length - <span class="hljs-number">1</span>].m;
+    $(<span class="hljs-string">"rc-verdict"</span>).innerHTML = step &gt;= last
+      ? <span class="hljs-string">"&lt;b&gt;"</span> + pkg + <span class="hljs-string">"&lt;/b&gt;: clone-first needed &lt;b&gt;"</span> + c[<span class="hljs-string">"round trips"</span>] + <span class="hljs-string">"&lt;/b&gt; round trips, one after the other, and &lt;b&gt;"</span> +
+        c[<span class="hljs-string">"git ops"</span>] + <span class="hljs-string">"&lt;/b&gt; git operations. Index-first needed &lt;b&gt;"</span> + i[<span class="hljs-string">"round trips"</span>] +
+        <span class="hljs-string">"&lt;/b&gt;, whatever the depth of the tree. The difference grows with every level of dependencies."</span>
+      : step &gt;= plans.index.length - <span class="hljs-number">1</span>
+        ? <span class="hljs-string">"conda is done. Clone-first still cannot see the bottom of the tree."</span>
+        : <span class="hljs-string">"Press &lt;b&gt;Next round trip&lt;/b&gt;: both sides make one network round trip per press."</span>;
+  }
+
+  <span class="hljs-keyword">function</span> reset() {
+    stop(); step = <span class="hljs-number">0</span>;
+    plans = { clone: clonePlan(data[pkg].deps, pkg), index: indexPlan(data[pkg].deps, pkg) };
+    render();
+  }
+  <span class="hljs-keyword">function</span> stop() { <span class="hljs-keyword">if</span> (timer) { clearInterval(timer); timer = <span class="hljs-literal">null</span>; $(<span class="hljs-string">"rc-play"</span>).textContent = <span class="hljs-string">"▶ Play"</span>; } }
+  <span class="hljs-keyword">function</span> next() {
+    <span class="hljs-keyword">const</span> last = <span class="hljs-built_in">Math</span>.max(plans.clone.length, plans.index.length) - <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">if</span> (step &lt; last) { step++; render(); }
+    <span class="hljs-keyword">if</span> (step &gt;= last) stop();
+  }
+
+  <span class="hljs-keyword">const</span> chips = $(<span class="hljs-string">"rc-pkgs"</span>);
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> name <span class="hljs-keyword">of</span> <span class="hljs-built_in">Object</span>.keys(data)) {
+    <span class="hljs-keyword">const</span> b = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">"button"</span>);
+    b.type = <span class="hljs-string">"button"</span>; b.className = <span class="hljs-string">"rc-chip"</span>; b.textContent = name;
+    b.setAttribute(<span class="hljs-string">"aria-pressed"</span>, <span class="hljs-built_in">String</span>(name === pkg));
+    b.onclick = () =&gt; {
+      pkg = name;
+      chips.querySelectorAll(<span class="hljs-string">"button"</span>).forEach((x) =&gt; x.setAttribute(<span class="hljs-string">"aria-pressed"</span>, <span class="hljs-built_in">String</span>(x === b)));
+      reset();
+    };
+    chips.appendChild(b);
+  }
+  $(<span class="hljs-string">"rc-step"</span>).onclick = () =&gt; { stop(); next(); };
+  $(<span class="hljs-string">"rc-reset"</span>).onclick = reset;
+  $(<span class="hljs-string">"rc-play"</span>).onclick = () =&gt; {
+    <span class="hljs-keyword">if</span> (timer) <span class="hljs-keyword">return</span> stop();
+    <span class="hljs-keyword">const</span> last = <span class="hljs-built_in">Math</span>.max(plans.clone.length, plans.index.length) - <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">if</span> (step &gt;= last) reset();
+    $(<span class="hljs-string">"rc-play"</span>).textContent = <span class="hljs-string">"⏸ Pause"</span>;
+    timer = setInterval(next, <span class="hljs-number">1100</span>);
+  };
+  reset();
+})();</code></pre></details>
 <aside class="note careful"><span class="note-label">Careful</span><p>Two honest footnotes. A real Nim solver may need <em>more</em> clones than this (atlas and nimble read
 several tags of a package when constraints conflict). And conda's index is big: modern clients
 fetch <strong>sharded repodata</strong> (CEP 16), one small file per package name, so they too walk the
@@ -2125,6 +2342,12 @@ nbReview(tpage = <span class="hljs-string">&quot;conda-for-nim&quot;</span>, tso
 
 <span class="hljs-keyword">proc</span> term(name: <span class="hljs-built_in">string</span>): <span class="hljs-built_in">string</span> = readFile(<span class="hljs-string">&quot;poc/out&quot;</span> / name)
 <span class="hljs-keyword">proc</span> poc(path: <span class="hljs-built_in">string</span>): <span class="hljs-built_in">string</span> = readFile(<span class="hljs-string">&quot;poc&quot;</span> / path)
+<span class="hljs-keyword">proc</span> between(path, a, b: <span class="hljs-built_in">string</span>): <span class="hljs-built_in">string</span> =
+  <span class="hljs-comment">## The part of a source file from the line holding `a` up to `b` (or to the end, when `b` is &quot;&quot;).</span>
+  <span class="hljs-keyword">let</span> s = readFile(path)
+  <span class="hljs-keyword">let</span> i = s.find(a)
+  <span class="hljs-keyword">let</span> j = <span class="hljs-keyword">if</span> b == <span class="hljs-string">&quot;&quot;</span>: s.len <span class="hljs-keyword">else</span>: s.find(b, i)
+  s[s.rfind('\n<span class="hljs-string">', 0, i) + 1 ..&lt; j]</span>
 
 <span class="hljs-comment"># ------------------------------------------------------------------ data for the race and the survey</span>
 <span class="hljs-keyword">proc</span> raceData(roots: openArray[<span class="hljs-built_in">string</span>]): <span class="hljs-type">JsonNode</span> =
@@ -2364,6 +2587,38 @@ fetch** and **one download** however deep the tree is, and the solve, which is t
 part, happens on your machine with nothing but metadata. That metadata was computed *once, when
 the package was built*: someone cloned and read the `.nimble` file, so that nobody else has to.
 &quot;&quot;&quot;</span>
+
+nbFold(<span class="hljs-string">&quot;How this interactive is built, with its source&quot;</span>, <span class="hljs-string">&quot;&quot;&quot;
+It takes three small pieces, and no framework.
+
+1. **The data comes from the PoC's own recipes.** At build time, `raceData` (in `index.nim`)
+   walks `poc/recipes/nim-*` and `poc/graphs/nim-*`. Those are the recipes nimforge wrote from
+   packages.json and from each package's `.nimble` file. From each `recipe.yaml`, it keeps the
+   version and the `nim-*` names listed under `run:`. Then, starting from each root (nimib,
+   pixie, fidget2), it collects the graph that can be reached and stores it as JSON:
+   `{pkg: {deps: {name: [deps]}, versions: {name: version}}}`.
+2. **A custom nimib block puts it on the page.** `nbRace` (in `lib/blocks.nim`) writes the
+   empty lanes and the buttons as HTML. It puts the JSON in a `&lt;script type=&quot;application/json&quot;&gt;`
+   tag, and inlines `lib/race.js`, which is read with `staticRead` when the page compiles.
+   Nothing is loaded from a CDN, so it works inside a claude.ai artifact too.
+3. **The script works out both stories in advance, as frames.**
+   - `levels` splits the graph by depth, breadth first.
+   - `clonePlan` makes one frame per round trip. The first is GET packages.json. Then, for each
+     level of the tree, there is one frame for `git ls-remote --tags` on the frontier, and one
+     frame for a clone that reads the `.nimble` files to find the next level.
+   - `indexPlan` makes three frames: GET repodata (every edge is known), a local solve, and one
+     download of everything.
+
+   Each frame holds the state of every package (unknown, known, busy or got) and the counters.
+   **Next round trip** moves both lanes forward by one frame, and `render` redraws them from it.
+   **Play** is a timer on the same step.
+
+So the race is a model, not a measurement. One press is one network round trip, and fetches made
+in parallel count as one. The measured times are in the bars below.
+&quot;&quot;&quot;</span>)
+nbFile(<span class="hljs-string">&quot;index.nim (the raceData proc)&quot;</span>, <span class="hljs-string">&quot;nim&quot;</span>, between(<span class="hljs-string">&quot;index.nim&quot;</span>, <span class="hljs-string">&quot;proc raceData&quot;</span>, <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">let bio&quot;</span>), tfolded = <span class="hljs-literal">true</span>)
+nbFile(<span class="hljs-string">&quot;lib/blocks.nim (the nbRace block)&quot;</span>, <span class="hljs-string">&quot;nim&quot;</span>, between(<span class="hljs-string">&quot;lib/blocks.nim&quot;</span>, <span class="hljs-string">&quot;const raceJs&quot;</span>, <span class="hljs-string">&quot;&quot;</span>), tfolded = <span class="hljs-literal">true</span>)
+nbFile(<span class="hljs-string">&quot;lib/race.js&quot;</span>, <span class="hljs-string">&quot;javascript&quot;</span>, readFile(<span class="hljs-string">&quot;lib/race.js&quot;</span>), tfolded = <span class="hljs-literal">true</span>)
 
 nbNote(nkCareful, <span class="hljs-string">&quot;&quot;&quot;
 Two honest footnotes. A real Nim solver may need *more* clones than this (atlas and nimble read
