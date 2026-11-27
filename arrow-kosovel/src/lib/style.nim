@@ -152,6 +152,16 @@ hr{border:0;border-top:1px solid var(--line)}
 .poem{margin:1.2rem 0;padding:.9rem 1.1rem;background:var(--surface);border:var(--bw) solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow)}
 .poem h4{margin:0 0 .4rem;font:700 calc(1.4rem * var(--head-size))/1.2 var(--head)}
 .poem .verse{white-space:pre-wrap;font:italic 400 1.02rem/1.55 var(--font)}
+.poem details.tr{margin:.5rem 0 0;padding:.3rem .6rem;border-radius:8px;background:var(--a1-soft)}
+.poem details.tr summary{font-size:.88rem}
+.poem details.tr .verse{font-style:normal;font-size:.95rem;margin:.3rem 0 .2rem}
+.ptext{max-height:16rem;overflow-y:auto;padding:.4rem .5rem;border-radius:10px;background:var(--paper);border:1px solid var(--line)}
+.pl{padding:.15rem .3rem;border-radius:6px;cursor:pointer;line-height:1.35}
+.pl span{display:block;font-style:italic}
+.pl i{display:block;font-style:normal;font-size:.84rem;color:var(--muted)}
+.pl.sel{background:var(--sel);color:var(--sel-ink)}
+.pl.sel i{color:inherit;opacity:.85}
+.pl.gap{height:.55rem;cursor:default}
 .poem .src{margin:.5rem 0 0;font-size:.78rem;color:var(--muted)}
 
 /* the layout explorer */

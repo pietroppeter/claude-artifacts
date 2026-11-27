@@ -14,11 +14,14 @@ proc lineCount(p: int): int {.importjs: "KOSOVEL[#].l.length".}
 proc lineAt(p, i: int): cstring {.importjs: "KOSOVEL[#].l[#]".}
 proc wordCount(p: int): int {.importjs: "KOSOVEL[#].w.length".}
 proc wordAt(p, i: int): cstring {.importjs: "KOSOVEL[#].w[#]".}
+proc transLine(p: int; lang: cstring; i: int): cstring {.importjs: "(KOSOVEL[#][#] || [])[#] || ''".}
+proc wordLine(p, i: int): int {.importjs: "KOSOVEL[#].wl[#]".}
 proc setHtml(e: Element; s: cstring) {.importjs: "#.innerHTML = #".}
 proc valueI(e: Element): int {.importjs: "parseInt(#.value)".}
 proc setValueI(e: Element; v: int) {.importjs: "#.value = #".}
 proc setMax(e: Element; v: int) {.importjs: "#.max = #".}
 proc rowOf(e: Element): cstring {.importjs: "((#.closest('[data-row]') || {dataset: {}}).dataset.row || '')".}
+proc lineOf(e: Element): cstring {.importjs: "((#.closest('[data-line]') || {dataset: {}}).dataset.line || '')".}
 proc targetEl(ev: Event): Element {.importjs: "#.target".}
 proc setPressed(e: Element; on: bool) {.importjs: "#.setAttribute('aria-pressed', # ? 'true' : 'false')".}
 proc setTheme(t: cstring) {.importjs: "document.documentElement.dataset.theme = #".}
@@ -40,6 +43,7 @@ var
   sliceFrom = 0
   sliceLen = 0            ## 0 = the whole column
   hexMode = false
+  lang = "en"             ## the translation shown beside the poem: "sl" (none), "en" or "it"
 
 proc values(): (seq[string], seq[bool]) =
   ## The column: the poem's lines (a blank line between stanzas is a null) or its words.
@@ -226,6 +230,20 @@ proc render() =
   sizes.add "</div>"
   byId("lx-out").setHtml cstring(info & sizes)
 
+  # the poem, with the line of the selected value marked, and its translation
+  let curLine = if column == colLines: sel else: wordLine(poem, sel)
+  var ptxt = ""
+  for i in 0 ..< lineCount(poem):
+    let orig = $lineAt(poem, i)
+    if orig.strip.len == 0:
+      ptxt.add "<div class=\"pl gap\"></div>"
+      continue
+    let tr = if lang == "sl": "" else: $transLine(poem, cstring(lang), i)
+    ptxt.add "<div class=\"pl" & (if i == curLine: " sel" else: "") & "\" data-line=\"" & $i & "\"><span>" & esc(orig) & "</span>" &
+      (if tr.len > 0: "<i>" & esc(tr) & "</i>" else: "") & "</div>"
+  byId("lx-text").setHtml cstring(ptxt)
+  for l in ["sl", "en", "it"]: byId("lx-" & l).setPressed(l == lang)
+
   for e in Encoding: byId("lx-e" & $ord(e)).setPressed(e == enc)
   byId("lx-lines").setPressed(column == colLines)
   byId("lx-words").setPressed(column == colWords)
@@ -259,6 +277,20 @@ proc setup() =
         if k >= 0 and (rows or enc in {encUtf8, encView}):
           sel = k
           render())
+  proc onLang(l: string) =
+    byId("lx-" & l).addEventListener("click", proc (ev: Event) = lang = l; render())
+  for l in ["sl", "en", "it"]: onLang(l)
+  byId("lx-text").addEventListener("click", proc (ev: Event) =
+    let r = lineOf(targetEl(ev))
+    if r.len > 0:
+      let i = parseInt($r)
+      if column == colLines: sel = i
+      else:
+        for k in 0 ..< wordCount(poem):
+          if wordLine(poem, k) == i:
+            sel = k
+            break
+      render())
   onTap("lx-values", true)
   onTap("lx-buffers", false)
   render()
