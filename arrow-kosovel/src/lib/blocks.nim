@@ -73,12 +73,18 @@ newNbBlock(NbPoem):
   title: string
   verse: string
   source: string
+  en: string
+  it: string
   toHtml:
-    &"""<figure class="poem"><h4>{escHtml(blk.title)}</h4><div class="verse">{escHtml(blk.verse)}</div><figcaption class="src">{markdownToHtml(blk.source).strip.replace("<p>", "").replace("</p>", "")}</figcaption></figure>"""
+    var s = &"""<figure class="poem"><h4>{escHtml(blk.title)}</h4><div class="verse">{escHtml(blk.verse)}</div>"""
+    for (lbl, t) in [("English", blk.en), ("Italiano", blk.it)]:
+      if t.len > 0:
+        s.add &"""<details class="tr"><summary>{lbl}</summary><div class="verse">{escHtml(t)}</div></details>"""
+    s & &"""<figcaption class="src">{markdownToHtml(blk.source).strip.replace("<p>", "").replace("</p>", "")}</figcaption></figure>"""
 
-template nbPoem*(ttitle, tverse, tsource: string) =
-  ## A poem, set as verse.
-  nb.add newNbPoem(title = ttitle, verse = tverse, source = tsource)
+template nbPoem*(ttitle, tverse, tsource: string; ten = ""; tit = "") =
+  ## A poem, set as verse, with its translations folded underneath.
+  nb.add newNbPoem(title = ttitle, verse = tverse, source = tsource, en = ten, it = tit)
 
 newNbBlock(NbExplorer):
   caption: string
@@ -91,6 +97,8 @@ newNbBlock(NbExplorer):
     s.add """</div>
 <div class="ctl"><label for="lx-from">Slice from</label><input type="range" id="lx-from" min="0" max="10" step="1" value="0"><output id="lx-from-v"></output></div>
 <div class="ctl"><label for="lx-count">Length</label><input type="range" id="lx-count" min="0" max="10" step="1" value="0"><output id="lx-count-v"></output></div>
+<p class="sec">The poem</p><div class="btns lang"><button type="button" id="lx-sl" aria-pressed="false">Slovenščina</button><button type="button" id="lx-en" aria-pressed="true">+ English</button><button type="button" id="lx-it" aria-pressed="false">+ Italiano</button></div>
+<div class="ptext" id="lx-text"></div>
 <p class="sec">The values (tap one)</p><div class="values" id="lx-values"></div>
 <p class="sec">The buffers</p><div id="lx-buffers"></div>
 <div class="out" id="lx-out" aria-live="polite"></div>"""

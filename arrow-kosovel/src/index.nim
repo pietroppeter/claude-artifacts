@@ -74,12 +74,16 @@ nbCode:
   echo bori.title, " (", bori.collection, "): ", bori.lines[0..2].join(" / ")
 
 let pick = poems.filterIt(it.title == "Moj črni tintnik")[0]
+# English and Italian translations of the poems on this page, line by line (data/translations.json)
+let trans = parseFile(here / "data" / "translations.json")
+proc tr(title, lang: string): seq[string] = trans[title][lang].to(seq[string])
 nbText: """
 *Pesem* is a poem, *kons* one of the constructivist poems (*Kons* from *konstrukcija*, the
 collection *Integrali '26* was only published in 1967), *proza* a prose poem. Here is one of the
 konsi, which you will meet again below, byte by byte:
 """
-nbPoem(pick.title, pick.text, "Srečko Kosovel, from *Integrali '26*. Text: Wikivir, public domain.")
+nbPoem(pick.title, pick.text, "Srečko Kosovel, from *Integrali '26*. Text: Wikivir, public domain. Translations: this page's own.",
+  ten = tr(pick.title, "en").join("\n"), tit = tr(pick.title, "it").join("\n"))
 
 # ------------------------------------------------------------------ rows and columns
 nbText: """
@@ -181,7 +185,14 @@ let picks = ["Bori", "Kons. 5", "Moj črni tintnik", "Jutro na Krasu", "Polh v j
 var data = newJArray()
 for t in picks:
   let p = poems.filterIt(it.title == t)[0]
-  data.add %*{"t": p.title, "c": p.collection, "l": p.lines, "w": words(p.text)}
+  # the line of each word, so a word in the explorer can point at its line in the translation
+  var wl: seq[int]
+  for i, ln in p.lines:
+    for w in words(ln): wl.add i
+  doAssert wl.len == words(p.text).len
+  for lang in ["en", "it"]: doAssert tr(t, lang).len == p.lines.len, t & " " & lang
+  data.add %*{"t": p.title, "c": p.collection, "l": p.lines, "w": words(p.text), "wl": wl,
+              "en": tr(t, "en"), "it": tr(t, "it")}
 
 nbText: """
 ## The layout explorer
@@ -191,6 +202,10 @@ column. *Lines* makes a column of the poem's lines (blank lines are nulls); *Wor
 column of its words. *Show bytes* adds the raw bytes under every cell; two-byte letters are
 dashed. The two sliders take a **slice**: in Arrow a slice is the same buffers with a different
 `offset` and `length`, so nothing is copied, and what is outside it is greyed out.
+
+Above the values is the poem itself, with the line of the selected value marked, and an
+English or Italian translation under each line (this page's own, close to the letter; tap a
+line to select it).
 """
 
 nbExplorer("""Built from `lib/layout.nim` compiled to JavaScript: the same procs that produced the
@@ -441,6 +456,8 @@ var nimLibs: seq[tuple[name, how, state: string]] = @[
   ("[nimarrow](https://github.com/emef/nimarrow), [nimarrow_glib](https://github.com/emef/nimarrow_glib)", "the first GLib bindings: arrays, tables, Parquet", "last commit July 2021"),
   ("[Nanuq](https://github.com/pietroppeter/nanuq)", "Polars for Nim; C Data Interface both ways, zero-copy views", "0.6.1, active"),
   ("[duckdb-nim](https://github.com/nimbase/duckdb-nim)", "DuckDB bindings, including DuckDB's Arrow C API", "active (October 2026)"),
+  ("[freccia](https://github.com/SciNim/freccia)", "pure Nim (SciNim): C Data Interface reader, zero-copy views, FlatBuffers schema; producer side never started", "stalled since January 2022"),
+  ("[SciNim/datafusion](https://github.com/SciNim/datafusion)", "DataFusion (Rust query engine on arrow-rs) through C bindings", "incomplete"),
   ("this page: `cdata.nim` + nanoarrow", "pure-Nim C Data Interface with builders; nanoarrow compiled in for IPC", "a sketch, below")]
 let nimTable = tabella(nimLibs):
   optCssTheme()
@@ -449,6 +466,48 @@ let nimTable = tabella(nimLibs):
   colsLabel {"name": "Project", "how": "What it does", "state": "State"}
   fmtMarkdown ["name", "how", "state"]
 nbTable nimTable
+nbText: &"""
+### Arrow on the Nim forum
+
+Arrow has come up on the [Nim forum](https://forum.nim-lang.org/) a handful of times in seven
+years, and the same tension runs through all of it: a pure-Nim Arrow would be lovely, bindings are
+what actually gets done.
+
+- **2019**, [*Pandas equivalent for Nim?*](https://forum.nim-lang.org/t/5624): Arrow is suggested
+  as a foundation, with Wes McKinney's post on Arrow and pandas' internals. The answers:
+  Arrow is a common format, "not a replacement for pandas" (HDF5 served one user better), and
+  NVIDIA's cuDF builds GPU dataframes on it.
+- **January 2022**, [freccia](https://github.com/SciNim/freccia) (*arrow* in Italian), in the
+  SciNim organisation: a pure-Nim Arrow by Arkanoid87. 21 commits in nine days (18 to 26
+  January), about 700 lines, all on the consumer side: the C Data Interface structs, reading arrays
+  that pyarrow exported (through nimpy), zero-copy `openArray` views, the null bitmap, a format-string
+  parser, the IPC schema in FlatBuffers (spun off as a side project, *patella*), and the primitive,
+  binary and list layouts with sliced and strided views. Producing arrays, structs, dictionaries,
+  dates and the rest were still on the TODO list, and the last commits note a Nim compiler issue
+  with iterators over strided views. Then it stopped.
+- **February 2023**, [*Wanted libraries wishlist?*](https://forum.nim-lang.org/t/9882): Apache
+  Arrow makes the list. Pietro points to freccia, stalled, its author thinking of archiving it, and
+  argues for a pure-Nim implementation, with bindings to check it against, since a pure Rust Arrow
+  (arrow2) was what made Polars possible. bpr agrees: Rust had two, and a Nim one would be a
+  stepping stone for data science, where Nim's Python-like syntax is an advantage.
+- **2025 to 2026**, in threads on [geographic data](https://forum.nim-lang.org/t/13508) and
+  [using Python from Nim](https://forum.nim-lang.org/t/13861), Arrow's neighbours do the work:
+  DuckDB, Parquet, Polars, c-blake's pure-Nim [nio](https://github.com/c-blake/nio) files.
+- **June 2026**, [*narrow, Apache Arrow bindings for Nim*](https://forum.nim-lang.org/t/13995):
+  bvld announces narrow, over the GLib C API. Araq: keep the core data structures and serialization
+  in native Nim, and avoid GLib's slow reference-counted object system. cblake: there is no single
+  answer to rows or columns, and nio exists. Pietro: the pragmatic step, likely the go-to for
+  Parquet. Clonk: SciNim also has [DataFusion bindings](https://github.com/SciNim/datafusion), incomplete.
+- **November 2026**, [*Nanuq*](https://forum.nim-lang.org/t/14258): Araq's take is that wrapping
+  C++ or Rust is "the old way", and that you can generate only the code you need, in Nim. ggibson
+  asks whether Nanuq passes data as Arrow without copying, and the answer grew into
+  [*What about Arrow?*]({whatAboutArrow}). The same month, [mq-bridge](https://forum.nim-lang.org/t/14265)
+  reads and writes Parquet from Nim through its Rust engine.
+
+What freccia had is roughly what is still missing: the small, shared, pure-Nim layer. What has
+changed since 2022 is that the C Data Interface made that layer much smaller than "an Arrow
+implementation", and that nanoarrow shows how small it can be.
+"""
 
 nbText: """
 The post's scenario 1 is "one shared package for the C Data Interface": the structs, their
@@ -541,7 +600,9 @@ kitten), the bear cubs, the sparrow and the dormouse are all in the explorer's l
 
 nbPoem("Iz zapisov", """Rad bi povedal ljudem lepo, dobro besedo, svetlo besedo, kakor je svetlo novembrsko sonce na Krasu.
 Toda moja beseda je težka in molčeča, grenka kakor je brinova jagoda s Krasa.""",
-  "Srečko Kosovel, from *Pesmi* (1927), quoted on the Slovenian Wikipedia. *I would like to tell people a beautiful, good word, a bright word, as bright as the November sun on the Karst. But my word is heavy and silent, bitter as a juniper berry from the Karst.*")
+  "Srečko Kosovel, from *Pesmi* (1927), quoted on the Slovenian Wikipedia.",
+  ten = "I would like to tell people a beautiful, good word, a bright word, as bright as the November sun on the Karst.\nBut my word is heavy and silent, bitter as a juniper berry from the Karst.",
+  tit = "Vorrei dire alla gente una parola bella, buona, una parola luminosa, luminosa come il sole di novembre sul Carso.\nMa la mia parola è pesante e silenziosa, amara come una bacca di ginepro del Carso.")
 
 nbText: """
 ## Glossary, for the next conversation with an Arrow committer
