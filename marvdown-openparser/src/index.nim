@@ -70,7 +70,7 @@ writes its blocks as JSON with jsony. George Lemon's **marvdown** (Markdown) and
 (JSON, TOML and 28 other formats) could replace all three. This page measures what would change,
 from the simplest dependency to the hardest, and says who makes the new libraries and who uses them.
 """
-nbVersion(1, "28 Nov 2026")
+nbVersion(2, "28 Nov 2026")
 
 nbTldr: &"""
 - **Fusion** is used for one thing: `captureStdout` (`src/nimib/capture.nim`) calls
@@ -89,17 +89,16 @@ nbTldr: &"""
 - **The PCRE problem has a cheaper fix**: port nim-markdown's 82 regular expressions to
   nim-regex (two use back references and need a few lines of code each), and fix the two
   inputs that crash it, found on the way.
-- **Who**: George Lemon publishes alone, at a very high pace, in the OpenPeeps org and six
-  others; {opOwn} of his own repositories use openparser, and two outside them (by Jaremy Creechley
-  and David Krause). Nobody outside uses marvdown yet.
+- **Who uses them, how reliable**: {opOwn} repositories of the OpenPeeps family use openparser,
+  two outside it (by Jaremy Creechley and David Krause); nobody outside uses marvdown yet. Both are
+  well tested and very active, 0.x, and written by one person (George Lemon): a bus factor of one.
 """
 
 nbToc @[
   ("started", "How this page started"),
   ("today", "What nimib depends on today"),
   ("fusion", "Fusion: one module, two C calls"),
-  ("who", "George Lemon and OpenPeeps"),
-  ("users", "Who depends on openparser and marvdown"),
+  ("users", "Who uses them, and how reliable they are"),
   ("toml", "TOML: parsetoml or openparser"),
   ("json", "JSON: jsony or openparser"),
   ("markdown", "Markdown: nim-markdown or marvdown"),
@@ -114,7 +113,7 @@ nbChapter("started", "How this page started", "28 Nov 2026, from the Nimib Land 
 
 nbPrompt("Pietro", "28 Nov 2026", [
   "I am considering adopting marvdown and open parser for nimib (instead of jsony and opentoml and nim markdown. Write an explainer that estimates the impacts, pros and cons. Also, what do we use Nim fusion for?",
-  "I want also to know all that you can find about George lemon and openpeeps. Which other projects are depending on those libraries?",
+  "I want to find out about the dependencies, and how used and reliable those projects are.",
 ])
 
 nbText: """
@@ -229,73 +228,39 @@ and one line less in `nimib.nimble`. It does not depend on anything else on this
 """)
 
 # =========================================================================================== 3
-nbChapter("who", "George Lemon and OpenPeeps", "from GitHub, DEV, the Nim forum and the package registry")
+nbChapter("users", "Who uses them, and how reliable they are", "every nimble file on GitHub that names them, and each project's history")
 
 nbText: &"""
-**George Lemon** ([georgelemon](https://github.com/georgelemon) on GitHub) describes himself as
-"Open Source Enthusiast", and on [DEV](https://dev.to/georgelemon) (since September 2019) as
-"Open Source Enthusiast at OpenPeeps". His one DEV post (June 2023) shows how to build Node.js and
-Bun addons in Nim with his library [denim](https://github.com/openpeeps/denim). His site,
-openpeeps.dev, did not load from here. Nothing public says more about him than his work.
-
-**OpenPeeps** is a GitHub organization whose description is "Open Source Enthusiasts | Developing
-@supranim @getsunday @tim-engine @trytilda @onebuckapp and more". Its only visible member is George
-Lemon, and every one of the {libs[1][7]} commits of marvdown and the {libs[4][7]} commits of
-openparser is his. It works like the label of one very productive person, with sister
-organizations for each larger project:
+Both libraries live in [OpenPeeps](https://github.com/openpeeps), a GitHub organization whose
+description is "Open Source Enthusiasts | Developing @supranim @getsunday @tim-engine @trytilda
+@onebuckapp and more". It belongs to a family of organizations maintained by
+[George Lemon](https://github.com/georgelemon), who wrote every one of the {libs[1][7]} commits of
+marvdown and the {libs[4][7]} commits of openparser:
 """
 
 nbTable toTableData(orgs.mapIt((org: it[0], repos: it[1], what: it[2]))), rownameCol = "org":
   optCssTheme()
-  tabHeader "George Lemon's organizations", "public repositories, 28 Nov 2026"
+  tabHeader "Where the libraries live", "public repositories, 28 Nov 2026"
   colsLabel:
     repos: "repos"
     what: "what is there"
   tabSourceNote md("GitHub search, forks included. 92 entries of Nim's package registry (of about 3,000) point to openpeeps (48), nimbase (38) or supranim (6).")
 
-nbText: """
-Some facts that matter for a dependency:
-
-- **Pace.** OpenPeeps created 5 to 8 repositories a year from 2021 to 2025, and 35 in 2026.
-  openparser is 47,000 lines of Nim written in seven months (April to November 2026, 265 commits),
-  with a regex engine that has its own JIT (via his DynASM port), SIMD JSON, a QR code reader,
-  a diff engine and a NIF parser among its 30 modules.
-- **Best known work.** [Tim](https://github.com/tim-engine/tim), a template engine and markup
-  language (69 stars, since 2022), denim (56), [Supranim](https://github.com/supranim/supranim), a
-  web framework (46), kapsis, a CLI builder (41). His libraries have tests, CI and API docs.
-- **Moves and renames.** He renamed `bro` to `bowdy` in the registry and moved a batch of
-  wrappers from openpeeps to nimbase (nim-lang/packages PRs
-  [#3535](https://github.com/nim-lang/packages/pull/3535) and
-  [#3546](https://github.com/nim-lang/packages/pull/3546)). Handled well, but a reminder that
-  names and places change.
-- **His own package manager.** In August 2026 he announced
-  [Clue](https://forum.nim-lang.org/t/14123), an alternative to nimble that resolves versions
-  depth-first ("I don't care about versions, that's a PM's job"). His libraries are tested with
-  `clue test`; they install with nimble too.
-"""
-
-nbNote(nkCareful, """
-All of this is what his public profiles and repositories show. I found no interview, talk or
-biography, and I did not try to find out more about him as a person.
-""")
-
-# =========================================================================================== 4
-nbChapter("users", "Who depends on openparser and marvdown", "every nimble file on GitHub that names them")
-
 nbText: &"""
-I read the nimble files of all 153 public repositories of George Lemon's organizations, then
-searched GitHub's code index for every other nimble file that names `openparser` or `marvdown`.
+**Who depends on them.** I read the nimble files of all 153 public repositories of those
+organizations, then searched GitHub's code index for every other nimble file that names
+`openparser` or `marvdown`.
 
-- **Inside his organizations**: {opOwn} repositories require openparser (Tim, Supranim, Clue,
+- **Inside the family**: {opOwn} repositories require openparser (Tim, Supranim, Clue,
   Booyaka, powpow, kapsis, bowdy, nyml, ozark, the nimbase API clients...). Only {mdOwn} require
-  marvdown: Booyaka (his documentation generator), datengine and stupidgreen (a static site
-  generator), plus getsunday/sunday in another of his organizations.
-- **Outside them**, there are three:
+  marvdown: Booyaka (a documentation generator), datengine and stupidgreen (a static site
+  generator), plus getsunday/sunday.
+- **Outside it**, there are three:
 """
 
 nbTable toTableData(outside.mapIt((repo: it[0], who: it[1], uses: it[2], why: it[3]))), rownameCol = "repo":
   optCssTheme()
-  tabHeader "Users outside George Lemon's organizations"
+  tabHeader "Users outside the OpenPeeps family"
   colsLabel:
     who: "by"
     uses: "requires"
@@ -303,10 +268,60 @@ nbTable toTableData(outside.mapIt((repo: it[0], who: it[1], uses: it[2], why: it
   tabSourceNote md("GitHub code search (default branches, as indexed on 28 Nov 2026), checked by cloning each repository.")
 
 nbText: """
-So openparser has two real users outside its author's work, both for its NIF module, both by
+So openparser has two real users outside its own family, both for its NIF module, both by
 well-known Nim developers (Jaremy Creechley wrote figuro and contributed to nim-markdown;
 David Krause wrote nimja), both in the last two months. marvdown has none. nimib would be the
 first large outside user of either, with nimibook, nimiSlides and every nimib page behind it.
+
+**How reliable they are.** The same signals for the old libraries and the new ones:
+"""
+
+nbTable toTableData(@[
+  (lib: "nim-markdown", tests: "94 checks + a CommonMark runner", ci: "none", releases: "26 tags, none in the last year (0.8.8, May 2024)", people: "11 authors; one wrote 88% of commits", pace: "quiet: 3 commits in a year"),
+  (lib: "marvdown", tests: "402 checks (180 CommonMark cases that assert current output)", ci: "tests, docs, release binaries", releases: "15 tags, all in the last year (0.2.7)", people: "1 author", pace: "64 commits in a year"),
+  (lib: "jsony", tests: "30 test files", ci: "build, docs", releases: "16 tags (1.1.6)", people: "22 authors; treeform wrote half", pace: "8 commits in a year"),
+  (lib: "parsetoml", tests: "1 test file", ci: "tests, docs", releases: "6 tags (0.7.2)", people: "15 authors", pace: "no commit in a year"),
+  (lib: "openparser", tests: "1,357 checks in 52 files, incl. a git-diff parity suite", ci: "tests (parallel suite), docs, release", releases: "26 tags in 7 months (0.4.5)", people: "1 author", pace: "265 commits in 7 months"),
+]):
+  optCssTheme()
+  tabHeader "Maintenance signals", "from each repository, 28 Nov 2026"
+  colsLabel:
+    lib: "library"
+    tests: "tests"
+    ci: "CI"
+    releases: "releases"
+    people: "people"
+    pace: "pace"
+  colsWidth:
+    lib: "110px"
+    tests: "180px"
+    ci: "130px"
+    releases: "160px"
+    people: "150px"
+    pace: "140px"
+  tabSourceNote md("Checks: `test`/`check` lines in the test files. Tags counted with git; \"in the last year\": tagged after 28 Nov 2025.")
+
+nbText: """
+What that means for nimib:
+
+- **Well tested, very active.** openparser has far more tests than anything nimib uses today,
+  CI on every push and frequent releases. marvdown has tests and CI too, but its CommonMark tests
+  pin the current output, divergences included (`SPEC:` comments), so they guard against change,
+  not against wrong output: that is how "CommonMark compliant" and 34% fit together.
+- **A bus factor of one.** Both are written by one person, at a very high pace: OpenPeeps created
+  5 to 8 repositories a year from 2021 to 2025 and 35 in 2026; openparser is 47,000 lines in
+  seven months, with a JIT regex engine, SIMD JSON, a QR reader and a NIF parser among its 30
+  modules. Speed is a strength while it lasts, and a risk if priorities move.
+- **Young and still 0.x.** 26 releases in 7 months means the API can move under nimib; pinning
+  versions would be needed. Names and places have moved before, cleanly (the registry renamed
+  `bro` to `bowdy`, and a batch of wrappers moved from openpeeps to nimbase:
+  nim-lang/packages [#3535](https://github.com/nim-lang/packages/pull/3535) and
+  [#3546](https://github.com/nim-lang/packages/pull/3546)).
+- **Its own tooling.** The projects are developed with [Clue](https://forum.nim-lang.org/t/14123),
+  the family's alternative to nimble; they install with nimble too.
+- **The old ones are not better maintained.** nim-markdown and parsetoml are quiet, with no release
+  in a year and no CI for nim-markdown. jsony is the healthy one. Moving would trade dormant
+  dependencies for a live one with a single maintainer.
 """
 
 # =========================================================================================== 5
@@ -618,7 +633,7 @@ nbText: """
 [fusion](https://github.com/nim-lang/fusion), [nimib](https://github.com/pietroppeter/nimib) (7118b3a),
 [CommonMark spec](https://github.com/commonmark/commonmark-spec),
 [cmark-gfm](https://github.com/github/cmark-gfm), [toml-test](https://github.com/toml-lang/toml-test),
-[George Lemon on GitHub](https://github.com/georgelemon) and [on DEV](https://dev.to/georgelemon),
+[George Lemon](https://github.com/georgelemon),
 [OpenPeeps](https://github.com/openpeeps), [Clue on the Nim forum](https://forum.nim-lang.org/t/14123).
 """
 
