@@ -16,6 +16,16 @@ h2{font:800 1.55rem/1.15 var(--serif);font-variation-settings:"SOFT" 100;margin:
 h2::before{content:counter(step,decimal-leading-zero);display:block;width:max-content;font:700 .78rem/1 var(--mono);color:var(--ink);
   background:var(--yellow);padding:.3rem .5rem;border-radius:999px;margin-bottom:.5rem}
 h3{font:700 1.15rem/1.3 var(--serif);margin:1.8rem 0 .4rem}
+h2[id],h3[id]{scroll-margin-top:1rem}
+.toc-up{font:600 .78rem/1 var(--font);color:var(--muted);text-decoration:none;white-space:nowrap;margin-left:.3rem;vertical-align:middle}
+.toc-up:hover,.toc-up:focus-visible{color:var(--ink);text-decoration:underline}
+.toc{margin:1.6rem 0;padding:.2rem 1rem .6rem;background:var(--card);border:1px solid var(--line);border-radius:14px}
+.toc-label{display:block;font:700 1.35rem/1 var(--hand);margin-top:.6rem}
+.toc ol{margin:.4rem 0;padding-left:1.4rem;font-size:.95rem}
+.toc ol ol{list-style:disc;font-size:.9rem;margin:.15rem 0 .3rem}
+.toc li{margin:.18rem 0}
+.toc a{text-decoration:none}
+.toc a:hover,.toc a:focus-visible{text-decoration:underline}
 .kicker{font:700 1.45rem/1 var(--hand);color:var(--muted);margin:1.4rem 0 0;transform:rotate(-1.5deg);transform-origin:left}
 a{color:var(--ink);text-decoration-color:var(--yellow-deep);text-decoration-thickness:2px;text-underline-offset:3px}
 a:hover{background:var(--yellow-soft)}
@@ -906,7 +916,7 @@ environment. This page explains both, shows the one idea that makes them differe
 a nimib page, with no nimble anywhere.</p>
 </div>
 <div class="tldr"><span class="tldr-label">The short version</span><ul>
-<li><strong>Nim today</strong>: nimble, atlas and nimby all start from <code>packages.json</code>, which knows a package's
+<li><strong>Nim today</strong>: nimble, atlas, nimby and the newcomer clue all start from <code>packages.json</code>, which knows a package's
 <em>name and git URL, and nothing else</em>. Versions are git tags, dependencies are in <code>.nimble</code>
 files, so every tool must clone to find out what to clone next.</li>
 <li><strong>Conda today</strong> is not Anaconda's Python installer any more: conda-forge has about 35,000
@@ -928,7 +938,7 @@ registry. Nim can copy the best of each.</li>
 add osx-arm64 and the <code>NIMBLE_DIR</code> activation. Everything else builds on that.</li>
 </ul>
 </div>
-<h2>Nim's package managers, and the phone book they share</h2>
+<nav class="toc" id="contents" aria-label="Contents"><span class="toc-label">Contents</span><ol><li><a href="#nim-s-package-managers-and-the-phone-book-they-share">Nim's package managers, and the phone book they share</a></li><li><a href="#conda-for-someone-who-last-looked-in-2016">Conda, for someone who last looked in 2016</a><ol><li><a href="#what-changed-since-you-last-looked">What changed since you last looked</a></li></ol></li><li><a href="#the-critical-concept-who-knows-the-graph-and-when">The critical concept: who knows the graph, and when?</a></li><li><a href="#the-proof-of-concept-in-eight-terminals">The proof of concept, in eight terminals</a><ol><li><a href="#1-nim-is-already-on-conda-forge">1. Nim is already on conda-forge</a></li><li><a href="#2-the-bridge-one-environment-variable">2. The bridge: one environment variable</a></li><li><a href="#3-nimforge-from-the-phone-book-to-recipes">3. nimforge: from the phone book to recipes</a></li><li><a href="#4-rattler-build-fourteen-packages-tested">4. rattler-build: fourteen packages, tested</a></li><li><a href="#5-a-nimib-page-built-by-pixi">5. A nimib page, built by pixi</a></li><li><a href="#6-nim-and-a-c-library-from-the-same-place">6. Nim and a C library, from the same place</a></li><li><a href="#7-a-nim-app-as-a-conda-package-nimby-installed-by-conda">7. A Nim app as a conda package: nimby, installed by conda</a></li><li><a href="#8-nim-2-4-2-with-the-bridge-built-in">8. Nim 2.4.2, with the bridge built in</a></li></ol></li><li><a href="#how-other-languages-live-in-conda">How other languages live in conda</a></li><li><a href="#nim-is-already-in-conda-a-survey">Nim is already in conda: a survey</a><ol><li><a href="#conda-forge-the-compiler-and-nothing-else">conda-forge: the compiler, and nothing else</a></li><li><a href="#bioconda-about-twenty-nim-tools-for-genomics">bioconda: about twenty Nim tools for genomics</a></li></ol></li><li><a href="#the-effort-and-the-critical-parts">The effort, and the critical parts</a></li><li><a href="#the-third-road-build-your-own-on-shared-foundations">The third road: build your own, on shared foundations</a></li><li><a href="#the-smallest-thing-to-try-in-four-steps">The smallest thing to try, in four steps</a></li></ol></nav><h2 id="nim-s-package-managers-and-the-phone-book-they-share">Nim's package managers, and the phone book they share <a class="toc-up" href="#contents">↑ Contents</a></h2>
 <p>Every Nim package manager starts from <a href="https://github.com/nim-lang/packages">nim-lang/packages</a>: one file,
 <code>packages.json</code>, edited by pull request. This is the whole entry for nimib:</p>
 <figure class="file"><figcaption>packages.json (one of 3020 entries)</figcaption><pre><code class="language-json">{
@@ -950,14 +960,15 @@ add osx-arm64 and the <code>NIMBLE_DIR</code> activation. Everything else builds
 dependencies, no checksums, no files.</strong> Versions are git tags in nimib's repository, and its
 dependencies are in <code>nimib.nimble</code>, a NimScript file at each tag. Of the 2978 packages,
 2847 live on GitHub, the rest on sourcehut, GitLab, Codeberg and friends.
-Three tools read this file, each with its own idea of what to do next:</p>
+Four tools read this file, each with its own idea of what to do next:</p>
 <div class="cards"><div class="card"><h4>nimble</h4><div class="card-who">dom96 (2014), now nim-lang; 0.28 in Nim's <code>koch</code></div><div class="card-motto">the official one</div><p>Downloads into <code>~/.nimble/pkgs2/name-version-checksum</code>. Reads <code>.nimble</code> files (now with a <em>declarative</em> parser, without running NimScript), solves versions (SAT solver since 0.16, PubGrub the default since 0.28), lock files, <code>nimble develop</code>.</p>
 </div><div class="card"><h4>atlas</h4><div class="card-who">Araq (2021, own repo since 2023), ships with Nim 2.0</div><div class="card-motto">a workspace, not a store</div><p>Clones dependencies into the project's <code>deps/</code> and writes their paths into <code>nim.cfg</code>, so the compiler needs no package manager at all. SAT solver, lazy loading, parallel clones, <code>--autoenv</code> to install the right Nim.</p>
 </div><div class="card"><h4>nimby</h4><div class="card-who">treeform (since 2019), now 0.2.4</div><div class="card-motto">just git, at HEAD, in parallel</div><p>Shallow-clones every dependency <em>at HEAD</em> into one visible workspace, in parallel, and writes <code>nim.cfg</code>. No resolution on purpose. A lock file (name, url, commit) for CI. Also installs Nim. Fidget2's CI went from 2 minutes to 3 seconds.</p>
+</div><div class="card"><h4>clue</h4><div class="card-who">George Lemon, OpenPeeps (April 2026), now 0.3.9</div><div class="card-motto">a store, a DFS, and the rest of the toolbox</div><p>Installs into one store, <code>~/.clue/packages</code>, and passes <code>--path</code> to the compiler (with a <code>clue.lock</code> to make that fast). Its resolver lives in <a href="https://github.com/openpeeps/datpkgr">datpkgr</a>, a language-agnostic kit: a lazy depth-first search with backtracking, <em>no SAT solver</em>, where the nearest constraint wins. It caches the versions it discovers with <code>git ls-remote</code>, and adds venvs (via choosenim), docs, deploys and Nimony builds.</p>
 </div><div class="card conda"><h4>conda / pixi</h4><div class="card-who">Continuum (2012) … prefix.dev (2023)</div><div class="card-motto">the index already knows</div><p>Installs prebuilt packages into an environment folder. Every package's version, dependencies and hash are in the channel's index (<code>repodata.json</code>), so it solves first and downloads once. The rest of this page.</p>
 </div></div>
 <p>They differ in <em>where packages go</em> (a hidden store, a <code>deps/</code> folder, a sibling workspace) and
-in <em>how versions are chosen</em> (a solver, a solver, no solver). They share the same first step:
+in <em>how versions are chosen</em> (a solver, a solver, no solver, a depth-first search). They share the same first step:
 to learn the dependencies of nimib you must fetch nimib, at a version you chose from its git
 tags, and read a file in it. Then do the same for each dependency. treeform's README puts the
 cost plainly: nimble took almost two minutes to install Fidget2's dependencies in CI, cloning
@@ -966,8 +977,7 @@ not across levels: you can't clone the grandchildren before you have read the ch
 <aside class="note nim"><span class="note-label">👑 Nim</span><p><code>packages.json</code> is a <strong>phone book</strong>, not an index: it tells you where to call, not what you will
 hear. Everything else (versions, dependencies, checksums) is discovered by cloning. That is the
 one design decision every Nim package manager has inherited.</p>
-</aside>
-<h2>Conda, for someone who last looked in 2016</h2>
+</aside><h2 id="conda-for-someone-who-last-looked-in-2016">Conda, for someone who last looked in 2016 <a class="toc-up" href="#contents">↑ Contents</a></h2>
 <p>Wolf's slide at <a href="https://compute-paris.org">Compute Paris</a> had this question on it:
 <em>&quot;But I thought Conda is for Python?!&quot;</em>, and the answer underlined in yellow: conda is a
 general-purpose, cross-platform, <strong>language-agnostic</strong> package manager. Here is his wheel,
@@ -1098,8 +1108,7 @@ which is just a directory, a <em>prefix</em> (hence the company name). A Python 
 <tr><th scope="row" class="tb_row tb_left tb_stub"><strong>feedstock</strong></th><td class="tb_row tb_left">on conda-forge, one GitHub repo per recipe, built by CI for every platform, updated by a bot</td><td class="tb_row tb_left">a GitHub release, if you're lucky</td></tr>
 </tbody>
 </table>
-</div>
-<h3>What changed since you last looked</h3>
+</div><h3 id="what-changed-since-you-last-looked">What changed since you last looked <a class="toc-up" href="#contents">↑ Contents</a></h3>
 <p>The conda you may remember was slow (a Python SAT solver on a huge index) and tied to
 Anaconda's <code>defaults</code> channel, with its license terms. Most of the work since then happened
 around <strong>Wolf Vollprecht</strong>: first at QuantStack, where he started <strong>mamba</strong> (the solver rewritten
@@ -1131,8 +1140,7 @@ tasks; <code>pixi run</code> solves, locks, installs and activates in one go. Th
 package, with its URL and sha256, <em>for every platform you list</em>, solved together. It feels like
 cargo or uv, but the packages can be anything: Nim, gcc, zlib, Python, R, CUDA.
 <a href="https://pixi.sh">pixi.sh</a> · <a href="https://rattler.build">rattler.build</a> · <a href="https://prefix.dev">prefix.dev</a></p>
-</aside>
-<h2>The critical concept: who knows the graph, and when?</h2>
+</aside><h2 id="the-critical-concept-who-knows-the-graph-and-when">The critical concept: who knows the graph, and when? <a class="toc-up" href="#contents">↑ Contents</a></h2>
 <p>Here is the difference between the two worlds, slowed down. Pick a package and press
 <strong>Next round trip</strong>. Both sides make one network round trip per press (in parallel, when there
 are several things to fetch). The graphs are real: they are the <code>requires</code> of each package at its
@@ -1289,6 +1297,223 @@ parses code) from each package to find out the next level. Index-first pays <str
 fetch</strong> and <strong>one download</strong> however deep the tree is, and the solve, which is the clever
 part, happens on your machine with nothing but metadata. That metadata was computed <em>once, when
 the package was built</em>: someone cloned and read the <code>.nimble</code> file, so that nobody else has to.</p>
+<details class="fold"><summary>How this interactive is built, with its source</summary><p>It takes three small pieces, and no framework.</p>
+<ol>
+<li>
+<p><strong>The data comes from the PoC's own recipes.</strong> At build time, <code>raceData</code> (in <code>index.nim</code>)
+walks <code>poc/recipes/nim-*</code> and <code>poc/graphs/nim-*</code>. Those are the recipes nimforge wrote from
+packages.json and from each package's <code>.nimble</code> file. From each <code>recipe.yaml</code>, it keeps the
+version and the <code>nim-*</code> names listed under <code>run:</code>. Then, starting from each root (nimib,
+pixie, fidget2), it collects the graph that can be reached and stores it as JSON:
+<code>{pkg: {deps: {name: [deps]}, versions: {name: version}}}</code>.</p>
+</li>
+<li>
+<p><strong>A custom nimib block puts it on the page.</strong> <code>nbRace</code> (in <code>lib/blocks.nim</code>) writes the
+empty lanes and the buttons as HTML. It puts the JSON in a <code>&lt;script type=&quot;application/json&quot;&gt;</code>
+tag, and inlines <code>lib/race.js</code>, which is read with <code>staticRead</code> when the page compiles.
+Nothing is loaded from a CDN, so it works inside a claude.ai artifact too.</p>
+</li>
+<li>
+<p><strong>The script works out both stories in advance, as frames.</strong></p>
+<ul>
+<li><code>levels</code> splits the graph by depth, breadth first.</li>
+<li><code>clonePlan</code> makes one frame per round trip. The first is GET packages.json. Then, for each
+level of the tree, there is one frame for <code>git ls-remote --tags</code> on the frontier, and one
+frame for a clone that reads the <code>.nimble</code> files to find the next level.</li>
+<li><code>indexPlan</code> makes three frames: GET repodata (every edge is known), a local solve, and one
+download of everything.</li>
+</ul>
+<p>Each frame holds the state of every package (unknown, known, busy or got) and the counters.
+<strong>Next round trip</strong> moves both lanes forward by one frame, and <code>render</code> redraws them from it.
+<strong>Play</strong> is a timer on the same step.</p>
+</li>
+</ol>
+<p>So the race is a model, not a measurement. One press is one network round trip, and fetches made
+in parallel count as one. The measured times are in the bars below.</p>
+</details>
+<details class="source"><summary><code>index.nim (the raceData proc)</code> <span class="src-lines">28 lines</span></summary><pre><code class="hljs nim"><span class="hljs-keyword">proc</span> raceData(roots: openArray[<span class="hljs-built_in">string</span>]): <span class="hljs-type">JsonNode</span> =
+  <span class="hljs-comment">## The dependency graphs of the recipes nimforge wrote (poc/recipes), for the race.</span>
+  <span class="hljs-keyword">var</span> deps = initTable[<span class="hljs-built_in">string</span>, <span class="hljs-built_in">seq</span>[<span class="hljs-built_in">string</span>]]()
+  <span class="hljs-keyword">var</span> versions = initTable[<span class="hljs-built_in">string</span>, <span class="hljs-built_in">string</span>]()
+  <span class="hljs-keyword">for</span> dir <span class="hljs-keyword">in</span> toSeq(walkDirs(<span class="hljs-string">&quot;poc/recipes/nim-*&quot;</span>)) &amp; toSeq(walkDirs(<span class="hljs-string">&quot;poc/graphs/nim-*&quot;</span>)):
+    <span class="hljs-keyword">let</span> name = dir.lastPathPart[<span class="hljs-string">&quot;nim-&quot;</span>.len .. ^<span class="hljs-number">1</span>]
+    <span class="hljs-keyword">if</span> name == <span class="hljs-string">&quot;activation&quot;</span>: <span class="hljs-keyword">continue</span>
+    <span class="hljs-keyword">var</span> inRun = <span class="hljs-literal">false</span>
+    deps[name] = @[]
+    <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> readFile(dir / <span class="hljs-string">&quot;recipe.yaml&quot;</span>).splitLines:
+      <span class="hljs-keyword">if</span> line.startsWith(<span class="hljs-string">&quot;  version: </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">&quot;</span>): versions[name] = line.split('<span class="hljs-string">&quot;')[1]</span>
+      <span class="hljs-keyword">if</span> line.strip == <span class="hljs-string">&quot;run:&quot;</span>: inRun = <span class="hljs-literal">true</span>; <span class="hljs-keyword">continue</span>
+      <span class="hljs-keyword">if</span> inRun:
+        <span class="hljs-keyword">if</span> <span class="hljs-keyword">not</span> line.startsWith(<span class="hljs-string">&quot;    - &quot;</span>): inRun = <span class="hljs-literal">false</span>; <span class="hljs-keyword">continue</span>
+        <span class="hljs-keyword">let</span> d = line.strip[<span class="hljs-number">2.</span>.^<span class="hljs-number">1</span>].split(' <span class="hljs-string">')[0]</span>
+        <span class="hljs-keyword">if</span> d.startsWith(<span class="hljs-string">&quot;nim-&quot;</span>) <span class="hljs-keyword">and</span> d != <span class="hljs-string">&quot;nim-activation&quot;</span>: deps[name].add d[<span class="hljs-string">&quot;nim-&quot;</span>.len .. ^<span class="hljs-number">1</span>]
+  <span class="hljs-literal">result</span> = newJObject()
+  <span class="hljs-keyword">for</span> root <span class="hljs-keyword">in</span> roots:
+    <span class="hljs-keyword">var</span> g = newJObject()
+    <span class="hljs-keyword">var</span> v = newJObject()
+    <span class="hljs-keyword">var</span> todo = @[root]
+    <span class="hljs-keyword">while</span> todo.len &gt; <span class="hljs-number">0</span>:
+      <span class="hljs-keyword">let</span> n = todo.pop
+      <span class="hljs-keyword">if</span> g.hasKey(n): <span class="hljs-keyword">continue</span>
+      g[n] = %deps[n]
+      v[n] = %versions[n]
+      todo.add deps[n]
+    <span class="hljs-literal">result</span>[root] = %*{<span class="hljs-string">&quot;deps&quot;</span>: g, <span class="hljs-string">&quot;versions&quot;</span>: v}</code></pre></details>
+<details class="source"><summary><code>lib/blocks.nim (the nbRace block)</code> <span class="src-lines">22 lines</span></summary><pre><code class="hljs nim"><span class="hljs-keyword">const</span> raceJs = staticRead(<span class="hljs-string">&quot;race.js&quot;</span>)
+
+newNbBlock(<span class="hljs-type">NbRace</span>):
+  data: <span class="hljs-built_in">string</span>     <span class="hljs-comment">## JSON: {pkg: {deps: {name: [deps...]}, versions: {name: v}}}</span>
+  toHtml:
+    &amp;<span class="hljs-string">&quot;&quot;&quot;&lt;section class=&quot;race&quot; id=&quot;race&quot; aria-label=&quot;clone-first against index-first, step by step&quot;&gt;
+&lt;div class=&quot;rc-row&quot; role=&quot;group&quot; aria-label=&quot;what to install&quot;&gt;&lt;span class=&quot;rc-label&quot;&gt;install&lt;/span&gt;&lt;span id=&quot;rc-pkgs&quot;&gt;&lt;/span&gt;&lt;/div&gt;
+&lt;div class=&quot;rc-lane&quot; id=&quot;rc-clone&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;rc-lane conda&quot; id=&quot;rc-index&quot;&gt;&lt;/div&gt;
+&lt;div class=&quot;rc-row&quot;&gt;
+  &lt;button type=&quot;button&quot; class=&quot;rc-btn primary&quot; id=&quot;rc-step&quot;&gt;Next round trip ▸&lt;/button&gt;
+  &lt;button type=&quot;button&quot; class=&quot;rc-btn&quot; id=&quot;rc-play&quot;&gt;▶ Play&lt;/button&gt;
+  &lt;button type=&quot;button&quot; class=&quot;rc-btn&quot; id=&quot;rc-reset&quot;&gt;↺ Reset&lt;/button&gt;
+&lt;/div&gt;
+&lt;p class=&quot;rc-verdict&quot; id=&quot;rc-verdict&quot; aria-live=&quot;polite&quot;&gt;&lt;/p&gt;
+&lt;noscript&gt;&lt;p&gt;This explainer needs JavaScript.&lt;/p&gt;&lt;/noscript&gt;
+&lt;script type=&quot;application/json&quot; id=&quot;rc-data&quot;&gt;{blk.data}&lt;/script&gt;
+&lt;/section&gt;&lt;script&gt;{raceJs}&lt;/script&gt;&quot;&quot;&quot;</span>
+
+<span class="hljs-keyword">template</span> nbRace*(tdata: <span class="hljs-type">JsonNode</span>) =
+  <span class="hljs-comment">## The interactive: who knows the dependency graph, and when.</span>
+  nb.add newNbRace(data = $tdata)</code></pre></details>
+<details class="source"><summary><code>lib/race.js</code> <span class="src-lines">133 lines</span></summary><pre><code class="language-javascript"><span class="hljs-comment">// The race: who knows the dependency graph, and when.</span>
+<span class="hljs-comment">// Clone-first (nimble, atlas, nimby): the registry only maps names to git URLs, so the graph is</span>
+<span class="hljs-comment">// discovered level by level, by listing tags and cloning each package to read its .nimble file.</span>
+<span class="hljs-comment">// Index-first (conda, pixi): the channel's repodata already holds every edge, so one fetch gives</span>
+<span class="hljs-comment">// the whole graph, the solve is local, and every package is downloaded at once.</span>
+(<span class="hljs-keyword">function</span> () {
+  <span class="hljs-keyword">const</span> data = <span class="hljs-built_in">JSON</span>.parse(<span class="hljs-built_in">document</span>.getElementById(<span class="hljs-string">"rc-data"</span>).textContent);
+  <span class="hljs-keyword">const</span> $ = (id) =&gt; <span class="hljs-built_in">document</span>.getElementById(id);
+  <span class="hljs-keyword">let</span> pkg = <span class="hljs-built_in">Object</span>.keys(data)[<span class="hljs-number">0</span>], step = <span class="hljs-number">0</span>, timer = <span class="hljs-literal">null</span>, plans = <span class="hljs-literal">null</span>;
+
+  <span class="hljs-keyword">function</span> levels(deps, root) {
+    <span class="hljs-keyword">const</span> depth = { [root]: <span class="hljs-number">0</span> }, q = [root];
+    <span class="hljs-keyword">while</span> (q.length) {
+      <span class="hljs-keyword">const</span> n = q.shift();
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> d <span class="hljs-keyword">of</span> deps[n] || []) <span class="hljs-keyword">if</span> (!(d <span class="hljs-keyword">in</span> depth)) { depth[d] = depth[n] + <span class="hljs-number">1</span>; q.push(d); }
+    }
+    <span class="hljs-keyword">const</span> out = [];
+    <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> [n, l] <span class="hljs-keyword">of</span> <span class="hljs-built_in">Object</span>.entries(depth)) (out[l] = out[l] || []).push(n);
+    <span class="hljs-keyword">return</span> out;
+  }
+
+  <span class="hljs-comment">// Each plan is a list of frames: {log, st: {name: state}, m: {meter: value}}.</span>
+  <span class="hljs-keyword">function</span> clonePlan(deps, root) {
+    <span class="hljs-keyword">const</span> names = <span class="hljs-built_in">Object</span>.keys(deps), st = {}, m = { <span class="hljs-string">"round trips"</span>: <span class="hljs-number">0</span>, <span class="hljs-string">"git ops"</span>: <span class="hljs-number">0</span>, <span class="hljs-string">".nimble read"</span>: <span class="hljs-number">0</span> };
+    names.forEach((n) =&gt; (st[n] = <span class="hljs-string">"unknown"</span>));
+    <span class="hljs-keyword">const</span> frames = [{ log: <span class="hljs-string">"nothing known yet"</span>, st: { ...st }, m: { ...m } }];
+    <span class="hljs-keyword">const</span> snap = (log) =&gt; frames.push({ log, st: { ...st }, m: { ...m } });
+    m[<span class="hljs-string">"round trips"</span>]++; st[root] = <span class="hljs-string">"known"</span>;
+    snap(<span class="hljs-string">"GET packages.json (2.9 MB): "</span> + root + <span class="hljs-string">" → its git URL. No versions, no dependencies."</span>);
+    <span class="hljs-keyword">let</span> frontier = [root];
+    <span class="hljs-keyword">const</span> seen = <span class="hljs-keyword">new</span> <span class="hljs-built_in">Set</span>([root]);
+    <span class="hljs-keyword">while</span> (frontier.length) {
+      m[<span class="hljs-string">"round trips"</span>]++; m[<span class="hljs-string">"git ops"</span>] += frontier.length;
+      frontier.forEach((n) =&gt; (st[n] = <span class="hljs-string">"busy"</span>));
+      snap(<span class="hljs-string">"git ls-remote --tags, "</span> + frontier.length + <span class="hljs-string">" repo"</span> + (frontier.length &gt; <span class="hljs-number">1</span> ? <span class="hljs-string">"s"</span> : <span class="hljs-string">""</span>) + <span class="hljs-string">" in parallel: which versions exist?"</span>);
+      m[<span class="hljs-string">"round trips"</span>]++; m[<span class="hljs-string">"git ops"</span>] += frontier.length; m[<span class="hljs-string">".nimble read"</span>] += frontier.length;
+      <span class="hljs-keyword">const</span> next = [];
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> n <span class="hljs-keyword">of</span> frontier) {
+        st[n] = <span class="hljs-string">"got"</span>;
+        <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> d <span class="hljs-keyword">of</span> deps[n]) <span class="hljs-keyword">if</span> (!seen.has(d)) { seen.add(d); next.push(d); st[d] = <span class="hljs-string">"known"</span>; }
+      }
+      snap(<span class="hljs-string">"git clone at the tag, read "</span> + frontier.map((n) =&gt; n + <span class="hljs-string">".nimble"</span>).join(<span class="hljs-string">", "</span>) +
+        (next.length ? <span class="hljs-string">" → found "</span> + next.join(<span class="hljs-string">", "</span>) : <span class="hljs-string">" → no new dependencies"</span>));
+      frontier = next;
+    }
+    frames[frames.length - <span class="hljs-number">1</span>].done = <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">return</span> frames;
+  }
+
+  <span class="hljs-keyword">function</span> indexPlan(deps, root) {
+    <span class="hljs-keyword">const</span> names = <span class="hljs-built_in">Object</span>.keys(deps), st = {}, m = { <span class="hljs-string">"round trips"</span>: <span class="hljs-number">0</span>, <span class="hljs-string">"downloads"</span>: <span class="hljs-number">0</span>, <span class="hljs-string">".nimble read"</span>: <span class="hljs-number">0</span> };
+    names.forEach((n) =&gt; (st[n] = <span class="hljs-string">"unknown"</span>));
+    <span class="hljs-keyword">const</span> frames = [{ log: <span class="hljs-string">"nothing known yet"</span>, st: { ...st }, m: { ...m } }];
+    <span class="hljs-keyword">const</span> snap = (log) =&gt; frames.push({ log, st: { ...st }, m: { ...m } });
+    m[<span class="hljs-string">"round trips"</span>]++; names.forEach((n) =&gt; (st[n] = <span class="hljs-string">"known"</span>));
+    snap(<span class="hljs-string">"GET repodata (noarch + linux-64): every package, version and dependency edge is in it."</span>);
+    names.forEach((n) =&gt; (st[n] = <span class="hljs-string">"busy"</span>));
+    snap(<span class="hljs-string">"solve locally (resolvo, a SAT solver in Rust): no network. Picks "</span> + names.length + <span class="hljs-string">" packages."</span>);
+    m[<span class="hljs-string">"round trips"</span>]++; m[<span class="hljs-string">"downloads"</span>] = names.length; names.forEach((n) =&gt; (st[n] = <span class="hljs-string">"got"</span>));
+    snap(<span class="hljs-string">"download "</span> + names.length + <span class="hljs-string">" .conda files at once, hard-link them into the env. Done."</span>);
+    frames[frames.length - <span class="hljs-number">1</span>].done = <span class="hljs-literal">true</span>;
+    <span class="hljs-keyword">return</span> frames;
+  }
+
+  <span class="hljs-keyword">function</span> lane(el, title, sub, frames, versions, lv) {
+    <span class="hljs-keyword">const</span> f = frames[<span class="hljs-built_in">Math</span>.min(step, frames.length - <span class="hljs-number">1</span>)];
+    <span class="hljs-keyword">let</span> g = <span class="hljs-string">""</span>;
+    lv.forEach((names, i) =&gt; {
+      g += <span class="hljs-string">'&lt;div class="rc-level"&gt;&lt;span class="rc-level-n"&gt;'</span> + (i === <span class="hljs-number">0</span> ? <span class="hljs-string">"root"</span> : <span class="hljs-string">"dep "</span> + i) + <span class="hljs-string">"&lt;/span&gt;"</span>;
+      <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> n <span class="hljs-keyword">of</span> names) {
+        <span class="hljs-keyword">const</span> s = f.st[n];
+        <span class="hljs-keyword">const</span> label = s === <span class="hljs-string">"unknown"</span> ? <span class="hljs-string">"?"</span> : s === <span class="hljs-string">"got"</span> ? n + <span class="hljs-string">" "</span> + versions[n] : n;
+        g += <span class="hljs-string">'&lt;span class="rc-node '</span> + s + <span class="hljs-string">'"&gt;'</span> + label + <span class="hljs-string">"&lt;/span&gt;"</span>;
+      }
+      g += <span class="hljs-string">"&lt;/div&gt;"</span>;
+    });
+    <span class="hljs-keyword">const</span> meters = <span class="hljs-built_in">Object</span>.entries(f.m).map(([k, v]) =&gt; <span class="hljs-string">"&lt;span&gt;&lt;b&gt;"</span> + v + <span class="hljs-string">"&lt;/b&gt; "</span> + k + <span class="hljs-string">"&lt;/span&gt;"</span>).join(<span class="hljs-string">""</span>);
+    el.innerHTML = <span class="hljs-string">"&lt;h4&gt;"</span> + title + <span class="hljs-string">'&lt;/h4&gt;&lt;p class="rc-sub"&gt;'</span> + sub + <span class="hljs-string">'&lt;/p&gt;&lt;div class="rc-meters"&gt;'</span> + meters +
+      <span class="hljs-string">'&lt;/div&gt;&lt;div class="rc-graph"&gt;'</span> + g + <span class="hljs-string">'&lt;/div&gt;&lt;p class="rc-log"&gt;'</span> + (f.done &amp;&amp; step &gt;= frames.length - <span class="hljs-number">1</span> ? <span class="hljs-string">"✓ "</span> : <span class="hljs-string">""</span>) + f.log + <span class="hljs-string">"&lt;/p&gt;"</span>;
+  }
+
+  <span class="hljs-keyword">function</span> render() {
+    <span class="hljs-keyword">const</span> d = data[pkg], lv = levels(d.deps, pkg);
+    lane($(<span class="hljs-string">"rc-clone"</span>), <span class="hljs-string">"Clone-first: nimble, atlas, nimby"</span>, <span class="hljs-string">"the registry maps names to git URLs; the graph lives in the .nimble files"</span>,
+      plans.clone, d.versions, lv);
+    lane($(<span class="hljs-string">"rc-index"</span>), <span class="hljs-string">"Index-first: conda, pixi"</span>, <span class="hljs-string">"the channel's repodata already holds every edge"</span>, plans.index, d.versions, lv);
+    <span class="hljs-keyword">const</span> last = <span class="hljs-built_in">Math</span>.max(plans.clone.length, plans.index.length) - <span class="hljs-number">1</span>;
+    $(<span class="hljs-string">"rc-step"</span>).disabled = step &gt;= last;
+    <span class="hljs-keyword">const</span> c = plans.clone[plans.clone.length - <span class="hljs-number">1</span>].m, i = plans.index[plans.index.length - <span class="hljs-number">1</span>].m;
+    $(<span class="hljs-string">"rc-verdict"</span>).innerHTML = step &gt;= last
+      ? <span class="hljs-string">"&lt;b&gt;"</span> + pkg + <span class="hljs-string">"&lt;/b&gt;: clone-first needed &lt;b&gt;"</span> + c[<span class="hljs-string">"round trips"</span>] + <span class="hljs-string">"&lt;/b&gt; round trips, one after the other, and &lt;b&gt;"</span> +
+        c[<span class="hljs-string">"git ops"</span>] + <span class="hljs-string">"&lt;/b&gt; git operations. Index-first needed &lt;b&gt;"</span> + i[<span class="hljs-string">"round trips"</span>] +
+        <span class="hljs-string">"&lt;/b&gt;, whatever the depth of the tree. The difference grows with every level of dependencies."</span>
+      : step &gt;= plans.index.length - <span class="hljs-number">1</span>
+        ? <span class="hljs-string">"conda is done. Clone-first still cannot see the bottom of the tree."</span>
+        : <span class="hljs-string">"Press &lt;b&gt;Next round trip&lt;/b&gt;: both sides make one network round trip per press."</span>;
+  }
+
+  <span class="hljs-keyword">function</span> reset() {
+    stop(); step = <span class="hljs-number">0</span>;
+    plans = { clone: clonePlan(data[pkg].deps, pkg), index: indexPlan(data[pkg].deps, pkg) };
+    render();
+  }
+  <span class="hljs-keyword">function</span> stop() { <span class="hljs-keyword">if</span> (timer) { clearInterval(timer); timer = <span class="hljs-literal">null</span>; $(<span class="hljs-string">"rc-play"</span>).textContent = <span class="hljs-string">"▶ Play"</span>; } }
+  <span class="hljs-keyword">function</span> next() {
+    <span class="hljs-keyword">const</span> last = <span class="hljs-built_in">Math</span>.max(plans.clone.length, plans.index.length) - <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">if</span> (step &lt; last) { step++; render(); }
+    <span class="hljs-keyword">if</span> (step &gt;= last) stop();
+  }
+
+  <span class="hljs-keyword">const</span> chips = $(<span class="hljs-string">"rc-pkgs"</span>);
+  <span class="hljs-keyword">for</span> (<span class="hljs-keyword">const</span> name <span class="hljs-keyword">of</span> <span class="hljs-built_in">Object</span>.keys(data)) {
+    <span class="hljs-keyword">const</span> b = <span class="hljs-built_in">document</span>.createElement(<span class="hljs-string">"button"</span>);
+    b.type = <span class="hljs-string">"button"</span>; b.className = <span class="hljs-string">"rc-chip"</span>; b.textContent = name;
+    b.setAttribute(<span class="hljs-string">"aria-pressed"</span>, <span class="hljs-built_in">String</span>(name === pkg));
+    b.onclick = () =&gt; {
+      pkg = name;
+      chips.querySelectorAll(<span class="hljs-string">"button"</span>).forEach((x) =&gt; x.setAttribute(<span class="hljs-string">"aria-pressed"</span>, <span class="hljs-built_in">String</span>(x === b)));
+      reset();
+    };
+    chips.appendChild(b);
+  }
+  $(<span class="hljs-string">"rc-step"</span>).onclick = () =&gt; { stop(); next(); };
+  $(<span class="hljs-string">"rc-reset"</span>).onclick = reset;
+  $(<span class="hljs-string">"rc-play"</span>).onclick = () =&gt; {
+    <span class="hljs-keyword">if</span> (timer) <span class="hljs-keyword">return</span> stop();
+    <span class="hljs-keyword">const</span> last = <span class="hljs-built_in">Math</span>.max(plans.clone.length, plans.index.length) - <span class="hljs-number">1</span>;
+    <span class="hljs-keyword">if</span> (step &gt;= last) reset();
+    $(<span class="hljs-string">"rc-play"</span>).textContent = <span class="hljs-string">"⏸ Pause"</span>;
+    timer = setInterval(next, <span class="hljs-number">1100</span>);
+  };
+  reset();
+})();</code></pre></details>
 <aside class="note careful"><span class="note-label">Careful</span><p>Two honest footnotes. A real Nim solver may need <em>more</em> clones than this (atlas and nimble read
 several tags of a package when constraints conflict). And conda's index is big: modern clients
 fetch <strong>sharded repodata</strong> (CEP 16), one small file per package name, so they too walk the
@@ -1296,11 +1521,9 @@ tree name by name, but over cached, compressed, HTTP/2 requests of a few kilobyt
 <code>git clone</code>.</p>
 </aside>
 <p>Measured here, for nimib and its four dependencies, on the same machine:</p>
-<figure class="bars"><div class="bar-row"><span><code>nimble install nimib</code> (0.18.2)</span><div class="bar-track"><div class="bar-fill" style="width:100.0%"></div><span class="bar-val">30.3 s</span></div></div><div class="bar-row"><span><code>pixi install</code>, empty cache, <strong>with gcc 16 and Nim</strong></span><div class="bar-track"><div class="bar-fill conda" style="width:26.7%"></div><span class="bar-val">8.1 s</span></div></div><div class="bar-row"><span><code>pixi install</code>, warm cache</span><div class="bar-track"><div class="bar-fill conda" style="width:0.9%"></div><span class="bar-val">0.26 s</span></div></div><figcaption>nimble cloned 5 repositories (a first try took 48 s); pixi's cold run downloaded about 150 MB (the whole gcc toolchain, sysroot and Nim) and still finished first. A warm install only hard-links files. Commands and output in <code>poc/out/06-timings.txt</code>.</figcaption></figure>
-<h2>The proof of concept, in eight terminals</h2>
+<figure class="bars"><div class="bar-row"><span><code>nimble install nimib</code> (0.18.2)</span><div class="bar-track"><div class="bar-fill" style="width:100.0%"></div><span class="bar-val">30.3 s</span></div></div><div class="bar-row"><span><code>pixi install</code>, empty cache, <strong>with gcc 16 and Nim</strong></span><div class="bar-track"><div class="bar-fill conda" style="width:26.7%"></div><span class="bar-val">8.1 s</span></div></div><div class="bar-row"><span><code>pixi install</code>, warm cache</span><div class="bar-track"><div class="bar-fill conda" style="width:0.9%"></div><span class="bar-val">0.26 s</span></div></div><figcaption>nimble cloned 5 repositories (a first try took 48 s); pixi's cold run downloaded about 150 MB (the whole gcc toolchain, sysroot and Nim) and still finished first. A warm install only hard-links files. Commands and output in <code>poc/out/06-timings.txt</code>.</figcaption></figure><h2 id="the-proof-of-concept-in-eight-terminals">The proof of concept, in eight terminals <a class="toc-up" href="#contents">↑ Contents</a></h2>
 <p>Everything below ran in a Linux container on 26 November 2026, with <code>poc/run.sh</code>. Every
-terminal is that script's output, unedited except for shortened paths.</p>
-<h3>1. Nim is already on conda-forge</h3>
+terminal is that script's output, unedited except for shortened paths.</p><h3 id="1-nim-is-already-on-conda-forge">1. Nim is already on conda-forge <a class="toc-up" href="#contents">↑ Contents</a></h3>
 <p><code>pixi init</code>, <code>pixi add nim</code>, and you have a working Nim, <em>and the C compiler it needs</em>:</p>
 <figure class="term"><figcaption>pixi add nim</figcaption><pre class="nb-output"><span class="term-cmd">cd /tmp/w/hello &amp;&amp; pixi init --platform linux-64 . &gt; /dev/null &amp;&amp; pixi add nim</span>
 Created /tmp/w/hello/pixi.toml
@@ -1328,8 +1551,7 @@ Error:   × failed to solve requirements of environment 'default' for platform '
 <aside class="note careful"><span class="note-label">Careful</span><p>conda-forge builds <code>nim</code> for linux-64, linux-aarch64 and osx-64 only: <strong>no osx-arm64, no
 Windows</strong>. On an M-series Mac <code>pixi add nim</code> fails today (Rosetta's osx-64 build is the
 workaround). It is the first thing to fix, and bioconda already works around it (below).</p>
-</aside>
-<h3>2. The bridge: one environment variable</h3>
+</aside><h3 id="2-the-bridge-one-environment-variable">2. The bridge: one environment variable <a class="toc-up" href="#contents">↑ Contents</a></h3>
 <p>How does <code>nim</code> find a package that conda installed? It turns out Nim has had the answer for
 years. In <code>compiler/commands.nim</code>, the <code>nimblepath</code> switch (which the default <code>nim.cfg</code> uses
 for <code>~/.nimble/pkgs2</code>) is replaced by <code>$NIMBLE_DIR/pkgs2</code> whenever that variable is set:</p>
@@ -1367,8 +1589,7 @@ uses, so the compiler picks the highest version), and an activation script sets
   <span class="hljs-tag">license</span>: <span class="hljs-literal">MIT</span>
   <span class="hljs-tag">summary</span>: <span class="hljs-literal">Point</span> <span class="hljs-literal">NIMBLE_DIR</span> <span class="hljs-literal">at</span> <span class="hljs-literal">the</span> <span class="hljs-literal">conda</span> <span class="hljs-literal">environment,</span> <span class="hljs-literal">so</span> <span class="hljs-literal">nim</span> <span class="hljs-literal">finds</span> <span class="hljs-literal">conda-installed</span> <span class="hljs-literal">Nim</span> <span class="hljs-literal">packages</span></code></pre></figure>
 <figure class="file"><figcaption>poc/recipes/nim-activation/activate.sh</figcaption><pre><code class="language-bash"><span class="hljs-built_in">export</span> <span class="hljs-variable">_NIM_ACTIVATION_OLD_NIMBLE_DIR</span>=<span class="hljs-string">"</span><span class="hljs-string">${</span><span class="hljs-variable">NIMBLE_DIR</span><span class="hljs-keyword">:-</span><span class="hljs-string">}</span><span class="hljs-string">"</span>
-<span class="hljs-built_in">export</span> <span class="hljs-variable">NIMBLE_DIR</span>=<span class="hljs-string">"</span><span class="hljs-string">${</span><span class="hljs-variable">CONDA_PREFIX</span><span class="hljs-string">}</span><span class="hljs-string">/share/nimble</span><span class="hljs-string">"</span></code></pre></figure>
-<h3>3. nimforge: from the phone book to recipes</h3>
+<span class="hljs-built_in">export</span> <span class="hljs-variable">NIMBLE_DIR</span>=<span class="hljs-string">"</span><span class="hljs-string">${</span><span class="hljs-variable">CONDA_PREFIX</span><span class="hljs-string">}</span><span class="hljs-string">/share/nimble</span><span class="hljs-string">"</span></code></pre></figure><h3 id="3-nimforge-from-the-phone-book-to-recipes">3. nimforge: from the phone book to recipes <a class="toc-up" href="#contents">↑ Contents</a></h3>
 <p>To package Nim libraries we need recipes. <code>nimforge.nim</code> does for <code>packages.json</code> what
 <code>rattler-build generate-recipe</code> does for PyPI and CRAN: look the name up, list the git tags,
 pick the highest, clone it, read the <code>.nimble</code> file (version, <code>srcDir</code>, <code>requires</code>), translate
@@ -1646,8 +1867,7 @@ nim-zippy</pre></figure>
 libraries are sources. <code>run_constraints: nim &gt;=1.4.0</code>: nimib's <code>requires &quot;nim &gt;= 1.4.0&quot;</code> does
 not <em>pull in</em> a compiler, it only forbids an old one. And the test: rattler-build creates a fresh
 environment with the new package, its dependencies and <code>nim</code>, and checks that <code>import nimib</code>
-compiles, which proves the dependencies <em>and</em> the <code>NIMBLE_DIR</code> bridge.</p>
-<h3>4. rattler-build: fourteen packages, tested</h3>
+compiles, which proves the dependencies <em>and</em> the <code>NIMBLE_DIR</code> bridge.</p><h3 id="4-rattler-build-fourteen-packages-tested">4. rattler-build: fourteen packages, tested <a class="toc-up" href="#contents">↑ Contents</a></h3>
 <figure class="term"><figcaption>rattler-build build --recipe-dir recipes</figcaption><pre class="nb-output"><span class="term-cmd">cd . &amp;&amp; rattler-build build --recipe-dir recipes --output-dir channel -c ./channel -c conda-forge 2&gt;&amp;1 | grep -E 'Artifact:|all tests passed' | sed 's/^[ │╭╰─]*//' | sort | uniq -c | sed 's/^ *1 //'</span>
 Artifact: ./channel/noarch/nim-activation-0.1.0-h4616a5c_0.conda (2.49 KiB)
 Artifact: ./channel/noarch/nim-bumpy-1.1.3-h4616a5c_0.conda (6.85 KiB)
@@ -1682,8 +1902,7 @@ nim-zippy-0.10.20-h4616a5c_0.conda
 repodata.json</pre></figure>
 <p><code>--recipe-dir</code> finds every recipe and builds them in dependency order, so each test can already
 install the packages it needs from the local channel. The channel is just a folder with a
-<code>repodata.json</code> per platform: copy it to any static web server, or upload it to prefix.dev.</p>
-<h3>5. A nimib page, built by pixi</h3>
+<code>repodata.json</code> per platform: copy it to any static web server, or upload it to prefix.dev.</p><h3 id="5-a-nimib-page-built-by-pixi">5. A nimib page, built by pixi <a class="toc-up" href="#contents">↑ Contents</a></h3>
 <p>A project that uses the channel. Nim comes from conda-forge, nimib and its dependencies from
 the local channel, and a pixi task builds the page:</p>
 <figure class="file"><figcaption>poc/demo/hello.nim</figcaption><pre><code class="hljs nim"><span class="hljs-keyword">import</span> nimib
@@ -1742,8 +1961,7 @@ parsetoml-0.7.2</pre></figure>
   constrains:
   - nim &gt;=1.4.0
   channel: file://./channel
-  license: MIT</pre></figure>
-<h3>6. Nim and a C library, from the same place</h3>
+  license: MIT</pre></figure><h3 id="6-nim-and-a-c-library-from-the-same-place">6. Nim and a C library, from the same place <a class="toc-up" href="#contents">↑ Contents</a></h3>
 <p>This is where conda is better than any language-specific package manager: the C side. Nim
 wrappers usually start with <em>&quot;first, <code>apt install libfoo-dev</code> (or brew, or vcpkg)&quot;</em>. Here zlib
 comes from conda-forge, headers and shared library in the environment, and the compiler flags
@@ -1775,8 +1993,7 @@ zlib 1.3.2: crc32(&quot;Nim go wild&quot;) = D21AA19A
 <p><code>ldd</code> shows the binary links the <code>libz.so.1</code> <em>of the environment</em> (the env's <code>lib/</code> is in its
 rpath, from <code>$LDFLAGS</code>). The same goes for openssl, pcre, SDL2, SDL3, GLFW, cairo, GTK,
 sqlite, libuv, libsodium, ffmpeg, OpenCV, HDF5, Arrow, DuckDB, htslib: all on conda-forge, all
-the things Nim wrappers keep telling you to install by hand.</p>
-<h3>7. A Nim app as a conda package: nimby, installed by conda</h3>
+the things Nim wrappers keep telling you to install by hand.</p><h3 id="7-a-nim-app-as-a-conda-package-nimby-installed-by-conda">7. A Nim app as a conda package: nimby, installed by conda <a class="toc-up" href="#contents">↑ Contents</a></h3>
 <p>Compiled programs are the easy case. A recipe for treeform's nimby (<code>build</code> requirement: <code>nim</code>;
 <code>run</code>: <code>git</code>), built and installed globally with <code>pixi global</code>, which puts a small trampoline in
 <code>~/.pixi/bin</code>:</p>
@@ -1829,8 +2046,7 @@ Usage: nimby &lt;subcommand&gt; [options]
 recipe never mentions libgcc; the compiler package declared that whatever it builds needs it at
 run time. Nimby is a nice test case for a different reason: its version 0.2.4 is in
 <code>nimby.nimble</code> but has no git tag (the latest tag is v0.1.5), so the recipe pins a commit. A
-generator can't guess that.</p>
-<h3>8. Nim 2.4.2, with the bridge built in</h3>
+generator can't guess that.</p><h3 id="8-nim-2-4-2-with-the-bridge-built-in">8. Nim 2.4.2, with the bridge built in <a class="toc-up" href="#contents">↑ Contents</a></h3>
 <p>Last, the conda-forge recipe of <code>nim</code> itself, moved to the v1 format, bumped to 2.4.2, with the
 activation script added (<code>poc/feedstock/nim</code>). Its test checks that <code>NIMBLE_DIR</code> points into
 the environment, without the <code>nim-activation</code> package. Building Nim from source took 21 minutes
@@ -1888,8 +2104,7 @@ all tests passed!
 Artifact: ./channel/linux-64/nim-2.4.2-hb0f4dca_0.conda (24.12 MiB)
 <span class="term-cmd">pixi exec -c ./channel -c conda-forge --spec &quot;nim==2.4.2&quot; -- sh -c 'nim --version | head -1; echo $NIMBLE_DIR'</span>
 Nim Compiler Version 2.4.2 [Linux: amd64]
-~/.cache/rattler/cache/cached-envs-v0/nim-e6a0e06aa71dfcd9/share/nimble</pre></figure>
-<h2>How other languages live in conda</h2>
+~/.cache/rattler/cache/cached-envs-v0/nim-e6a0e06aa71dfcd9/share/nimble</pre></figure><h2 id="how-other-languages-live-in-conda">How other languages live in conda <a class="toc-up" href="#contents">↑ Contents</a></h2>
 <p>Nim would not be the first. Wolf's next slide was titled <em>New ecosystems are blooming</em>, with
 Mojo, Common Lisp, GitHub Releases and <em>ROS &amp; RoboStack, stronger than ever</em>; his first had Zig
 and R on the wheel. Each one found a different answer to the same three questions: where do
@@ -1918,10 +2133,8 @@ library files go, who writes the recipes, and which channel hosts them.</p>
 under a prefix in a fixed folder like R's, generated from the registry like RoboStack's, in a
 <strong>community channel</strong> on prefix.dev like Mojo's and Common Lisp's (free accounts get 3 GB of
 public storage, a lot of Nim source), with <strong>release binaries</strong> of Nim tools picked up by
-octoconda on the side.</p>
-<h2>Nim is already in conda: a survey</h2>
-<p>Wolf was right: there is Nim in conda, in two places.</p>
-<h3>conda-forge: the compiler, and nothing else</h3>
+octoconda on the side.</p><h2 id="nim-is-already-in-conda-a-survey">Nim is already in conda: a survey <a class="toc-up" href="#contents">↑ Contents</a></h2>
+<p>Wolf was right: there is Nim in conda, in two places.</p><h3 id="conda-forge-the-compiler-and-nothing-else">conda-forge: the compiler, and nothing else <a class="toc-up" href="#contents">↑ Contents</a></h3>
 <p><a href="https://github.com/conda-forge/nim-feedstock">conda-forge/nim-feedstock</a> has packaged the Nim compiler since <strong>8 November
 2019</strong>. Its history is a small relay race: <strong>Christopher Dunn</strong> (<code>pb-cdunn</code>, then at PacBio, who
 needed Nim for genome assembly tools) created it; <strong>Marcel Bargull</strong> (a conda-forge and bioconda
@@ -1939,8 +2152,7 @@ titled <code>@conda-forge-admin, please add user @&lt;github-name&gt;</code>, an
 request; any current maintainer merges it. With three maintainers who have not merged a bot PR
 since 2025, that is the obvious first step, and Wolf's offer to help get you added makes it easy.
 A maintainer merges bot PRs, adds platforms in <code>conda-forge.yml</code>, and reviews changes to the recipe.</p>
-</aside>
-<h3>bioconda: about twenty Nim tools for genomics</h3>
+</aside><h3 id="bioconda-about-twenty-nim-tools-for-genomics">bioconda: about twenty Nim tools for genomics <a class="toc-up" href="#contents">↑ Contents</a></h3>
 <p><a href="https://github.com/bioconda/bioconda-recipes">bioconda</a> is the channel for bioinformatics, built on top of conda-forge. Nim found
 a niche there early, thanks to <code>hts-nim</code> (Nim bindings to htslib, the C library for sequencing
 data): fast single-binary tools that bioinformaticians install with one command. A search of
@@ -1987,8 +2199,7 @@ most run <strong>nimble at build time</strong>, fetching dependencies from GitHu
 with Nim libraries as conda packages those would become ordinary <code>host</code> requirements, pinned,
 cached and reproducible.</p>
 <p>Nobody ships Nim <em>libraries</em> as conda packages yet: the <code>nim-</code> prefix exists only for two tools
-(<code>nim-abif</code>, <code>nim-falcon</code>). The convention is free to set.</p>
-<h2>The effort, and the critical parts</h2>
+(<code>nim-abif</code>, <code>nim-falcon</code>). The convention is free to set.</p><h2 id="the-effort-and-the-critical-parts">The effort, and the critical parts <a class="toc-up" href="#contents">↑ Contents</a></h2>
 <p>What it would take to make conda a real home for Nim, from the cheapest piece to the most
 expensive. &quot;Critical&quot; means: without it, the rest doesn't matter.</p>
 <div id="tabella-c6bb30c8" class="tabella">
@@ -2019,8 +2230,7 @@ would co-exist, and someone has to explain which one wins. conda knows nothing o
 backends: <code>nim js</code> needs no C compiler, and a JS-only project would still get gcc unless the
 <code>nim</code> package splits into <code>nim</code> and <code>nim-c</code>. And Windows is the platform where conda-forge's
 compiler story is the hardest.</p>
-</aside>
-<h2>The third road: build your own, on shared foundations</h2>
+</aside><h2 id="the-third-road-build-your-own-on-shared-foundations">The third road: build your own, on shared foundations <a class="toc-up" href="#contents">↑ Contents</a></h2>
 <p>Late in the talk, Wolf's slide said: <em>Everyone can build their own package manager with AI.
 The new recipe format and our tools make it very easy to build your own ecosystem. Our
 advice: build on incredible shared foundations, with best-in-class tools.</em> prefix.dev means it
@@ -2052,8 +2262,7 @@ cache) and write the <strong>solver</strong> and the <strong>MatchSpec / version
 are where package management is actually decided, and they are small enough to understand
 completely. With an AI doing the first pass of an automatic port, as with nimaki, the book's
 tests and exercises become the check that the port is right.</p>
-</aside>
-<h2>The smallest thing to try, in four steps</h2>
+</aside><h2 id="the-smallest-thing-to-try-in-four-steps">The smallest thing to try, in four steps <a class="toc-up" href="#contents">↑ Contents</a></h2>
 <p>The PoC above proves the mechanics. The smallest real step is about the feedstock, not about
 new tools:</p>
 <ol class="steps">
@@ -2072,7 +2281,7 @@ are the two pieces that turn a channel into a package manager.</li>
 </ol>
 <hr />
 <p><em>Sources:</em> the repositories of <a href="https://github.com/nim-lang/nimble">nimble</a> (changelog to 0.28), <a href="https://github.com/nim-lang/atlas">atlas</a>
-(0.17.1), <a href="https://github.com/treeform/nimby">nimby</a> (README and changelog), <a href="https://github.com/nim-lang/packages">nim-lang/packages</a> and Nim's
+(0.17.1), <a href="https://github.com/treeform/nimby">nimby</a> (README and changelog), <a href="https://github.com/openpeeps/clue">clue</a> and <a href="https://github.com/openpeeps/datpkgr">datpkgr</a> (READMEs and the resolver, 0.3.9), <a href="https://github.com/nim-lang/packages">nim-lang/packages</a> and Nim's
 <code>koch.nim</code> and <code>compiler/commands.nim</code>; conda-forge's <a href="https://github.com/conda-forge/nim-feedstock">nim-feedstock</a> (full
 history and its open pull requests), conda-forge's bot data (<code>graph.json</code>, <code>all_feedstocks.json</code>),
 <a href="https://github.com/bioconda/bioconda-recipes">bioconda-recipes</a>; pixi and rattler-build docs and the <a href="https://github.com/conda/ceps">CEPs</a>. Wolf's slide is
@@ -2100,7 +2309,7 @@ page by <a href="https://github.com/pietroppeter/nimib">nimib</a>.</p>
 <span class="hljs-keyword">import</span> nimib
 <span class="hljs-keyword">import</span> tabelline <span class="hljs-keyword">except</span> <span class="hljs-type">Value</span>
 <span class="hljs-keyword">import</span> tabelline/nimib
-<span class="hljs-keyword">import</span> lib/[style, blocks]
+<span class="hljs-keyword">import</span> lib/[style, blocks, toc]
 <span class="hljs-keyword">import</span> review          <span class="hljs-comment"># tabelline's review mode, from claude-artifacts shared/review (unchanged copy)</span>
 
 nbInit
@@ -2115,6 +2324,8 @@ nbReview(tpage = <span class="hljs-string">&quot;conda-for-nim&quot;</span>, tso
   nimble = <span class="hljs-string">&quot;https://github.com/nim-lang/nimble&quot;</span>
   atlas = <span class="hljs-string">&quot;https://github.com/nim-lang/atlas&quot;</span>
   nimby = <span class="hljs-string">&quot;https://github.com/treeform/nimby&quot;</span>
+  clue = <span class="hljs-string">&quot;https://github.com/openpeeps/clue&quot;</span>
+  datpkgr = <span class="hljs-string">&quot;https://github.com/openpeeps/datpkgr&quot;</span>
   feedstock = <span class="hljs-string">&quot;https://github.com/conda-forge/nim-feedstock&quot;</span>
   bioconda = <span class="hljs-string">&quot;https://github.com/bioconda/bioconda-recipes&quot;</span>
   pixi = <span class="hljs-string">&quot;https://pixi.sh&quot;</span>
@@ -2125,6 +2336,12 @@ nbReview(tpage = <span class="hljs-string">&quot;conda-for-nim&quot;</span>, tso
 
 <span class="hljs-keyword">proc</span> term(name: <span class="hljs-built_in">string</span>): <span class="hljs-built_in">string</span> = readFile(<span class="hljs-string">&quot;poc/out&quot;</span> / name)
 <span class="hljs-keyword">proc</span> poc(path: <span class="hljs-built_in">string</span>): <span class="hljs-built_in">string</span> = readFile(<span class="hljs-string">&quot;poc&quot;</span> / path)
+<span class="hljs-keyword">proc</span> between(path, a, b: <span class="hljs-built_in">string</span>): <span class="hljs-built_in">string</span> =
+  <span class="hljs-comment">## The part of a source file from the line holding `a` up to `b` (or to the end, when `b` is &quot;&quot;).</span>
+  <span class="hljs-keyword">let</span> s = readFile(path)
+  <span class="hljs-keyword">let</span> i = s.find(a)
+  <span class="hljs-keyword">let</span> j = <span class="hljs-keyword">if</span> b == <span class="hljs-string">&quot;&quot;</span>: s.len <span class="hljs-keyword">else</span>: s.find(b, i)
+  s[s.rfind('\n<span class="hljs-string">', 0, i) + 1 ..&lt; j]</span>
 
 <span class="hljs-comment"># ------------------------------------------------------------------ data for the race and the survey</span>
 <span class="hljs-keyword">proc</span> raceData(roots: openArray[<span class="hljs-built_in">string</span>]): <span class="hljs-type">JsonNode</span> =
@@ -2187,7 +2404,7 @@ a nimib page, with no nimble anywhere.
 &quot;&quot;&quot;</span>
 
 nbTldr: <span class="hljs-string">&quot;&quot;&quot;
-- **Nim today**: nimble, atlas and nimby all start from `packages.json`, which knows a package's
+- **Nim today**: nimble, atlas, nimby and the newcomer clue all start from `packages.json`, which knows a package's
   *name and git URL, and nothing else*. Versions are git tags, dependencies are in `.nimble`
   files, so every tool must clone to find out what to clone next.
 - **Conda today** is not Anaconda's Python installer any more: conda-forge has about 35,000
@@ -2208,6 +2425,7 @@ nbTldr: <span class="hljs-string">&quot;&quot;&quot;
 - **Smallest next step**: become a maintainer of `nim-feedstock`, merge the waiting 2.4 update,
   add osx-arm64 and the `NIMBLE_DIR` activation. Everything else builds on that.
 &quot;&quot;&quot;</span>
+nbTocHere
 
 <span class="hljs-comment"># ============================================================================================ 1</span>
 nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
@@ -2233,7 +2451,7 @@ That is all the registry knows: a name, a git URL, a license, some tags. **No ve
 dependencies, no checksums, no files.** Versions are git tags in nimib's repository, and its
 dependencies are in `nimib.nimble`, a NimScript file at each tag. Of the {nUrl} packages,
 {hostCount[&quot;github.com&quot;]} live on GitHub, the rest on sourcehut, GitLab, Codeberg and friends.
-Three tools read this file, each with its own idea of what to do next:
+Four tools read this file, each with its own idea of what to do next:
 &quot;&quot;&quot;</span>
 
 nbCards([
@@ -2246,6 +2464,9 @@ nbCards([
   <span class="hljs-type">Card</span>(name: <span class="hljs-string">&quot;nimby&quot;</span>, who: <span class="hljs-string">&quot;treeform (since 2019), now 0.2.4&quot;</span>,
     motto: <span class="hljs-string">&quot;just git, at HEAD, in parallel&quot;</span>,
     text: <span class="hljs-string">&quot;Shallow-clones every dependency *at HEAD* into one visible workspace, in parallel, and writes `nim.cfg`. No resolution on purpose. A lock file (name, url, commit) for CI. Also installs Nim. Fidget2's CI went from 2 minutes to 3 seconds.&quot;</span>),
+  <span class="hljs-type">Card</span>(name: <span class="hljs-string">&quot;clue&quot;</span>, who: <span class="hljs-string">&quot;George Lemon, OpenPeeps (April 2026), now 0.3.9&quot;</span>,
+    motto: <span class="hljs-string">&quot;a store, a DFS, and the rest of the toolbox&quot;</span>,
+    text: <span class="hljs-string">&quot;Installs into one store, `~/.clue/packages`, and passes `--path` to the compiler (with a `clue.lock` to make that fast). Its resolver lives in [datpkgr](https://github.com/openpeeps/datpkgr), a language-agnostic kit: a lazy depth-first search with backtracking, *no SAT solver*, where the nearest constraint wins. It caches the versions it discovers with `git ls-remote`, and adds venvs (via choosenim), docs, deploys and Nimony builds.&quot;</span>),
   <span class="hljs-type">Card</span>(name: <span class="hljs-string">&quot;conda / pixi&quot;</span>, who: <span class="hljs-string">&quot;Continuum (2012) … prefix.dev (2023)&quot;</span>, conda: <span class="hljs-literal">true</span>,
     motto: <span class="hljs-string">&quot;the index already knows&quot;</span>,
     text: <span class="hljs-string">&quot;Installs prebuilt packages into an environment folder. Every package's version, dependencies and hash are in the channel's index (`repodata.json`), so it solves first and downloads once. The rest of this page.&quot;</span>),
@@ -2253,7 +2474,7 @@ nbCards([
 
 nbText: <span class="hljs-string">&quot;&quot;&quot;
 They differ in *where packages go* (a hidden store, a `deps/` folder, a sibling workspace) and
-in *how versions are chosen* (a solver, a solver, no solver). They share the same first step:
+in *how versions are chosen* (a solver, a solver, no solver, a depth-first search). They share the same first step:
 to learn the dependencies of nimib you must fetch nimib, at a version you chose from its git
 tags, and read a file in it. Then do the same for each dependency. treeform's README puts the
 cost plainly: nimble took almost two minutes to install Fidget2's dependencies in CI, cloning
@@ -2364,6 +2585,38 @@ fetch** and **one download** however deep the tree is, and the solve, which is t
 part, happens on your machine with nothing but metadata. That metadata was computed *once, when
 the package was built*: someone cloned and read the `.nimble` file, so that nobody else has to.
 &quot;&quot;&quot;</span>
+
+nbFold(<span class="hljs-string">&quot;How this interactive is built, with its source&quot;</span>, <span class="hljs-string">&quot;&quot;&quot;
+It takes three small pieces, and no framework.
+
+1. **The data comes from the PoC's own recipes.** At build time, `raceData` (in `index.nim`)
+   walks `poc/recipes/nim-*` and `poc/graphs/nim-*`. Those are the recipes nimforge wrote from
+   packages.json and from each package's `.nimble` file. From each `recipe.yaml`, it keeps the
+   version and the `nim-*` names listed under `run:`. Then, starting from each root (nimib,
+   pixie, fidget2), it collects the graph that can be reached and stores it as JSON:
+   `{pkg: {deps: {name: [deps]}, versions: {name: version}}}`.
+2. **A custom nimib block puts it on the page.** `nbRace` (in `lib/blocks.nim`) writes the
+   empty lanes and the buttons as HTML. It puts the JSON in a `&lt;script type=&quot;application/json&quot;&gt;`
+   tag, and inlines `lib/race.js`, which is read with `staticRead` when the page compiles.
+   Nothing is loaded from a CDN, so it works inside a claude.ai artifact too.
+3. **The script works out both stories in advance, as frames.**
+   - `levels` splits the graph by depth, breadth first.
+   - `clonePlan` makes one frame per round trip. The first is GET packages.json. Then, for each
+     level of the tree, there is one frame for `git ls-remote --tags` on the frontier, and one
+     frame for a clone that reads the `.nimble` files to find the next level.
+   - `indexPlan` makes three frames: GET repodata (every edge is known), a local solve, and one
+     download of everything.
+
+   Each frame holds the state of every package (unknown, known, busy or got) and the counters.
+   **Next round trip** moves both lanes forward by one frame, and `render` redraws them from it.
+   **Play** is a timer on the same step.
+
+So the race is a model, not a measurement. One press is one network round trip, and fetches made
+in parallel count as one. The measured times are in the bars below.
+&quot;&quot;&quot;</span>)
+nbFile(<span class="hljs-string">&quot;index.nim (the raceData proc)&quot;</span>, <span class="hljs-string">&quot;nim&quot;</span>, between(<span class="hljs-string">&quot;index.nim&quot;</span>, <span class="hljs-string">&quot;proc raceData&quot;</span>, <span class="hljs-string">&quot;</span><span class="hljs-meta">\n</span><span class="hljs-string">let bio&quot;</span>), tfolded = <span class="hljs-literal">true</span>)
+nbFile(<span class="hljs-string">&quot;lib/blocks.nim (the nbRace block)&quot;</span>, <span class="hljs-string">&quot;nim&quot;</span>, between(<span class="hljs-string">&quot;lib/blocks.nim&quot;</span>, <span class="hljs-string">&quot;const raceJs&quot;</span>, <span class="hljs-string">&quot;&quot;</span>), tfolded = <span class="hljs-literal">true</span>)
+nbFile(<span class="hljs-string">&quot;lib/race.js&quot;</span>, <span class="hljs-string">&quot;javascript&quot;</span>, readFile(<span class="hljs-string">&quot;lib/race.js&quot;</span>), tfolded = <span class="hljs-literal">true</span>)
 
 nbNote(nkCareful, <span class="hljs-string">&quot;&quot;&quot;
 Two honest footnotes. A real Nim solver may need *more* clones than this (atlas and nimble read
@@ -2739,7 +2992,7 @@ nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
 ---
 
 *Sources:* the repositories of [nimble]({nimble}) (changelog to 0.28), [atlas]({atlas})
-(0.17.1), [nimby]({nimby}) (README and changelog), [nim-lang/packages]({pkgsJson}) and Nim's
+(0.17.1), [nimby]({nimby}) (README and changelog), [clue]({clue}) and [datpkgr]({datpkgr}) (READMEs and the resolver, 0.3.9), [nim-lang/packages]({pkgsJson}) and Nim's
 `koch.nim` and `compiler/commands.nim`; conda-forge's [nim-feedstock]({feedstock}) (full
 history and its open pull requests), conda-forge's bot data (`graph.json`, `all_feedstocks.json`),
 [bioconda-recipes]({bioconda}); pixi and rattler-build docs and the [CEPs]({ceps}). Wolf's slide is
@@ -2750,6 +3003,7 @@ page by [nimib](https://github.com/pietroppeter/nimib).
 &quot;&quot;&quot;</span>
 
 nbSave
+addToc nb.doc.filename
 </code></pre>
 </section>
   

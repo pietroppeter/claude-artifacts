@@ -9,7 +9,7 @@ import std/[os, json, strformat, strutils, sequtils, tables, algorithm]
 import nimib
 import tabelline except Value
 import tabelline/nimib
-import lib/[style, blocks]
+import lib/[style, blocks, toc]
 import review          # tabelline's review mode, from claude-artifacts shared/review (unchanged copy)
 
 nbInit
@@ -24,6 +24,8 @@ const
   nimble = "https://github.com/nim-lang/nimble"
   atlas = "https://github.com/nim-lang/atlas"
   nimby = "https://github.com/treeform/nimby"
+  clue = "https://github.com/openpeeps/clue"
+  datpkgr = "https://github.com/openpeeps/datpkgr"
   feedstock = "https://github.com/conda-forge/nim-feedstock"
   bioconda = "https://github.com/bioconda/bioconda-recipes"
   pixi = "https://pixi.sh"
@@ -34,6 +36,12 @@ const
 
 proc term(name: string): string = readFile("poc/out" / name)
 proc poc(path: string): string = readFile("poc" / path)
+proc between(path, a, b: string): string =
+  ## The part of a source file from the line holding `a` up to `b` (or to the end, when `b` is "").
+  let s = readFile(path)
+  let i = s.find(a)
+  let j = if b == "": s.len else: s.find(b, i)
+  s[s.rfind('\n', 0, i) + 1 ..< j]
 
 # ------------------------------------------------------------------ data for the race and the survey
 proc raceData(roots: openArray[string]): JsonNode =
@@ -96,7 +104,7 @@ a nimib page, with no nimble anywhere.
 """
 
 nbTldr: """
-- **Nim today**: nimble, atlas and nimby all start from `packages.json`, which knows a package's
+- **Nim today**: nimble, atlas, nimby and the newcomer clue all start from `packages.json`, which knows a package's
   *name and git URL, and nothing else*. Versions are git tags, dependencies are in `.nimble`
   files, so every tool must clone to find out what to clone next.
 - **Conda today** is not Anaconda's Python installer any more: conda-forge has about 35,000
@@ -117,6 +125,7 @@ nbTldr: """
 - **Smallest next step**: become a maintainer of `nim-feedstock`, merge the waiting 2.4 update,
   add osx-arm64 and the `NIMBLE_DIR` activation. Everything else builds on that.
 """
+nbTocHere
 
 # ============================================================================================ 1
 nbText: &"""
@@ -142,7 +151,7 @@ That is all the registry knows: a name, a git URL, a license, some tags. **No ve
 dependencies, no checksums, no files.** Versions are git tags in nimib's repository, and its
 dependencies are in `nimib.nimble`, a NimScript file at each tag. Of the {nUrl} packages,
 {hostCount["github.com"]} live on GitHub, the rest on sourcehut, GitLab, Codeberg and friends.
-Three tools read this file, each with its own idea of what to do next:
+Four tools read this file, each with its own idea of what to do next:
 """
 
 nbCards([
@@ -155,6 +164,9 @@ nbCards([
   Card(name: "nimby", who: "treeform (since 2019), now 0.2.4",
     motto: "just git, at HEAD, in parallel",
     text: "Shallow-clones every dependency *at HEAD* into one visible workspace, in parallel, and writes `nim.cfg`. No resolution on purpose. A lock file (name, url, commit) for CI. Also installs Nim. Fidget2's CI went from 2 minutes to 3 seconds."),
+  Card(name: "clue", who: "George Lemon, OpenPeeps (April 2026), now 0.3.9",
+    motto: "a store, a DFS, and the rest of the toolbox",
+    text: "Installs into one store, `~/.clue/packages`, and passes `--path` to the compiler (with a `clue.lock` to make that fast). Its resolver lives in [datpkgr](https://github.com/openpeeps/datpkgr), a language-agnostic kit: a lazy depth-first search with backtracking, *no SAT solver*, where the nearest constraint wins. It caches the versions it discovers with `git ls-remote`, and adds venvs (via choosenim), docs, deploys and Nimony builds."),
   Card(name: "conda / pixi", who: "Continuum (2012) … prefix.dev (2023)", conda: true,
     motto: "the index already knows",
     text: "Installs prebuilt packages into an environment folder. Every package's version, dependencies and hash are in the channel's index (`repodata.json`), so it solves first and downloads once. The rest of this page."),
@@ -162,7 +174,7 @@ nbCards([
 
 nbText: """
 They differ in *where packages go* (a hidden store, a `deps/` folder, a sibling workspace) and
-in *how versions are chosen* (a solver, a solver, no solver). They share the same first step:
+in *how versions are chosen* (a solver, a solver, no solver, a depth-first search). They share the same first step:
 to learn the dependencies of nimib you must fetch nimib, at a version you chose from its git
 tags, and read a file in it. Then do the same for each dependency. treeform's README puts the
 cost plainly: nimble took almost two minutes to install Fidget2's dependencies in CI, cloning
@@ -273,6 +285,38 @@ fetch** and **one download** however deep the tree is, and the solve, which is t
 part, happens on your machine with nothing but metadata. That metadata was computed *once, when
 the package was built*: someone cloned and read the `.nimble` file, so that nobody else has to.
 """
+
+nbFold("How this interactive is built, with its source", """
+It takes three small pieces, and no framework.
+
+1. **The data comes from the PoC's own recipes.** At build time, `raceData` (in `index.nim`)
+   walks `poc/recipes/nim-*` and `poc/graphs/nim-*`. Those are the recipes nimforge wrote from
+   packages.json and from each package's `.nimble` file. From each `recipe.yaml`, it keeps the
+   version and the `nim-*` names listed under `run:`. Then, starting from each root (nimib,
+   pixie, fidget2), it collects the graph that can be reached and stores it as JSON:
+   `{pkg: {deps: {name: [deps]}, versions: {name: version}}}`.
+2. **A custom nimib block puts it on the page.** `nbRace` (in `lib/blocks.nim`) writes the
+   empty lanes and the buttons as HTML. It puts the JSON in a `<script type="application/json">`
+   tag, and inlines `lib/race.js`, which is read with `staticRead` when the page compiles.
+   Nothing is loaded from a CDN, so it works inside a claude.ai artifact too.
+3. **The script works out both stories in advance, as frames.**
+   - `levels` splits the graph by depth, breadth first.
+   - `clonePlan` makes one frame per round trip. The first is GET packages.json. Then, for each
+     level of the tree, there is one frame for `git ls-remote --tags` on the frontier, and one
+     frame for a clone that reads the `.nimble` files to find the next level.
+   - `indexPlan` makes three frames: GET repodata (every edge is known), a local solve, and one
+     download of everything.
+
+   Each frame holds the state of every package (unknown, known, busy or got) and the counters.
+   **Next round trip** moves both lanes forward by one frame, and `render` redraws them from it.
+   **Play** is a timer on the same step.
+
+So the race is a model, not a measurement. One press is one network round trip, and fetches made
+in parallel count as one. The measured times are in the bars below.
+""")
+nbFile("index.nim (the raceData proc)", "nim", between("index.nim", "proc raceData", "\nlet bio"), tfolded = true)
+nbFile("lib/blocks.nim (the nbRace block)", "nim", between("lib/blocks.nim", "const raceJs", ""), tfolded = true)
+nbFile("lib/race.js", "javascript", readFile("lib/race.js"), tfolded = true)
 
 nbNote(nkCareful, """
 Two honest footnotes. A real Nim solver may need *more* clones than this (atlas and nimble read
@@ -648,7 +692,7 @@ nbText: &"""
 ---
 
 *Sources:* the repositories of [nimble]({nimble}) (changelog to 0.28), [atlas]({atlas})
-(0.17.1), [nimby]({nimby}) (README and changelog), [nim-lang/packages]({pkgsJson}) and Nim's
+(0.17.1), [nimby]({nimby}) (README and changelog), [clue]({clue}) and [datpkgr]({datpkgr}) (READMEs and the resolver, 0.3.9), [nim-lang/packages]({pkgsJson}) and Nim's
 `koch.nim` and `compiler/commands.nim`; conda-forge's [nim-feedstock]({feedstock}) (full
 history and its open pull requests), conda-forge's bot data (`graph.json`, `all_feedstocks.json`),
 [bioconda-recipes]({bioconda}); pixi and rattler-build docs and the [CEPs]({ceps}). Wolf's slide is
@@ -659,3 +703,4 @@ page by [nimib](https://github.com/pietroppeter/nimib).
 """
 
 nbSave
+addToc nb.doc.filename

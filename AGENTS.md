@@ -40,6 +40,9 @@ Static pages made with Claude, served by GitHub Pages from `main` (root). No bui
   `https://raw.githack.com/pietroppeter/claude-artifacts/<branch>/<slug>/index.html`.
 
 ## Page style
+- Every page has a table of contents (Pietro's rule, 2026-11-28): a "Contents" list after the intro that links
+  every section heading (`h2`, with `h3` nested), and on each of those headings a small "↑ Contents" link back to it.
+  Build it from the headings at build time (see `conda-for-nim/src/lib/toc.nim`), not by hand, so it can't drift.
 - Pick a visual style that fits each explainer's subject: palette, typefaces, motifs. Don't reuse the previous page's theme by default.
 - Code blocks are where pages keep breaking on a phone. `tools/phonecheck.js` checks all of this; the rules behind it:
   - Keep code small: 12.5–13px for code blocks and outputs, smaller than body text. nimib's own head style sets
