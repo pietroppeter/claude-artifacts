@@ -1,0 +1,7 @@
+lib	role	repo	version	nim	first	last	commits	authors	commitsYear	lines	nimbleFiles
+nim-markdown	Markdown	soasme/nim-markdown	0.8.8	0.19	2018-10-13	2026-09-03	529	11	3	4790	45
+marvdown	Markdown	openpeeps/marvdown	0.2.7	2.0	2025-09-12	2026-11-06	96	1	64	4249	5
+jsony	JSON	treeform/jsony	1.1.6	1.4	2020-11-30	2026-10-28	191	22	8	997	214
+parsetoml	TOML	NimParsers/parsetoml	0.7.2	0.18	2015-01-14	2025-01-12	103	15	0	1942	67
+openparser	JSON, TOML and 28 more	openpeeps/openparser	0.4.5	2.2.10	2026-04-14	2026-11-25	265	1	265	46871	29
+fusion	captureStdout	nim-lang/fusion	1.2	1.0	2020-04-21	2024-03-05	83	16	0	10067	58

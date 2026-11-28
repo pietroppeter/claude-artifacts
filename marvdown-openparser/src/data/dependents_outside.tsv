@@ -1,0 +1,4 @@
+repo	who	uses	for
+elcritch/merenda	Jaremy Creechley	openparser	NIF, in two examples of a desktop GUI toolkit
+enthus1ast/nimDnsServer	David Krause	openparser	NIF config files of a DNS server built on powpow
+penguinite/everything	a bot	openparser, marvdown	a joke package that requires every package in the registry

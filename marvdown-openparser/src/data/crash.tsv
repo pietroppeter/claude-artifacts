@@ -1,0 +1,2 @@
+[link](foo(and(bar))	Error: unhandled exception: index 20 not in 0 .. 19 [IndexDefect]
+[a](<b)c>	Error: unhandled exception: index 9 not in 0 .. 8 [IndexDefect]

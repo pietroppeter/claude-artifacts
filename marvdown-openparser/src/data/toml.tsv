@@ -1,0 +1,5 @@
+library	spec	valid accepted	valid	invalid rejected	invalid
+parsetoml	1.0.0	184	208	435	509
+parsetoml	1.1.0	183	218	427	502
+optoml	1.0.0	208	208	509	509
+optoml	1.1.0	207	218	502	502

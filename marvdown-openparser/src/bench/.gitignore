@@ -1,0 +1,4 @@
+deps/
+bin/
+*.json
+corpus.txt

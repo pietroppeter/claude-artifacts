@@ -22,7 +22,7 @@ nbInit
 nbReview(tversion = 1, tpage = "my-page", tsource = "my-page/src/index.nim")
 ```
 
-Pages that use it: `a-month-with-claude`, `nimconf-schedules`, `tabelline-forum-post`, `skill-issues`, `lemire-base64`, `nimony-evolution`, `tea-in-nim`, `futureverse-nim`, `faretto`, `conda-for-nim`, `moire`, `arrow-kosovel`, `nimib-on-nimony` (its own
+Pages that use it: `a-month-with-claude`, `nimconf-schedules`, `tabelline-forum-post`, `skill-issues`, `lemire-base64`, `nimony-evolution`, `tea-in-nim`, `futureverse-nim`, `faretto`, `conda-for-nim`, `moire`, `arrow-kosovel`, `marvdown-openparser`, `nimib-on-nimony` (its own
 nimiboth blocks read `review.js` and the styles of `review.nim` from here at compile time).
 
 ## Updating it

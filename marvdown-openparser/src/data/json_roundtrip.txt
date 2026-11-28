@@ -1,0 +1,3 @@
+{"blocks":[{"code":"echo 1","output":"1\n","kind":"NbCode"},{"blocks":[{"code":"nested","output":"","kind":"NbCode"}],"kind":"NbContainer"}],"kind":"NbContainer"}
+NbContainer 2 2 nested
+true
