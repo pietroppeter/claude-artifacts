@@ -1,0 +1,58 @@
+[
+  {
+    "name": "A list right after a paragraph",
+    "md": "A list:\n- one\n- two\n",
+    "nimMarkdown": "<p>A list:</p>\n<ul>\n<li>one</li>\n<li>two</li>\n</ul>\n",
+    "marvdown": "<p>A list: - one - two </p>",
+    "marvdownDefault": "<p>A list: - one - two </p>"
+  },
+  {
+    "name": "A line ending with !",
+    "md": "the right place!\nNote that\n",
+    "nimMarkdown": "<p>the right place!\nNote that</p>\n",
+    "marvdown": "<p>the right place!Note that </p>",
+    "marvdownDefault": "<p>the right place!Note that </p>"
+  },
+  {
+    "name": "Inline HTML in a paragraph",
+    "md": "Text with <span class=\"x\">red</span> words.\n",
+    "nimMarkdown": "<p>Text with <span class=\"x\">red</span> words.</p>\n",
+    "marvdown": "<p>Text with </p><p><span class=\"x\">red</span> words. </p>",
+    "marvdownDefault": "<p>Text with </p><p><span class=\"x\">red</span> words. </p>"
+  },
+  {
+    "name": "An inline image tag, then more text",
+    "md": "An image <img src=\"a.png\">.\n\n**bold** after\n",
+    "nimMarkdown": "<p>An image <img src=\"a.png\">.</p>\n<p><strong>bold</strong> after</p>\n",
+    "marvdown": "<p>An image </p><p><img src=\"a.png\">.\n\n**bold** after\n</p>",
+    "marvdownDefault": "<p>An image </p><p><img src=\"a.png\">.\n\n**bold** after\n</p>"
+  },
+  {
+    "name": "A code span with double backticks",
+    "md": "Draw ``` ```mermaid ``` ``` blocks.\n",
+    "nimMarkdown": "<p>Draw <code> </code>mermaid <code> </code> blocks.</p>\n",
+    "marvdown": "<p>Draw </p><pre><code class=\"language- ```mermaid ``` ``` blocks.\"></code></pre>",
+    "marvdownDefault": "<p>Draw </p><pre><code class=\"language- ```mermaid ``` ``` blocks.\"></code></pre>"
+  },
+  {
+    "name": "Nested block quotes",
+    "md": ">>> foo\n> bar\n",
+    "nimMarkdown": "<blockquote>\n<blockquote>\n<blockquote>\n<p>foo\nbar</p>\n</blockquote>\n</blockquote>\n</blockquote>\n",
+    "marvdown": "<blockquote>> foo bar</blockquote>",
+    "marvdownDefault": "<blockquote>> foo bar</blockquote>"
+  },
+  {
+    "name": "A table",
+    "md": "| a | b |\n|---|---|\n| 1 | 2 |\n",
+    "nimMarkdown": "<table>\n<thead>\n<tr>\n<th>a</th>\n<th>b</th>\n</tr>\n</thead>\n<tbody>\n<tr>\n<td>1</td>\n<td>2</td>\n</tr></tbody></table>\n",
+    "marvdown": "<table><thead><tr><th>a</th><th>b</th></tr></thead><tbody><tr><td>1</td><td>2</td></tr></tbody></table>",
+    "marvdownDefault": "<table><thead><tr><th>a</th><th>b</th></tr></thead><tbody><tr><td>1</td><td>2</td></tr></tbody></table>"
+  },
+  {
+    "name": "A heading",
+    "md": "# Hello *world*\n",
+    "nimMarkdown": "<h1 id=\"hello-<em>world</em>\">Hello <em>world</em></h1>\n",
+    "marvdown": "<h1>Hello <em>world</em></h1>",
+    "marvdownDefault": "<h1 id=\"hello-world\"><a href=\"#hello-world\" class=\"anchor-link\">🔗</a>Hello <em>world</em></h1>"
+  }
+]

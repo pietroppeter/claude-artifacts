@@ -1,0 +1,6 @@
+org	repos	what
+openpeeps	66	the main org: openparser, marvdown, clue, booyaka, kapsis, denim, powpow, bowdy, nyml, toktok...
+nimbase	54	wrappers and API clients moved out of openpeeps (libvips, duckdb, libdatachannel, nimcypher, dynasm, opendocs, image, nim-prebuilts)
+supranim	14	Supranim, an MVC web framework
+tim-engine	12	Tim, a template engine and markup language with ports to Node, Python and Ruby
+getcarne, getsunday, onebuckapp, trytilda	a few each	Carne (a JavaScript runtime), Sunday, the Whatever browser (Swift), Tilda

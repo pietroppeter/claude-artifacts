@@ -1,0 +1,27 @@
+section	examples	cm_nimmd	cm_marv
+Tabs	11	10	4
+Backslash escapes	13	13	5
+Entity and numeric character references	17	17	6
+Precedence	1	1	0
+Thematic breaks	19	18	13
+ATX headings	18	7	11
+Setext headings	27	14	9
+Indented code blocks	12	11	4
+Fenced code blocks	29	28	15
+HTML blocks	46	45	15
+Link reference definitions	27	25	11
+Paragraphs	8	8	7
+Blank lines	1	0	0
+Block quotes	25	21	3
+List items	48	47	10
+Lists	26	26	3
+Inlines	1	1	0
+Code spans	22	22	7
+Emphasis and strong emphasis	132	131	41
+Links	90	86	36
+Images	22	22	2
+Autolinks	19	19	3
+Raw HTML	21	19	4
+Hard line breaks	15	15	8
+Soft line breaks	2	2	2
+Textual content	3	3	3

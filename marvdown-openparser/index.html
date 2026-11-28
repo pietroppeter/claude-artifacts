@@ -1,0 +1,2084 @@
+<!DOCTYPE html>
+<html lang="en-us">
+<head>
+  <title>marvdown and openparser for nimib?</title>
+  <meta content="text/html; charset=utf-8" http-equiv="content-type">
+  <meta content="width=device-width, initial-scale=1" name="viewport">
+  <meta content="nimib 0.4.3" name="generator">
+  <style>:root{--paper:#fbfaf6;--ink:#1b2233;--muted:#5f6675;--line:#dcdad2;--card:#ffffff;--teal:#0e7490;--teal-soft:#dff1f5;--lemon:#d9b21f;--lemon-soft:#fbf3c7;--lemon-ink:#6b5600;--aside:#0e7490;--careful:#b4232a;--nimib:#0e7490;--aside-soft:#e9f4f7;--careful-soft:#f8e3e3;--nimib-soft:#e3f2f6;--code-bg:#ffffff;--out-bg:#f2f1ec;--kw:#8a1f5c;--str:#2d6e3a;--num:#9a5300;--com:#8a857b;--type:#1f5f8a;--surface:#ffffff;--shade:#eeede6;--secondary:#5fb3c6;--secondary-soft:#d6edf3;--primary-text:#0e6075;--neutral-1:#eeede6;--font:system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;--serif:"Iowan Old Style", "Palatino Linotype", Palatino, Georgia, serif;--mono:ui-monospace, "SF Mono", Menlo, Consolas, monospace;}html{-webkit-text-size-adjust:100%}
+body{margin:0 auto;max-width:44rem;padding:1rem max(1rem,env(safe-area-inset-right)) 3rem max(1rem,env(safe-area-inset-left));
+  background:var(--paper);color:var(--ink);font:400 17px/1.6 var(--font)}
+h1{font:700 2rem/1.15 var(--serif);margin:1.2rem 0 .4rem;letter-spacing:-.01em}
+h2{font:700 1.4rem/1.25 var(--serif);margin:2.6rem 0 .6rem;padding-top:.6rem;border-top:3px double var(--ink)}
+h2::before{content:"";display:inline-block;width:.55em;height:.55em;margin-right:.45em;border-radius:50%;background:var(--teal);vertical-align:.08em}
+h3{font:700 1.12rem/1.3 var(--serif);margin:1.8rem 0 .4rem}
+h4{margin:.2rem 0 .4rem;font-size:.95rem}
+a{color:var(--ink);text-decoration-color:var(--teal);text-underline-offset:2px}
+code{font:13px/1.45 var(--mono);background:var(--teal-soft);padding:0 .25em;border-radius:3px}
+header,footer{font-size:.85rem;color:var(--muted)}
+header a,footer a{color:var(--muted)}
+header code{background:none;font:inherit;padding:0}
+hr{border:0;border-top:1px solid var(--line)}
+table{border-collapse:collapse;width:100%;font-size:.88rem;margin:.8rem 0;display:block;overflow-x:auto}
+th,td{border-bottom:1px solid var(--line);padding:.35rem .5rem .35rem 0;text-align:left;vertical-align:top}
+th{border-bottom:2px solid var(--ink)}
+td code,th code{font-size:12px}
+.tabella{overflow-x:auto}
+.tabella table{display:table;width:auto;min-width:100%}
+/* code: small, scrolling inside its box, highlighted at build time (nimib-theme) */
+body pre{overflow-x:auto;background:var(--code-bg);border:1px solid var(--line);border-radius:4px;padding:.6rem .7rem;margin:.6rem 0}
+body pre > code{display:block;overflow-x:auto;font:13px/1.45 var(--mono);background:transparent;padding:0;white-space:pre}
+body pre.nb-output,body pre.out{font:12.5px/1.45 var(--mono);background:var(--out-bg);color:var(--ink);white-space:pre;overflow-x:auto}
+body pre.out > code{font:12.5px/1.45 var(--mono)}
+.hljs-keyword,.hljs-selector-tag{color:var(--kw);font-weight:600}
+.hljs-string,.hljs-template-string{color:var(--str)}
+.hljs-number,.hljs-literal{color:var(--num)}
+.hljs-comment,.hljs-meta{color:var(--com);font-style:italic}
+.hljs-type,.hljs-built_in,.hljs-title{color:var(--type)}
+/* blocks (blocks.nim) */
+.lede{font-size:1.12rem;color:var(--muted);margin:.2rem 0 1rem}
+.tldr{background:var(--card);border:1px solid var(--line);border-left:6px solid var(--lemon);padding:.4rem 1rem;margin:1rem 0}
+.tldr-label,.toc-label{display:block;font-weight:700;font-size:.78rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted);margin-top:.4rem}
+.tldr ul{padding-left:1.1rem;margin:.4rem 0}
+.tldr li{margin:.3rem 0}
+.toc{margin:1rem 0;padding:.3rem 1rem;border:1px solid var(--line);background:var(--card)}
+.toc ol{margin:.4rem 0;padding-left:1.3rem}
+.toc li{margin:.2rem 0}
+h2 .ch-sub{display:block;font:400 .85rem/1.4 var(--font);color:var(--muted);margin-top:.2rem}
+h2 .ch-top{display:inline-block;font:600 .78rem/1.4 var(--font);color:var(--teal);text-decoration:none;margin-top:.2rem}
+.prompt{margin:1.4rem 0 1.6rem}
+.prompt figcaption{font-size:.78rem;color:var(--muted);margin:0 0 .35rem .2rem}
+.prompt .prompt-who{font-weight:700;color:var(--ink)}
+.prompt blockquote{margin:0;padding:.8rem 1rem;background:var(--ink);color:var(--paper);border-radius:16px 16px 16px 4px;font-size:1.02rem;line-height:1.55;max-width:34rem}
+.prompt blockquote p{margin:0}
+.prompt blockquote p + p{margin-top:.6rem}
+aside.note{background:var(--card);border:1px solid var(--line);border-left:5px solid var(--muted);padding:.5rem .9rem;margin:1rem 0;font-size:.95rem}
+aside.note.aside{border-left-color:var(--aside);background:var(--aside-soft)}
+aside.note.careful{border-left-color:var(--careful);background:var(--careful-soft)}
+aside.note.nimib{border-left-color:var(--nimib);background:var(--nimib-soft)}
+aside.note .note-label{display:block;font-weight:700;font-size:.8rem;letter-spacing:.06em;text-transform:uppercase;color:var(--muted)}
+aside.note p{margin:.3rem 0}
+aside.note ul{margin:.3rem 0;padding-left:1.1rem}
+figure.scores{margin:1.2rem 0;padding:.6rem .9rem;background:var(--card);border:1px solid var(--line)}
+figure.scores figcaption{font-weight:700;font-size:.95rem;margin-bottom:.4rem}
+.score{margin:.35rem 0 .7rem}
+.score-label{font-size:.88rem;margin-bottom:2px}
+.score-line{display:flex;align-items:center;gap:6px;min-height:14px}
+.score-bar{height:12px;border-radius:0 3px 3px 0;min-width:2px}
+.score-bar.now{background:var(--teal)}
+.score-bar.new{background:var(--lemon)}
+.score-value{font:12px var(--mono);color:var(--muted);white-space:nowrap}
+.scores-note{font-size:.8rem;color:var(--muted);margin:.3rem 0 0}
+.renders{display:grid;gap:.8rem;margin:1rem 0}
+section.render{background:var(--card);border:1px solid var(--line);border-top:4px solid var(--ink);padding:.5rem .8rem .3rem;min-width:0}
+section.render pre{margin:.2rem 0 .5rem}
+section.render pre.src{background:var(--card);border-style:dashed}
+.render-who{display:inline-block;font:600 11px/1.6 var(--mono);text-transform:uppercase;letter-spacing:.05em;padding:0 .4em;border-radius:3px}
+.render-who.now{background:var(--teal-soft);color:var(--teal)}
+.render-who.new{background:var(--lemon-soft);color:var(--lemon-ink)}
+</style>
+<style>
+/* the colours and fonts the review mode uses, for a page that has none of its own (a plain nimib
+   page): `:where` weighs nothing, so a page's own tokens (tabelline's, on :root) win */
+:where(html) { --paper: #fffdf8; --ink: #1f1f1f; --surface: #f6f3ec; --line: #c9c4ba; --shade: #e7e2d8;
+  --muted: #6b675f; --secondary: #6aa9d6; --secondary-soft: #d6e8f5; --primary-text: #8a3550;
+  --neutral-1: #ece8df; --font: system-ui, sans-serif; --mono: ui-monospace, monospace; }
+/* the review mode (review.nim, nbReview): a Review button, then marks on the text, a bar at
+   the bottom, the comment's sheet at the top, export and history */
+.rv-only { display: none; }
+body.rv-on .rv-only { display: block; }
+.rv-bar[hidden], .rv-panel[hidden] { display: none; }
+.rv-enter { display: flex; flex-wrap: wrap; align-items: center; gap: .4rem .8rem; margin: .8rem 0 1.4rem; color: var(--muted); font-size: .92rem; }
+.rv-enter .rv-version { font-weight: 700; color: var(--ink); }
+.rv-toggle { font: inherit; color: var(--ink); background: transparent; border: 1px solid var(--line); border-radius: 0;
+  min-height: 44px; padding: 0 .8rem; cursor: pointer; }
+.rv-toggle[aria-pressed="true"] { border-color: var(--ink); box-shadow: inset 0 -3px 0 var(--secondary); }
+body.rv-on { padding-bottom: calc(4.6rem + env(safe-area-inset-bottom, 0px)); }
+mark.rv-mark { background: var(--secondary-soft); color: inherit; box-shadow: 0 2px 0 var(--secondary); cursor: pointer; }
+mark.rv-mark.rv-current { background: var(--secondary); }
+.rv-bar { position: fixed; left: 0; right: 0; bottom: 0; z-index: 50; display: flex; align-items: center; gap: .3rem;
+  justify-content: center; padding: .45rem max(.5rem, env(safe-area-inset-right, 0px)) calc(.45rem + env(safe-area-inset-bottom, 0px)) max(.5rem, env(safe-area-inset-left, 0px));
+  background: var(--surface); border-top: 3px solid var(--ink); font: 400 15px/1.2 var(--font); }
+.rv-bar button, .rv-sheet button { font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line);
+  border-radius: 0; min-height: 44px; min-width: 44px; padding: 0 .7rem; cursor: pointer; white-space: nowrap; }
+.rv-bar button { padding: 0 .55rem; }
+.rv-bar button[data-do="delete"] { color: var(--primary-text); }
+.rv-bar button:disabled { color: var(--muted); border-color: var(--shade); cursor: default; }
+.rv-bar button[data-do="prev"], .rv-bar button[data-do="next"] { font-size: 1.4rem; padding: 0; }
+.rv-bar .rv-count { min-width: 3.2rem; text-align: center; color: var(--muted); font-size: .85rem; }
+.rv-bar .rv-add, .rv-sheet .rv-save { background: var(--ink); color: var(--paper); border-color: var(--ink); font-weight: 700; }
+.rv-bar .rv-add.rv-selected { background: var(--secondary); color: var(--ink); border-color: var(--ink); }
+dialog.rv-sheet { width: 100%; max-width: 40rem; margin: 0 auto auto; padding: 1rem max(1rem, env(safe-area-inset-right, 0px)) 1rem max(1rem, env(safe-area-inset-left, 0px));
+  border: 0; border-bottom: 3px solid var(--ink); background: var(--surface); color: var(--ink); font: 400 16px/1.45 var(--font);
+  max-height: 90vh; overflow-y: auto; }
+dialog.rv-sheet::backdrop { background: color-mix(in oklab, var(--ink) 30%, transparent); }
+.rv-sheet .rv-where { margin: 0 0 .4rem; font-weight: 700; }
+.rv-sheet textarea { display: block; width: 100%; margin-top: .2rem; font: 16px/1.4 var(--font); color: var(--ink);
+  background: var(--paper); border: 1px solid var(--line); border-radius: 0; padding: .5rem; }
+.rv-export textarea { font: 16px/1.45 var(--mono); white-space: pre-wrap; }   /* 16px: a phone zooms on smaller fields */
+.rv-sheet .rv-actions { display: flex; flex-wrap: wrap; gap: .4rem; justify-content: flex-end; }
+.rv-sheet .rv-left { margin-right: auto; }
+.rv-sheet .rv-danger { color: var(--primary-text); }
+/* the comment's sheet: at the top, small, not modal: the bar and the page stay in reach */
+.rv-panel { position: fixed; top: 0; left: 0; right: 0; z-index: 60; max-width: 40rem; margin: 0 auto;
+  padding: .5rem max(.6rem, env(safe-area-inset-right, 0px)) .6rem max(.6rem, env(safe-area-inset-left, 0px));
+  background: var(--surface); border-bottom: 3px solid var(--ink); color: var(--ink); font: 400 16px/1.45 var(--font);
+  animation: rv-down .2s ease-out; }
+.rv-panel .rv-whole { margin: 0 0 .3rem; color: var(--muted); font-size: .85rem; }
+.rv-panel .rv-note { margin: 0; }
+.rv-panel .rv-thumbs { margin-top: .45rem; }
+.rv-panel button { font: inherit; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 0; cursor: pointer; }
+/* history: one line per version */
+.rv-versions { list-style: none; margin: 0 0 .8rem; padding: 0; }
+.rv-versions li { display: flex; align-items: center; gap: .5rem; min-height: 48px; border-bottom: 1px solid var(--shade); }
+.rv-versions a { color: var(--ink); }
+.rv-versions .rv-date { flex: 1; color: var(--muted); font-size: .9rem; }
+.rv-versions .rv-n { font-size: .85rem; }
+/* a screenshot, as large as the screen allows */
+dialog.rv-zoom { width: 100vw; height: 100vh; max-width: 100vw; max-height: 100vh; margin: 0; padding: 0; border: 0; background: transparent; }
+dialog.rv-zoom[open] { display: flex; align-items: center; justify-content: center; }
+dialog.rv-zoom::backdrop { background: color-mix(in oklab, var(--ink) 88%, transparent); }
+dialog.rv-zoom img { max-width: 100%; max-height: 100%; object-fit: contain; }
+dialog.rv-zoom button { position: fixed; top: max(.5rem, env(safe-area-inset-top, 0px)); right: .5rem; min-width: 44px; min-height: 44px;
+  font-size: 1.5rem; color: var(--ink); background: var(--paper); border: 1px solid var(--line); border-radius: 0; }
+.rv-thumb img, .rv-shot img { cursor: zoom-in; }
+dialog.rv-sheet[open] { animation: rv-down .2s ease-out; }
+@keyframes rv-down { from { transform: translateY(-100%); } }
+/* the note: an editable box, so a phone offers to paste a screenshot in it */
+.rv-note { min-height: 3.2rem; max-height: 9rem; overflow-y: auto; padding: .5rem; font: 16px/1.4 var(--font);
+  background: var(--paper); border: 1px solid var(--line); white-space: pre-wrap; overflow-wrap: anywhere; }
+.rv-note:empty::before { content: attr(data-placeholder); color: var(--muted); }
+.rv-note:focus { outline: 2px solid var(--secondary); outline-offset: -1px; }
+.rv-thumbs { display: flex; flex-wrap: wrap; gap: .5rem; }
+.rv-thumb { position: relative; }
+.rv-thumb img { display: block; height: 4.5rem; width: auto; border: 1px solid var(--line); }
+.rv-thumb button { position: absolute; top: 0; right: 0; min-height: 32px; min-width: 32px; padding: 0; font-size: 1.1rem; }
+/* the export: each screenshot with its own Copy */
+.rv-shotlist { display: flex; flex-direction: column; gap: .35rem; margin: 0 0 .6rem; }
+.rv-shot { display: flex; align-items: center; gap: .5rem; font-size: .85rem; color: var(--muted); }
+.rv-shot img { height: 2.75rem; width: auto; border: 1px solid var(--line); }
+.rv-shot span { flex: 1; overflow-wrap: anywhere; }
+/* the strip of versions of the older versions of the post Review mode (nbVersions) */
+.versioni { margin: 1rem 0 1.4rem; font-size: .92rem; }
+.versioni ol { list-style: none; margin: 0; padding: 0; display: flex; flex-wrap: wrap; gap: .4rem; }
+.versioni li { border: 1px solid var(--line); background: var(--surface); }
+.versioni li > a, .versioni li > .voce { display: flex; align-items: center; min-height: 44px; padding: 0 .7rem; color: var(--ink); text-decoration: none; }
+.versioni li > a:hover b { text-decoration: underline; }
+.versioni li[aria-current] { border-color: var(--ink); box-shadow: inset 0 -3px 0 var(--ink); }
+.versioni .titolo { font-weight: 700; margin-right: .5rem; }
+.versioni li span span, .versioni li a span { color: var(--muted); margin-left: .35rem; }
+/* moving between versions: a short slide, the bar stays where it is */
+@view-transition { navigation: auto; }
+::view-transition-old(root) { animation: versione-out .22s ease-in both; }
+::view-transition-new(root) { animation: versione-in .26s ease-out both; }
+@keyframes versione-out { to { opacity: 0; transform: translateX(-1.5rem); } }
+@keyframes versione-in { from { opacity: 0; transform: translateX(1.5rem); } }
+.rv-bar { view-transition-name: rv-bar; }
+@media (prefers-reduced-motion: reduce) {
+  ::view-transition-old(root), ::view-transition-new(root) { animation: none; }
+}
+html[data-tema="quaderno"] mark.rv-mark { background: var(--highlight); box-shadow: 0 2px 0 var(--red-pen); }
+html[data-tema="quaderno"] mark.rv-mark.rv-current { background: var(--postit); box-shadow: 0 2px 0 var(--red-pen), 0 0 0 2px var(--red-pen); }
+html[data-tema="quaderno"] .rv-bar { font-family: var(--font); }
+</style>
+  
+  <style>
+.nb-box {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.nb-small {
+  font-size: 0.8rem;
+}
+button.nb-small {
+  float: right;
+  padding: 2px;
+  padding-right: 5px;
+  padding-left: 5px;
+}
+section#source {
+  display:none
+}
+pre > code {
+  font-size: 1.2em;
+}
+.nb-output {
+  line-height: 1.15;
+}
+figure {
+  margin: 2rem 0;
+}
+figcaption {
+  text-align: center;
+}
+  
+</style>
+  
+    
+<!-- claude-artifacts:codeblocks -->
+<style>pre{overflow-x:auto}pre>code{overflow-x:auto}</style>
+<!-- /claude-artifacts:codeblocks -->
+</head>
+<body>
+<header>
+<div class="nb-box">
+ <span><a href=".">🏡</a></span>
+ <span><code>marvdown and openparser for nimib?</code></span>
+ <span><a href="https://github.com/pietroppeter/claude-artifacts"><svg aria-hidden="true" width="1.2em" height="1.2em" style="vertical-align: middle;" preserveAspectRatio="xMidYMid meet" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59c.4.07.55-.17.55-.38c0-.19-.01-.82-.01-1.49c-2.01.37-2.53-.49-2.69-.94c-.09-.23-.48-.94-.82-1.13c-.28-.15-.68-.52-.01-.53c.63-.01 1.08.58 1.23.82c.72 1.21 1.87.87 2.33.66c.07-.52.28-.87.51-1.07c-1.78-.2-3.64-.89-3.64-3.95c0-.87.31-1.59.82-2.15c-.08-.2-.36-1.02.08-2.12c0 0 .67-.21 2.2.82c.64-.18 1.32-.27 2-.27c.68 0 1.36.09 2 .27c1.53-1.04 2.2-.82 2.2-.82c.44 1.1.16 1.92.08 2.12c.51.56.82 1.27.82 2.15c0 3.07-1.87 3.75-3.65 3.95c.29.25.54.73.54 1.48c0 1.07-.01 1.93-.01 2.2c0 .21.15.46.55.38A8.013 8.013 0 0 0 16 8c0-4.42-3.58-8-8-8z" fill="#000"></path></svg></a></span>
+</div>
+<hr>
+</header>
+<main>
+<div id="review" hidden data-page="marvdown-openparser" data-version="1" data-title="marvdown and openparser for nimib?" data-source="marvdown-openparser/src/index.nim" data-versions=""></div><script>
+document.addEventListener('DOMContentLoaded', function () {
+// Review mode for a nimib page: open it with the Review button, select text, comment on it, keep
+// the comments in this browser, export them as Markdown with a YAML block for a coding agent.
+// No dependencies. The page gives its settings on
+// <div id="review" data-page data-version data-title data-source data-versions>.
+// Each part is between `// part:` lines, which the devlog post "Review mode" shows one by one.
+(function () {
+  var cfg = document.getElementById('review');
+  var root = document.querySelector('main');
+  if (!cfg || !root) return;
+  var page = cfg.dataset;
+
+  // part: anchor
+  // A comment points at the text it quotes, with a few words around it (as a W3C text quote
+  // selector does), and the heading it is under. Not at an element: the page is rebuilt from its
+  // source, and the text is what stays. The text of the page is its text nodes, in order.
+  var CONTEXT = 32;
+  var BLOCKS = 'p, li, h1, h2, h3, h4, pre, td, th, caption, blockquote, summary, dt, dd, div, nav';
+  function textIndex() {
+    // a line break between blocks, so the words around a quote read "page Select", not "pageSelect"
+    var nodes = [], text = '', last = null;
+    var walker = document.createTreeWalker(root, NodeFilter.SHOW_TEXT, {
+      acceptNode: function (n) {
+        var p = n.parentNode.closest('script, style, #review');
+        return p ? NodeFilter.FILTER_REJECT : NodeFilter.FILTER_ACCEPT;
+      }
+    });
+    for (var n = walker.nextNode(); n; n = walker.nextNode()) {
+      var block = n.parentNode.closest(BLOCKS);
+      if (nodes.length && block !== last) text += '\n';
+      last = block;
+      nodes.push({ node: n, start: text.length });
+      text += n.data;
+    }
+    return { nodes: nodes, text: text };
+  }
+  function pointToIndex(idx, container, offset) {
+    if (container.nodeType === 3) {
+      for (var i = 0; i < idx.nodes.length; i++)
+        if (idx.nodes[i].node === container) return idx.nodes[i].start + offset;
+    }
+    var at = document.createRange();
+    at.setStart(container, offset);
+    for (var j = 0; j < idx.nodes.length; j++)   // the first text node after the point
+      if (at.comparePoint(idx.nodes[j].node, 0) >= 0) return idx.nodes[j].start;
+    return idx.text.length;
+  }
+  function sectionOf(node) {
+    var found = { title: '', id: '' };
+    root.querySelectorAll('h1, h2, h3').forEach(function (h) {
+      if (h.compareDocumentPosition(node) & Node.DOCUMENT_POSITION_FOLLOWING)
+        found = { title: h.textContent.trim(), id: h.id || '' };
+    });
+    return found;
+  }
+  function describe(range) {
+    var idx = textIndex();
+    var s = pointToIndex(idx, range.startContainer, range.startOffset);
+    var e = pointToIndex(idx, range.endContainer, range.endOffset);
+    var quote = idx.text.slice(s, e);
+    if (!quote.trim()) return null;
+    return { quote: quote, prefix: idx.text.slice(Math.max(0, s - CONTEXT), s),
+             suffix: idx.text.slice(e, e + CONTEXT), section: sectionOf(range.startContainer) };
+  }
+  function locate(note, idx) {
+    // every place the quote is, scored by how much of its context matches; the best wins
+    var best = null, bestScore = -1;
+    for (var at = idx.text.indexOf(note.quote); at >= 0; at = idx.text.indexOf(note.quote, at + 1)) {
+      var before = idx.text.slice(Math.max(0, at - note.prefix.length), at);
+      var after = idx.text.slice(at + note.quote.length, at + note.quote.length + note.suffix.length);
+      var score = common(before, note.prefix, true) + common(after, note.suffix, false);
+      if (score > bestScore) { best = at; bestScore = score; }
+    }
+    return best === null ? null : { start: best, end: best + note.quote.length };
+  }
+  function common(a, b, fromEnd) {
+    var n = 0;
+    while (n < a.length && n < b.length &&
+           (fromEnd ? a[a.length - 1 - n] === b[b.length - 1 - n] : a[n] === b[n])) n++;
+    return n;
+  }
+
+  // part: mark
+  // A located comment is drawn with <mark> around each piece of text it covers (a quote can
+  // cross a link or a paragraph). Marks only wrap text, so the text of the page stays the same.
+  function mark(note) {
+    if (!note.quote) return;   // a comment on the whole page has nothing to mark
+    var idx = textIndex(), at = locate(note, idx);
+    note.found = !!at;
+    if (!at) return;
+    idx.nodes.forEach(function (n) {
+      var a = Math.max(at.start, n.start) - n.start;
+      var b = Math.min(at.end, n.start + n.node.data.length) - n.start;
+      if (b <= a || !n.node.data.slice(a, b).trim()) return;
+      if (n.node.parentNode.closest('table') && !n.node.parentNode.closest('td, th, caption')) return;
+      var t = n.node;
+      if (b < t.data.length) t.splitText(b);
+      if (a > 0) t = t.splitText(a);
+      var m = document.createElement('mark');
+      m.className = 'rv-mark';
+      m.dataset.id = note.id;
+      t.parentNode.replaceChild(m, t);
+      m.appendChild(t);
+    });
+  }
+  function unmarkAll() {
+    root.querySelectorAll('mark.rv-mark').forEach(function (m) {
+      var p = m.parentNode;
+      while (m.firstChild) p.insertBefore(m.firstChild, m);
+      p.removeChild(m);
+      p.normalize();
+    });
+  }
+  function drawAll() {
+    unmarkAll();
+    notes.forEach(mark);
+    var idx = textIndex();
+    function place(note) {   // the page's order: a comment on the whole page first, one not found last
+      if (!note.quote) return -1;
+      var m = root.querySelector('mark.rv-mark[data-id="' + note.id + '"]');
+      return m ? pointToIndex(idx, m.firstChild, 0) : Infinity;
+    }
+    notes.sort(function (a, b) { return place(a) - place(b); });
+  }
+
+  // part: store
+  // The comments of a page live in this browser's localStorage, one key per page and version,
+  // so a new version starts with no comments and the old ones stay with the version they are on.
+  // Whether the review mode is open is kept too, so a page opens the way it was left.
+  var PREFIX = 'nimib-review:', KEY = PREFIX + page.page + '@v' + page.version;
+  var MODE = 'nimib-review-mode:' + page.page;
+  function read(key) {
+    try { return JSON.parse(localStorage.getItem(key)) || []; } catch (e) { return []; }
+  }
+  function save() {
+    try {
+      localStorage.setItem(KEY, JSON.stringify(notes.map(function (n) {
+        return { id: n.id, kind: n.kind, quote: n.quote, prefix: n.prefix, suffix: n.suffix,
+                 section: n.section, text: n.text, replacement: n.replacement, at: n.at, images: n.images };
+      })));
+      full = false;
+    } catch (e) { full = true; }   // the browser's storage is full: screenshots take the most
+  }
+  function remember(on) {
+    try { if (on) localStorage.setItem(MODE, '1'); else localStorage.removeItem(MODE); } catch (e) {}
+  }
+  var notes = read(KEY);
+  var current = -1, full = false, on = false;
+
+  // part: mode
+  // Reading is the default: no bar, no marks, nothing of the review mode but one button, Review,
+  // beside the version (in `.rv-enter`, or under the title). It opens the review mode, and closes
+  // it. Blocks that only matter while reviewing (`.rv-only`) show only then.
+  var slot = document.querySelector('.rv-enter');
+  if (!slot) {
+    slot = document.createElement('p');
+    slot.className = 'rv-enter';
+    var after = root.querySelector('.lede') || root.querySelector('h1');
+    if (after) after.insertAdjacentElement('afterend', slot); else root.prepend(slot);
+  }
+  var toggle = document.createElement('button');
+  toggle.type = 'button';
+  toggle.className = 'rv-toggle';
+  slot.appendChild(toggle);
+  toggle.addEventListener('click', function () { setMode(!on); });
+  function setMode(open) {
+    on = open;
+    remember(on);
+    document.body.classList.toggle('rv-on', on);
+    toggle.textContent = on ? 'Close review' : '✎ Review';
+    toggle.setAttribute('aria-pressed', on ? 'true' : 'false');
+    bar.hidden = !on;
+    if (on) drawAll(); else { leave(); unmarkAll(); pending = null; }
+    show();
+  }
+
+  // part: bar
+  // While reviewing, a bar stays at the bottom of the screen, where a thumb reaches on a phone:
+  // the previous and next comment and which one this is, delete it, a new one (*Page note* when
+  // nothing is selected, a note on the whole page; *Comment ✓* on the words selected), and
+  // export. A selection is kept as soon as it is made, because tapping a button can clear it.
+  var bar = document.createElement('div');
+  bar.className = 'rv-bar';
+  bar.hidden = true;
+  bar.setAttribute('role', 'toolbar');
+  bar.setAttribute('aria-label', 'Review mode');
+  bar.innerHTML =
+    '<button type="button" data-do="prev" aria-label="Previous comment">‹</button>' +
+    '<span class="rv-count" aria-live="polite"></span>' +
+    '<button type="button" data-do="next" aria-label="Next comment">›</button>' +
+    '<button type="button" data-do="delete" aria-label="Delete this comment">Delete</button>' +
+    '<button type="button" data-do="add" class="rv-add">Page note</button>' +
+    '<button type="button" data-do="export">Export</button>';
+  document.body.appendChild(bar);
+  var pending = null;
+  document.addEventListener('selectionchange', function () {
+    if (!on) return;
+    var sel = document.getSelection();
+    if (sel.rangeCount && !sel.isCollapsed && root.contains(sel.getRangeAt(0).commonAncestorContainer)) {
+      pending = describe(sel.getRangeAt(0));
+    } else {
+      setTimeout(function () { if (document.getSelection().isCollapsed) { pending = null; show(); } }, 400);
+    }
+    show();
+  });
+  bar.addEventListener('pointerdown', function (e) { e.preventDefault(); });   // keep the selection
+  bar.addEventListener('click', function (e) {
+    var b = e.target.closest('button');
+    if (!b) return;
+    var act = b.dataset.do;
+    if (act === 'prev' || act === 'next') step(act === 'next' ? 1 : -1);
+    if (act === 'delete' && notes[current]) remove(notes[current]);
+    if (act === 'add') add();
+    if (act === 'export') openExport();
+  });
+  root.addEventListener('click', function (e) {   // a tap on marked words opens them, anywhere else closes
+    if (!on || !document.getSelection().isCollapsed) return;
+    var m = e.target.closest('mark.rv-mark');
+    if (m) {
+      var n = notes.find(function (x) { return x.id === m.dataset.id; });
+      if (n) select(n);
+    } else if (current >= 0 && !e.target.closest('a, button')) leave();
+  });
+  function show() {
+    var c = bar.querySelector('.rv-count');
+    c.textContent = full ? 'storage full: export'
+                  : notes.length ? (current >= 0 ? (current + 1) + '/' : '') + notes.length : 'none';
+    bar.querySelector('[data-do="prev"]').disabled = !notes.length;
+    bar.querySelector('[data-do="next"]').disabled = !notes.length;
+    bar.querySelector('[data-do="delete"]').disabled = current < 0;
+    var add = bar.querySelector('.rv-add');
+    add.textContent = pending ? 'Comment ✓' : 'Page note';   // says what it will do: on the words, or on the page
+    add.classList.toggle('rv-selected', !!pending);
+    add.setAttribute('aria-label', pending ? 'Comment on the selected text' : 'Comment on the whole page');
+  }
+
+  // part: sheet
+  // The comment that ‹ and › stop on is open in a sheet at the top of the screen: there is no
+  // Edit, no Save and no Cancel. What is typed is kept as it is typed; ‹ and › keep working and
+  // take the sheet to the next comment; a tap on the page closes it. A comment left empty is
+  // dropped. The sheet is small, so the words it is about stay in view under it, marked. There
+  // are no kinds: to replace the words, the note says so ("Replace with: ..."), or "Remove". A
+  // screenshot is pasted in the note, like text: the note is an editable box, so a phone offers
+  // to paste an image there. While the sheet is open the page may not zoom.
+  var viewport = document.querySelector('meta[name="viewport"]');
+  var looseViewport = viewport ? viewport.content : '';
+  function noZoom(yes) {
+    if (viewport) viewport.content = yes ? looseViewport + ', maximum-scale=1' : looseViewport;
+  }
+  var sheet = document.createElement('div');
+  sheet.className = 'rv-panel';
+  sheet.hidden = true;
+  sheet.innerHTML =
+    '<p class="rv-whole">On the whole page</p>' +
+    '<div class="rv-note" contenteditable="true" role="textbox" aria-multiline="true" aria-label="Comment"' +
+    ' data-placeholder="What should change, and why. To replace the words: Replace with: and the new text; ' +
+    'to drop them: Remove. Paste a screenshot here too."></div>' +
+    '<div class="rv-thumbs"></div>';
+  document.body.appendChild(sheet);
+  var noteBox = sheet.querySelector('.rv-note');
+  function add() {
+    var n = Object.assign({ text: '', quote: '', prefix: '', suffix: '', section: { title: '', id: '' } }, pending || {});
+    n.id = 'c' + Date.now().toString(36);
+    n.at = new Date().toISOString();
+    notes.push(n);
+    document.getSelection().removeAllRanges();
+    pending = null;
+    select(n);
+    noteBox.focus();
+  }
+  function select(n) {
+    var was = notes[current];
+    if (was && was !== n) drop(was);
+    drawAll();
+    current = notes.indexOf(n);
+    root.querySelectorAll('mark.rv-current').forEach(function (m) { m.classList.remove('rv-current'); });
+    var ms = root.querySelectorAll('mark.rv-mark[data-id="' + n.id + '"]');
+    ms.forEach(function (m) { m.classList.add('rv-current'); });
+    sheet.querySelector('.rv-whole').hidden = !!n.quote;
+    noteBox.textContent = n.text || '';
+    thumbs();
+    sheet.hidden = false;
+    noZoom(true);
+    keepInView();
+    show();
+  }
+  function step(d) {
+    if (!notes.length) return;
+    var target = notes[((current < 0 ? (d > 0 ? -1 : 0) : current) + d + notes.length) % notes.length];
+    if (target !== notes[current]) select(target);
+  }
+  function leave() {   // close the sheet; an empty comment goes
+    var n = notes[current];
+    current = -1;
+    sheet.hidden = true;
+    noZoom(false);
+    if (n) drop(n);
+    root.querySelectorAll('mark.rv-current').forEach(function (m) { m.classList.remove('rv-current'); });
+    show();
+  }
+  function empty(n) { return !(n.text || '').trim() && !(n.images || []).length && n.replacement == null; }
+  function drop(n) { if (empty(n)) { notes = notes.filter(function (x) { return x !== n; }); save(); drawAll(); } }
+  function remove(n) {
+    notes = notes.filter(function (x) { return x !== n; });
+    save();
+    current = -1;
+    sheet.hidden = true;
+    noZoom(false);
+    drawAll();
+    show();
+  }
+  function keepInView() {   // the marked words, just under the sheet
+    var m = root.querySelector('mark.rv-current');
+    if (!m) return;
+    var under = sheet.offsetHeight + 24;
+    window.scrollBy({ top: m.getBoundingClientRect().top - under, behavior: 'smooth' });
+  }
+  noteBox.addEventListener('input', function () {
+    var n = notes[current];
+    if (!n) return;
+    n.text = noteBox.innerText.trim();
+    save();
+    show();
+  });
+  function thumbs() {
+    var n = notes[current], shots = (n && n.images) || [];
+    var box = sheet.querySelector('.rv-thumbs');
+    box.innerHTML = '';
+    box.hidden = !shots.length;
+    shots.forEach(function (src, i) {
+      var t = document.createElement('div');
+      t.className = 'rv-thumb';
+      t.innerHTML = '<img alt="screenshot ' + (i + 1) + '"><button type="button" aria-label="Remove screenshot ' + (i + 1) + '">×</button>';
+      t.querySelector('img').src = src;
+      t.querySelector('img').addEventListener('click', function () { zoom(src); });
+      t.querySelector('button').addEventListener('click', function () {
+        shots.splice(i, 1);
+        n.images = shots.length ? shots : undefined;
+        save(); thumbs();
+      });
+      box.appendChild(t);
+    });
+  }
+  function shrink(blob, width, quality) {   // an image as a JPEG at most `width` pixels wide
+    return new Promise(function (ok, ko) {
+      var img = new Image(), url = URL.createObjectURL(blob);
+      img.onload = function () {
+        var k = Math.min(1, width / img.naturalWidth), c = document.createElement('canvas');
+        c.width = Math.round(img.naturalWidth * k); c.height = Math.round(img.naturalHeight * k);
+        c.getContext('2d').drawImage(img, 0, 0, c.width, c.height);
+        URL.revokeObjectURL(url);
+        ok(c.toDataURL('image/jpeg', quality));
+      };
+      img.onerror = ko;
+      img.src = url;
+    });
+  }
+  noteBox.addEventListener('paste', function (e) {   // an image goes to the screenshots, text stays plain text
+    e.preventDefault();
+    var n = notes[current];
+    var files = [].filter.call(e.clipboardData.files || [], function (f) { return /^image\//.test(f.type); });
+    Promise.all(files.map(function (b) { return shrink(b, 900, 0.72); })).then(function (srcs) {
+      if (!srcs.length || !n) return;
+      n.images = (n.images || []).concat(srcs);
+      save(); thumbs(); keepInView(); show();
+    });
+    var text = e.clipboardData.getData('text/plain');
+    if (text) document.execCommand('insertText', false, text);
+  });
+  noteBox.addEventListener('drop', function (e) { e.preventDefault(); });   // no images inside the text
+
+  // part: zoom
+  // A tap on a screenshot, in the sheet or in the export, shows it as large as the screen allows.
+  var lens = document.createElement('dialog');
+  lens.className = 'rv-zoom';
+  lens.innerHTML = '<button type="button" aria-label="Close">×</button><img alt="screenshot">';
+  document.body.appendChild(lens);
+  lens.addEventListener('click', function () { lens.close(); });
+  function zoom(src) { lens.querySelector('img').src = src; lens.showModal(); }
+
+  // part: export
+  // The comments as one text, for a person and for an agent: a title, a YAML block that says which
+  // page, version and source they are on, then one Markdown section per comment, in page order.
+  // The text can be edited before it is copied. Copy copies the text only, short enough for a
+  // chat message; each screenshot has a Copy of its own, to paste after it. Close review ends the
+  // review here too, so a long page need not be scrolled back to its top.
+  function yaml(s) { return JSON.stringify(String(s)); }   // a JSON string is a YAML string
+  function flat(s) { return s.replace(/\s+/g, ' '); }
+  function quoted(s) { return flat(s).trim(); }
+  function fence(s) {
+    var f = '~~~';
+    while (s.indexOf(f) >= 0) f += '~';
+    return f + 'text\n' + s.trim() + '\n' + f;
+  }
+  function shotName(i, k) { return 'review-v' + page.version + '-' + (i + 1) + '-' + (k + 1) + '.jpg'; }
+  function exportText() {
+    // a chat shows a pasted text as Markdown: a yaml fence is a tidy box under the title
+    var out = ['# Review of “' + page.title + '”, version ' + page.version, '',
+      '```yaml',
+      'format: nimib-review/3',
+      'title: ' + yaml(page.title),
+      'page: ' + yaml(location.origin + location.pathname),
+      'source: ' + yaml(page.source),
+      'version: ' + page.version,
+      'exported: ' + yaml(new Date().toISOString()),
+      'comments: ' + notes.length,
+      '```', ''];
+    notes.forEach(function (n, i) {
+      var where = !n.quote ? 'On the whole page'
+                : n.section && n.section.title ? 'In “' + n.section.title + '”' + (n.section.id ? ' (#' + n.section.id + ')' : '')
+                : 'At the top';
+      out.push('## ' + (i + 1) + '. ' + where, '');
+      if (n.quote) {
+        out.push('> ' + quoted(n.quote), '');
+        out.push('Around it: “…' + flat(n.prefix) + '⟦' + flat(n.quote) + '⟧' + flat(n.suffix) + '…”', '');
+        if (n.found === false) out.push('(Not found on the page any more.)', '');
+      }
+      // a comment kept from version 6 or before may still have a kind of its own
+      if (n.kind === 'cut' || (n.kind === 'replace' && !(n.replacement || '').trim())) out.push('Remove these words.', '');
+      else if (n.kind === 'replace') out.push('Replace with:', '', fence(n.replacement), '');
+      if (n.text) out.push(n.text, '');
+      if (n.images) out.push('Screenshots: ' + n.images.map(function (src, k) { return shotName(i, k); }).join(', '), '');
+    });
+    return out.join('\n');
+  }
+  var box = document.createElement('dialog');
+  box.className = 'rv-sheet rv-export';
+  box.innerHTML =
+    '<form method="dialog"><p class="rv-where">Export: edit it if you like, then copy it</p>' +
+    '<textarea rows="12" spellcheck="false"></textarea><div class="rv-shotlist"></div>' +
+    '<div class="rv-actions"><button value="history" class="rv-left">History</button>' +
+    '<button value="leave">Close review</button><button value="close">Close</button>' +
+    '<button value="copy" class="rv-save" autofocus>Copy</button></div></form>';
+  document.body.appendChild(box);
+  var area = box.querySelector('textarea');
+  function openExport() {
+    if (current >= 0) leave();
+    area.value = exportText();
+    shotList();
+    noZoom(true);
+    box.showModal();
+  }
+  box.addEventListener('close', function () { noZoom(false); });
+  function allShots() {
+    var all = [];
+    notes.forEach(function (n, i) { (n.images || []).forEach(function (src, k) { all.push({ name: shotName(i, k), src: src }); }); });
+    return all;
+  }
+  function shotList() {   // each screenshot, with its own Copy: paste it in the chat after the text
+    var list = box.querySelector('.rv-shotlist');
+    var canCopy = !!(navigator.clipboard && window.ClipboardItem);
+    list.innerHTML = '';
+    var all = allShots();
+    list.hidden = !all.length;
+    all.forEach(function (shot) {
+      var row = document.createElement('div');
+      row.className = 'rv-shot';
+      row.innerHTML = '<img alt=""><span></span><button type="button">Copy image</button>';
+      row.querySelector('img').src = shot.src;
+      row.querySelector('img').addEventListener('click', function () { zoom(shot.src); });
+      row.querySelector('span').textContent = shot.name;
+      var b = row.querySelector('button');
+      b.hidden = !canCopy;
+      b.addEventListener('click', function () {
+        copied(b, navigator.clipboard.write([new ClipboardItem({ 'image/png': png(shot.src) })]));
+      });
+      list.appendChild(row);
+    });
+  }
+  function png(src) {   // the clipboard takes PNG images everywhere, JPEG not always
+    return new Promise(function (ok, ko) {
+      var img = new Image();
+      img.onload = function () {
+        var c = document.createElement('canvas');
+        c.width = img.naturalWidth; c.height = img.naturalHeight;
+        c.getContext('2d').drawImage(img, 0, 0);
+        c.toBlob(ok, 'image/png');
+      };
+      img.onerror = ko;
+      img.src = src;
+    });
+  }
+  function copied(button, promise) {
+    var label = button.textContent;
+    return promise.then(function () {
+      button.textContent = 'Copied ✓';
+      setTimeout(function () { button.textContent = label; }, 1500);
+    }, function () { button.textContent = 'Blocked'; });
+  }
+  box.querySelector('form').addEventListener('submit', function (e) {
+    var act = e.submitter && e.submitter.value;
+    if (act === 'copy') {
+      e.preventDefault();
+      var button = e.submitter;
+      var fallback = function () { area.select(); document.execCommand('copy'); };
+      copied(button, navigator.clipboard ? navigator.clipboard.writeText(area.value).catch(fallback)
+                                         : Promise.resolve().then(fallback));
+    } else if (act === 'history') {
+      e.preventDefault();
+      box.close();
+      openHistory();
+    } else if (act === 'leave') {   // the end of a review: back to reading, from the bottom of the page too
+      setMode(false);
+    }
+  });
+
+  // part: history
+  // The versions of the page, each with the comments this browser keeps on it: open one, clear
+  // its comments, or clear every comment of the review mode in this browser. Back to Export from
+  // here. Clearing asks twice, with a second tap (confirm() is blocked inside an artifact).
+  var versions = [];
+  try { versions = JSON.parse(page.versions || '[]'); } catch (e) {}
+  var hist = document.createElement('dialog');
+  hist.className = 'rv-sheet rv-history';
+  hist.innerHTML =
+    '<form method="dialog"><p class="rv-where">History: the versions of this page</p>' +
+    '<ol class="rv-versions"></ol>' +
+    '<div class="rv-actions"><button value="wipe" class="rv-left rv-danger">Clear everything</button>' +
+    '<button value="export">Export</button><button value="close" class="rv-save" autofocus>Close</button></div></form>';
+  document.body.appendChild(hist);
+  function stored() {   // the versions of this page that have comments in this browser
+    var found = {};
+    try {
+      for (var i = 0; i < localStorage.length; i++) {
+        var k = localStorage.key(i), m = k.match(/@v(\d+)$/);
+        if (m && k.indexOf(PREFIX + page.page + '@v') === 0) found[m[1]] = read(k).length;
+      }
+    } catch (e) {}
+    return found;
+  }
+  function twice(button, label, act) {   // the first tap asks, the second does
+    if (button.dataset.sure === 'yes') { act(); return; }
+    button.dataset.sure = 'yes';
+    button.textContent = label;
+  }
+  function openHistory() {
+    var list = hist.querySelector('.rv-versions'), counts = stored();
+    var all = versions.slice();
+    if (!all.some(function (v) { return v.n == page.version; })) all.push({ n: +page.version, date: '', href: '' });
+    Object.keys(counts).forEach(function (n) {
+      if (!all.some(function (v) { return v.n == n; })) all.push({ n: +n, date: '', href: '' });
+    });
+    all.sort(function (a, b) { return b.n - a.n; });   // the newest first
+    list.innerHTML = '';
+    all.forEach(function (v) {
+      var li = document.createElement('li'), n = counts[v.n] || 0, here = v.n == page.version;
+      var name = here || !v.href ? '<b>v' + v.n + '</b>' : '<a href="' + v.href + '"><b>v' + v.n + '</b></a>';
+      li.innerHTML = name + ' <span class="rv-date"></span> <span class="rv-n"></span>' +
+        '<button type="button" class="rv-danger">Clear</button>';
+      li.querySelector('.rv-date').textContent = (v.date || '') + (here ? ' · this one' : '');
+      li.querySelector('.rv-n').textContent = n ? n + (n === 1 ? ' comment' : ' comments') : '';
+      var b = li.querySelector('button');
+      b.hidden = !n;
+      b.addEventListener('click', function () {
+        twice(b, 'Delete ' + n + '?', function () {
+          try { localStorage.removeItem(PREFIX + page.page + '@v' + v.n); } catch (e) {}
+          if (here) { notes = []; leave(); drawAll(); show(); }
+          openHistory();
+        });
+      });
+      list.appendChild(li);
+    });
+    var wipe = hist.querySelector('[value="wipe"]');
+    wipe.dataset.sure = ''; wipe.textContent = 'Clear everything';
+    if (!hist.open) hist.showModal();
+  }
+  hist.querySelector('form').addEventListener('submit', function (e) {
+    var act = e.submitter && e.submitter.value;
+    if (act === 'wipe') {
+      e.preventDefault();
+      twice(e.submitter, 'Delete every comment?', function () {
+        try {
+          Object.keys(localStorage).forEach(function (k) { if (k.indexOf(PREFIX) === 0) localStorage.removeItem(k); });
+        } catch (err) {}
+        notes = []; leave(); drawAll(); show();
+        openHistory();
+      });
+    } else if (act === 'export') {
+      e.preventDefault();
+      hist.close();
+      openExport();
+    }
+  });
+
+  var wasOn = false;
+  try { wasOn = localStorage.getItem(MODE) === '1'; } catch (e) {}
+  setMode(wasOn);
+})();
+});
+</script>
+<h1>marvdown and openparser for nimib?</h1>
+<div class="lede"><p>nimib turns Markdown into HTML with nim-markdown, reads <code>nimib.toml</code> with parsetoml and
+writes its blocks as JSON with jsony. George Lemon's <strong>marvdown</strong> (Markdown) and <strong>openparser</strong>
+(JSON, TOML and 28 other formats) could replace all three. This page measures what would change,
+from the simplest dependency to the hardest, and says who makes the new libraries and who uses them.</p>
+</div>
+<p class="rv-enter"><span class="rv-version">Version 1 · updated 28 Nov 2026</span></p>
+<div class="tldr"><span class="tldr-label">The short version</span><ul>
+<li><strong>Fusion</strong> is used for one thing: <code>captureStdout</code> (<code>src/nimib/capture.nim</code>) calls
+<code>duplicate</code> and <code>duplicateTo</code> from <code>fusion/ioutils</code>, two wrappers of the C calls <code>dup</code> and <code>dup2</code>.
+About twenty lines of Nim replace it, and nimib loses a dependency.</li>
+<li><strong>TOML: openparser is better than parsetoml.</strong> On the official toml-test suite (TOML 1.0) it
+accepts all 208 valid files and rejects all 509 invalid ones; parsetoml accepts
+184 of 208 and rejects 435 of 509. parsetoml had no commit in the last year.</li>
+<li><strong>JSON: no reason to move.</strong> jsony works, is maintained and used by 200+ packages;
+openparser can do the same job, but its hooks have another signature, so every block with a
+custom hook (and tabelline's book, which reads nimib's JSON) would have to change.</li>
+<li><strong>Markdown: marvdown is not ready.</strong> On CommonMark's 655 examples it gets 222 right
+(34%), nim-markdown 611 (93%). On 183 real Markdown files
+of the nimib repositories only 89 render the same. It drops lists that follow a paragraph
+and swallows the rest of a page after an inline <code>&lt;img&gt;</code>. It is 10 times faster and needs no PCRE.</li>
+<li><strong>The PCRE problem has a cheaper fix</strong>: port nim-markdown's 82 regular expressions to
+nim-regex (two use back references and need a few lines of code each), and fix the two
+inputs that crash it, found on the way.</li>
+<li><strong>Who</strong>: George Lemon publishes alone, at a very high pace, in the OpenPeeps org and six
+others; 43 of his own repositories use openparser, and two outside them (by Jaremy Creechley
+and David Krause). Nobody outside uses marvdown yet.</li>
+</ul>
+</div>
+<nav class="toc" id="toc"><span class="toc-label">Contents</span><ol><li><a href="#started">How this page started</a></li><li><a href="#today">What nimib depends on today</a></li><li><a href="#fusion">Fusion: one module, two C calls</a></li><li><a href="#who">George Lemon and OpenPeeps</a></li><li><a href="#users">Who depends on openparser and marvdown</a></li><li><a href="#toml">TOML: parsetoml or openparser</a></li><li><a href="#json">JSON: jsony or openparser</a></li><li><a href="#markdown">Markdown: nim-markdown or marvdown</a></li><li><a href="#pcre">The PCRE problem, and a cheaper fix</a></li><li><a href="#downstream">What changes downstream</a></li><li><a href="#plan">Effort, risks and a plan</a></li><li><a href="#built">How this page is built</a></li></ol></nav>
+<h2 id="started">How this page started<span class="ch-sub">28 Nov 2026, from the Nimib Land project</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
+<figure class="prompt"><figcaption><span class="prompt-who">Pietro</span> asked Claude, 28 Nov 2026</figcaption><blockquote><p>I am considering adopting marvdown and open parser for nimib (instead of jsony and opentoml and nim markdown. Write an explainer that estimates the impacts, pros and cons. Also, what do we use Nim fusion for?</p>
+<p>I want also to know all that you can find about George lemon and openpeeps. Which other projects are depending on those libraries?</p>
+</blockquote></figure>
+<p>&quot;opentoml&quot; is parsetoml: that is the TOML library nimib uses. Earlier in the project, a thread
+on taking Nim's standard library off PCRE recommended porting nim-markdown to
+<a href="https://github.com/nitely/nim-regex">nim-regex</a>, so this page compares against that too.
+Everything here was run, not read: the libraries at the commits in <code>bench/deps.sh</code>, built with
+Nim 2.2.15 (openparser asks for 2.2.10 or later).</p>
+<h2 id="today">What nimib depends on today<span class="ch-sub">nimib 0.4.3 on main (7118b3a), its nimble file</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
+<p>nimib's nimble file asks for five packages. Each is used in one or two places:</p>
+<div id="tabella-1a7a0480" class="tabella tb_css_theme">
+<style>
+:where(.tabella):not(#_) { overflow-x: var(--tb-container-overflow-x, auto); overflow-y: var(--tb-container-overflow-y, auto); width: var(--tb-container-width, auto);
+  height: var(--tb-container-height, auto); padding: var(--tb-container-padding-y, 0px) var(--tb-container-padding-x, 0px); }
+:where(.tabella):not(#_) table, :where(.tabella):not(#_) thead, :where(.tabella):not(#_) tbody, :where(.tabella):not(#_) tfoot, :where(.tabella):not(#_) tr, :where(.tabella):not(#_) td, :where(.tabella):not(#_) th { border-style: none; }
+:where(.tabella):not(#_) .tb_table { display: table; border-collapse: collapse; line-height: normal;
+  margin-left: var(--tb-table-margin-left, auto); margin-right: var(--tb-table-margin-right, auto); width: var(--tb-table-width, auto);
+  color: var(--tb-table-font-color, #333333); font-family: var(--tb-table-font-names, system-ui, -apple-system, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif); font-size: var(--tb-table-font-size, 16px);
+  background-color: var(--tb-table-background-color, #FFFFFF); table-layout: var(--tb-table-layout, auto);
+  font-weight: var(--tb-table-font-weight, normal); font-style: var(--tb-table-font-style, normal);
+  border-top: var(--tb-table-border-top-width, 2px) var(--tb-table-border-top-style, solid) var(--tb-table-border-top-color, #A8A8A8);
+  border-bottom: var(--tb-table-border-bottom-width, 2px) var(--tb-table-border-bottom-style, solid) var(--tb-table-border-bottom-color, #A8A8A8);
+  border-left: var(--tb-table-border-left-width, 2px) var(--tb-table-border-left-style, none) var(--tb-table-border-left-color, #D3D3D3);
+  border-right: var(--tb-table-border-right-width, 2px) var(--tb-table-border-right-style, none) var(--tb-table-border-right-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_caption { caption-side: top; padding: 4px 5px; color: var(--tb-table-font-color, #333333); font-style: italic; }
+:where(.tabella):not(#_) .tb_heading { background-color: var(--tb-heading-background-color, var(--tb-table-background-color, #FFFFFF)); text-align: var(--tb-heading-align, center); color: var(--tb-heading-color, var(--tb-table-font-color, #333333)); }
+:where(.tabella):not(#_) .tb_heading th { border-left: var(--tb-heading-border-lr-width, 1px) var(--tb-heading-border-lr-style, none) var(--tb-heading-border-lr-color, #D3D3D3);
+  border-right: var(--tb-heading-border-lr-width, 1px) var(--tb-heading-border-lr-style, none) var(--tb-heading-border-lr-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_title { font-size: var(--tb-heading-title-font-size, 125%); font-weight: var(--tb-heading-title-font-weight, initial);
+  padding: var(--tb-heading-padding, 4px) var(--tb-heading-padding-horizontal, 5px); }
+:where(.tabella):not(#_) .tb_subtitle { font-size: var(--tb-heading-subtitle-font-size, 85%); font-weight: var(--tb-heading-subtitle-font-weight, normal); padding: 0 var(--tb-heading-padding-horizontal, 5px) var(--tb-heading-padding, 4px) var(--tb-heading-padding-horizontal, 5px); }
+:where(.tabella):not(#_) .tb_heading_last { border-bottom: var(--tb-heading-border-bottom-width, 2px) var(--tb-heading-border-bottom-style, solid) var(--tb-heading-border-bottom-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_col_headings th { background-color: var(--tb-column-labels-background-color, var(--tb-table-background-color, #FFFFFF)); color: var(--tb-column-labels-color, var(--tb-table-font-color, #333333));
+  font-size: var(--tb-column-labels-font-size, 100%); font-weight: var(--tb-column-labels-font-weight, normal);
+  text-transform: var(--tb-column-labels-text-transform, inherit); vertical-align: bottom;
+  padding: var(--tb-column-labels-padding, 5px) var(--tb-column-labels-padding-horizontal, 5px); overflow-x: hidden; }
+:where(.tabella):not(#_) .tb_col_headings_last th { border-bottom: var(--tb-column-labels-border-bottom-width, 2px) var(--tb-column-labels-border-bottom-style, solid) var(--tb-column-labels-border-bottom-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_heading + .tb_col_headings th, :where(.tabella):not(#_) thead > .tb_col_headings:first-child th {
+  border-top: var(--tb-column-labels-border-top-width, 2px) var(--tb-column-labels-border-top-style, none) var(--tb-column-labels-border-top-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_col_headings th:first-child { border-left: var(--tb-column-labels-border-lr-width, 1px) var(--tb-column-labels-border-lr-style, none) var(--tb-column-labels-border-lr-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_col_headings th:last-child { border-right: var(--tb-column-labels-border-lr-width, 1px) var(--tb-column-labels-border-lr-style, none) var(--tb-column-labels-border-lr-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_col_headings th + th { border-left: var(--tb-column-labels-vlines-width, 1px) var(--tb-column-labels-vlines-style, none) var(--tb-column-labels-vlines-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_spanner { display: inline-block; width: 100%; padding-bottom: 4px;
+  border-bottom: 2px solid var(--tb-column-labels-border-bottom-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_spanner_empty { border-bottom: none; }
+:where(.tabella):not(#_) .tb_group_heading { background-color: var(--tb-row-group-background-color, var(--tb-table-background-color, #FFFFFF)); color: var(--tb-row-group-color, inherit); font-weight: var(--tb-row-group-font-weight, initial);
+  font-size: var(--tb-row-group-font-size, 100%); text-transform: var(--tb-row-group-text-transform, inherit);
+  padding: var(--tb-row-group-padding, 8px) var(--tb-row-group-padding-horizontal, 5px); text-align: left;
+  border-top: var(--tb-row-group-border-top-width, 2px) var(--tb-row-group-border-top-style, solid) var(--tb-row-group-border-top-color, var(--tb-row-group-border-color, #D3D3D3));
+  border-bottom: var(--tb-row-group-border-bottom-width, 2px) var(--tb-row-group-border-bottom-style, solid) var(--tb-row-group-border-bottom-color, var(--tb-row-group-border-color, #D3D3D3));
+  border-left: var(--tb-row-group-border-left-width, 1px) var(--tb-row-group-border-left-style, none) var(--tb-row-group-border-left-color, #D3D3D3);
+  border-right: var(--tb-row-group-border-right-width, 1px) var(--tb-row-group-border-right-style, none) var(--tb-row-group-border-right-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_row { padding: var(--tb-data-row-padding, 8px) var(--tb-data-row-padding-horizontal, 5px); margin: 10px;
+  border-top: var(--tb-table-body-hlines-width, 1px) var(--tb-table-body-hlines-style, solid) var(--tb-table-body-hlines-color, #D3D3D3); vertical-align: middle; overflow-x: hidden; }
+:where(.tabella):not(#_) tbody { border-top: var(--tb-table-body-border-top-width, 2px) var(--tb-table-body-border-top-style, none) var(--tb-table-body-border-top-color, #D3D3D3);
+  border-bottom: var(--tb-table-body-border-bottom-width, 2px) var(--tb-table-body-border-bottom-style, none) var(--tb-table-body-border-bottom-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_stub { background-color: var(--tb-stub-background-color, transparent); color: var(--tb-stub-color, inherit); font-weight: var(--tb-stub-font-weight, initial); text-align: left;
+  font-size: var(--tb-stub-font-size, 100%); text-transform: var(--tb-stub-text-transform, inherit);
+  border-right: var(--tb-stub-border-width, 2px) var(--tb-stub-border-style, solid) var(--tb-stub-border-color, var(--tb-table-body-hlines-color, #D3D3D3)); }
+:where(.tabella):not(#_) tbody tr:first-child .tb_row { border-top: none; }
+:where(.tabella):not(#_) .tb_indent_1 { text-indent: var(--tb-stub-indent-length, 1em); } :where(.tabella):not(#_) .tb_indent_2 { text-indent: calc(2 * var(--tb-stub-indent-length, 1em)); }
+:where(.tabella):not(#_) .tb_indent_3 { text-indent: calc(3 * var(--tb-stub-indent-length, 1em)); } :where(.tabella):not(#_) .tb_indent_4 { text-indent: calc(4 * var(--tb-stub-indent-length, 1em)); }
+:where(.tabella):not(#_) .tb_indent_5 { text-indent: calc(5 * var(--tb-stub-indent-length, 1em)); }
+:where(.tabella):not(#_) .tb_stub.tb_stub_level { border-right: none; vertical-align: top; }
+:where(.tabella):not(#_) .tb_stub_row_group { font-size: var(--tb-stub-row-group-font-size, 100%); font-weight: var(--tb-stub-row-group-font-weight, initial);
+  text-transform: var(--tb-stub-row-group-text-transform, inherit); vertical-align: top;
+  border-right: var(--tb-stub-row-group-border-width, 2px) var(--tb-stub-row-group-border-style, solid) var(--tb-stub-row-group-border-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_no_data { color: var(--tb-table-font-color, #333333); font-style: italic; }
+:where(.tabella):not(#_) sup, :where(.tabella):not(#_) sub { line-height: 0; }
+:where(.tabella):not(#_) .tb_supsub { display: inline-flex; flex-direction: column; font-size: 70%; line-height: 1.05;
+  vertical-align: -0.4em; text-align: left; }
+:where(.tabella):not(#_) .tb_supsub sup, :where(.tabella):not(#_) .tb_supsub sub { font-size: inherit; vertical-align: baseline; line-height: inherit; }
+:where(.tabella):not(#_) .tb_frac { white-space: nowrap; } :where(.tabella):not(#_) .tb_frac sup, :where(.tabella):not(#_) .tb_frac sub { font-size: 70%; }
+:where(.tabella):not(#_) .tb_striped { background-color: var(--tb-row-striping-background-color, rgba(128,128,128,0.05)); }
+:where(.tabella):not(#_) .tb_summary_row { background-color: var(--tb-summary-row-background-color, transparent); color: var(--tb-summary-row-color, inherit); text-transform: var(--tb-summary-row-text-transform, inherit);
+  padding: var(--tb-summary-row-padding, 8px) var(--tb-summary-row-padding-horizontal, 5px); vertical-align: middle; }
+:where(.tabella):not(#_) .tb_first_summary_row { border-top: var(--tb-summary-row-border-width, 2px) var(--tb-summary-row-border-style, solid) var(--tb-summary-row-border-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_last_summary_row_top { border-bottom: var(--tb-summary-row-border-width, 2px) var(--tb-summary-row-border-style, solid) var(--tb-summary-row-border-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_grand_summary_row { background-color: var(--tb-grand-summary-row-background-color, transparent); color: var(--tb-grand-summary-row-color, inherit); text-transform: var(--tb-grand-summary-row-text-transform, inherit);
+  padding: var(--tb-grand-summary-row-padding, 8px) var(--tb-grand-summary-row-padding-horizontal, 5px); vertical-align: middle; }
+:where(.tabella):not(#_) .tb_first_grand_summary_row { border-top: var(--tb-grand-summary-row-border-width, 6px) var(--tb-grand-summary-row-border-style, double) var(--tb-grand-summary-row-border-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_last_grand_summary_row_top { border-bottom: var(--tb-grand-summary-row-border-width, 6px) var(--tb-grand-summary-row-border-style, double) var(--tb-grand-summary-row-border-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_left { text-align: left; } :where(.tabella):not(#_) .tb_center { text-align: center; } :where(.tabella):not(#_) .tb_right { text-align: right; font-variant-numeric: tabular-nums; }
+:where(.tabella):not(#_) td.tb_right { white-space: nowrap; }
+:where(.tabella):not(#_) .tb_sticky_stub .tb_stub:not(.tb_stub_level), :where(.tabella):not(#_) .tb_sticky_stub .tb_stubhead { position: sticky; left: 0; z-index: 1; }
+:where(.tabella):not(#_) .tb_sticky_stub .tb_stub:not(.tb_stub_level):not(.tb_striped), :where(.tabella):not(#_) .tb_sticky_stub .tb_stubhead { background-color: var(--tb-stub-background-color, var(--tb-table-background-color, #FFFFFF)); }
+:where(.tabella):not(#_) .tb_footnotes { color: var(--tb-table-font-color, #333333); background-color: var(--tb-footnotes-background-color, var(--tb-table-background-color, #FFFFFF)); }
+:where(.tabella):not(#_) .tb_sourcenotes { color: var(--tb-table-font-color, #333333); background-color: var(--tb-source-notes-background-color, var(--tb-table-background-color, #FFFFFF)); }
+:where(.tabella):not(#_) .tb_footnote { font-size: var(--tb-footnotes-font-size, 90%); padding: var(--tb-footnotes-padding, 4px) var(--tb-footnotes-padding-horizontal, 5px); text-align: left;
+  border-left: var(--tb-footnotes-border-lr-width, 2px) var(--tb-footnotes-border-lr-style, none) var(--tb-footnotes-border-lr-color, #D3D3D3);
+  border-right: var(--tb-footnotes-border-lr-width, 2px) var(--tb-footnotes-border-lr-style, none) var(--tb-footnotes-border-lr-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_footnotes:not(:has(+ .tb_footnotes)) .tb_footnote { border-bottom: var(--tb-footnotes-border-bottom-width, 2px) var(--tb-footnotes-border-bottom-style, none) var(--tb-footnotes-border-bottom-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_sourcenote { font-size: var(--tb-source-notes-font-size, 90%); padding: var(--tb-source-notes-padding, 4px) var(--tb-source-notes-padding-horizontal, 5px); text-align: left;
+  border-left: var(--tb-source-notes-border-lr-width, 2px) var(--tb-source-notes-border-lr-style, none) var(--tb-source-notes-border-lr-color, #D3D3D3);
+  border-right: var(--tb-source-notes-border-lr-width, 2px) var(--tb-source-notes-border-lr-style, none) var(--tb-source-notes-border-lr-color, #D3D3D3); }
+:where(.tabella):not(#_) .tb_sourcenotes:last-child .tb_sourcenote { border-bottom: var(--tb-source-notes-border-bottom-width, 2px) var(--tb-source-notes-border-bottom-style, none) var(--tb-source-notes-border-bottom-color, #D3D3D3); }
+:where(.tabella):not(#_) tfoot tr:first-child td { padding-top: 8px; }
+:where(.tabella):not(#_) .tb_footnote_marks { font-size: 75%; vertical-align: 0.4em; font-weight: normal; font-style: normal; }
+:where(.tabella):not(#_) .tb_nanoplot text { font-family: ui-monospace, 'Cascadia Code', 'Source Code Pro', Menlo, Consolas, 'DejaVu Sans Mono', monospace; stroke-width: 0.15em; paint-order: stroke; stroke-linejoin: round; cursor: default; }
+:where(.tabella):not(#_) .tb_nanoplot .vert-line:hover rect { fill: var(--tb-guide); fill-opacity: 40%; stroke: #FFFFFF60; }
+:where(.tabella):not(#_) .tb_nanoplot .vert-line:hover text, :where(.tabella):not(#_) .tb_nanoplot .horizontal-line:hover text, :where(.tabella):not(#_) .tb_nanoplot .ref-line:hover text, :where(.tabella):not(#_) .tb_nanoplot .boxplot-line:hover text { stroke: white; fill: #212427; }
+:where(.tabella):not(#_) .tb_nanoplot .ref-line:hover rect { stroke: #FFFFFF60; }
+:where(.tabella):not(#_) .tb_nanoplot .ref-line:hover line { stroke: #FF0000; }
+:where(.tabella):not(#_) .tb_nanoplot .y-axis-line:hover rect { fill: #EDEDED; fill-opacity: 60%; stroke: #FFFFFF60; }
+:where(.tabella):not(#_) .tb_nanoplot .y-axis-line:hover text { stroke: white; stroke-width: 0.20em; fill: #1A1C1F; }
+:where(.tabella):not(#_) .tb_nanoplot_static .vert-line text, :where(.tabella):not(#_) .tb_nanoplot_static .horizontal-line text, :where(.tabella):not(#_) .tb_nanoplot_static .ref-line text, :where(.tabella):not(#_) .tb_nanoplot_static .boxplot-line text { stroke: white; fill: #212427; }
+:where(.tabella):not(#_) .tb_nanoplot_static .y-axis-line rect { fill: #EDEDED; fill-opacity: 60%; }
+:where(.tabella):not(#_) .tb_nanoplot_static .y-axis-line text { stroke: white; stroke-width: 0.20em; fill: #1A1C1F; }
+:where(.tabella.tb_css_theme) { --tb-table-font-color: var(--ink, #1C1C1C); --tb-table-font-names: var(--font, system-ui, sans-serif); --tb-table-background-color: var(--paper, #FFFFFF); --tb-table-border-top-width: 3px; --tb-table-border-top-color: var(--ink, #1C1C1C); --tb-table-border-bottom-width: 3px; --tb-table-border-bottom-color: var(--ink, #1C1C1C); --tb-heading-border-bottom-color: var(--primary, var(--ink, #1C1C1C)); --tb-column-labels-font-weight: bold; --tb-column-labels-border-bottom-color: var(--ink, #1C1C1C); --tb-row-group-background-color: var(--shade, color-mix(in oklab, var(--ink, #1C1C1C) 4%, var(--paper, #FFFFFF))); --tb-row-group-border-color: var(--ink, #1C1C1C); --tb-table-body-hlines-color: var(--line, color-mix(in oklab, var(--ink, #1C1C1C) 14%, var(--paper, #FFFFFF))); --tb-row-striping-background-color: var(--shade, color-mix(in oklab, var(--ink, #1C1C1C) 4%, var(--paper, #FFFFFF))); --tb-summary-row-border-width: 1px; --tb-summary-row-border-color: var(--ink, #1C1C1C); --tb-grand-summary-row-border-width: 4px; --tb-grand-summary-row-border-color: var(--ink, #1C1C1C); }
+</style>
+<table class="tb_table" aria-labelledby="tabella-1a7a0480-title">
+<thead>
+<tr class="tb_heading"><th colspan="3" id="tabella-1a7a0480-title" class="tb_title">nimib's dependencies</th></tr>
+<tr class="tb_heading"><th colspan="3" class="tb_subtitle tb_heading_last">what each is for, and what would replace it</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left" scope="col" id="pkg">package</th><th class="tb_col_heading tb_left" scope="col" id="where">used in</th><th class="tb_col_heading tb_left" scope="col" id="candidate">replaced by</th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><td class="tb_row tb_left"><code>markdown</code> (nim-markdown)</td><td class="tb_row tb_left"><code>renders.nim</code>: <code>markdownToHtml</code>, the HTML of every <code>nbText</code>; <code>nimib.nim</code> imports it</td><td class="tb_row tb_left">marvdown</td></tr>
+<tr><td class="tb_row tb_left"><code>parsetoml</code></td><td class="tb_row tb_left"><code>config.nim</code>: <code>loadTomlSection</code> reads <code>nimib.toml</code>, turns TOML into JSON, then into an object with jsony</td><td class="tb_row tb_left">openparser/toml</td></tr>
+<tr><td class="tb_row tb_left"><code>jsony</code></td><td class="tb_row tb_left"><code>jsons.nim</code>: a JSON hook per block type, so a <code>seq[NbBlock]</code> can go to JSON and back; <code>jsutils.nim</code>: values passed to <code>nbJsFromCode</code>; re-exported by <code>nimib</code></td><td class="tb_row tb_left">openparser/json</td></tr>
+<tr><td class="tb_row tb_left"><code>fusion</code></td><td class="tb_row tb_left"><code>capture.nim</code>: <code>captureStdout</code>, the output of <code>nbCode</code></td><td class="tb_row tb_left">nothing: ~20 lines</td></tr>
+<tr><td class="tb_row tb_left">Nim ≥ 1.4</td><td class="tb_row tb_left">CI tests Nim stable and devel only</td><td class="tb_row tb_left">openparser needs 2.2.10</td></tr>
+</tbody>
+</table>
+</div>
+<p>The same three libraries are used beside nimib, not only through it: nimiSlides calls
+nim-markdown's <code>markdown(...)</code> itself, and so does tabelline's book; nimibook reads and writes
+its <code>book.json</code> with jsony, and nimibook and nimiSlides read their own sections of <code>nimib.toml</code>
+with nimib's <code>loadTomlSection</code>. The <a href="#downstream">downstream chapter</a> has the full list.</p>
+<div id="tabella-5aa99de9" class="tabella tb_css_theme">
+<table class="tb_table" aria-labelledby="tabella-5aa99de9-title">
+<thead>
+<tr class="tb_heading"><th colspan="11" id="tabella-5aa99de9-title" class="tb_title">The libraries, old and new</th></tr>
+<tr class="tb_heading"><th colspan="11" class="tb_subtitle tb_heading_last">from their git history, 28 Nov 2026</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_left" scope="col" id="role">for</th><th class="tb_col_heading tb_left" scope="col" id="version">version</th><th class="tb_col_heading tb_left" scope="col" id="nim">needs Nim</th><th class="tb_col_heading tb_left" scope="col" id="since">since</th><th class="tb_col_heading tb_left" scope="col" id="last">last commit</th><th class="tb_col_heading tb_right" scope="col" id="commits">commits</th><th class="tb_col_heading tb_right" scope="col" id="authors">authors</th><th class="tb_col_heading tb_right" scope="col" id="year">commits, last 12 months</th><th class="tb_col_heading tb_right" scope="col" id="lines">lines of Nim</th><th class="tb_col_heading tb_right" scope="col" id="nimble">nimble files that name it</th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><th scope="row" class="tb_row tb_left tb_stub">nim-markdown</th><td class="tb_row tb_left">Markdown</td><td class="tb_row tb_left">0.8.8</td><td class="tb_row tb_left">0.19</td><td class="tb_row tb_left">2018</td><td class="tb_row tb_left">2026-09-03</td><td class="tb_row tb_right">529</td><td class="tb_row tb_right">11</td><td class="tb_row tb_right">3</td><td class="tb_row tb_right">4,790</td><td class="tb_row tb_right">45</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">marvdown</th><td class="tb_row tb_left" style="font-weight: bold">Markdown</td><td class="tb_row tb_left" style="font-weight: bold">0.2.7</td><td class="tb_row tb_left" style="font-weight: bold">2.0</td><td class="tb_row tb_left" style="font-weight: bold">2025</td><td class="tb_row tb_left" style="font-weight: bold">2026-11-06</td><td class="tb_row tb_right" style="font-weight: bold">96</td><td class="tb_row tb_right" style="font-weight: bold">1</td><td class="tb_row tb_right" style="font-weight: bold">64</td><td class="tb_row tb_right" style="font-weight: bold">4,249</td><td class="tb_row tb_right" style="font-weight: bold">5</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">jsony</th><td class="tb_row tb_left">JSON</td><td class="tb_row tb_left">1.1.6</td><td class="tb_row tb_left">1.4</td><td class="tb_row tb_left">2020</td><td class="tb_row tb_left">2026-10-28</td><td class="tb_row tb_right">191</td><td class="tb_row tb_right">22</td><td class="tb_row tb_right">8</td><td class="tb_row tb_right">997</td><td class="tb_row tb_right">214</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">parsetoml</th><td class="tb_row tb_left">TOML</td><td class="tb_row tb_left">0.7.2</td><td class="tb_row tb_left">0.18</td><td class="tb_row tb_left">2015</td><td class="tb_row tb_left">2025-01-12</td><td class="tb_row tb_right">103</td><td class="tb_row tb_right">15</td><td class="tb_row tb_right">0</td><td class="tb_row tb_right">1,942</td><td class="tb_row tb_right">67</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">openparser</th><td class="tb_row tb_left" style="font-weight: bold">JSON, TOML and 28 more</td><td class="tb_row tb_left" style="font-weight: bold">0.4.5</td><td class="tb_row tb_left" style="font-weight: bold">2.2.10</td><td class="tb_row tb_left" style="font-weight: bold">2026</td><td class="tb_row tb_left" style="font-weight: bold">2026-11-25</td><td class="tb_row tb_right" style="font-weight: bold">265</td><td class="tb_row tb_right" style="font-weight: bold">1</td><td class="tb_row tb_right" style="font-weight: bold">265</td><td class="tb_row tb_right" style="font-weight: bold">46,871</td><td class="tb_row tb_right" style="font-weight: bold">29</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">fusion</th><td class="tb_row tb_left">captureStdout</td><td class="tb_row tb_left">1.2</td><td class="tb_row tb_left">1.0</td><td class="tb_row tb_left">2020</td><td class="tb_row tb_left">2024-03-05</td><td class="tb_row tb_right">83</td><td class="tb_row tb_right">16</td><td class="tb_row tb_right">0</td><td class="tb_row tb_right">10,067</td><td class="tb_row tb_right">58</td></tr>
+</tbody>
+<tfoot>
+<tr class="tb_sourcenotes"><td class="tb_sourcenote" colspan="11">Authors: distinct commit e-mails. Last column: GitHub code search for the name in <code>.nimble</code> files (a rough count of users, forks and duplicates included).</td></tr>
+</tfoot>
+</table>
+</div>
+<h2 id="fusion">Fusion: one module, two C calls<span class="ch-sub">the short answer to the second question</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
+<p>nimib imports <a href="https://github.com/nim-lang/fusion">fusion</a> in exactly one place,
+<a href="https://github.com/pietroppeter/nimib/blob/7118b3a8fa112757b7d76ffcb5251a6478cbfcfd/src/nimib/capture.nim"><code>src/nimib/capture.nim</code></a>, for <code>fusion/ioutils</code>:</p>
+<pre><code class="language-nim"><span class="hljs-keyword">import</span> fusion/ioutils   <span class="hljs-comment"># duplicate, duplicateTo</span>
+</code></pre>
+<p><code>captureStdout</code> is how <code>nbCode</code> gets the output of its code: it copies the stdout file
+descriptor with <code>duplicate</code>, points stdout at a temporary file with <code>duplicateTo</code>, runs the code,
+reads the file and puts stdout back. <code>duplicate</code> is C's <code>dup</code> and <code>duplicateTo</code> is <code>dup2</code>
+(<code>_dup</code> and <code>_dup2</code> on Windows). The only other trace of fusion is <code>withDir</code> in <code>paths.nim</code>,
+already copied from <code>fusion/scripting</code> (&quot;ported from fusion/scripting&quot;), not imported.</p>
+<p>So the whole dependency is two C calls. Here they are without fusion, run while this page was built
+(the block below runs inside nimib's own <code>captureStdout</code>, so it also checks that the two nest):</p>
+<pre><code class="nohighlight nim hljs"><span class="hljs-keyword">import</span> std/tempfiles
+<span class="hljs-keyword">when</span> <span class="hljs-keyword">defined</span>(windows):
+  <span class="hljs-keyword">proc</span> cDup(fd: <span class="hljs-built_in">cint</span>): <span class="hljs-built_in">cint</span> {.importc: <span class="hljs-string">&quot;_dup&quot;</span>, header: <span class="hljs-string">&quot;&lt;io.h&gt;&quot;</span>.}
+  <span class="hljs-keyword">proc</span> cDup2(fd, to: <span class="hljs-built_in">cint</span>): <span class="hljs-built_in">cint</span> {.importc: <span class="hljs-string">&quot;_dup2&quot;</span>, header: <span class="hljs-string">&quot;&lt;io.h&gt;&quot;</span>.}
+<span class="hljs-keyword">else</span>:
+  <span class="hljs-keyword">proc</span> cDup(fd: <span class="hljs-built_in">cint</span>): <span class="hljs-built_in">cint</span> {.importc: <span class="hljs-string">&quot;dup&quot;</span>, header: <span class="hljs-string">&quot;&lt;unistd.h&gt;&quot;</span>.}
+  <span class="hljs-keyword">proc</span> cDup2(fd, to: <span class="hljs-built_in">cint</span>): <span class="hljs-built_in">cint</span> {.importc: <span class="hljs-string">&quot;dup2&quot;</span>, header: <span class="hljs-string">&quot;&lt;unistd.h&gt;&quot;</span>.}
+
+<span class="hljs-keyword">template</span> captureStdoutNoFusion(ident: <span class="hljs-built_in">untyped</span>, body: <span class="hljs-built_in">untyped</span>) =
+  <span class="hljs-keyword">let</span> outFd = <span class="hljs-literal">stdout</span>.getFileHandle()
+  <span class="hljs-keyword">let</span> saved = cDup(outFd)                     <span class="hljs-comment"># was fusion's duplicate</span>
+  <span class="hljs-keyword">let</span> (tmp, path) = createTempFile(<span class="hljs-string">&quot;tmp&quot;</span>, <span class="hljs-string">&quot;&quot;</span>)
+  <span class="hljs-literal">stdout</span>.flushFile()
+  doAssert cDup2(tmp.getFileHandle(), outFd) != -<span class="hljs-number">1</span>   <span class="hljs-comment"># was duplicateTo</span>
+  body
+  <span class="hljs-literal">stdout</span>.flushFile()
+  tmp.setFilePos(<span class="hljs-number">0</span>)
+  ident = tmp.readAll()
+  tmp.close()
+  removeFile(path)
+  doAssert cDup2(saved, outFd) != -<span class="hljs-number">1</span>
+
+<span class="hljs-keyword">var</span> captured: <span class="hljs-built_in">string</span>
+captureStdoutNoFusion(captured):
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;hello from inside&quot;</span>
+<span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;captured: &quot;</span>, captured.strip</code></pre>
+<pre class="nb-output">captured: hello from inside
+</pre>
+<aside class="note nimib"><span class="note-label">🐳 For nimib</span><p>Removing fusion is a small, safe change on its own: the template above, a test on Windows in CI,
+and one line less in <code>nimib.nimble</code>. It does not depend on anything else on this page.</p>
+</aside>
+<h2 id="who">George Lemon and OpenPeeps<span class="ch-sub">from GitHub, DEV, the Nim forum and the package registry</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
+<p><strong>George Lemon</strong> (<a href="https://github.com/georgelemon">georgelemon</a> on GitHub) describes himself as
+&quot;Open Source Enthusiast&quot;, and on <a href="https://dev.to/georgelemon">DEV</a> (since September 2019) as
+&quot;Open Source Enthusiast at OpenPeeps&quot;. His one DEV post (June 2023) shows how to build Node.js and
+Bun addons in Nim with his library <a href="https://github.com/openpeeps/denim">denim</a>. His site,
+openpeeps.dev, did not load from here. Nothing public says more about him than his work.</p>
+<p><strong>OpenPeeps</strong> is a GitHub organization whose description is &quot;Open Source Enthusiasts | Developing
+@supranim @getsunday @tim-engine @trytilda @onebuckapp and more&quot;. Its only visible member is George
+Lemon, and every one of the 96 commits of marvdown and the 265 commits of
+openparser is his. It works like the label of one very productive person, with sister
+organizations for each larger project:</p>
+<div id="tabella-d3fb58e5" class="tabella tb_css_theme">
+<table class="tb_table" aria-labelledby="tabella-d3fb58e5-title">
+<thead>
+<tr class="tb_heading"><th colspan="3" id="tabella-d3fb58e5-title" class="tb_title">George Lemon's organizations</th></tr>
+<tr class="tb_heading"><th colspan="3" class="tb_subtitle tb_heading_last">public repositories, 28 Nov 2026</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_left" scope="col" id="repos">repos</th><th class="tb_col_heading tb_left" scope="col" id="what">what is there</th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><th scope="row" class="tb_row tb_left tb_stub">openpeeps</th><td class="tb_row tb_left">66</td><td class="tb_row tb_left">the main org: openparser, marvdown, clue, booyaka, kapsis, denim, powpow, bowdy, nyml, toktok...</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">nimbase</th><td class="tb_row tb_left">54</td><td class="tb_row tb_left">wrappers and API clients moved out of openpeeps (libvips, duckdb, libdatachannel, nimcypher, dynasm, opendocs, image, nim-prebuilts)</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">supranim</th><td class="tb_row tb_left">14</td><td class="tb_row tb_left">Supranim, an MVC web framework</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">tim-engine</th><td class="tb_row tb_left">12</td><td class="tb_row tb_left">Tim, a template engine and markup language with ports to Node, Python and Ruby</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">getcarne, getsunday, onebuckapp, trytilda</th><td class="tb_row tb_left">a few each</td><td class="tb_row tb_left">Carne (a JavaScript runtime), Sunday, the Whatever browser (Swift), Tilda</td></tr>
+</tbody>
+<tfoot>
+<tr class="tb_sourcenotes"><td class="tb_sourcenote" colspan="3">GitHub search, forks included. 92 entries of Nim's package registry (of about 3,000) point to openpeeps (48), nimbase (38) or supranim (6).</td></tr>
+</tfoot>
+</table>
+</div>
+<p>Some facts that matter for a dependency:</p>
+<ul>
+<li><strong>Pace.</strong> OpenPeeps created 5 to 8 repositories a year from 2021 to 2025, and 35 in 2026.
+openparser is 47,000 lines of Nim written in seven months (April to November 2026, 265 commits),
+with a regex engine that has its own JIT (via his DynASM port), SIMD JSON, a QR code reader,
+a diff engine and a NIF parser among its 30 modules.</li>
+<li><strong>Best known work.</strong> <a href="https://github.com/tim-engine/tim">Tim</a>, a template engine and markup
+language (69 stars, since 2022), denim (56), <a href="https://github.com/supranim/supranim">Supranim</a>, a
+web framework (46), kapsis, a CLI builder (41). His libraries have tests, CI and API docs.</li>
+<li><strong>Moves and renames.</strong> He renamed <code>bro</code> to <code>bowdy</code> in the registry and moved a batch of
+wrappers from openpeeps to nimbase (nim-lang/packages PRs
+<a href="https://github.com/nim-lang/packages/pull/3535">#3535</a> and
+<a href="https://github.com/nim-lang/packages/pull/3546">#3546</a>). Handled well, but a reminder that
+names and places change.</li>
+<li><strong>His own package manager.</strong> In August 2026 he announced
+<a href="https://forum.nim-lang.org/t/14123">Clue</a>, an alternative to nimble that resolves versions
+depth-first (&quot;I don't care about versions, that's a PM's job&quot;). His libraries are tested with
+<code>clue test</code>; they install with nimble too.</li>
+</ul>
+<aside class="note careful"><span class="note-label">Careful</span><p>All of this is what his public profiles and repositories show. I found no interview, talk or
+biography, and I did not try to find out more about him as a person.</p>
+</aside>
+<h2 id="users">Who depends on openparser and marvdown<span class="ch-sub">every nimble file on GitHub that names them</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
+<p>I read the nimble files of all 153 public repositories of George Lemon's organizations, then
+searched GitHub's code index for every other nimble file that names <code>openparser</code> or <code>marvdown</code>.</p>
+<ul>
+<li><strong>Inside his organizations</strong>: 43 repositories require openparser (Tim, Supranim, Clue,
+Booyaka, powpow, kapsis, bowdy, nyml, ozark, the nimbase API clients...). Only 3 require
+marvdown: Booyaka (his documentation generator), datengine and stupidgreen (a static site
+generator), plus getsunday/sunday in another of his organizations.</li>
+<li><strong>Outside them</strong>, there are three:</li>
+</ul>
+<div id="tabella-1fd93f56" class="tabella tb_css_theme">
+<table class="tb_table" aria-labelledby="tabella-1fd93f56-title">
+<thead>
+<tr class="tb_heading"><th colspan="4" id="tabella-1fd93f56-title" class="tb_title tb_heading_last">Users outside George Lemon's organizations</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_left" scope="col" id="who">by</th><th class="tb_col_heading tb_left" scope="col" id="uses">requires</th><th class="tb_col_heading tb_left" scope="col" id="why">for</th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><th scope="row" class="tb_row tb_left tb_stub">elcritch/merenda</th><td class="tb_row tb_left">Jaremy Creechley</td><td class="tb_row tb_left">openparser</td><td class="tb_row tb_left">NIF, in two examples of a desktop GUI toolkit</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">enthus1ast/nimDnsServer</th><td class="tb_row tb_left">David Krause</td><td class="tb_row tb_left">openparser</td><td class="tb_row tb_left">NIF config files of a DNS server built on powpow</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">penguinite/everything</th><td class="tb_row tb_left">a bot</td><td class="tb_row tb_left">openparser, marvdown</td><td class="tb_row tb_left">a joke package that requires every package in the registry</td></tr>
+</tbody>
+<tfoot>
+<tr class="tb_sourcenotes"><td class="tb_sourcenote" colspan="4">GitHub code search (default branches, as indexed on 28 Nov 2026), checked by cloning each repository.</td></tr>
+</tfoot>
+</table>
+</div>
+<p>So openparser has two real users outside its author's work, both for its NIF module, both by
+well-known Nim developers (Jaremy Creechley wrote figuro and contributed to nim-markdown;
+David Krause wrote nimja), both in the last two months. marvdown has none. nimib would be the
+first large outside user of either, with nimibook, nimiSlides and every nimib page behind it.</p>
+<h2 id="toml">TOML: parsetoml or openparser<span class="ch-sub">the simplest swap, and the clearest win</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
+<p>nimib reads one table of <code>nimib.toml</code> and keeps the rest of the text for others to read:</p>
+<pre><code class="language-toml"><span class="hljs-keyword">[</span><span class="hljs-keyword">nimib</span><span class="hljs-keyword">]</span>
+srcDir = <span class="hljs-string">"</span><span class="hljs-string">docsrc</span><span class="hljs-string">"</span>
+homeDir = <span class="hljs-string">"</span><span class="hljs-string">docs</span><span class="hljs-string">"</span>
+</code></pre>
+<p>Today <code>loadTomlSection</code> parses the text with parsetoml, converts the section to <code>JsonNode</code> with
+45 lines of <code>customToJson</code>, prints it and parses it again with jsony into the object. openparser
+parses TOML straight into an object, which removes those 45 lines and jsony from the config path:</p>
+<pre><code class="language-nim"><span class="hljs-keyword">import</span> std/tables, openparser/toml
+<span class="hljs-keyword">type</span> Cfg = <span class="hljs-keyword">object</span>
+  nimib: NbConfig
+<span class="hljs-keyword">let</span> cfg = parseTOML(content, Cfg)    <span class="hljs-comment"># unknown tables and keys are skipped by default</span>
+</code></pre>
+<p>To compare the two parsers I ran the <a href="https://github.com/toml-lang/toml-test">toml-test</a> suite,
+the one TOML implementations use: a parser should accept every valid file and reject every
+invalid one.</p>
+<figure class="scores"><figcaption>toml-test, TOML 1.0</figcaption><div class="score"><div class="score-label">parsetoml, valid files accepted</div><div class="score-line"><span class="score-bar now" style="width:88.5%"></span><span class="score-value">184 / 208 · 88%</span></div></div><div class="score"><div class="score-label">openparser, valid files accepted</div><div class="score-line"><span class="score-bar new" style="width:100.0%"></span><span class="score-value">208 / 208 · 100%</span></div></div><div class="score"><div class="score-label">parsetoml, invalid files rejected</div><div class="score-line"><span class="score-bar now" style="width:85.5%"></span><span class="score-value">435 / 509 · 85%</span></div></div><div class="score"><div class="score-label">openparser, invalid files rejected</div><div class="score-line"><span class="score-bar new" style="width:100.0%"></span><span class="score-value">509 / 509 · 100%</span></div></div><p class="scores-note">TOML 1.1: parsetoml 183/218 and 427/502, openparser 207/218 and 502/502. Acceptance only: the values parsed were not compared.</p></figure>
+<aside class="note careful"><span class="note-label">Careful</span><p>One rough edge: <code>parseTOML(text, T)</code> did not compile until I added <code>import std/tables</code> to my own
+module (a generic in openparser calls <code>pairs</code> on an <code>OrderedTableRef</code> without binding it). Easy
+to work around, worth an issue upstream.</p>
+</aside>
+<aside class="note nimib"><span class="note-label">🐳 For nimib</span><p>For <code>nimib.toml</code> the gain is correctness on corner cases nimib users rarely write, and less code.
+The cost is the whole openparser package: 47,000 lines, Nim 2.2.10 or later, and nimble installs
+nimsimd, nimcypher and dynasm with it, even if only <code>openparser/toml</code> and <code>openparser/json</code> are
+compiled (json pulls nimsimd for its SIMD path).</p>
+</aside>
+<h2 id="json">JSON: jsony or openparser<span class="ch-sub">a sideways move with a breaking change</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
+<p>nimib uses JSON in three places: the config path above, the values that <code>nbJsFromCode</code> passes
+to the browser (<code>toJson(x)</code>, parsed back with <code>std/json</code>), and its <strong>JSON backend</strong>: every block
+type registers a hook, so a document's <code>seq[NbBlock]</code> (of many subtypes) can be written to JSON
+and read back with the right types. tabelline's book uses that: it saves each chapter's
+blocks and renders them again later with <code>readFile(path).fromJson(NbDoc)</code>.</p>
+<p>jsony's hook gets the raw string and a position, <code>parseHook(s: string, i: var int, v: var NbBlock)</code>;
+nimib reads the <code>kind</code> field, rewinds <code>i</code> and parses again as the right type.
+openparser's hook gets a parser object, <code>parseHook(p: var JsonParser, v: var NbBlock)</code>, whose
+position is private, so it cannot rewind. It works with a detour through <code>JsonNode</code>, which I tried
+on a small block hierarchy (<code>bench/tjson_op.nim</code>):</p>
+<pre><code class="language-nim"><span class="hljs-keyword">proc</span> <span class="hljs-title function_">parseHook</span>(p: <span class="hljs-keyword">var</span> JsonParser, v: <span class="hljs-keyword">var</span> NbBlock) =
+  <span class="hljs-keyword">var</span> node: JsonNode
+  parseHook(p, node)                       <span class="hljs-comment"># parse the block once, as a tree</span>
+  v = registry[node[<span class="hljs-string">"</span><span class="hljs-string">kind</span><span class="hljs-string">"</span>].getStr](node)  <span class="hljs-comment"># each kind: fromJson($node, ThatKind)</span>
+</code></pre>
+<p>It wrote nested containers to JSON and read them back exactly (<code>toJson(back) == s</code> printed
+<code>true</code>), at the cost of parsing every block twice.</p>
+<div id="tabella-ff56c649" class="tabella tb_css_theme">
+<table class="tb_table" aria-labelledby="tabella-ff56c649-title">
+<thead>
+<tr class="tb_heading"><th colspan="2" id="tabella-ff56c649-title" class="tb_title tb_heading_last">jsony to openparser/json</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left" scope="col" id="side"></th><th class="tb_col_heading tb_left" scope="col" id="text"></th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><td class="tb_row tb_left">for openparser</td><td class="tb_row tb_left">one JSON library for nimib and its TOML; SIMD parsing; <code>{.json: &quot;name&quot;.}</code> field names (compile-time dump only, so far); depth limits</td></tr>
+<tr><td class="tb_row tb_left">against</td><td class="tb_row tb_left">every custom <code>parseHook</code>/<code>dumpHook</code> written for jsony breaks (new signature); nimib re-exports jsony, so pages that call <code>toJson</code>/<code>fromJson</code> through nimib change library; the JsonNode detour; nimibook keeps jsony anyway for <code>book.json</code></td></tr>
+<tr><td class="tb_row tb_left">speed</td><td class="tb_row tb_left">not a factor: nimib writes a few kilobytes of JSON per page</td></tr>
+</tbody>
+</table>
+</div>
+<aside class="note nimib"><span class="note-label">🐳 For nimib</span><p>jsony is small (1,000 lines), maintained by treeform, named in 200+ nimble files and does the job.
+Swapping it only makes sense as part of adopting openparser for TOML, and even then nimib could keep
+jsony for blocks and use openparser only for the config.</p>
+</aside>
+<h2 id="markdown">Markdown: nim-markdown or marvdown<span class="ch-sub">the one that every page sees</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
+<p>This is the dependency that matters most: every <code>nbText</code> of every nimib page goes through it.
+<a href="https://github.com/openpeeps/marvdown">marvdown</a> says it is &quot;CommonMark compliant&quot;, with GitHub tables, task lists, alerts,
+footnotes, front matter, heading anchors and a JSON AST. To check, I ran the
+<a href="https://spec.commonmark.org/0.31.2/">CommonMark 0.31.2 spec</a> examples through both libraries,
+compared the HTML the way CommonMark's own test runner does, and forgave marvdown two
+differences that browsers ignore (<code>class=&quot;&quot;</code> on code blocks and the last newline in a block).</p>
+<figure class="scores"><figcaption>CommonMark 0.31.2 and GitHub's extensions</figcaption><div class="score"><div class="score-label">nim-markdown, CommonMark (655 examples)</div><div class="score-line"><span class="score-bar now" style="width:93.3%"></span><span class="score-value">611 / 655 · 93%</span></div></div><div class="score"><div class="score-label">marvdown, CommonMark (655 examples)</div><div class="score-line"><span class="score-bar new" style="width:33.9%"></span><span class="score-value">222 / 655 · 34%</span></div></div><div class="score"><div class="score-label">nim-markdown, GFM extensions (tables, strikethrough, autolinks)</div><div class="score-line"><span class="score-bar now" style="width:36.4%"></span><span class="score-value">8 / 22 · 36%</span></div></div><div class="score"><div class="score-label">marvdown, GFM extensions</div><div class="score-line"><span class="score-bar new" style="width:13.6%"></span><span class="score-value">3 / 22 · 14%</span></div></div><div class="score"><div class="score-label">183 real <code>.md</code> files of the nimib repositories, same HTML from both</div><div class="score-line"><span class="score-bar new" style="width:48.6%"></span><span class="score-value">89 / 183 · 49%</span></div></div><p class="scores-note">marvdown with all raw HTML allowed and anchors off, nim-markdown with nimib's GFM settings. Real files: every .md of 1 KB or more in nimib, nimibook, tabelline, diagrammari, xoffy, skills and nblog, compared after also ignoring heading ids and &quot;.</p></figure>
+<div id="tabella-1c169a70" class="tabella tb_css_theme">
+<table class="tb_table" aria-labelledby="tabella-1c169a70-title">
+<thead>
+<tr class="tb_heading"><th colspan="4" id="tabella-1c169a70-title" class="tb_title tb_heading_last">CommonMark examples passed, by section of the spec</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_right" scope="col" id="n">examples</th><th class="tb_col_heading tb_right" scope="col" id="now">nim-markdown</th><th class="tb_col_heading tb_right" scope="col" id="new">marvdown</th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><th scope="row" class="tb_row tb_left tb_stub">Tabs</th><td class="tb_row tb_right">11</td><td class="tb_row tb_right">10</td><td class="tb_row tb_right">4</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Backslash escapes</th><td class="tb_row tb_right">13</td><td class="tb_row tb_right">13</td><td class="tb_row tb_right">5</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Entity and numeric character references</th><td class="tb_row tb_right">17</td><td class="tb_row tb_right">17</td><td class="tb_row tb_right">6</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Precedence</th><td class="tb_row tb_right">1</td><td class="tb_row tb_right">1</td><td class="tb_row tb_right">0</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Thematic breaks</th><td class="tb_row tb_right">19</td><td class="tb_row tb_right">18</td><td class="tb_row tb_right">13</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">ATX headings</th><td class="tb_row tb_right">18</td><td class="tb_row tb_right">7</td><td class="tb_row tb_right" style="font-weight: bold">11</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Setext headings</th><td class="tb_row tb_right">27</td><td class="tb_row tb_right">14</td><td class="tb_row tb_right">9</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Indented code blocks</th><td class="tb_row tb_right">12</td><td class="tb_row tb_right">11</td><td class="tb_row tb_right">4</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Fenced code blocks</th><td class="tb_row tb_right">29</td><td class="tb_row tb_right">28</td><td class="tb_row tb_right">15</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">HTML blocks</th><td class="tb_row tb_right">46</td><td class="tb_row tb_right">45</td><td class="tb_row tb_right">15</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Link reference definitions</th><td class="tb_row tb_right">27</td><td class="tb_row tb_right">25</td><td class="tb_row tb_right">11</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Paragraphs</th><td class="tb_row tb_right">8</td><td class="tb_row tb_right">8</td><td class="tb_row tb_right">7</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Blank lines</th><td class="tb_row tb_right">1</td><td class="tb_row tb_right">0</td><td class="tb_row tb_right" style="font-weight: bold">0</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Block quotes</th><td class="tb_row tb_right">25</td><td class="tb_row tb_right">21</td><td class="tb_row tb_right">3</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">List items</th><td class="tb_row tb_right">48</td><td class="tb_row tb_right">47</td><td class="tb_row tb_right">10</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Lists</th><td class="tb_row tb_right">26</td><td class="tb_row tb_right">26</td><td class="tb_row tb_right">3</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Inlines</th><td class="tb_row tb_right">1</td><td class="tb_row tb_right">1</td><td class="tb_row tb_right">0</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Code spans</th><td class="tb_row tb_right">22</td><td class="tb_row tb_right">22</td><td class="tb_row tb_right">7</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Emphasis and strong emphasis</th><td class="tb_row tb_right">132</td><td class="tb_row tb_right">131</td><td class="tb_row tb_right">41</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Links</th><td class="tb_row tb_right">90</td><td class="tb_row tb_right">86</td><td class="tb_row tb_right">36</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Images</th><td class="tb_row tb_right">22</td><td class="tb_row tb_right">22</td><td class="tb_row tb_right">2</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Autolinks</th><td class="tb_row tb_right">19</td><td class="tb_row tb_right">19</td><td class="tb_row tb_right">3</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Raw HTML</th><td class="tb_row tb_right">21</td><td class="tb_row tb_right">19</td><td class="tb_row tb_right">4</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Hard line breaks</th><td class="tb_row tb_right">15</td><td class="tb_row tb_right">15</td><td class="tb_row tb_right">8</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Soft line breaks</th><td class="tb_row tb_right">2</td><td class="tb_row tb_right">2</td><td class="tb_row tb_right" style="font-weight: bold">2</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">Textual content</th><td class="tb_row tb_right">3</td><td class="tb_row tb_right">3</td><td class="tb_row tb_right" style="font-weight: bold">3</td></tr>
+</tbody>
+<tfoot>
+<tr class="tb_sourcenotes"><td class="tb_sourcenote" colspan="4">Bold: where marvdown does at least as well (ATX headings, where nim-markdown's untagged main adds heading ids the spec does not have).</td></tr>
+</tfoot>
+</table>
+</div>
+<p>The sections that fail are the everyday ones: lists (3 of 26), block quotes (3 of 25), images,
+autolinks, raw HTML. Here is what that looks like, on inputs a nimib page writes all the time:</p>
+<div class="renders"><section class="render"><h4>A list right after a paragraph</h4><pre class="out src"><code class="language-text">A list:
+- one
+- two</code></pre><span class="render-who now">nim-markdown</span><pre class="out"><code class="language-text">&lt;p&gt;A list:&lt;/p&gt;
+&lt;ul&gt;
+&lt;li&gt;one&lt;/li&gt;
+&lt;li&gt;two&lt;/li&gt;
+&lt;/ul&gt;</code></pre><span class="render-who new">marvdown</span><pre class="out"><code class="language-text">&lt;p&gt;A list: - one - two &lt;/p&gt;</code></pre></section><section class="render"><h4>A line ending with !</h4><pre class="out src"><code class="language-text">the right place!
+Note that</code></pre><span class="render-who now">nim-markdown</span><pre class="out"><code class="language-text">&lt;p&gt;the right place!
+Note that&lt;/p&gt;</code></pre><span class="render-who new">marvdown</span><pre class="out"><code class="language-text">&lt;p&gt;the right place!Note that &lt;/p&gt;</code></pre></section><section class="render"><h4>Inline HTML in a paragraph</h4><pre class="out src"><code class="language-text">Text with &lt;span class=&quot;x&quot;&gt;red&lt;/span&gt; words.</code></pre><span class="render-who now">nim-markdown</span><pre class="out"><code class="language-text">&lt;p&gt;Text with &lt;span class=&quot;x&quot;&gt;red&lt;/span&gt; words.&lt;/p&gt;</code></pre><span class="render-who new">marvdown</span><pre class="out"><code class="language-text">&lt;p&gt;Text with &lt;/p&gt;&lt;p&gt;&lt;span class=&quot;x&quot;&gt;red&lt;/span&gt; words. &lt;/p&gt;</code></pre></section><section class="render"><h4>An inline image tag, then more text</h4><pre class="out src"><code class="language-text">An image &lt;img src=&quot;a.png&quot;&gt;.
+
+**bold** after</code></pre><span class="render-who now">nim-markdown</span><pre class="out"><code class="language-text">&lt;p&gt;An image &lt;img src=&quot;a.png&quot;&gt;.&lt;/p&gt;
+&lt;p&gt;&lt;strong&gt;bold&lt;/strong&gt; after&lt;/p&gt;</code></pre><span class="render-who new">marvdown</span><pre class="out"><code class="language-text">&lt;p&gt;An image &lt;/p&gt;&lt;p&gt;&lt;img src=&quot;a.png&quot;&gt;.
+
+**bold** after
+&lt;/p&gt;</code></pre></section><section class="render"><h4>A code span with double backticks</h4><pre class="out src"><code class="language-text">Draw ``` ```mermaid ``` ``` blocks.</code></pre><span class="render-who now">nim-markdown</span><pre class="out"><code class="language-text">&lt;p&gt;Draw &lt;code&gt; &lt;/code&gt;mermaid &lt;code&gt; &lt;/code&gt; blocks.&lt;/p&gt;</code></pre><span class="render-who new">marvdown</span><pre class="out"><code class="language-text">&lt;p&gt;Draw &lt;/p&gt;&lt;pre&gt;&lt;code class=&quot;language- ```mermaid ``` ``` blocks.&quot;&gt;&lt;/code&gt;&lt;/pre&gt;</code></pre></section><section class="render"><h4>Nested block quotes</h4><pre class="out src"><code class="language-text">&gt;&gt;&gt; foo
+&gt; bar</code></pre><span class="render-who now">nim-markdown</span><pre class="out"><code class="language-text">&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;blockquote&gt;
+&lt;p&gt;foo
+bar&lt;/p&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;
+&lt;/blockquote&gt;</code></pre><span class="render-who new">marvdown</span><pre class="out"><code class="language-text">&lt;blockquote&gt;&gt; foo bar&lt;/blockquote&gt;</code></pre></section><section class="render"><h4>A table</h4><pre class="out src"><code class="language-text">| a | b |
+|---|---|
+| 1 | 2 |</code></pre><span class="render-who now">nim-markdown</span><pre class="out"><code class="language-text">&lt;table&gt;
+&lt;thead&gt;
+&lt;tr&gt;
+&lt;th&gt;a&lt;/th&gt;
+&lt;th&gt;b&lt;/th&gt;
+&lt;/tr&gt;
+&lt;/thead&gt;
+&lt;tbody&gt;
+&lt;tr&gt;
+&lt;td&gt;1&lt;/td&gt;
+&lt;td&gt;2&lt;/td&gt;
+&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;</code></pre><span class="render-who new">marvdown</span><pre class="out"><code class="language-text">&lt;table&gt;&lt;thead&gt;&lt;tr&gt;&lt;th&gt;a&lt;/th&gt;&lt;th&gt;b&lt;/th&gt;&lt;/tr&gt;&lt;/thead&gt;&lt;tbody&gt;&lt;tr&gt;&lt;td&gt;1&lt;/td&gt;&lt;td&gt;2&lt;/td&gt;&lt;/tr&gt;&lt;/tbody&gt;&lt;/table&gt;</code></pre></section><section class="render"><h4>A heading</h4><pre class="out src"><code class="language-text"># Hello *world*</code></pre><span class="render-who now">nim-markdown</span><pre class="out"><code class="language-text">&lt;h1 id=&quot;hello-&lt;em&gt;world&lt;/em&gt;&quot;&gt;Hello &lt;em&gt;world&lt;/em&gt;&lt;/h1&gt;</code></pre><span class="render-who new">marvdown</span><pre class="out"><code class="language-text">&lt;h1&gt;Hello &lt;em&gt;world&lt;/em&gt;&lt;/h1&gt;</code></pre></section></div>
+<p>A list right after a line of text is how most pages write lists: the list of folders in
+nimib's own CONTRIBUTING.md comes out as one paragraph. An <code>&lt;img&gt;</code> (or any tag marvdown takes for the start
+of a block) in the middle of a sentence turns everything after it into raw text, to the end of the
+page. Words lose their space after a line that ends with &quot;!&quot;. A double-backtick code span loses
+its text.</p>
+<div id="tabella-82a8718f" class="tabella tb_css_theme">
+<table class="tb_table" aria-labelledby="tabella-82a8718f-title">
+<thead>
+<tr class="tb_heading"><th colspan="4" id="tabella-82a8718f-title" class="tb_title">Speed: one file to HTML</th></tr>
+<tr class="tb_heading"><th colspan="4" class="tb_subtitle tb_heading_last">milliseconds, mean of 50 runs in one process, -d:release</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left tb_stubhead" scope="col"></th><th class="tb_col_heading tb_right" scope="col" id="kb">KB</th><th class="tb_col_heading tb_right" scope="col" id="now">nim-markdown</th><th class="tb_col_heading tb_right" scope="col" id="new">marvdown</th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><th scope="row" class="tb_row tb_left tb_stub">markdown/README.md</th><td class="tb_row tb_right">4</td><td class="tb_row tb_right">3.34</td><td class="tb_row tb_right">0.11</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">marvdown/README.md</th><td class="tb_row tb_right">14</td><td class="tb_row tb_right">4.41</td><td class="tb_row tb_right">0.28</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">cmark-gfm/README.md</th><td class="tb_row tb_right">7</td><td class="tb_row tb_right">1.83</td><td class="tb_row tb_right">0.31</td></tr>
+<tr><th scope="row" class="tb_row tb_left tb_stub">toml-test/README.md</th><td class="tb_row tb_right">9</td><td class="tb_row tb_right">2.16</td><td class="tb_row tb_right">0.18</td></tr>
+</tbody>
+<tfoot>
+<tr class="tb_sourcenotes"><td class="tb_sourcenote" colspan="4"><code>bench/bench.nim</code>. A nimib page spends seconds compiling, so a few milliseconds of Markdown do not show.</td></tr>
+</tfoot>
+</table>
+</div>
+<p>marvdown is 10 to 30 times faster, and it has things nimib pages build by hand today: heading
+ids with a table of contents (<code>getSelectorItems</code>; tabelline, diagrammari and xoffy each wrote an
+<code>addHeadingIds</code>), GitHub alerts, footnotes, YAML front matter, and an AST it can write as JSON and
+render later, a natural fit for nimib's JSON backend. Its defaults differ from nimib's needs
+(anchors with a 🔗 on, raw HTML filtered by a list of tags), so nimib would set its own options.</p>
+<p>Running the spec through nim-markdown found something too: <strong>two examples crash it</strong>.</p>
+<div id="tabella-ea511222" class="tabella tb_css_theme">
+<table class="tb_table" aria-labelledby="tabella-ea511222-title">
+<thead>
+<tr class="tb_heading"><th colspan="2" id="tabella-ea511222-title" class="tb_title">Inputs that stop nim-markdown</th></tr>
+<tr class="tb_heading"><th colspan="2" class="tb_subtitle tb_heading_last">an IndexDefect, which ends the program: a nimib page would not build</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left" scope="col" id="input">Markdown</th><th class="tb_col_heading tb_left" scope="col" id="result">what happens</th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><td class="tb_row tb_left"><code>[a](&lt;b)c&gt;</code></td><td class="tb_row tb_left">Error: unhandled exception: index 9 not in 0 .. 8 [IndexDefect]</td></tr>
+</tbody>
+<tfoot>
+<tr class="tb_sourcenotes"><td class="tb_sourcenote" colspan="2">nim-markdown at main (995405b). marvdown renders both, not as the spec says.</td></tr>
+</tfoot>
+</table>
+</div>
+<h2 id="pcre">The PCRE problem, and a cheaper fix<span class="ch-sub">why this came up, and what it would take</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
+<p>nim-markdown is built on <code>std/re</code>, which loads <strong>PCRE 1</strong> (<code>libpcre.so.3</code>) at run time. Ubuntu
+26.04 no longer ships it, so nimib's CI pins <code>ubuntu-24.04</code> and installs <code>libpcre3</code>, and every
+sandbox that builds a nimib page needs the same trick. That is the real reason to look at
+marvdown: it needs no regular expressions from outside Nim.</p>
+<p>But the cheaper fix is in nim-markdown itself. It has <strong>82 regular expression literals</strong>, used
+through <code>matchLen</code> (54 times), <code>replace</code>, <code>find</code>, <code>contains</code> and <code>match</code>.
+<a href="https://github.com/nitely/nim-regex">nim-regex</a> (pure Nim, by nitely, the engine behind Nim
+2.4's <code>std/nre2</code>) handles lookahead (7 uses) and named groups (2), but not back references, which 2
+patterns use (code spans: a run of backticks closed by the same run). Those two become a few lines
+of plain Nim each.</p>
+<div id="tabella-a820aebf" class="tabella tb_css_theme">
+<table class="tb_table" aria-labelledby="tabella-a820aebf-title">
+<thead>
+<tr class="tb_heading"><th colspan="4" id="tabella-a820aebf-title" class="tb_title tb_heading_last">Three ways off PCRE</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left" scope="col" id="option" width="130px">option</th><th class="tb_col_heading tb_left" scope="col" id="effort" width="165px">effort</th><th class="tb_col_heading tb_left" scope="col" id="keeps" width="150px">output of existing pages</th><th class="tb_col_heading tb_left" scope="col" id="risk" width="180px">risk</th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><td class="tb_row tb_left">Port nim-markdown to nim-regex</td><td class="tb_row tb_left">1 to 2 days, with the CommonMark runner of this page to check that 611 stays 611</td><td class="tb_row tb_left">today's output, byte for byte</td><td class="tb_row tb_left">low; upstream is quiet (3 commits in a year), so a fork in nimib-land may be needed</td></tr>
+<tr><td class="tb_row tb_left">Move to marvdown now</td><td class="tb_row tb_left">1 hour for nimib's code, then weeks of fixing pages, or of fixing marvdown</td><td class="tb_row tb_left">nothing: half of real files change</td><td class="tb_row tb_left">high: lost lists and swallowed text in published pages</td></tr>
+<tr><td class="tb_row tb_left">Help marvdown reach CommonMark first</td><td class="tb_row tb_left">weeks, upstream, with George Lemon</td><td class="tb_row tb_left">a fast parser with anchors, AST and front matter, later</td><td class="tb_row tb_left">depends on one maintainer's priorities</td></tr>
+</tbody>
+</table>
+</div>
+<h2 id="downstream">What changes downstream<span class="ch-sub">the repositories in this project, read on 28 Nov 2026</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
+<div id="tabella-49ba705d" class="tabella tb_css_theme">
+<table class="tb_table" aria-labelledby="tabella-49ba705d-title">
+<thead>
+<tr class="tb_heading"><th colspan="3" id="tabella-49ba705d-title" class="tb_title">Where nimib's three libraries show up</th></tr>
+<tr class="tb_heading"><th colspan="3" class="tb_subtitle tb_heading_last">and what a swap would change</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left" scope="col" id="repo" width="115px">repository</th><th class="tb_col_heading tb_left" scope="col" id="uses" width="200px">uses</th><th class="tb_col_heading tb_left" scope="col" id="impact" width="215px">impact</th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><td class="tb_row tb_left">nimibook</td><td class="tb_row tb_left">jsony for <code>book.json</code> (own dependency); <code>loadTomlSection</code> for <code>[nimibook]</code></td><td class="tb_row tb_left">TOML: none if <code>loadTomlSection</code> keeps its signature. JSON: none, it keeps jsony. Markdown: every chapter's text</td></tr>
+<tr><td class="tb_row tb_left">nimiSlides</td><td class="tb_row tb_left">imports <code>markdown</code> and calls <code>markdown(...)</code> for slides and footers; <code>loadTomlSection</code> for <code>[nimislides]</code></td><td class="tb_row tb_left">Markdown: two renderers in one deck if nimib moves and nimiSlides does not; move both or neither</td></tr>
+<tr><td class="tb_row tb_left">tabelline (docs, book)</td><td class="tb_row tb_left"><code>markdownToHtml</code> in 9 blocks; the book calls <code>markdown(...)</code> and <code>fromJson(NbDoc)</code> (jsony through nimib)</td><td class="tb_row tb_left">JSON: the book's re-render changes if nimib leaves jsony. Markdown: every page</td></tr>
+<tr><td class="tb_row tb_left">diagrammari, xoffy</td><td class="tb_row tb_left"><code>markdownToHtml</code> in their blocks, own <code>addHeadingIds</code></td><td class="tb_row tb_left">Markdown only; would gain anchors from marvdown</td></tr>
+<tr><td class="tb_row tb_left">nblog</td><td class="tb_row tb_left">a draft post on serializing OOP blocks with jsony</td><td class="tb_row tb_left">the post documents jsony's approach, still valid as history</td></tr>
+<tr><td class="tb_row tb_left">every nimib page</td><td class="tb_row tb_left"><code>nbText</code></td><td class="tb_row tb_left">Markdown: any output change shows up in published pages</td></tr>
+</tbody>
+</table>
+</div>
+<aside class="note nimib"><span class="note-label">🐳 For nimib</span><p>Two API points make this manageable: <code>markdownToHtml</code> is the single place nimib renders Markdown,
+and <code>loadTomlSection(content, section, T)</code> the single place it reads TOML. Keep both signatures and
+most downstream code does not notice. The exceptions are the direct <code>markdown(...)</code> calls
+(nimiSlides, tabelline's book) and the jsony re-export.</p>
+</aside>
+<h2 id="plan">Effort, risks and a plan<span class="ch-sub">from the simplest change to the hardest</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
+<div id="tabella-94fac31f" class="tabella tb_css_theme">
+<table class="tb_table" aria-labelledby="tabella-94fac31f-title">
+<thead>
+<tr class="tb_heading"><th colspan="5" id="tabella-94fac31f-title" class="tb_title tb_heading_last">Five changes, in order</th></tr>
+<tr class="tb_col_headings tb_col_headings_last"><th class="tb_col_heading tb_left" scope="col" id="step" width="150px">change</th><th class="tb_col_heading tb_left" scope="col" id="effort" width="115px">effort</th><th class="tb_col_heading tb_left" scope="col" id="gain" width="150px">gain</th><th class="tb_col_heading tb_left" scope="col" id="risk" width="180px">risk</th><th class="tb_col_heading tb_left" scope="col" id="now" width="130px">do it now?</th></tr>
+</thead>
+<tbody class="tb_table_body">
+<tr><td class="tb_row tb_left">1. Drop fusion</td><td class="tb_row tb_left">an hour</td><td class="tb_row tb_left">one dependency less</td><td class="tb_row tb_left">none; test on Windows</td><td class="tb_row tb_left"><strong>yes</strong></td></tr>
+<tr><td class="tb_row tb_left">2. nim-markdown off PCRE (nim-regex port, fix the two crashes)</td><td class="tb_row tb_left">1 to 2 days</td><td class="tb_row tb_left">no libpcre3, no Ubuntu pin, sandboxes just work</td><td class="tb_row tb_left">low, checked by the spec runner</td><td class="tb_row tb_left"><strong>yes</strong></td></tr>
+<tr><td class="tb_row tb_left">3. parsetoml to openparser/toml</td><td class="tb_row tb_left">half a day</td><td class="tb_row tb_left">a conforming TOML parser, 45 lines less</td><td class="tb_row tb_left">Nim ≥ 2.2.10 for every user; a 47k-line single-author package</td><td class="tb_row tb_left">later, when nimib raises its Nim floor</td></tr>
+<tr><td class="tb_row tb_left">4. jsony to openparser/json</td><td class="tb_row tb_left">1 to 2 days, plus downstream</td><td class="tb_row tb_left">one JSON library</td><td class="tb_row tb_left">breaks custom block hooks and tabelline's book</td><td class="tb_row tb_left">no</td></tr>
+<tr><td class="tb_row tb_left">5. nim-markdown to marvdown</td><td class="tb_row tb_left">an hour of code, weeks of output changes</td><td class="tb_row tb_left">speed, anchors, front matter, AST</td><td class="tb_row tb_left">lost lists and text in published pages</td><td class="tb_row tb_left">not before ~90% on CommonMark</td></tr>
+</tbody>
+</table>
+</div>
+<p><strong>Recommendation.</strong> Do the first two now: they remove what hurts (fusion, PCRE) without changing
+a single page. Keep jsony. Treat openparser's TOML as a good option for the next time nimib
+raises its minimum Nim, if openparser is still moving at the same quality and has gained users.
+Leave marvdown for later, and if its ideas appeal (anchors, front matter, the AST), the most
+useful thing nimib can do is send George Lemon this page's CommonMark runner: it turns
+&quot;CommonMark compliant&quot; into a number that can go up.</p>
+<p>What would change my mind: marvdown passing 90% of the spec and rendering the nimib repositories'
+files like nim-markdown; openparser getting a second maintainer or wide use; nimib deciding to
+require Nim 2.2.10 anyway.</p>
+<h2 id="built">How this page is built<span class="ch-sub">every number is rerun by one script</span><a class="ch-top" href="#toc">↑ Contents</a></h2>
+<p>The page is a nimib notebook (<code>src/index.nim</code>) with tables by
+<a href="https://pietroppeter.github.io/tabelline/">tabelline</a>; it reads every number from <code>src/data/</code>,
+which <code>src/bench/run.sh</code> writes:</p>
+<ul>
+<li><code>bench/deps.sh</code> fetches marvdown, openparser (and nimsimd, nimcypher, dynasm), nim-markdown,
+jsony, parsetoml and three test suites at pinned commits: commonmark-spec, cmark-gfm (the GFM
+extensions) and toml-test.</li>
+<li><code>cm_*.nim</code> and <code>gfm_*.nim</code> are four tiny programs, Markdown on stdin and HTML on stdout, one per
+library and setting. <code>runspec.py</code> feeds them every spec example and compares the HTML with
+CommonMark's own <code>normalize.py</code> (that is why it is Python: it reuses the official normalizer).
+<code>realworld.py</code> does the same for a folder of <code>.md</code> files.</li>
+<li><code>tt_parsetoml.nim</code> and <code>tt_optoml.nim</code> run toml-test's file lists; <code>tjson_op.nim</code> is the block
+round trip of the JSON chapter; <code>bench.nim</code> the speed table; <code>cases.nim</code> renders the cards of the
+Markdown chapter with both libraries in one program.</li>
+<li>The dependents come from cloning (blob-less) every repository of George Lemon's organizations and
+reading their nimble files, then GitHub code search for the rest.</li>
+</ul>
+<p><strong>Sources</strong>: <a href="https://github.com/openpeeps/marvdown">marvdown</a> (6af1ac0),
+<a href="https://github.com/openpeeps/openparser">openparser</a> (a60cce6),
+<a href="https://github.com/soasme/nim-markdown">nim-markdown</a> (995405b),
+<a href="https://github.com/treeform/jsony">jsony</a>, <a href="https://github.com/NimParsers/parsetoml">parsetoml</a>,
+<a href="https://github.com/nim-lang/fusion">fusion</a>, <a href="https://github.com/pietroppeter/nimib">nimib</a> (7118b3a),
+<a href="https://github.com/commonmark/commonmark-spec">CommonMark spec</a>,
+<a href="https://github.com/github/cmark-gfm">cmark-gfm</a>, <a href="https://github.com/toml-lang/toml-test">toml-test</a>,
+<a href="https://github.com/georgelemon">George Lemon on GitHub</a> and <a href="https://dev.to/georgelemon">on DEV</a>,
+<a href="https://github.com/openpeeps">OpenPeeps</a>, <a href="https://forum.nim-lang.org/t/14123">Clue on the Nim forum</a>.</p>
+</main>
+<footer>
+<div class="nb-box">
+ <span><span class="nb-small">made with <a href="https://pietroppeter.github.io/nimib/">nimib 🐳</a></span></span>
+ <span></span>
+ <span><button class="nb-small" id="show" onclick="toggleSourceDisplay()">Show Source</button></span>
+</div>
+</footer>
+<section id="source">
+<pre><code class="nohighlight nim hljs"><span class="hljs-comment">## Should nimib swap jsony, parsetoml and nim-markdown for George Lemon's openparser and marvdown?</span>
+<span class="hljs-comment">## Every number on the page comes from data/, written by bench/run.sh (see bench/ and README.md).</span>
+<span class="hljs-comment">## Build: sh deps.sh &amp;&amp; nim r index.nim   (writes ../index.html; MO_DEPS moves the deps folder)</span>
+<span class="hljs-keyword">import</span> std/[os, strformat, strutils, json, sequtils]
+<span class="hljs-keyword">import</span> nimib
+<span class="hljs-keyword">import</span> tabelline, tabelline/nimib
+<span class="hljs-keyword">import</span> lib/blocks
+<span class="hljs-keyword">import</span> lib/style <span class="hljs-keyword">as</span> pagestyle   <span class="hljs-comment"># (as: tabelline exports a `style` too)</span>
+<span class="hljs-keyword">import</span> review          <span class="hljs-comment"># tabelline's review mode, from claude-artifacts shared/review (unchanged copy)</span>
+
+nbInit
+nb.doc.filename = currentSourcePath().parentDir.parentDir / <span class="hljs-string">&quot;index.html&quot;</span>
+nb.title = <span class="hljs-string">&quot;marvdown and openparser for nimib?&quot;</span>
+nb.useExplainerStyle
+nbReview(tpage = <span class="hljs-string">&quot;marvdown-openparser&quot;</span>, tsource = <span class="hljs-string">&quot;marvdown-openparser/src/index.nim&quot;</span>)
+
+<span class="hljs-comment"># ---------------------------------------------------------------- data, at build time</span>
+<span class="hljs-keyword">let</span> data = currentSourcePath().parentDir / <span class="hljs-string">&quot;data&quot;</span>
+<span class="hljs-keyword">proc</span> tsv(name: <span class="hljs-built_in">string</span>): <span class="hljs-built_in">seq</span>[<span class="hljs-built_in">seq</span>[<span class="hljs-built_in">string</span>]] =
+  <span class="hljs-comment">## The rows of data/&lt;name&gt;, header left out.</span>
+  <span class="hljs-keyword">let</span> lines = readFile(data / name).strip.splitLines
+  <span class="hljs-keyword">for</span> line <span class="hljs-keyword">in</span> lines[<span class="hljs-number">1</span> .. ^<span class="hljs-number">1</span>]: <span class="hljs-literal">result</span>.add line.split(<span class="hljs-string">'\t'</span>)
+
+<span class="hljs-keyword">let</span> cm = tsv(<span class="hljs-string">&quot;commonmark.tsv&quot;</span>)
+<span class="hljs-keyword">let</span> gfm = tsv(<span class="hljs-string">&quot;gfm.tsv&quot;</span>)
+<span class="hljs-keyword">let</span> rw = tsv(<span class="hljs-string">&quot;realworld.tsv&quot;</span>)[<span class="hljs-number">0</span>]
+<span class="hljs-keyword">let</span> toml = tsv(<span class="hljs-string">&quot;toml.tsv&quot;</span>)
+<span class="hljs-keyword">let</span> speed = tsv(<span class="hljs-string">&quot;speed.tsv&quot;</span>)
+<span class="hljs-keyword">let</span> crash = tsv(<span class="hljs-string">&quot;crash.tsv&quot;</span>)
+<span class="hljs-keyword">let</span> libs = tsv(<span class="hljs-string">&quot;libs.tsv&quot;</span>)
+<span class="hljs-keyword">let</span> cases = parseJson(readFile(data / <span class="hljs-string">&quot;cases.json&quot;</span>))
+<span class="hljs-keyword">let</span> ownOrgs = readFile(data / <span class="hljs-string">&quot;dependents_own_orgs.tsv&quot;</span>).strip.splitLines.mapIt(it.split(<span class="hljs-string">'\t'</span>))
+<span class="hljs-keyword">let</span> outside = tsv(<span class="hljs-string">&quot;dependents_outside.tsv&quot;</span>)
+<span class="hljs-keyword">let</span> orgs = tsv(<span class="hljs-string">&quot;orgs.tsv&quot;</span>)
+
+<span class="hljs-keyword">proc</span> total(rows: <span class="hljs-built_in">seq</span>[<span class="hljs-built_in">seq</span>[<span class="hljs-built_in">string</span>]], col: <span class="hljs-built_in">int</span>): <span class="hljs-built_in">int</span> =
+  <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> rows: <span class="hljs-literal">result</span> += parseInt(r[col])
+<span class="hljs-keyword">let</span>
+  cmN = total(cm, <span class="hljs-number">1</span>)
+  cmNow = total(cm, <span class="hljs-number">2</span>)
+  cmNew = total(cm, <span class="hljs-number">3</span>)
+  gfmN = total(gfm, <span class="hljs-number">1</span>)
+  gfmNow = total(gfm, <span class="hljs-number">2</span>)
+  gfmNew = total(gfm, <span class="hljs-number">3</span>)
+  rwFiles = parseInt(rw[<span class="hljs-number">0</span>])
+  rwSame = parseInt(rw[<span class="hljs-number">1</span>])
+<span class="hljs-keyword">func</span> pct(a, b: <span class="hljs-built_in">int</span>): <span class="hljs-built_in">string</span> = $<span class="hljs-built_in">int</span>(<span class="hljs-number">100</span> * a / b + <span class="hljs-number">0.5</span>) &amp; <span class="hljs-string">&quot;%&quot;</span>
+<span class="hljs-keyword">proc</span> tomlRow(lib, v: <span class="hljs-built_in">string</span>): <span class="hljs-built_in">seq</span>[<span class="hljs-built_in">int</span>] =
+  <span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> toml:
+    <span class="hljs-keyword">if</span> r[<span class="hljs-number">0</span>] == lib <span class="hljs-keyword">and</span> r[<span class="hljs-number">1</span>] == v: <span class="hljs-keyword">return</span> r[<span class="hljs-number">2</span> .. <span class="hljs-number">5</span>].mapIt(parseInt(it))
+<span class="hljs-keyword">let</span>
+  pt10 = tomlRow(<span class="hljs-string">&quot;parsetoml&quot;</span>, <span class="hljs-string">&quot;1.0.0&quot;</span>)
+  op10 = tomlRow(<span class="hljs-string">&quot;optoml&quot;</span>, <span class="hljs-string">&quot;1.0.0&quot;</span>)
+  pt11 = tomlRow(<span class="hljs-string">&quot;parsetoml&quot;</span>, <span class="hljs-string">&quot;1.1.0&quot;</span>)
+  op11 = tomlRow(<span class="hljs-string">&quot;optoml&quot;</span>, <span class="hljs-string">&quot;1.1.0&quot;</span>)
+<span class="hljs-keyword">let</span> opOwn = ownOrgs.filterIt(it[<span class="hljs-number">1</span>] == <span class="hljs-string">&quot;openparser&quot;</span>).len
+<span class="hljs-keyword">let</span> mdOwn = ownOrgs.filterIt(it[<span class="hljs-number">1</span>] == <span class="hljs-string">&quot;marvdown&quot;</span>).len
+
+<span class="hljs-keyword">const</span>
+  nimibRepo = <span class="hljs-string">&quot;https://github.com/pietroppeter/nimib/blob/7118b3a8fa112757b7d76ffcb5251a6478cbfcfd/&quot;</span>
+  marv = <span class="hljs-string">&quot;https://github.com/openpeeps/marvdown&quot;</span>
+  op = <span class="hljs-string">&quot;https://github.com/openpeeps/openparser&quot;</span>
+
+<span class="hljs-comment"># ---------------------------------------------------------------- the page</span>
+nbText: <span class="hljs-string">&quot;# marvdown and openparser for nimib?&quot;</span>
+
+nbLede: <span class="hljs-string">&quot;&quot;&quot;
+nimib turns Markdown into HTML with nim-markdown, reads `nimib.toml` with parsetoml and
+writes its blocks as JSON with jsony. George Lemon's **marvdown** (Markdown) and **openparser**
+(JSON, TOML and 28 other formats) could replace all three. This page measures what would change,
+from the simplest dependency to the hardest, and says who makes the new libraries and who uses them.
+&quot;&quot;&quot;</span>
+nbVersion(<span class="hljs-number">1</span>, <span class="hljs-string">&quot;28 Nov 2026&quot;</span>)
+
+nbTldr: &amp;<span class="hljs-string">&quot;&quot;&quot;
+- **Fusion** is used for one thing: `captureStdout` (`src/nimib/capture.nim`) calls
+  `duplicate` and `duplicateTo` from `fusion/ioutils`, two wrappers of the C calls `dup` and `dup2`.
+  About twenty lines of Nim replace it, and nimib loses a dependency.
+- **TOML: openparser is better than parsetoml.** On the official toml-test suite (TOML 1.0) it
+  accepts all {op10[1]} valid files and rejects all {op10[3]} invalid ones; parsetoml accepts
+  {pt10[0]} of {pt10[1]} and rejects {pt10[2]} of {pt10[3]}. parsetoml had no commit in the last year.
+- **JSON: no reason to move.** jsony works, is maintained and used by 200+ packages;
+  openparser can do the same job, but its hooks have another signature, so every block with a
+  custom hook (and tabelline's book, which reads nimib's JSON) would have to change.
+- **Markdown: marvdown is not ready.** On CommonMark's {cmN} examples it gets {cmNew} right
+  ({pct(cmNew, cmN)}), nim-markdown {cmNow} ({pct(cmNow, cmN)}). On {rwFiles} real Markdown files
+  of the nimib repositories only {rwSame} render the same. It drops lists that follow a paragraph
+  and swallows the rest of a page after an inline `&lt;img&gt;`. It is 10 times faster and needs no PCRE.
+- **The PCRE problem has a cheaper fix**: port nim-markdown's 82 regular expressions to
+  nim-regex (two use back references and need a few lines of code each), and fix the two
+  inputs that crash it, found on the way.
+- **Who**: George Lemon publishes alone, at a very high pace, in the OpenPeeps org and six
+  others; {opOwn} of his own repositories use openparser, and two outside them (by Jaremy Creechley
+  and David Krause). Nobody outside uses marvdown yet.
+&quot;&quot;&quot;</span>
+
+nbToc @[
+  (<span class="hljs-string">&quot;started&quot;</span>, <span class="hljs-string">&quot;How this page started&quot;</span>),
+  (<span class="hljs-string">&quot;today&quot;</span>, <span class="hljs-string">&quot;What nimib depends on today&quot;</span>),
+  (<span class="hljs-string">&quot;fusion&quot;</span>, <span class="hljs-string">&quot;Fusion: one module, two C calls&quot;</span>),
+  (<span class="hljs-string">&quot;who&quot;</span>, <span class="hljs-string">&quot;George Lemon and OpenPeeps&quot;</span>),
+  (<span class="hljs-string">&quot;users&quot;</span>, <span class="hljs-string">&quot;Who depends on openparser and marvdown&quot;</span>),
+  (<span class="hljs-string">&quot;toml&quot;</span>, <span class="hljs-string">&quot;TOML: parsetoml or openparser&quot;</span>),
+  (<span class="hljs-string">&quot;json&quot;</span>, <span class="hljs-string">&quot;JSON: jsony or openparser&quot;</span>),
+  (<span class="hljs-string">&quot;markdown&quot;</span>, <span class="hljs-string">&quot;Markdown: nim-markdown or marvdown&quot;</span>),
+  (<span class="hljs-string">&quot;pcre&quot;</span>, <span class="hljs-string">&quot;The PCRE problem, and a cheaper fix&quot;</span>),
+  (<span class="hljs-string">&quot;downstream&quot;</span>, <span class="hljs-string">&quot;What changes downstream&quot;</span>),
+  (<span class="hljs-string">&quot;plan&quot;</span>, <span class="hljs-string">&quot;Effort, risks and a plan&quot;</span>),
+  (<span class="hljs-string">&quot;built&quot;</span>, <span class="hljs-string">&quot;How this page is built&quot;</span>),
+]
+
+<span class="hljs-comment"># =========================================================================================== 0</span>
+nbChapter(<span class="hljs-string">&quot;started&quot;</span>, <span class="hljs-string">&quot;How this page started&quot;</span>, <span class="hljs-string">&quot;28 Nov 2026, from the Nimib Land project&quot;</span>)
+
+nbPrompt(<span class="hljs-string">&quot;Pietro&quot;</span>, <span class="hljs-string">&quot;28 Nov 2026&quot;</span>, [
+  <span class="hljs-string">&quot;I am considering adopting marvdown and open parser for nimib (instead of jsony and opentoml and nim markdown. Write an explainer that estimates the impacts, pros and cons. Also, what do we use Nim fusion for?&quot;</span>,
+  <span class="hljs-string">&quot;I want also to know all that you can find about George lemon and openpeeps. Which other projects are depending on those libraries?&quot;</span>,
+])
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+&quot;opentoml&quot; is parsetoml: that is the TOML library nimib uses. Earlier in the project, a thread
+on taking Nim's standard library off PCRE recommended porting nim-markdown to
+[nim-regex](https://github.com/nitely/nim-regex), so this page compares against that too.
+Everything here was run, not read: the libraries at the commits in `bench/deps.sh`, built with
+Nim 2.2.15 (openparser asks for 2.2.10 or later).
+&quot;&quot;&quot;</span>
+
+<span class="hljs-comment"># =========================================================================================== 1</span>
+nbChapter(<span class="hljs-string">&quot;today&quot;</span>, <span class="hljs-string">&quot;What nimib depends on today&quot;</span>, <span class="hljs-string">&quot;nimib 0.4.3 on main (7118b3a), its nimble file&quot;</span>)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+nimib's nimble file asks for five packages. Each is used in one or two places:
+&quot;&quot;&quot;</span>
+
+nbTable toTableData(@[
+  (pkg: <span class="hljs-string">&quot;`markdown` (nim-markdown)&quot;</span>, where: <span class="hljs-string">&quot;`renders.nim`: `markdownToHtml`, the HTML of every `nbText`; `nimib.nim` imports it&quot;</span>, candidate: <span class="hljs-string">&quot;marvdown&quot;</span>),
+  (pkg: <span class="hljs-string">&quot;`parsetoml`&quot;</span>, where: <span class="hljs-string">&quot;`config.nim`: `loadTomlSection` reads `nimib.toml`, turns TOML into JSON, then into an object with jsony&quot;</span>, candidate: <span class="hljs-string">&quot;openparser/toml&quot;</span>),
+  (pkg: <span class="hljs-string">&quot;`jsony`&quot;</span>, where: <span class="hljs-string">&quot;`jsons.nim`: a JSON hook per block type, so a `seq[NbBlock]` can go to JSON and back; `jsutils.nim`: values passed to `nbJsFromCode`; re-exported by `nimib`&quot;</span>, candidate: <span class="hljs-string">&quot;openparser/json&quot;</span>),
+  (pkg: <span class="hljs-string">&quot;`fusion`&quot;</span>, where: <span class="hljs-string">&quot;`capture.nim`: `captureStdout`, the output of `nbCode`&quot;</span>, candidate: <span class="hljs-string">&quot;nothing: ~20 lines&quot;</span>),
+  (pkg: <span class="hljs-string">&quot;Nim ≥ 1.4&quot;</span>, where: <span class="hljs-string">&quot;CI tests Nim stable and devel only&quot;</span>, candidate: <span class="hljs-string">&quot;openparser needs 2.2.10&quot;</span>),
+]):
+  optCssTheme()
+  tabHeader <span class="hljs-string">&quot;nimib's dependencies&quot;</span>, <span class="hljs-string">&quot;what each is for, and what would replace it&quot;</span>
+  colsLabel:
+    pkg: <span class="hljs-string">&quot;package&quot;</span>
+    where: <span class="hljs-string">&quot;used in&quot;</span>
+    candidate: <span class="hljs-string">&quot;replaced by&quot;</span>
+  fmtMarkdown [<span class="hljs-string">&quot;pkg&quot;</span>, <span class="hljs-string">&quot;where&quot;</span>, <span class="hljs-string">&quot;candidate&quot;</span>]
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+The same three libraries are used beside nimib, not only through it: nimiSlides calls
+nim-markdown's `markdown(...)` itself, and so does tabelline's book; nimibook reads and writes
+its `book.json` with jsony, and nimibook and nimiSlides read their own sections of `nimib.toml`
+with nimib's `loadTomlSection`. The [downstream chapter](#downstream) has the full list.
+&quot;&quot;&quot;</span>
+
+nbTable toTableData(libs.mapIt((lib: it[<span class="hljs-number">0</span>], role: it[<span class="hljs-number">1</span>], version: it[<span class="hljs-number">3</span>], nim: it[<span class="hljs-number">4</span>], since: it[<span class="hljs-number">5</span>][<span class="hljs-number">0</span> .. <span class="hljs-number">3</span>],
+    last: it[<span class="hljs-number">6</span>], commits: parseInt(it[<span class="hljs-number">7</span>]), authors: parseInt(it[<span class="hljs-number">8</span>]), year: parseInt(it[<span class="hljs-number">9</span>]),
+    lines: parseInt(it[<span class="hljs-number">10</span>]), nimble: parseInt(it[<span class="hljs-number">11</span>])))), rownameCol = <span class="hljs-string">&quot;lib&quot;</span>:
+  optCssTheme()
+  tabHeader <span class="hljs-string">&quot;The libraries, old and new&quot;</span>, <span class="hljs-string">&quot;from their git history, 28 Nov 2026&quot;</span>
+  colsLabel:
+    role: <span class="hljs-string">&quot;for&quot;</span>
+    version: <span class="hljs-string">&quot;version&quot;</span>
+    nim: <span class="hljs-string">&quot;needs Nim&quot;</span>
+    since: <span class="hljs-string">&quot;since&quot;</span>
+    last: <span class="hljs-string">&quot;last commit&quot;</span>
+    commits: <span class="hljs-string">&quot;commits&quot;</span>
+    authors: <span class="hljs-string">&quot;authors&quot;</span>
+    year: <span class="hljs-string">&quot;commits, last 12 months&quot;</span>
+    lines: <span class="hljs-string">&quot;lines of Nim&quot;</span>
+    nimble: <span class="hljs-string">&quot;nimble files that name it&quot;</span>
+  fmtNumber [<span class="hljs-string">&quot;commits&quot;</span>, <span class="hljs-string">&quot;authors&quot;</span>, <span class="hljs-string">&quot;year&quot;</span>, <span class="hljs-string">&quot;lines&quot;</span>, <span class="hljs-string">&quot;nimble&quot;</span>], decimals = <span class="hljs-number">0</span>
+  tabStyle style.text(weight = <span class="hljs-string">&quot;bold&quot;</span>), loc.body(rows = where($it[<span class="hljs-string">&quot;lib&quot;</span>] <span class="hljs-keyword">in</span> [<span class="hljs-string">&quot;marvdown&quot;</span>, <span class="hljs-string">&quot;openparser&quot;</span>]))
+  tabSourceNote md(<span class="hljs-string">&quot;Authors: distinct commit e-mails. Last column: GitHub code search for the name in `.nimble` files (a rough count of users, forks and duplicates included).&quot;</span>)
+
+<span class="hljs-comment"># =========================================================================================== 2</span>
+nbChapter(<span class="hljs-string">&quot;fusion&quot;</span>, <span class="hljs-string">&quot;Fusion: one module, two C calls&quot;</span>, <span class="hljs-string">&quot;the short answer to the second question&quot;</span>)
+
+nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
+nimib imports [fusion](https://github.com/nim-lang/fusion) in exactly one place,
+[`src/nimib/capture.nim`]({nimibRepo}src/nimib/capture.nim), for `fusion/ioutils`:
+
+```nim
+import fusion/ioutils   # duplicate, duplicateTo
+```
+
+`captureStdout` is how `nbCode` gets the output of its code: it copies the stdout file
+descriptor with `duplicate`, points stdout at a temporary file with `duplicateTo`, runs the code,
+reads the file and puts stdout back. `duplicate` is C's `dup` and `duplicateTo` is `dup2`
+(`_dup` and `_dup2` on Windows). The only other trace of fusion is `withDir` in `paths.nim`,
+already copied from `fusion/scripting` (&quot;ported from fusion/scripting&quot;), not imported.
+
+So the whole dependency is two C calls. Here they are without fusion, run while this page was built
+(the block below runs inside nimib's own `captureStdout`, so it also checks that the two nest):
+&quot;&quot;&quot;</span>
+
+nbCode:
+  <span class="hljs-keyword">import</span> std/tempfiles
+  <span class="hljs-keyword">when</span> <span class="hljs-keyword">defined</span>(windows):
+    <span class="hljs-keyword">proc</span> cDup(fd: <span class="hljs-built_in">cint</span>): <span class="hljs-built_in">cint</span> {.importc: <span class="hljs-string">&quot;_dup&quot;</span>, header: <span class="hljs-string">&quot;&lt;io.h&gt;&quot;</span>.}
+    <span class="hljs-keyword">proc</span> cDup2(fd, to: <span class="hljs-built_in">cint</span>): <span class="hljs-built_in">cint</span> {.importc: <span class="hljs-string">&quot;_dup2&quot;</span>, header: <span class="hljs-string">&quot;&lt;io.h&gt;&quot;</span>.}
+  <span class="hljs-keyword">else</span>:
+    <span class="hljs-keyword">proc</span> cDup(fd: <span class="hljs-built_in">cint</span>): <span class="hljs-built_in">cint</span> {.importc: <span class="hljs-string">&quot;dup&quot;</span>, header: <span class="hljs-string">&quot;&lt;unistd.h&gt;&quot;</span>.}
+    <span class="hljs-keyword">proc</span> cDup2(fd, to: <span class="hljs-built_in">cint</span>): <span class="hljs-built_in">cint</span> {.importc: <span class="hljs-string">&quot;dup2&quot;</span>, header: <span class="hljs-string">&quot;&lt;unistd.h&gt;&quot;</span>.}
+
+  <span class="hljs-keyword">template</span> captureStdoutNoFusion(ident: <span class="hljs-built_in">untyped</span>, body: <span class="hljs-built_in">untyped</span>) =
+    <span class="hljs-keyword">let</span> outFd = <span class="hljs-literal">stdout</span>.getFileHandle()
+    <span class="hljs-keyword">let</span> saved = cDup(outFd)                     <span class="hljs-comment"># was fusion's duplicate</span>
+    <span class="hljs-keyword">let</span> (tmp, path) = createTempFile(<span class="hljs-string">&quot;tmp&quot;</span>, <span class="hljs-string">&quot;&quot;</span>)
+    <span class="hljs-literal">stdout</span>.flushFile()
+    doAssert cDup2(tmp.getFileHandle(), outFd) != -<span class="hljs-number">1</span>   <span class="hljs-comment"># was duplicateTo</span>
+    body
+    <span class="hljs-literal">stdout</span>.flushFile()
+    tmp.setFilePos(<span class="hljs-number">0</span>)
+    ident = tmp.readAll()
+    tmp.close()
+    removeFile(path)
+    doAssert cDup2(saved, outFd) != -<span class="hljs-number">1</span>
+
+  <span class="hljs-keyword">var</span> captured: <span class="hljs-built_in">string</span>
+  captureStdoutNoFusion(captured):
+    <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;hello from inside&quot;</span>
+  <span class="hljs-keyword">echo</span> <span class="hljs-string">&quot;captured: &quot;</span>, captured.strip
+
+nbNote(nkNimib, <span class="hljs-string">&quot;&quot;&quot;
+Removing fusion is a small, safe change on its own: the template above, a test on Windows in CI,
+and one line less in `nimib.nimble`. It does not depend on anything else on this page.
+&quot;&quot;&quot;</span>)
+
+<span class="hljs-comment"># =========================================================================================== 3</span>
+nbChapter(<span class="hljs-string">&quot;who&quot;</span>, <span class="hljs-string">&quot;George Lemon and OpenPeeps&quot;</span>, <span class="hljs-string">&quot;from GitHub, DEV, the Nim forum and the package registry&quot;</span>)
+
+nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
+**George Lemon** ([georgelemon](https://github.com/georgelemon) on GitHub) describes himself as
+&quot;Open Source Enthusiast&quot;, and on [DEV](https://dev.to/georgelemon) (since September 2019) as
+&quot;Open Source Enthusiast at OpenPeeps&quot;. His one DEV post (June 2023) shows how to build Node.js and
+Bun addons in Nim with his library [denim](https://github.com/openpeeps/denim). His site,
+openpeeps.dev, did not load from here. Nothing public says more about him than his work.
+
+**OpenPeeps** is a GitHub organization whose description is &quot;Open Source Enthusiasts | Developing
+@supranim @getsunday @tim-engine @trytilda @onebuckapp and more&quot;. Its only visible member is George
+Lemon, and every one of the {libs[1][7]} commits of marvdown and the {libs[4][7]} commits of
+openparser is his. It works like the label of one very productive person, with sister
+organizations for each larger project:
+&quot;&quot;&quot;</span>
+
+nbTable toTableData(orgs.mapIt((org: it[<span class="hljs-number">0</span>], repos: it[<span class="hljs-number">1</span>], what: it[<span class="hljs-number">2</span>]))), rownameCol = <span class="hljs-string">&quot;org&quot;</span>:
+  optCssTheme()
+  tabHeader <span class="hljs-string">&quot;George Lemon's organizations&quot;</span>, <span class="hljs-string">&quot;public repositories, 28 Nov 2026&quot;</span>
+  colsLabel:
+    repos: <span class="hljs-string">&quot;repos&quot;</span>
+    what: <span class="hljs-string">&quot;what is there&quot;</span>
+  tabSourceNote md(<span class="hljs-string">&quot;GitHub search, forks included. 92 entries of Nim's package registry (of about 3,000) point to openpeeps (48), nimbase (38) or supranim (6).&quot;</span>)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+Some facts that matter for a dependency:
+
+- **Pace.** OpenPeeps created 5 to 8 repositories a year from 2021 to 2025, and 35 in 2026.
+  openparser is 47,000 lines of Nim written in seven months (April to November 2026, 265 commits),
+  with a regex engine that has its own JIT (via his DynASM port), SIMD JSON, a QR code reader,
+  a diff engine and a NIF parser among its 30 modules.
+- **Best known work.** [Tim](https://github.com/tim-engine/tim), a template engine and markup
+  language (69 stars, since 2022), denim (56), [Supranim](https://github.com/supranim/supranim), a
+  web framework (46), kapsis, a CLI builder (41). His libraries have tests, CI and API docs.
+- **Moves and renames.** He renamed `bro` to `bowdy` in the registry and moved a batch of
+  wrappers from openpeeps to nimbase (nim-lang/packages PRs
+  [#3535](https://github.com/nim-lang/packages/pull/3535) and
+  [#3546](https://github.com/nim-lang/packages/pull/3546)). Handled well, but a reminder that
+  names and places change.
+- **His own package manager.** In August 2026 he announced
+  [Clue](https://forum.nim-lang.org/t/14123), an alternative to nimble that resolves versions
+  depth-first (&quot;I don't care about versions, that's a PM's job&quot;). His libraries are tested with
+  `clue test`; they install with nimble too.
+&quot;&quot;&quot;</span>
+
+nbNote(nkCareful, <span class="hljs-string">&quot;&quot;&quot;
+All of this is what his public profiles and repositories show. I found no interview, talk or
+biography, and I did not try to find out more about him as a person.
+&quot;&quot;&quot;</span>)
+
+<span class="hljs-comment"># =========================================================================================== 4</span>
+nbChapter(<span class="hljs-string">&quot;users&quot;</span>, <span class="hljs-string">&quot;Who depends on openparser and marvdown&quot;</span>, <span class="hljs-string">&quot;every nimble file on GitHub that names them&quot;</span>)
+
+nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
+I read the nimble files of all 153 public repositories of George Lemon's organizations, then
+searched GitHub's code index for every other nimble file that names `openparser` or `marvdown`.
+
+- **Inside his organizations**: {opOwn} repositories require openparser (Tim, Supranim, Clue,
+  Booyaka, powpow, kapsis, bowdy, nyml, ozark, the nimbase API clients...). Only {mdOwn} require
+  marvdown: Booyaka (his documentation generator), datengine and stupidgreen (a static site
+  generator), plus getsunday/sunday in another of his organizations.
+- **Outside them**, there are three:
+&quot;&quot;&quot;</span>
+
+nbTable toTableData(outside.mapIt((repo: it[<span class="hljs-number">0</span>], who: it[<span class="hljs-number">1</span>], uses: it[<span class="hljs-number">2</span>], why: it[<span class="hljs-number">3</span>]))), rownameCol = <span class="hljs-string">&quot;repo&quot;</span>:
+  optCssTheme()
+  tabHeader <span class="hljs-string">&quot;Users outside George Lemon's organizations&quot;</span>
+  colsLabel:
+    who: <span class="hljs-string">&quot;by&quot;</span>
+    uses: <span class="hljs-string">&quot;requires&quot;</span>
+    why: <span class="hljs-string">&quot;for&quot;</span>
+  tabSourceNote md(<span class="hljs-string">&quot;GitHub code search (default branches, as indexed on 28 Nov 2026), checked by cloning each repository.&quot;</span>)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+So openparser has two real users outside its author's work, both for its NIF module, both by
+well-known Nim developers (Jaremy Creechley wrote figuro and contributed to nim-markdown;
+David Krause wrote nimja), both in the last two months. marvdown has none. nimib would be the
+first large outside user of either, with nimibook, nimiSlides and every nimib page behind it.
+&quot;&quot;&quot;</span>
+
+<span class="hljs-comment"># =========================================================================================== 5</span>
+nbChapter(<span class="hljs-string">&quot;toml&quot;</span>, <span class="hljs-string">&quot;TOML: parsetoml or openparser&quot;</span>, <span class="hljs-string">&quot;the simplest swap, and the clearest win&quot;</span>)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+nimib reads one table of `nimib.toml` and keeps the rest of the text for others to read:
+
+```toml
+[nimib]
+srcDir = &quot;docsrc&quot;
+homeDir = &quot;docs&quot;
+```
+
+Today `loadTomlSection` parses the text with parsetoml, converts the section to `JsonNode` with
+45 lines of `customToJson`, prints it and parses it again with jsony into the object. openparser
+parses TOML straight into an object, which removes those 45 lines and jsony from the config path:
+
+```nim
+import std/tables, openparser/toml
+type Cfg = object
+  nimib: NbConfig
+let cfg = parseTOML(content, Cfg)    # unknown tables and keys are skipped by default
+```
+
+To compare the two parsers I ran the [toml-test](https://github.com/toml-lang/toml-test) suite,
+the one TOML implementations use: a parser should accept every valid file and reject every
+invalid one.
+&quot;&quot;&quot;</span>
+
+nbScores(<span class="hljs-string">&quot;toml-test, TOML 1.0&quot;</span>, @[
+  (label: <span class="hljs-string">&quot;parsetoml, valid files accepted&quot;</span>, passed: pt10[<span class="hljs-number">0</span>], total: pt10[<span class="hljs-number">1</span>], side: sNow),
+  (label: <span class="hljs-string">&quot;openparser, valid files accepted&quot;</span>, passed: op10[<span class="hljs-number">0</span>], total: op10[<span class="hljs-number">1</span>], side: sNew),
+  (label: <span class="hljs-string">&quot;parsetoml, invalid files rejected&quot;</span>, passed: pt10[<span class="hljs-number">2</span>], total: pt10[<span class="hljs-number">3</span>], side: sNow),
+  (label: <span class="hljs-string">&quot;openparser, invalid files rejected&quot;</span>, passed: op10[<span class="hljs-number">2</span>], total: op10[<span class="hljs-number">3</span>], side: sNew),
+], &amp;<span class="hljs-string">&quot;TOML 1.1: parsetoml {pt11[0]}/{pt11[1]} and {pt11[2]}/{pt11[3]}, openparser {op11[0]}/{op11[1]} and {op11[2]}/{op11[3]}. Acceptance only: the values parsed were not compared.&quot;</span>)
+
+nbNote(nkCareful, <span class="hljs-string">&quot;&quot;&quot;
+One rough edge: `parseTOML(text, T)` did not compile until I added `import std/tables` to my own
+module (a generic in openparser calls `pairs` on an `OrderedTableRef` without binding it). Easy
+to work around, worth an issue upstream.
+&quot;&quot;&quot;</span>)
+
+nbNote(nkNimib, <span class="hljs-string">&quot;&quot;&quot;
+For `nimib.toml` the gain is correctness on corner cases nimib users rarely write, and less code.
+The cost is the whole openparser package: 47,000 lines, Nim 2.2.10 or later, and nimble installs
+nimsimd, nimcypher and dynasm with it, even if only `openparser/toml` and `openparser/json` are
+compiled (json pulls nimsimd for its SIMD path).
+&quot;&quot;&quot;</span>)
+
+<span class="hljs-comment"># =========================================================================================== 6</span>
+nbChapter(<span class="hljs-string">&quot;json&quot;</span>, <span class="hljs-string">&quot;JSON: jsony or openparser&quot;</span>, <span class="hljs-string">&quot;a sideways move with a breaking change&quot;</span>)
+
+nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
+nimib uses JSON in three places: the config path above, the values that `nbJsFromCode` passes
+to the browser (`toJson(x)`, parsed back with `std/json`), and its **JSON backend**: every block
+type registers a hook, so a document's `seq[NbBlock]` (of many subtypes) can be written to JSON
+and read back with the right types. tabelline's book uses that: it saves each chapter's
+blocks and renders them again later with `readFile(path).fromJson(NbDoc)`.
+
+jsony's hook gets the raw string and a position, `parseHook(s: string, i: var int, v: var NbBlock)`;
+nimib reads the `kind` field, rewinds `i` and parses again as the right type.
+openparser's hook gets a parser object, `parseHook(p: var JsonParser, v: var NbBlock)`, whose
+position is private, so it cannot rewind. It works with a detour through `JsonNode`, which I tried
+on a small block hierarchy (`bench/tjson_op.nim`):
+
+```nim
+proc parseHook(p: var JsonParser, v: var NbBlock) =
+  var node: JsonNode
+  parseHook(p, node)                       # parse the block once, as a tree
+  v = registry[node[&quot;kind&quot;].getStr](node)  # each kind: fromJson($node, ThatKind)
+```
+
+It wrote nested containers to JSON and read them back exactly (`toJson(back) == s` printed
+`true`), at the cost of parsing every block twice.
+&quot;&quot;&quot;</span>
+
+nbTable toTableData(@[
+  (side: <span class="hljs-string">&quot;for openparser&quot;</span>, text: <span class="hljs-string">&quot;one JSON library for nimib and its TOML; SIMD parsing; `{.json: </span><span class="hljs-meta">\&quot;</span><span class="hljs-string">name</span><span class="hljs-meta">\&quot;</span><span class="hljs-string">.}` field names (compile-time dump only, so far); depth limits&quot;</span>),
+  (side: <span class="hljs-string">&quot;against&quot;</span>, text: <span class="hljs-string">&quot;every custom `parseHook`/`dumpHook` written for jsony breaks (new signature); nimib re-exports jsony, so pages that call `toJson`/`fromJson` through nimib change library; the JsonNode detour; nimibook keeps jsony anyway for `book.json`&quot;</span>),
+  (side: <span class="hljs-string">&quot;speed&quot;</span>, text: <span class="hljs-string">&quot;not a factor: nimib writes a few kilobytes of JSON per page&quot;</span>),
+]):
+  optCssTheme()
+  tabHeader <span class="hljs-string">&quot;jsony to openparser/json&quot;</span>
+  colsLabel:
+    side: <span class="hljs-string">&quot;&quot;</span>
+    text: <span class="hljs-string">&quot;&quot;</span>
+  fmtMarkdown [<span class="hljs-string">&quot;text&quot;</span>]
+
+nbNote(nkNimib, <span class="hljs-string">&quot;&quot;&quot;
+jsony is small (1,000 lines), maintained by treeform, named in 200+ nimble files and does the job.
+Swapping it only makes sense as part of adopting openparser for TOML, and even then nimib could keep
+jsony for blocks and use openparser only for the config.
+&quot;&quot;&quot;</span>)
+
+<span class="hljs-comment"># =========================================================================================== 7</span>
+nbChapter(<span class="hljs-string">&quot;markdown&quot;</span>, <span class="hljs-string">&quot;Markdown: nim-markdown or marvdown&quot;</span>, <span class="hljs-string">&quot;the one that every page sees&quot;</span>)
+
+nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
+This is the dependency that matters most: every `nbText` of every nimib page goes through it.
+[marvdown]({marv}) says it is &quot;CommonMark compliant&quot;, with GitHub tables, task lists, alerts,
+footnotes, front matter, heading anchors and a JSON AST. To check, I ran the
+[CommonMark 0.31.2 spec](https://spec.commonmark.org/0.31.2/) examples through both libraries,
+compared the HTML the way CommonMark's own test runner does, and forgave marvdown two
+differences that browsers ignore (`class=&quot;&quot;` on code blocks and the last newline in a block).
+&quot;&quot;&quot;</span>
+
+nbScores(<span class="hljs-string">&quot;CommonMark 0.31.2 and GitHub's extensions&quot;</span>, @[
+  (label: &amp;<span class="hljs-string">&quot;nim-markdown, CommonMark ({cmN} examples)&quot;</span>, passed: cmNow, total: cmN, side: sNow),
+  (label: &amp;<span class="hljs-string">&quot;marvdown, CommonMark ({cmN} examples)&quot;</span>, passed: cmNew, total: cmN, side: sNew),
+  (label: <span class="hljs-string">&quot;nim-markdown, GFM extensions (tables, strikethrough, autolinks)&quot;</span>, passed: gfmNow, total: gfmN, side: sNow),
+  (label: <span class="hljs-string">&quot;marvdown, GFM extensions&quot;</span>, passed: gfmNew, total: gfmN, side: sNew),
+  (label: &amp;<span class="hljs-string">&quot;{rwFiles} real `.md` files of the nimib repositories, same HTML from both&quot;</span>, passed: rwSame, total: rwFiles, side: sNew),
+], <span class="hljs-string">&quot;marvdown with all raw HTML allowed and anchors off, nim-markdown with nimib's GFM settings. Real files: every .md of 1 KB or more in nimib, nimibook, tabelline, diagrammari, xoffy, skills and nblog, compared after also ignoring heading ids and &amp;quot;.&quot;</span>)
+
+<span class="hljs-keyword">var</span> bySection: <span class="hljs-built_in">seq</span>[<span class="hljs-keyword">tuple</span>[section: <span class="hljs-built_in">string</span>, n, now, <span class="hljs-keyword">new</span>: <span class="hljs-built_in">int</span>]]
+<span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> cm:
+  bySection.add (r[<span class="hljs-number">0</span>], parseInt(r[<span class="hljs-number">1</span>]), parseInt(r[<span class="hljs-number">2</span>]), parseInt(r[<span class="hljs-number">3</span>]))
+nbTable toTableData(bySection), rownameCol = <span class="hljs-string">&quot;section&quot;</span>:
+  optCssTheme()
+  tabHeader <span class="hljs-string">&quot;CommonMark examples passed, by section of the spec&quot;</span>
+  colsLabel:
+    n: <span class="hljs-string">&quot;examples&quot;</span>
+    now: <span class="hljs-string">&quot;nim-markdown&quot;</span>
+    <span class="hljs-keyword">new</span>: <span class="hljs-string">&quot;marvdown&quot;</span>
+  tabStyle style.text(weight = <span class="hljs-string">&quot;bold&quot;</span>), loc.body(cols(<span class="hljs-string">&quot;new&quot;</span>), rows = where(it[<span class="hljs-string">&quot;new&quot;</span>].toFloat &gt;= it[<span class="hljs-string">&quot;now&quot;</span>].toFloat))
+  tabSourceNote md(<span class="hljs-string">&quot;Bold: where marvdown does at least as well (ATX headings, where nim-markdown's untagged main adds heading ids the spec does not have).&quot;</span>)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+The sections that fail are the everyday ones: lists (3 of 26), block quotes (3 of 25), images,
+autolinks, raw HTML. Here is what that looks like, on inputs a nimib page writes all the time:
+&quot;&quot;&quot;</span>
+
+<span class="hljs-keyword">var</span> renders: <span class="hljs-built_in">seq</span>[<span class="hljs-type">Render</span>]
+<span class="hljs-keyword">for</span> c <span class="hljs-keyword">in</span> cases:
+  renders.add (name: c[<span class="hljs-string">&quot;name&quot;</span>].getStr, md: c[<span class="hljs-string">&quot;md&quot;</span>].getStr, now: c[<span class="hljs-string">&quot;nimMarkdown&quot;</span>].getStr, <span class="hljs-keyword">new</span>: c[<span class="hljs-string">&quot;marvdown&quot;</span>].getStr)
+nbRenders renders
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+A list right after a line of text is how most pages write lists: the list of folders in
+nimib's own CONTRIBUTING.md comes out as one paragraph. An `&lt;img&gt;` (or any tag marvdown takes for the start
+of a block) in the middle of a sentence turns everything after it into raw text, to the end of the
+page. Words lose their space after a line that ends with &quot;!&quot;. A double-backtick code span loses
+its text.
+&quot;&quot;&quot;</span>
+
+<span class="hljs-keyword">var</span> sp: <span class="hljs-built_in">seq</span>[<span class="hljs-keyword">tuple</span>[file: <span class="hljs-built_in">string</span>, kb: <span class="hljs-built_in">int</span>, now, <span class="hljs-keyword">new</span>: <span class="hljs-built_in">float</span>]]
+<span class="hljs-keyword">for</span> r <span class="hljs-keyword">in</span> speed: sp.add (r[<span class="hljs-number">0</span>], parseInt(r[<span class="hljs-number">1</span>]), parseFloat(r[<span class="hljs-number">2</span>]), parseFloat(r[<span class="hljs-number">3</span>]))
+nbTable toTableData(sp), rownameCol = <span class="hljs-string">&quot;file&quot;</span>:
+  optCssTheme()
+  tabHeader <span class="hljs-string">&quot;Speed: one file to HTML&quot;</span>, <span class="hljs-string">&quot;milliseconds, mean of 50 runs in one process, -d:release&quot;</span>
+  colsLabel:
+    kb: <span class="hljs-string">&quot;KB&quot;</span>
+    now: <span class="hljs-string">&quot;nim-markdown&quot;</span>
+    <span class="hljs-keyword">new</span>: <span class="hljs-string">&quot;marvdown&quot;</span>
+  fmtNumber [<span class="hljs-string">&quot;now&quot;</span>, <span class="hljs-string">&quot;new&quot;</span>], decimals = <span class="hljs-number">2</span>
+  tabSourceNote md(<span class="hljs-string">&quot;`bench/bench.nim`. A nimib page spends seconds compiling, so a few milliseconds of Markdown do not show.&quot;</span>)
+
+nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
+marvdown is 10 to 30 times faster, and it has things nimib pages build by hand today: heading
+ids with a table of contents (`getSelectorItems`; tabelline, diagrammari and xoffy each wrote an
+`addHeadingIds`), GitHub alerts, footnotes, YAML front matter, and an AST it can write as JSON and
+render later, a natural fit for nimib's JSON backend. Its defaults differ from nimib's needs
+(anchors with a 🔗 on, raw HTML filtered by a list of tags), so nimib would set its own options.
+
+Running the spec through nim-markdown found something too: **two examples crash it**.
+&quot;&quot;&quot;</span>
+
+nbTable toTableData(crash.mapIt((input: <span class="hljs-string">&quot;`&quot;</span> &amp; it[<span class="hljs-number">0</span>] &amp; <span class="hljs-string">&quot;`&quot;</span>, <span class="hljs-literal">result</span>: it[<span class="hljs-number">1</span>]))):
+  optCssTheme()
+  tabHeader <span class="hljs-string">&quot;Inputs that stop nim-markdown&quot;</span>, <span class="hljs-string">&quot;an IndexDefect, which ends the program: a nimib page would not build&quot;</span>
+  colsLabel:
+    input: <span class="hljs-string">&quot;Markdown&quot;</span>
+    <span class="hljs-literal">result</span>: <span class="hljs-string">&quot;what happens&quot;</span>
+  fmtMarkdown [<span class="hljs-string">&quot;input&quot;</span>]
+  tabSourceNote md(<span class="hljs-string">&quot;nim-markdown at main (995405b). marvdown renders both, not as the spec says.&quot;</span>)
+
+<span class="hljs-comment"># =========================================================================================== 8</span>
+nbChapter(<span class="hljs-string">&quot;pcre&quot;</span>, <span class="hljs-string">&quot;The PCRE problem, and a cheaper fix&quot;</span>, <span class="hljs-string">&quot;why this came up, and what it would take&quot;</span>)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+nim-markdown is built on `std/re`, which loads **PCRE 1** (`libpcre.so.3`) at run time. Ubuntu
+26.04 no longer ships it, so nimib's CI pins `ubuntu-24.04` and installs `libpcre3`, and every
+sandbox that builds a nimib page needs the same trick. That is the real reason to look at
+marvdown: it needs no regular expressions from outside Nim.
+
+But the cheaper fix is in nim-markdown itself. It has **82 regular expression literals**, used
+through `matchLen` (54 times), `replace`, `find`, `contains` and `match`.
+[nim-regex](https://github.com/nitely/nim-regex) (pure Nim, by nitely, the engine behind Nim
+2.4's `std/nre2`) handles lookahead (7 uses) and named groups (2), but not back references, which 2
+patterns use (code spans: a run of backticks closed by the same run). Those two become a few lines
+of plain Nim each.
+&quot;&quot;&quot;</span>
+
+nbTable toTableData(@[
+  (option: <span class="hljs-string">&quot;Port nim-markdown to nim-regex&quot;</span>, effort: <span class="hljs-string">&quot;1 to 2 days, with the CommonMark runner of this page to check that 611 stays 611&quot;</span>, keeps: <span class="hljs-string">&quot;today's output, byte for byte&quot;</span>, risk: <span class="hljs-string">&quot;low; upstream is quiet (3 commits in a year), so a fork in nimib-land may be needed&quot;</span>),
+  (option: <span class="hljs-string">&quot;Move to marvdown now&quot;</span>, effort: <span class="hljs-string">&quot;1 hour for nimib's code, then weeks of fixing pages, or of fixing marvdown&quot;</span>, keeps: <span class="hljs-string">&quot;nothing: half of real files change&quot;</span>, risk: <span class="hljs-string">&quot;high: lost lists and swallowed text in published pages&quot;</span>),
+  (option: <span class="hljs-string">&quot;Help marvdown reach CommonMark first&quot;</span>, effort: <span class="hljs-string">&quot;weeks, upstream, with George Lemon&quot;</span>, keeps: <span class="hljs-string">&quot;a fast parser with anchors, AST and front matter, later&quot;</span>, risk: <span class="hljs-string">&quot;depends on one maintainer's priorities&quot;</span>),
+]):
+  optCssTheme()
+  tabHeader <span class="hljs-string">&quot;Three ways off PCRE&quot;</span>
+  colsLabel:
+    option: <span class="hljs-string">&quot;option&quot;</span>
+    effort: <span class="hljs-string">&quot;effort&quot;</span>
+    keeps: <span class="hljs-string">&quot;output of existing pages&quot;</span>
+    risk: <span class="hljs-string">&quot;risk&quot;</span>
+  colsWidth:
+    option: <span class="hljs-string">&quot;130px&quot;</span>
+    effort: <span class="hljs-string">&quot;165px&quot;</span>
+    keeps: <span class="hljs-string">&quot;150px&quot;</span>
+    risk: <span class="hljs-string">&quot;180px&quot;</span>
+
+<span class="hljs-comment"># =========================================================================================== 9</span>
+nbChapter(<span class="hljs-string">&quot;downstream&quot;</span>, <span class="hljs-string">&quot;What changes downstream&quot;</span>, <span class="hljs-string">&quot;the repositories in this project, read on 28 Nov 2026&quot;</span>)
+
+nbTable toTableData(@[
+  (repo: <span class="hljs-string">&quot;nimibook&quot;</span>, uses: <span class="hljs-string">&quot;jsony for `book.json` (own dependency); `loadTomlSection` for `[nimibook]`&quot;</span>, impact: <span class="hljs-string">&quot;TOML: none if `loadTomlSection` keeps its signature. JSON: none, it keeps jsony. Markdown: every chapter's text&quot;</span>),
+  (repo: <span class="hljs-string">&quot;nimiSlides&quot;</span>, uses: <span class="hljs-string">&quot;imports `markdown` and calls `markdown(...)` for slides and footers; `loadTomlSection` for `[nimislides]`&quot;</span>, impact: <span class="hljs-string">&quot;Markdown: two renderers in one deck if nimib moves and nimiSlides does not; move both or neither&quot;</span>),
+  (repo: <span class="hljs-string">&quot;tabelline (docs, book)&quot;</span>, uses: <span class="hljs-string">&quot;`markdownToHtml` in 9 blocks; the book calls `markdown(...)` and `fromJson(NbDoc)` (jsony through nimib)&quot;</span>, impact: <span class="hljs-string">&quot;JSON: the book's re-render changes if nimib leaves jsony. Markdown: every page&quot;</span>),
+  (repo: <span class="hljs-string">&quot;diagrammari, xoffy&quot;</span>, uses: <span class="hljs-string">&quot;`markdownToHtml` in their blocks, own `addHeadingIds`&quot;</span>, impact: <span class="hljs-string">&quot;Markdown only; would gain anchors from marvdown&quot;</span>),
+  (repo: <span class="hljs-string">&quot;nblog&quot;</span>, uses: <span class="hljs-string">&quot;a draft post on serializing OOP blocks with jsony&quot;</span>, impact: <span class="hljs-string">&quot;the post documents jsony's approach, still valid as history&quot;</span>),
+  (repo: <span class="hljs-string">&quot;every nimib page&quot;</span>, uses: <span class="hljs-string">&quot;`nbText`&quot;</span>, impact: <span class="hljs-string">&quot;Markdown: any output change shows up in published pages&quot;</span>),
+]):
+  optCssTheme()
+  tabHeader <span class="hljs-string">&quot;Where nimib's three libraries show up&quot;</span>, <span class="hljs-string">&quot;and what a swap would change&quot;</span>
+  colsLabel:
+    repo: <span class="hljs-string">&quot;repository&quot;</span>
+    uses: <span class="hljs-string">&quot;uses&quot;</span>
+    impact: <span class="hljs-string">&quot;impact&quot;</span>
+  colsWidth:
+    repo: <span class="hljs-string">&quot;115px&quot;</span>
+    uses: <span class="hljs-string">&quot;200px&quot;</span>
+    impact: <span class="hljs-string">&quot;215px&quot;</span>
+  fmtMarkdown [<span class="hljs-string">&quot;uses&quot;</span>, <span class="hljs-string">&quot;impact&quot;</span>]
+
+nbNote(nkNimib, <span class="hljs-string">&quot;&quot;&quot;
+Two API points make this manageable: `markdownToHtml` is the single place nimib renders Markdown,
+and `loadTomlSection(content, section, T)` the single place it reads TOML. Keep both signatures and
+most downstream code does not notice. The exceptions are the direct `markdown(...)` calls
+(nimiSlides, tabelline's book) and the jsony re-export.
+&quot;&quot;&quot;</span>)
+
+<span class="hljs-comment"># =========================================================================================== 10</span>
+nbChapter(<span class="hljs-string">&quot;plan&quot;</span>, <span class="hljs-string">&quot;Effort, risks and a plan&quot;</span>, <span class="hljs-string">&quot;from the simplest change to the hardest&quot;</span>)
+
+nbTable toTableData(@[
+  (step: <span class="hljs-string">&quot;1. Drop fusion&quot;</span>, effort: <span class="hljs-string">&quot;an hour&quot;</span>, gain: <span class="hljs-string">&quot;one dependency less&quot;</span>, risk: <span class="hljs-string">&quot;none; test on Windows&quot;</span>, now: <span class="hljs-string">&quot;**yes**&quot;</span>),
+  (step: <span class="hljs-string">&quot;2. nim-markdown off PCRE (nim-regex port, fix the two crashes)&quot;</span>, effort: <span class="hljs-string">&quot;1 to 2 days&quot;</span>, gain: <span class="hljs-string">&quot;no libpcre3, no Ubuntu pin, sandboxes just work&quot;</span>, risk: <span class="hljs-string">&quot;low, checked by the spec runner&quot;</span>, now: <span class="hljs-string">&quot;**yes**&quot;</span>),
+  (step: <span class="hljs-string">&quot;3. parsetoml to openparser/toml&quot;</span>, effort: <span class="hljs-string">&quot;half a day&quot;</span>, gain: <span class="hljs-string">&quot;a conforming TOML parser, 45 lines less&quot;</span>, risk: <span class="hljs-string">&quot;Nim ≥ 2.2.10 for every user; a 47k-line single-author package&quot;</span>, now: <span class="hljs-string">&quot;later, when nimib raises its Nim floor&quot;</span>),
+  (step: <span class="hljs-string">&quot;4. jsony to openparser/json&quot;</span>, effort: <span class="hljs-string">&quot;1 to 2 days, plus downstream&quot;</span>, gain: <span class="hljs-string">&quot;one JSON library&quot;</span>, risk: <span class="hljs-string">&quot;breaks custom block hooks and tabelline's book&quot;</span>, now: <span class="hljs-string">&quot;no&quot;</span>),
+  (step: <span class="hljs-string">&quot;5. nim-markdown to marvdown&quot;</span>, effort: <span class="hljs-string">&quot;an hour of code, weeks of output changes&quot;</span>, gain: <span class="hljs-string">&quot;speed, anchors, front matter, AST&quot;</span>, risk: <span class="hljs-string">&quot;lost lists and text in published pages&quot;</span>, now: <span class="hljs-string">&quot;not before ~90% on CommonMark&quot;</span>),
+]):
+  optCssTheme()
+  tabHeader <span class="hljs-string">&quot;Five changes, in order&quot;</span>
+  colsLabel:
+    step: <span class="hljs-string">&quot;change&quot;</span>
+    effort: <span class="hljs-string">&quot;effort&quot;</span>
+    gain: <span class="hljs-string">&quot;gain&quot;</span>
+    risk: <span class="hljs-string">&quot;risk&quot;</span>
+    now: <span class="hljs-string">&quot;do it now?&quot;</span>
+  colsWidth:
+    step: <span class="hljs-string">&quot;150px&quot;</span>
+    effort: <span class="hljs-string">&quot;115px&quot;</span>
+    gain: <span class="hljs-string">&quot;150px&quot;</span>
+    risk: <span class="hljs-string">&quot;180px&quot;</span>
+    now: <span class="hljs-string">&quot;130px&quot;</span>
+  fmtMarkdown [<span class="hljs-string">&quot;now&quot;</span>]
+
+nbText: &amp;<span class="hljs-string">&quot;&quot;&quot;
+**Recommendation.** Do the first two now: they remove what hurts (fusion, PCRE) without changing
+a single page. Keep jsony. Treat openparser's TOML as a good option for the next time nimib
+raises its minimum Nim, if openparser is still moving at the same quality and has gained users.
+Leave marvdown for later, and if its ideas appeal (anchors, front matter, the AST), the most
+useful thing nimib can do is send George Lemon this page's CommonMark runner: it turns
+&quot;CommonMark compliant&quot; into a number that can go up.
+
+What would change my mind: marvdown passing 90% of the spec and rendering the nimib repositories'
+files like nim-markdown; openparser getting a second maintainer or wide use; nimib deciding to
+require Nim 2.2.10 anyway.
+&quot;&quot;&quot;</span>
+
+<span class="hljs-comment"># =========================================================================================== 11</span>
+nbChapter(<span class="hljs-string">&quot;built&quot;</span>, <span class="hljs-string">&quot;How this page is built&quot;</span>, <span class="hljs-string">&quot;every number is rerun by one script&quot;</span>)
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+The page is a nimib notebook (`src/index.nim`) with tables by
+[tabelline](https://pietroppeter.github.io/tabelline/); it reads every number from `src/data/`,
+which `src/bench/run.sh` writes:
+
+- `bench/deps.sh` fetches marvdown, openparser (and nimsimd, nimcypher, dynasm), nim-markdown,
+  jsony, parsetoml and three test suites at pinned commits: commonmark-spec, cmark-gfm (the GFM
+  extensions) and toml-test.
+- `cm_*.nim` and `gfm_*.nim` are four tiny programs, Markdown on stdin and HTML on stdout, one per
+  library and setting. `runspec.py` feeds them every spec example and compares the HTML with
+  CommonMark's own `normalize.py` (that is why it is Python: it reuses the official normalizer).
+  `realworld.py` does the same for a folder of `.md` files.
+- `tt_parsetoml.nim` and `tt_optoml.nim` run toml-test's file lists; `tjson_op.nim` is the block
+  round trip of the JSON chapter; `bench.nim` the speed table; `cases.nim` renders the cards of the
+  Markdown chapter with both libraries in one program.
+- The dependents come from cloning (blob-less) every repository of George Lemon's organizations and
+  reading their nimble files, then GitHub code search for the rest.
+&quot;&quot;&quot;</span>
+
+nbText: <span class="hljs-string">&quot;&quot;&quot;
+**Sources**: [marvdown](https://github.com/openpeeps/marvdown) (6af1ac0),
+[openparser](https://github.com/openpeeps/openparser) (a60cce6),
+[nim-markdown](https://github.com/soasme/nim-markdown) (995405b),
+[jsony](https://github.com/treeform/jsony), [parsetoml](https://github.com/NimParsers/parsetoml),
+[fusion](https://github.com/nim-lang/fusion), [nimib](https://github.com/pietroppeter/nimib) (7118b3a),
+[CommonMark spec](https://github.com/commonmark/commonmark-spec),
+[cmark-gfm](https://github.com/github/cmark-gfm), [toml-test](https://github.com/toml-lang/toml-test),
+[George Lemon on GitHub](https://github.com/georgelemon) and [on DEV](https://dev.to/georgelemon),
+[OpenPeeps](https://github.com/openpeeps), [Clue on the Nim forum](https://forum.nim-lang.org/t/14123).
+&quot;&quot;&quot;</span>
+
+nbSave
+</code></pre>
+</section>
+  
+<script>
+  function toggleSourceDisplay() {
+    var btn = document.getElementById("show")
+    var source = document.getElementById("source");
+    if (btn.innerHTML=="Show Source") {
+      btn.innerHTML = "Hide Source";
+      source.style.display = "block";
+    } else {
+      btn.innerHTML = "Show Source";
+      source.style.display = "none";
+    }
+  }
+</script>
+  
+<!-- claude-artifacts:backlink -->
+<style>
+html{-webkit-text-size-adjust:100%;text-size-adjust:100%}
+#ca-backlink{all:initial;position:fixed;z-index:2147483647;left:max(10px,env(safe-area-inset-left,0px));bottom:max(10px,env(safe-area-inset-bottom,0px));
+font:500 12px/1 system-ui,-apple-system,"Segoe UI",sans-serif;color:#1f1a22;background:rgba(251,250,252,.96);
+border:1px solid rgba(0,0,0,.14);border-radius:999px;padding:6px 10px;text-decoration:none;box-shadow:0 1px 3px rgba(0,0,0,.12);
+-webkit-backdrop-filter:blur(4px);backdrop-filter:blur(4px);cursor:pointer}
+#ca-backlink:hover,#ca-backlink:focus-visible{text-decoration:underline}
+@media (prefers-color-scheme:dark){#ca-backlink{color:#ece6ef;background:rgba(23,19,26,.94);border-color:rgba(255,255,255,.18)}}
+@media print{#ca-backlink{display:none}}
+body.rv-on #ca-backlink{display:none}
+</style>
+<a id="ca-backlink" href="https://pietroppeter.github.io/claude-artifacts/" title="All Claude artifacts">&larr; Claude artifacts</a>
+<!-- /claude-artifacts:backlink -->
+</body>
