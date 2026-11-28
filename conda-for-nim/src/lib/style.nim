@@ -33,6 +33,16 @@ h2{font:800 1.55rem/1.15 var(--serif);font-variation-settings:"SOFT" 100;margin:
 h2::before{content:counter(step,decimal-leading-zero);display:block;width:max-content;font:700 .78rem/1 var(--mono);color:var(--ink);
   background:var(--yellow);padding:.3rem .5rem;border-radius:999px;margin-bottom:.5rem}
 h3{font:700 1.15rem/1.3 var(--serif);margin:1.8rem 0 .4rem}
+h2[id],h3[id]{scroll-margin-top:1rem}
+.toc-up{font:600 .78rem/1 var(--font);color:var(--muted);text-decoration:none;white-space:nowrap;margin-left:.3rem;vertical-align:middle}
+.toc-up:hover,.toc-up:focus-visible{color:var(--ink);text-decoration:underline}
+.toc{margin:1.6rem 0;padding:.2rem 1rem .6rem;background:var(--card);border:1px solid var(--line);border-radius:14px}
+.toc-label{display:block;font:700 1.35rem/1 var(--hand);margin-top:.6rem}
+.toc ol{margin:.4rem 0;padding-left:1.4rem;font-size:.95rem}
+.toc ol ol{list-style:disc;font-size:.9rem;margin:.15rem 0 .3rem}
+.toc li{margin:.18rem 0}
+.toc a{text-decoration:none}
+.toc a:hover,.toc a:focus-visible{text-decoration:underline}
 .kicker{font:700 1.45rem/1 var(--hand);color:var(--muted);margin:1.4rem 0 0;transform:rotate(-1.5deg);transform-origin:left}
 a{color:var(--ink);text-decoration-color:var(--yellow-deep);text-decoration-thickness:2px;text-underline-offset:3px}
 a:hover{background:var(--yellow-soft)}
